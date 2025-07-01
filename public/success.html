@@ -3,207 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bestellung bestätigt - Pizza Bella</title>
+    <title>Bestellung bestätigt - Pizza&Pasta D'amico</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+    <script src="js/multilingual.js"></script>
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
         .success-container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
             text-align: center;
-            max-width: 500px;
-            width: 100%;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            animation: slideUp 0.6s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .success-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 30px;
-            animation: bounce 0.8s ease-out;
-        }
-
-        .success-icon i {
-            font-size: 2.5rem;
+            font-size: 3rem;
             color: white;
+            animation: successPulse 2s ease-in-out;
         }
 
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-            40% {
-                transform: translateY(-10px);
-            }
-            60% {
-                transform: translateY(-5px);
-            }
+        @keyframes successPulse {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
         }
 
-        h1 {
-            color: #2c3e50;
+        .success-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #22c55e;
             margin-bottom: 15px;
-            font-size: 2rem;
         }
 
-        .order-details {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 30px 0;
+        .success-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 40px;
+        }
+
+        .order-details-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
             text-align: left;
+        }
+
+        .order-id {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #3b82f6;
+            margin-bottom: 20px;
+            text-align: center;
         }
 
         .detail-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #dee2e6;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .detail-row:last-child {
             border-bottom: none;
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: #27ae60;
         }
 
         .detail-label {
-            color: #6c757d;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
         }
 
         .detail-value {
+            color: #ffffff;
             font-weight: 600;
-            color: #2c3e50;
         }
 
-        .estimated-time {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-        }
-
-        .estimated-time h3 {
-            margin-bottom: 10px;
-        }
-
-        .time-display {
-            font-size: 2rem;
-            font-weight: bold;
-        }
-
-        .instructions {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: left;
-        }
-
-        .instructions h4 {
-            color: #1976d2;
-            margin-bottom: 10px;
-        }
-
-        .instructions ul {
-            color: #424242;
-            padding-left: 20px;
-        }
-
-        .instructions li {
-            margin-bottom: 8px;
-        }
-
-        .actions {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 15px 25px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            min-width: 200px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-
-        .btn-secondary {
-            background: #f8f9fa;
-            color: #6c757d;
-            border: 2px solid #dee2e6;
-        }
-
-        .btn-secondary:hover {
-            background: #e9ecef;
-            border-color: #adb5bd;
+        .detail-value.amount {
+            color: #22c55e;
+            font-size: 1.1rem;
         }
 
         .status-tracker {
-            margin: 30px 0;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
         }
 
         .status-steps {
@@ -235,19 +130,18 @@
         }
 
         .step-icon.active {
-            background: #27ae60;
+            background: #22c55e;
             color: white;
-            animation: pulse 2s infinite;
         }
 
         .step-icon.pending {
-            background: #dee2e6;
-            color: #6c757d;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .step-label {
             font-size: 0.9rem;
-            color: #6c757d;
+            color: rgba(255, 255, 255, 0.7);
             text-align: center;
         }
 
@@ -257,7 +151,7 @@
             left: 50%;
             right: -50%;
             height: 2px;
-            background: #dee2e6;
+            background: rgba(255, 255, 255, 0.1);
             z-index: 1;
         }
 
@@ -265,45 +159,119 @@
             display: none;
         }
 
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(39, 174, 96, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(39, 174, 96, 0);
-            }
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .instructions {
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .instructions h4 {
+            color: #3b82f6;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .instructions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .instructions li {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .instructions li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        .payment-info {
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .payment-success {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #22c55e;
+            font-weight: 600;
+            font-size: 1.1rem;
         }
 
         @media (max-width: 768px) {
             .success-container {
-                padding: 30px 20px;
-                margin: 10px;
+                padding: 15px;
             }
-
-            h1 {
-                font-size: 1.5rem;
+            
+            .success-title {
+                font-size: 2rem;
             }
-
-            .time-display {
-                font-size: 1.5rem;
-            }
-
+            
             .actions {
-                flex-direction: column;
+                grid-template-columns: 1fr;
             }
-
-            .btn {
-                min-width: auto;
-            }
-
+            
             .status-steps {
                 flex-direction: column;
                 gap: 20px;
             }
-
+            
             .step-line {
                 display: none;
             }
@@ -311,50 +279,59 @@
     </style>
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div class="pizza-loader" id="pizzaLoader">
+        <div class="spinning-pizza">🍕</div>
+        <div class="loading-text">Bestellung wird verarbeitet...</div>
+        <div class="loading-subtext">Einen Moment bitte...</div>
+    </div>
+
     <div class="success-container">
+        <!-- Success Icon -->
         <div class="success-icon">
             <i class="fas fa-check"></i>
         </div>
 
-        <h1>Bestellung bestätigt!</h1>
-        <p>Vielen Dank für Ihre Bestellung bei Pizza Bella.</p>
+        <!-- Success Message -->
+        <h1 class="success-title">Bestellung bestätigt!</h1>
+        <p class="success-subtitle">Vielen Dank für Ihre Bestellung bei Pizza&Pasta D'amico</p>
 
-        <div class="order-details">
-            <div class="detail-row">
-                <span class="detail-label">
-                    <i class="fas fa-hashtag"></i> Bestellnummer
-                </span>
-                <span class="detail-value" id="orderNumber">-</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">
-                    <i class="fas fa-map-marker-alt"></i> Standort
-                </span>
-                <span class="detail-value" id="tableLocation">-</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">
-                    <i class="fas fa-clock"></i> Bestellzeit
-                </span>
-                <span class="detail-value" id="orderTime">-</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">
-                    <i class="fas fa-pizza-slice"></i> Pizza
-                </span>
-                <span class="detail-value" id="pizzaName">-</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Total</span>
-                <span class="detail-value" id="totalAmount">-</span>
+        <!-- Payment Success Info -->
+        <div class="payment-info" id="paymentInfo" style="display: none;">
+            <div class="payment-success">
+                <i class="fas fa-credit-card"></i>
+                <span>Zahlung erfolgreich verarbeitet</span>
             </div>
         </div>
 
-        <div class="estimated-time">
-            <h3><i class="fas fa-fire"></i> Geschätzte Zubereitungszeit</h3>
-            <div class="time-display" id="estimatedTime">15-20 Min</div>
+        <!-- Order Details -->
+        <div class="order-details-card">
+            <div class="order-id" id="orderIdDisplay">
+                Bestellung #<span id="orderNumber">---</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Bestellzeit:</span>
+                <span class="detail-value" id="orderTime">--:--</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Geschätzte Wartezeit:</span>
+                <span class="detail-value" id="waitTime">-- Min</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Zahlungsmethode:</span>
+                <span class="detail-value" id="paymentMethod">---</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Gesamtbetrag:</span>
+                <span class="detail-value amount" id="totalAmount">CHF 0.00</span>
+            </div>
         </div>
 
+        <!-- Status Tracker -->
         <div class="status-tracker">
             <h4 style="text-align: center; margin-bottom: 20px; color: #2c3e50;">
                 <i class="fas fa-tasks"></i> Bestellstatus
@@ -383,6 +360,7 @@
             </div>
         </div>
 
+        <!-- Instructions -->
         <div class="instructions">
             <h4><i class="fas fa-info-circle"></i> Was passiert jetzt?</h4>
             <ul>
@@ -393,6 +371,7 @@
             </ul>
         </div>
 
+        <!-- Actions -->
         <div class="actions">
             <a href="index.html" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Neue Bestellung
@@ -408,146 +387,276 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
-        // Firebase Configuration (HIER DEINE ECHTEN WERTE EINFÜGEN!)
-       const firebaseConfig = {
-  apiKey: "AIzaSyD3OCMvc4Iup58Ao0BiFNuvA0fnJokzYS8",
-  authDomain: "pizzapastadamico.firebaseapp.com",
-  projectId: "pizzapastadamico",
-  storageBucket: "pizzapastadamico.firebasestorage.app",
-  messagingSenderId: "83240541532",
-  appId: "1:83240541532:web:11e3277850bf89a5b8b599",
-  measurementId: "G-6H2J5K88J7"
-};
+        // FIREBASE CONFIGURATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyBiVdp67AZmZnGpM8OlZXBGKJKhF4iDlsE",
+            authDomain: "pizzapastadamico.firebaseapp.com",
+            databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pizzapastadamico",
+            storageBucket: "pizzapastadamico.appspot.com",
+            messagingSenderId: "168976461234",
+            appId: "1:168976461234:web:abc123def456ghi789"
+        };
 
         // Firebase initialisieren
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // URL Parameter auslesen
-        const urlParams = new URLSearchParams(window.location.search);
-        const orderId = urlParams.get('order');
-        const tableNumber = urlParams.get('table');
+        let currentOrderId = null;
 
-        // Bestelldetails anzeigen
-        function displayOrderDetails() {
-            document.getElementById('orderNumber').textContent = orderId || 'Unbekannt';
-            document.getElementById('tableLocation').textContent = 
-                tableNumber === 'takeaway' ? 'Takeaway' : `Tisch ${tableNumber}`;
+        // INITIALIZATION
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.ml) {
+                window.ml.init();
+            }
+            
+            setTimeout(() => {
+                hideLoadingScreen();
+                processOrderConfirmation();
+            }, 1500);
+        });
+
+        // LOADING SCREEN VERSTECKEN
+        function hideLoadingScreen() {
+            const loader = document.getElementById('pizzaLoader');
+            loader.classList.add('hidden');
+        }
+
+        // ORDER CONFIRMATION VERARBEITEN
+        async function processOrderConfirmation() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const sessionId = urlParams.get('session_id');
+                const orderId = urlParams.get('order_id');
+                const paymentStatus = urlParams.get('payment');
+
+                if (sessionId && orderId) {
+                    // Stripe Payment Success
+                    await handleStripeSuccess(sessionId, orderId);
+                    document.getElementById('paymentInfo').style.display = 'block';
+                } else if (paymentStatus === 'success' && orderId) {
+                    // Cash Payment Success
+                    await handleCashSuccess(orderId);
+                } else {
+                    // Fallback: Zeige generische Erfolgsseite
+                    showGenericSuccess();
+                }
+
+                // Live-Updates für Bestellstatus starten
+                if (currentOrderId) {
+                    startStatusUpdates();
+                }
+
+            } catch (error) {
+                console.error('Fehler beim Verarbeiten der Bestellbestätigung:', error);
+                showErrorState();
+            }
+        }
+
+        // STRIPE SUCCESS HANDLER
+        async function handleStripeSuccess(sessionId, orderId) {
+            try {
+                // Temporäre Bestellung laden
+                const tempOrderRef = await database.ref(`temp-orders/${orderId}`).once('value');
+                const orderData = tempOrderRef.val();
+                
+                if (!orderData) {
+                    throw new Error('Bestellung nicht gefunden');
+                }
+
+                // Payment Status update
+                orderData.paymentStatus = 'completed';
+                orderData.stripeSessionId = sessionId;
+                orderData.confirmedAt = new Date().toISOString();
+
+                // Zu aktiven Bestellungen verschieben
+                const orderRef = await database.ref('orders').push(orderData);
+                currentOrderId = orderRef.key;
+                
+                // Temporäre Bestellung löschen
+                await database.ref(`temp-orders/${orderId}`).remove();
+
+                // UI aktualisieren
+                displayOrderDetails(orderData, 'card');
+
+            } catch (error) {
+                console.error('Fehler beim Verarbeiten der Stripe-Zahlung:', error);
+                throw error;
+            }
+        }
+
+        // CASH SUCCESS HANDLER
+        async function handleCashSuccess(orderId) {
+            try {
+                // Bestellung von Firebase laden
+                const ordersRef = await database.ref('orders').once('value');
+                const orders = ordersRef.val() || {};
+                
+                // Bestellung finden
+                const orderEntry = Object.entries(orders).find(([_, order]) => order.id === orderId);
+                
+                if (orderEntry) {
+                    currentOrderId = orderEntry[0];
+                    displayOrderDetails(orderEntry[1], 'cash');
+                } else {
+                    throw new Error('Bestellung nicht gefunden');
+                }
+
+            } catch (error) {
+                console.error('Fehler beim Laden der Barzahlungsbestellung:', error);
+                throw error;
+            }
+        }
+
+        // ORDER DETAILS ANZEIGEN
+        function displayOrderDetails(orderData, paymentMethod) {
+            // Order ID
+            document.getElementById('orderNumber').textContent = orderData.id;
+            
+            // Order Time
+            const orderTime = new Date(orderData.timestamp).toLocaleTimeString('de-CH', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('orderTime').textContent = orderTime;
+            
+            // Wait Time
+            document.getElementById('waitTime').textContent = `${orderData.waitTime} Min`;
+            
+            // Payment Method
+            const paymentMethods = {
+                'card': 'Kartenzahlung',
+                'cash': 'Barzahlung',
+                'twint': 'TWINT'
+            };
+            document.getElementById('paymentMethod').textContent = paymentMethods[paymentMethod] || paymentMethod;
+            
+            // Total Amount
+            document.getElementById('totalAmount').textContent = `CHF ${orderData.total.toFixed(2)}`;
+        }
+
+        // LIVE STATUS UPDATES
+        function startStatusUpdates() {
+            if (!currentOrderId) return;
+            
+            database.ref(`orders/${currentOrderId}/status`).on('value', (snapshot) => {
+                const status = snapshot.val();
+                updateStatusTracker(status);
+            });
+
+            // Notifications listener
+            database.ref(`notifications/${currentOrderId}`).on('child_added', (snapshot) => {
+                const notification = snapshot.val();
+                showNotification(notification.message, notification.playSound);
+            });
+        }
+
+        // STATUS TRACKER UPDATE
+        function updateStatusTracker(status) {
+            const preparingIcon = document.getElementById('preparingIcon');
+            const readyIcon = document.getElementById('readyIcon');
+
+            // Reset all to pending
+            preparingIcon.className = 'step-icon pending';
+            readyIcon.className = 'step-icon pending';
+
+            switch (status) {
+                case 'zubereitung':
+                    preparingIcon.className = 'step-icon active';
+                    break;
+                case 'fertig':
+                    preparingIcon.className = 'step-icon active';
+                    readyIcon.className = 'step-icon active';
+                    break;
+            }
+        }
+
+        // NOTIFICATION ANZEIGEN
+        function showNotification(message, playSound = false) {
+            // Simple notification - könnte erweitert werden
+            const notification = document.createElement('div');
+            notification.className = 'success-notification';
+            notification.innerHTML = `
+                <i class="fas fa-bell"></i>
+                <span>${message}</span>
+            `;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #22c55e, #16a34a);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 12px;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideIn 0.3s ease;
+            `;
+
+            document.body.appendChild(notification);
+
+            if (playSound) {
+                playNotificationSound();
+            }
+
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // NOTIFICATION SOUND
+        function playNotificationSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = 1000;
+                oscillator.type = 'sine';
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.8);
+            } catch (error) {
+                console.log('Sound nicht verfügbar:', error);
+            }
+        }
+
+        // GENERIC SUCCESS ANZEIGEN
+        function showGenericSuccess() {
+            document.getElementById('orderNumber').textContent = 'DEMO';
             document.getElementById('orderTime').textContent = new Date().toLocaleTimeString('de-CH', {
                 hour: '2-digit',
                 minute: '2-digit'
             });
+            document.getElementById('waitTime').textContent = '5 Min';
+            document.getElementById('paymentMethod').textContent = 'Demo-Modus';
+            document.getElementById('totalAmount').textContent = 'CHF 0.00';
         }
 
-        // Bestellstatus verfolgen
-        function trackOrderStatus() {
-            if (!orderId) return;
-
-            // Nach der spezifischen Bestellung suchen
-            database.ref('orders').orderByChild('id').equalTo(orderId).on('value', (snapshot) => {
-                const orders = snapshot.val();
-                if (!orders) return;
-
-                const orderKey = Object.keys(orders)[0];
-                const orderData = orders[orderKey];
-
-                if (orderData) {
-                    // Bestelldetails aktualisieren
-                    document.getElementById('pizzaName').textContent = orderData.pizza.name;
-                    document.getElementById('totalAmount').textContent = `CHF ${orderData.total.toFixed(2)}`;
-
-                    // Status-Icons aktualisieren
-                    const preparingIcon = document.getElementById('preparingIcon');
-                    const readyIcon = document.getElementById('readyIcon');
-
-                    if (orderData.status === 'zubereitung') {
-                        preparingIcon.className = 'step-icon active';
-                        document.getElementById('estimatedTime').textContent = '5-10 Min';
-                    } else if (orderData.status === 'fertig') {
-                        preparingIcon.className = 'step-icon active';
-                        readyIcon.className = 'step-icon active';
-                        document.getElementById('estimatedTime').textContent = 'Fertig!';
-                        
-                        // Benachrichtigung anzeigen
-                        showReadyNotification();
-                    }
-                }
-            });
+        // ERROR STATE ANZEIGEN
+        function showErrorState() {
+            document.querySelector('.success-title').textContent = 'Fehler aufgetreten';
+            document.querySelector('.success-subtitle').textContent = 'Es gab ein Problem beim Verarbeiten Ihrer Bestellung.';
+            document.querySelector('.success-icon').innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+            document.querySelector('.success-icon').style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
         }
 
-        // Pizza fertig Benachrichtigung
-        function showReadyNotification() {
-            // Browser-Benachrichtigung
-            if (Notification.permission === 'granted') {
-                new Notification('Pizza Bella', {
-                    body: 'Ihre Pizza ist fertig!',
-                    icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiNGRjZCNkIiLz4KPHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiIHg9IjE2IiB5PSIxNiI+CjxwYXRoIGQ9Ik0xMiAyQzE3LjUyIDIgMjIgNi40OCAyMiAxMlMxNy41MiAyMiAxMiAyMlMyIDEyIDIgMTJTNi40OCAyIDEyIDJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+'
-                });
-            }
-
-            // Visueller Hinweis
-            document.body.style.background = 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)';
-            
-            // Confetti-Effekt (einfache Version)
-            createConfetti();
-        }
-
-        // Einfacher Confetti-Effekt
-        function createConfetti() {
-            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7'];
-            
-            for (let i = 0; i < 50; i++) {
-                const confetti = document.createElement('div');
-                confetti.style.position = 'fixed';
-                confetti.style.width = '10px';
-                confetti.style.height = '10px';
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.left = Math.random() * 100 + 'vw';
-                confetti.style.top = '-10px';
-                confetti.style.zIndex = '9999';
-                confetti.style.borderRadius = '50%';
-                confetti.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
-                
-                document.body.appendChild(confetti);
-                
-                setTimeout(() => {
-                    confetti.remove();
-                }, 5000);
-            }
-        }
-
-        // CSS für Confetti-Animation hinzufügen
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fall {
-                0% {
-                    transform: translateY(0) rotate(0deg);
-                    opacity: 1;
-                }
-                100% {
-                    transform: translateY(100vh) rotate(360deg);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Browser-Benachrichtigungen anfordern
-        if (Notification.permission === 'default') {
-            Notification.requestPermission();
-        }
-
-        // Initialisierung
-        displayOrderDetails();
-        trackOrderStatus();
-
-        // Automatisches Aktualisieren der Zeit
-        setInterval(() => {
-            document.getElementById('orderTime').textContent = new Date().toLocaleTimeString('de-CH', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }, 1000);
+        console.log('Success Page geladen');
     </script>
+
+    <style>
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
 </body>
 </html>

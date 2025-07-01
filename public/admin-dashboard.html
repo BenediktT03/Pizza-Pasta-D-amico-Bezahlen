@@ -3,67 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Pizza&Pasta D'amico</title>
+    <title>Pietro Admin Dashboard - Pizza&Pasta D'amico</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* ZUSÄTZLICHE ADMIN-SPEZIFISCHE STYLES */
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #0a0a0a;
-            min-height: 100vh;
-            color: #ffffff;
         }
-
-        .header {
-            background: linear-gradient(135deg, #2c3e50, #3498db);
-            color: white;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
+        
+        .controls-section {
             display: flex;
-            justify-content: space-between;
+            gap: 10px;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
+            margin-bottom: 20px;
         }
-
-        .header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-
-        .foodtruck-status {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .status-toggle {
+        
+        .toggle-switch {
             position: relative;
             width: 60px;
             height: 30px;
-            background: #e74c3c;
+            background: #374151;
             border-radius: 15px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background 0.3s ease;
         }
-
-        .status-toggle.open {
-            background: #27ae60;
+        
+        .toggle-switch.active {
+            background: #22c55e;
         }
-
-        .status-toggle::before {
-            content: '';
+        
+        .toggle-slider {
             position: absolute;
             top: 3px;
             left: 3px;
@@ -73,800 +45,304 @@
             border-radius: 50%;
             transition: transform 0.3s ease;
         }
-
-        .status-toggle.open::before {
+        
+        .toggle-switch.active .toggle-slider {
             transform: translateX(30px);
         }
-
-        .status-text {
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logout-btn {
-            background: #e74c3c;
+        
+        .custom-wait-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
-            border: none;
-            padding: 8px 15px;
+            padding: 8px 12px;
             border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-            font-weight: 600;
-        }
-
-        .logout-btn:hover {
-            background: #c0392b;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* NEUE: Wartezeit-Kontrollbereich */
-        .wait-time-control {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 30px;
-        }
-
-        .wait-time-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .wait-time-display {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #22c55e;
-        }
-
-        .wait-time-controls {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .time-preset {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            width: 80px;
             text-align: center;
         }
-
-        .time-preset:hover {
-            background: rgba(59, 130, 246, 0.1);
+        
+        .custom-wait-input:focus {
+            outline: none;
             border-color: #3b82f6;
-        }
-
-        .time-preset.active {
-            background: rgba(34, 197, 94, 0.2);
-            border-color: #22c55e;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stats-card {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 25px;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-
-        .stats-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .stats-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            font-size: 1.5rem;
-            color: white;
-        }
-
-        .stats-icon.orders { background: linear-gradient(45deg, #3498db, #2980b9); }
-        .stats-icon.revenue { background: linear-gradient(45deg, #27ae60, #2ecc71); }
-        .stats-icon.queue { background: linear-gradient(45deg, #f39c12, #e67e22); }
-        .stats-icon.avg-time { background: linear-gradient(45deg, #9b59b6, #8e44ad); }
-
-        .stats-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #ffffff;
-            margin-bottom: 5px;
-        }
-
-        .stats-label {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
-        }
-
-        .content-section {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 20px;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            color: #ffffff;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .orders-container {
-            display: grid;
-            gap: 15px;
-        }
-
-        .order-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 20px;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .order-card:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(59, 130, 246, 0.5);
-        }
-
-        .order-card.status-neu {
-            border-left: 4px solid #e74c3c;
-            animation: pulse-red 2s infinite;
-        }
-
-        .order-card.status-zubereitung {
-            border-left: 4px solid #f39c12;
-        }
-
-        .order-card.status-fertig {
-            border-left: 4px solid #27ae60;
-        }
-
-        @keyframes pulse-red {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
-            50% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
-        }
-
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .order-id {
-            font-weight: bold;
-            color: #ffffff;
-            font-size: 1.1rem;
-        }
-
-        .order-time-info {
-            text-align: right;
-            font-size: 0.85rem;
-        }
-
-        .order-time {
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        /* NEUE: Wartezeit-Anzeige pro Bestellung */
-        .wait-time-badge {
-            background: rgba(34, 197, 94, 0.2);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            color: #22c55e;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-top: 4px;
-            display: inline-block;
-        }
-
-        .wait-time-badge.overdue {
-            background: rgba(239, 68, 68, 0.2);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: #ef4444;
-        }
-
-        .wait-time-badge.soon {
-            background: rgba(245, 158, 11, 0.2);
-            border-color: rgba(245, 158, 11, 0.3);
-            color: #f59e0b;
-        }
-
-        .order-details {
-            margin-bottom: 15px;
-        }
-
-        .order-items {
-            margin-bottom: 15px;
-        }
-
-        .order-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .order-item:last-child {
-            border-bottom: none;
-        }
-
-        .item-name {
-            font-weight: 600;
-            color: #ffffff;
-        }
-
-        .item-details {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.9rem;
-        }
-
-        .item-price {
-            font-weight: bold;
-            color: #27ae60;
-        }
-
-        .order-note {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 10px;
-            margin: 10px 0;
-            font-style: italic;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .order-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-primary {
-            background: #3498db;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-        }
-
-        .btn-success {
-            background: #27ae60;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #229954;
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c0392b;
-            transform: translateY(-2px);
-        }
-
-        /* NEUE: Benachrichtigungs-Buttons */
-        .btn-notify {
-            background: #9b59b6;
-            color: white;
-        }
-
-        .btn-notify:hover {
-            background: #8e44ad;
-            transform: translateY(-2px);
-        }
-
-        .btn-warning {
-            background: #f39c12;
-            color: white;
-        }
-
-        .btn-warning:hover {
-            background: #e67e22;
-            transform: translateY(-2px);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            color: rgba(255, 255, 255, 0.3);
-        }
-
-        .notification-popup {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: white;
-            padding: 16px 24px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
-            z-index: 9999;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            max-width: 350px;
-        }
-
-        .notification-popup.show {
-            transform: translateX(0);
-        }
-
-        .notification-popup.error {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-        }
-
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .wait-time-controls {
-                grid-template-columns: 1fr;
-            }
-
-            .order-header {
-                flex-direction: column;
-                gap: 10px;
-                align-items: flex-start;
-            }
-
-            .order-actions {
-                flex-direction: column;
-            }
+            background: rgba(255, 255, 255, 0.15);
         }
     </style>
 </head>
 <body>
-    <div class="header">
+    <!-- ADMIN HEADER -->
+    <div class="admin-header">
         <div class="header-content">
-            <h1><i class="fas fa-pizza-slice"></i> Pizza&Pasta D'amico - Admin</h1>
-            
-            <div class="foodtruck-status">
-                <span class="status-text" id="statusText">Geschlossen</span>
-                <div class="status-toggle" id="statusToggle" onclick="toggleFoodtruckStatus()"></div>
+            <div class="admin-title">
+                <h1><i class="fas fa-crown"></i> Pietro Dashboard</h1>
+                <div class="status-indicator">
+                    <i class="fas fa-circle" id="globalStatusIcon"></i>
+                    <span id="globalStatusText">Wird geladen...</span>
+                </div>
             </div>
-
-            <div class="user-info">
-                <span id="currentUser">Pietro D'amico</span>
-                <button class="logout-btn" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Zurück
-                </button>
-            </div>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Abmelden
+            </button>
         </div>
     </div>
 
-    <div class="container">
-        <!-- NEUE: Wartezeit-Kontrolle -->
+    <!-- ADMIN CONTAINER -->
+    <div class="admin-container">
+        <!-- WARTEZEIT-KONTROLLE -->
         <div class="wait-time-control">
             <div class="wait-time-header">
-                <div>
-                    <h3 style="color: #ffffff; margin-bottom: 5px;">
-                        <i class="fas fa-clock"></i> Wartezeit-Management
-                    </h3>
-                    <div class="wait-time-display" id="currentWaitTime">5-10 Min</div>
-                </div>
-                <div>
-                    <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Produkte in Zubereitung</div>
-                    <div style="font-size: 1.5rem; font-weight: bold; color: #f59e0b;" id="queueCount">0</div>
-                </div>
+                <h3><i class="fas fa-clock"></i> Wartezeit-Management</h3>
+                <div class="wait-time-display" id="currentWaitTime">5 Min</div>
             </div>
             
-            <div class="wait-time-controls">
-                <div class="time-preset" data-time="5-10" onclick="setWaitTime('5-10')">
-                    <div style="font-weight: bold; color: #22c55e;">🟢 Normal</div>
-                    <div style="font-size: 1.2rem; margin: 5px 0;">5-10 Min</div>
-                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Wenig los</div>
+            <div class="controls-section">
+                <span style="color: rgba(255,255,255,0.8); margin-right: 15px;">Foodtruck Status:</span>
+                <div class="toggle-switch" id="restaurantToggle">
+                    <div class="toggle-slider"></div>
                 </div>
-                <div class="time-preset" data-time="8-15" onclick="setWaitTime('8-15')">
-                    <div style="font-weight: bold; color: #f59e0b;">🟡 Beschäftigt</div>
-                    <div style="font-size: 1.2rem; margin: 5px 0;">8-15 Min</div>
-                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Mehr Andrang</div>
+                <span id="restaurantStatusText" style="margin-left: 10px; font-weight: 600;">Geschlossen</span>
+            </div>
+            
+            <div class="wait-time-controls" id="waitTimePresets">
+                <div class="time-preset active" data-time="5">
+                    <div style="font-size: 1.2rem; font-weight: 700; color: #22c55e;">5 Min</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8;">Normal</div>
                 </div>
-                <div class="time-preset" data-time="10-20" onclick="setWaitTime('10-20')">
-                    <div style="font-weight: bold; color: #ef4444;">🔴 Sehr voll</div>
-                    <div style="font-size: 1.2rem; margin: 5px 0;">10-20 Min</div>
-                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Viel zu tun</div>
+                <div class="time-preset" data-time="10">
+                    <div style="font-size: 1.2rem; font-weight: 700; color: #f59e0b;">10 Min</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8;">Beschäftigt</div>
                 </div>
-                <div class="time-preset" data-time="custom" onclick="setCustomWaitTime()">
-                    <div style="font-weight: bold; color: #9b59b6;">⚙️ Anpassen</div>
-                    <div style="font-size: 1.2rem; margin: 5px 0;">Custom</div>
-                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Eigene Zeit</div>
+                <div class="time-preset" data-time="15">
+                    <div style="font-size: 1.2rem; font-weight: 700; color: #ef4444;">15 Min</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8;">Sehr voll</div>
+                </div>
+                <div class="time-preset" data-time="custom">
+                    <div style="font-size: 1rem; font-weight: 700; color: #8b5cf6;">Custom</div>
+                    <input type="number" class="custom-wait-input" id="customWaitTime" 
+                           placeholder="Min" min="1" max="60" style="margin-top: 5px;">
                 </div>
             </div>
         </div>
 
+        <!-- STATISTIKEN -->
         <div class="dashboard-grid">
             <div class="stats-card">
                 <div class="stats-icon orders">
                     <i class="fas fa-shopping-cart"></i>
                 </div>
-                <div class="stats-number" id="todayOrders">0</div>
+                <div class="stats-number" id="totalOrders">0</div>
                 <div class="stats-label">Bestellungen heute</div>
             </div>
-
+            
+            <div class="stats-card">
+                <div class="stats-icon waiting">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stats-number" id="newOrders">0</div>
+                <div class="stats-label">Wartend</div>
+            </div>
+            
             <div class="stats-card">
                 <div class="stats-icon revenue">
-                    <i class="fas fa-money-bill-wave"></i>
+                    <i class="fas fa-euro-sign"></i>
                 </div>
                 <div class="stats-number" id="todayRevenue">CHF 0</div>
                 <div class="stats-label">Umsatz heute</div>
             </div>
-
-            <div class="stats-card">
-                <div class="stats-icon queue">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stats-number" id="activeOrders">0</div>
-                <div class="stats-label">Produkte in Warteschlange</div>
-            </div>
-
-            <div class="stats-card">
-                <div class="stats-icon avg-time">
-                    <i class="fas fa-hourglass-half"></i>
-                </div>
-                <div class="stats-number" id="avgPrepTime">0 Min</div>
-                <div class="stats-label">Ø Zubereitungszeit</div>
-            </div>
         </div>
 
-        <div class="content-section">
-            <div class="section-title">
-                <i class="fas fa-shopping-cart"></i>
-                Aktuelle Bestellungen
-                <button class="btn btn-primary" onclick="refreshOrders()" style="margin-left: auto;">
-                    <i class="fas fa-sync"></i> Aktualisieren
-                </button>
+        <!-- BESTELLUNGEN -->
+        <div class="orders-section">
+            <div class="section-header">
+                <h3><i class="fas fa-list"></i> Aktive Bestellungen</h3>
+                <div class="sound-toggle" id="soundToggle">
+                    <i class="fas fa-volume-up"></i>
+                    <span>Sound AN</span>
+                </div>
             </div>
-            <div class="orders-container" id="ordersContainer">
+            
+            <div class="orders-grid" id="ordersContainer">
                 <div class="empty-state">
                     <i class="fas fa-clock"></i>
-                    <h3>Keine Bestellungen</h3>
+                    <h3>Keine aktiven Bestellungen</h3>
                     <p>Neue Bestellungen werden hier automatisch angezeigt</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Benachrichtigung -->
-    <div class="notification-popup" id="notification"></div>
+    <!-- NOTIFICATION POPUP -->
+    <div class="notification-popup" id="notificationPopup">
+        <span id="notificationMessage"></span>
+    </div>
 
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <script>
+        // FIREBASE CONFIGURATION
         const firebaseConfig = {
-            apiKey: "AIzaSyD3OCMvc4Iup58Ao0BiFNuvA0fnJokzYS8",
+            apiKey: "AIzaSyBiVdp67AZmZnGpM8OlZXBGKJKhF4iDlsE",
             authDomain: "pizzapastadamico.firebaseapp.com",
             databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: "pizzapastadamico",
-            storageBucket: "pizzapastadamico.firebasestorage.app",
-            messagingSenderId: "83240541532",
-            appId: "1:83240541532:web:11e3277850bf89a5b8b599",
-            measurementId: "G-6H2J5K88J7"
+            storageBucket: "pizzapastadamico.appspot.com",
+            messagingSenderId: "168976461234",
+            appId: "1:168976461234:web:abc123def456ghi789"
         };
 
+        // Firebase initialisieren
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        let currentUser = { email: 'pietro@damico.ch' };
-        let foodtruckStatus = false;
+        // GLOBAL VARIABLES
         let orders = {};
-        let currentWaitTimeMode = 'auto'; // 'auto' oder 'manual'
-        let manualWaitTime = '5-10';
+        let currentWaitTime = 5;
+        let restaurantOpen = false;
+        let soundEnabled = true;
 
-        // NEUE FUNKTIONEN FÜR WARTEZEIT-MANAGEMENT
+        // LOGIN CHECK
+        const isLoggedIn = localStorage.getItem('pietroLoggedIn');
+        const loginTime = localStorage.getItem('loginTime');
+        const now = new Date().getTime();
+        const twoHours = 2 * 60 * 60 * 1000;
 
-        // Wartezeit automatisch basierend auf PRODUKTANZAHL berechnen - NEUE LOGIK
-        function calculateAutoWaitTime(totalProducts) {
-            if (totalProducts < 6) {
-                // Unter 6 Produkte: 5 Minuten
-                return { min: 5, max: 5, text: '5', level: 'normal' };
-            } else if (totalProducts < 12) {
-                // 6-11 Produkte: 10 Minuten
-                return { min: 10, max: 10, text: '10', level: 'busy' };
-            } else {
-                // 12+ Produkte: Alle zusätzlichen 6 Produkte = +5-10 Min mehr
-                const extraGroups = Math.floor((totalProducts - 6) / 6);
-                const extraMinMin = extraGroups * 5;
-                const extraMinMax = extraGroups * 10;
-                
-                const totalMin = 10 + extraMinMin;
-                const totalMax = 10 + extraMinMax;
-                
-                return { 
-                    min: totalMin, 
-                    max: totalMax, 
-                    text: totalMin === totalMax ? `${totalMin}` : `${totalMin}-${totalMax}`,
-                    level: 'very_busy'
-                };
-            }
+        if (!isLoggedIn || !loginTime || (now - parseInt(loginTime)) > twoHours) {
+            window.location.href = 'admin.html';
         }
 
-        // Gesamtanzahl aktiver Produkte berechnen
-        function getTotalActiveProducts() {
-            const activeOrders = Object.values(orders).filter(order => 
-                order.status === 'neu' || order.status === 'zubereitung'
-            );
-            
-            return activeOrders.reduce((total, order) => {
-                if (order.items) {
-                    // Neue Struktur mit items array
-                    return total + order.items.reduce((sum, item) => sum + item.quantity, 0);
-                } else {
-                    // Alte Struktur - assume 1 pizza
-                    return total + 1;
-                }
-            }, 0);
-        }
-
-        // Wartezeit-Modus setzen (manuell)
-        function setWaitTime(timeText) {
-            currentWaitTimeMode = 'manual';
-            manualWaitTime = timeText;
-            
-            // Firebase aktualisieren
-            database.ref('settings/waitTime').set({
-                mode: 'manual',
-                time: timeText,
-                updatedAt: new Date().toISOString(),
-                updatedBy: currentUser.email
-            });
-            
-            updateWaitTimeDisplay();
-            updateTimePresets();
-            showNotification(`Wartezeit manuell auf ${timeText} Min gesetzt`);
-        }
-
-        // Benutzerdefinierte Wartezeit
-        function setCustomWaitTime() {
-            const customTime = prompt('Benutzerdefinierte Wartezeit eingeben (z.B. "15-25"):');
-            if (customTime && customTime.match(/^\d+-\d+$/)) {
-                setWaitTime(customTime);
-            } else if (customTime) {
-                alert('Ungültiges Format. Verwenden Sie z.B. "15-25"');
-            }
-        }
-
-        // Wartezeit-Anzeige aktualisieren
-        function updateWaitTimeDisplay() {
-            const totalProducts = getTotalActiveProducts();
-
-            let waitTime;
-            if (currentWaitTimeMode === 'manual') {
-                waitTime = { text: manualWaitTime };
-            } else {
-                waitTime = calculateAutoWaitTime(totalProducts);
-            }
-
-            document.getElementById('currentWaitTime').textContent = waitTime.text + ' Min';
-            document.getElementById('queueCount').textContent = totalProducts;
-            
-            // Aktualisiere auch die Kundenseite
-            database.ref('settings/currentWaitTime').set(waitTime.text);
-        }
-
-        // Zeit-Preset-Buttons aktualisieren
-        function updateTimePresets() {
-            document.querySelectorAll('.time-preset').forEach(preset => {
-                preset.classList.remove('active');
-                if (preset.dataset.time === manualWaitTime && currentWaitTimeMode === 'manual') {
-                    preset.classList.add('active');
-                }
-            });
-        }
-
-        // Zeit für spezifische Bestellung berechnen
-        function getOrderWaitTime(order) {
-            const orderTime = new Date(order.timestamp);
-            const now = new Date();
-            const elapsedMinutes = Math.floor((now - orderTime) / (1000 * 60));
-            
-            // Geschätzte Gesamtzeit basierend auf aktueller Wartezeit
-            const currentWait = manualWaitTime || '5-10';
-            const maxWaitMinutes = parseInt(currentWait.split('-')[1]);
-            
-            const remainingMinutes = Math.max(0, maxWaitMinutes - elapsedMinutes);
-            
-            let status = 'normal';
-            if (elapsedMinutes > maxWaitMinutes) {
-                status = 'overdue';
-            } else if (remainingMinutes <= 3) {
-                status = 'soon';
-            }
-            
-            return {
-                elapsed: elapsedMinutes,
-                remaining: remainingMinutes,
-                status: status,
-                text: remainingMinutes > 0 ? `noch ${remainingMinutes} Min` : 'überfällig'
-            };
-        }
-
-        // Benachrichtigung an Kunden senden (Browser Push)
-        async function notifyCustomer(orderId, message, playSound = false) {
-            try {
-                // Firebase-Update für Live-Updates
-                await database.ref(`orders/${orderId}/customerNotification`).set({
-                    message: message,
-                    timestamp: new Date().toISOString(),
-                    read: false,
-                    playSound: playSound // Steuert ob Ton abgespielt wird
-                });
-                
-                // Icon je nach Nachrichtentyp
-                let icon = '📱';
-                if (message.includes('fertig')) icon = '🍕';
-                if (message.includes('rufen') || message.includes('länger fertig')) icon = '📞';
-                
-                const soundText = playSound ? ' (mit Ton)' : ' (still)';
-                showNotification(`${icon} Kunde benachrichtigt: ${message}${soundText}`);
-            } catch (error) {
-                console.error('Fehler beim Benachrichtigen:', error);
-                showNotification('Fehler beim Senden der Benachrichtigung', 'error');
-            }
-        }
-
-        // Login-Prüfung
-        document.addEventListener('DOMContentLoaded', () => {
-            const pietroLoggedIn = localStorage.getItem('pietroLoggedIn');
-            const loginTime = localStorage.getItem('loginTime');
-            
-            if (pietroLoggedIn === 'true' && loginTime) {
-                const now = Date.now();
-                const loginTimestamp = parseInt(loginTime);
-                const hoursPassed = (now - loginTimestamp) / (1000 * 60 * 60);
-                
-                if (hoursPassed < 24) {
-                    console.log('Pietro Login gültig - Dashboard gestartet');
-                    initDashboard();
-                    return;
-                }
-            }
-            
-            // Login ungültig - zurück zum Login
-            window.location.href = 'login.html';
+        // INITIALIZATION
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAdmin();
+            loadOrders();
+            loadRestaurantStatus();
+            loadWaitTime();
+            setupEventListeners();
+            console.log('Pietro Admin Dashboard initialisiert');
         });
 
-        // Dashboard initialisieren
-        function initDashboard() {
-            loadFoodtruckStatus();
-            loadOrders();
-            loadWaitTimeSettings();
+        // EVENT LISTENERS SETUP
+        function setupEventListeners() {
+            // Restaurant Toggle
+            document.getElementById('restaurantToggle').addEventListener('click', toggleRestaurantStatus);
             
-            // Auto-Update alle 30 Sekunden
-            setInterval(updateStatistics, 30000);
-            setInterval(updateWaitTimeDisplay, 30000);
-        }
+            // Wartezeit Presets
+            document.querySelectorAll('.time-preset').forEach(preset => {
+                preset.addEventListener('click', function() {
+                    const time = this.dataset.time;
+                    if (time === 'custom') {
+                        const customInput = document.getElementById('customWaitTime');
+                        customInput.focus();
+                        customInput.addEventListener('change', function() {
+                            if (this.value && this.value > 0) {
+                                updateWaitTime(parseInt(this.value));
+                            }
+                        });
+                    } else {
+                        updateWaitTime(parseInt(time));
+                    }
+                    
+                    // Update active state
+                    document.querySelectorAll('.time-preset').forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
 
-        // Foodtruck Status laden
-        function loadFoodtruckStatus() {
-            database.ref('settings/foodtruckOpen').on('value', (snapshot) => {
-                foodtruckStatus = snapshot.val() || false;
-                updateStatusDisplay();
+            // Sound Toggle
+            document.getElementById('soundToggle').addEventListener('click', function() {
+                soundEnabled = !soundEnabled;
+                this.innerHTML = soundEnabled 
+                    ? '<i class="fas fa-volume-up"></i><span>Sound AN</span>'
+                    : '<i class="fas fa-volume-off"></i><span>Sound AUS</span>';
+                this.classList.toggle('enabled', soundEnabled);
             });
         }
 
-        // Wartezeit-Einstellungen laden
-        function loadWaitTimeSettings() {
-            database.ref('settings/waitTime').on('value', (snapshot) => {
-                const settings = snapshot.val();
-                if (settings) {
-                    currentWaitTimeMode = settings.mode || 'auto';
-                    manualWaitTime = settings.time || '5-10';
-                    updateTimePresets();
-                }
-                updateWaitTimeDisplay();
-            });
+        // ADMIN INITIALIZATION
+        function initializeAdmin() {
+            console.log('Admin Dashboard wird initialisiert...');
+            updateGlobalStatus();
         }
 
-        // Status-Anzeige aktualisieren
-        function updateStatusDisplay() {
-            const statusText = document.getElementById('statusText');
-            const statusToggle = document.getElementById('statusToggle');
-            
-            if (foodtruckStatus) {
-                statusText.textContent = 'Geöffnet';
-                statusText.className = 'status-text open';
-                statusToggle.classList.add('open');
-            } else {
-                statusText.textContent = 'Geschlossen';
-                statusText.className = 'status-text closed';
-                statusToggle.classList.remove('open');
-            }
-        }
-
-        // Foodtruck Status umschalten
-        async function toggleFoodtruckStatus() {
+        // RESTAURANT STATUS TOGGLE
+        async function toggleRestaurantStatus() {
             try {
-                const newStatus = !foodtruckStatus;
-                await database.ref('settings/foodtruckOpen').set(newStatus);
-                showNotification(`Foodtruck ${newStatus ? 'geöffnet' : 'geschlossen'}`);
+                restaurantOpen = !restaurantOpen;
+                await database.ref('settings/restaurantOpen').set(restaurantOpen);
+                updateRestaurantUI();
+                
+                const status = restaurantOpen ? 'geöffnet' : 'geschlossen';
+                showNotification(`Foodtruck ${status}`, 'success');
             } catch (error) {
                 console.error('Fehler beim Ändern des Status:', error);
                 showNotification('Fehler beim Ändern des Status', 'error');
             }
         }
 
-        // Bestellungen laden
-        function loadOrders() {
-            database.ref('orders').on('value', (snapshot) => {
-                orders = snapshot.val() || {};
-                renderOrders();
-                updateStatistics();
+        // RESTAURANT STATUS LADEN
+        function loadRestaurantStatus() {
+            database.ref('settings/restaurantOpen').on('value', (snapshot) => {
+                restaurantOpen = snapshot.val() || false;
+                updateRestaurantUI();
+                updateGlobalStatus();
+            });
+        }
+
+        // RESTAURANT UI UPDATE
+        function updateRestaurantUI() {
+            const toggle = document.getElementById('restaurantToggle');
+            const statusText = document.getElementById('restaurantStatusText');
+            
+            toggle.classList.toggle('active', restaurantOpen);
+            statusText.textContent = restaurantOpen ? 'Geöffnet' : 'Geschlossen';
+            statusText.style.color = restaurantOpen ? '#22c55e' : '#ef4444';
+        }
+
+        // WARTEZEIT LADEN
+        function loadWaitTime() {
+            database.ref('settings/waitTime').on('value', (snapshot) => {
+                currentWaitTime = snapshot.val() || 5;
                 updateWaitTimeDisplay();
             });
         }
 
-        // Bestellungen rendern
+        // WARTEZEIT UPDATE
+        async function updateWaitTime(minutes) {
+            try {
+                currentWaitTime = minutes;
+                await database.ref('settings/waitTime').set(minutes);
+                updateWaitTimeDisplay();
+                showNotification(`Wartezeit auf ${minutes} Min gesetzt`, 'success');
+            } catch (error) {
+                console.error('Fehler beim Update der Wartezeit:', error);
+                showNotification('Fehler beim Update der Wartezeit', 'error');
+            }
+        }
+
+        // WARTEZEIT DISPLAY UPDATE
+        function updateWaitTimeDisplay() {
+            document.getElementById('currentWaitTime').textContent = `${currentWaitTime} Min`;
+        }
+
+        // BESTELLUNGEN LADEN
+        function loadOrders() {
+            database.ref('orders').on('value', (snapshot) => {
+                const newOrders = snapshot.val() || {};
+                
+                // Check for new orders (for sound notification)
+                Object.keys(newOrders).forEach(orderId => {
+                    if (!orders[orderId] && soundEnabled) {
+                        playNotificationSound();
+                        showNotification('🍕 Neue Bestellung eingegangen!', 'info');
+                    }
+                });
+                
+                orders = newOrders;
+                renderOrders();
+                updateStatistics();
+            });
+        }
+
+        // BESTELLUNGEN RENDERN
         function renderOrders() {
             const container = document.getElementById('ordersContainer');
             const orderList = Object.entries(orders);
@@ -875,7 +351,7 @@
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-clock"></i>
-                        <h3>Keine Bestellungen</h3>
+                        <h3>Keine aktiven Bestellungen</h3>
                         <p>Neue Bestellungen werden hier automatisch angezeigt</p>
                     </div>
                 `;
@@ -891,11 +367,13 @@
             });
 
             container.innerHTML = orderList.map(([id, order]) => {
-                const waitTimeInfo = getOrderWaitTime(order);
                 const orderTime = new Date(order.timestamp).toLocaleTimeString('de-CH', {
                     hour: '2-digit',
                     minute: '2-digit'
                 });
+
+                const waitTimeInfo = getOrderWaitTime(order);
+                const actions = getOrderActions(id, order);
 
                 return `
                     <div class="order-card status-${order.status || 'neu'}">
@@ -910,111 +388,184 @@
                         </div>
                         
                         <div class="order-details">
-                            <div class="order-items">
-                                ${order.items ? order.items.map(item => `
-                                    <div class="order-item">
-                                        <div>
-                                            <div class="item-name">${item.name}</div>
-                                            <div class="item-details">${item.quantity}x CHF ${item.price.toFixed(2)}</div>
-                                        </div>
-                                        <div class="item-price">CHF ${item.total.toFixed(2)}</div>
-                                    </div>
-                                `).join('') : `
-                                    <div class="order-item">
-                                        <div>
-                                            <div class="item-name">${order.pizza?.name || 'Unbekannt'}</div>
-                                            <div class="item-details">1x CHF ${(order.total || 0).toFixed(2)}</div>
-                                        </div>
-                                        <div class="item-price">CHF ${(order.total || 0).toFixed(2)}</div>
-                                    </div>
-                                `}
-                                <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-top: 10px;">
-                                    <div style="display: flex; justify-content: space-between; font-weight: bold;">
-                                        <span>Gesamttotal:</span>
-                                        <span style="color: #22c55e;">CHF ${(order.total || 0).toFixed(2)}</span>
-                                    </div>
-                                </div>
+                            ${renderOrderItems(order)}
+                            
+                            <div class="order-total">
+                                <span class="total-label">Gesamt:</span>
+                                <span class="total-amount">CHF ${(order.total || 0).toFixed(2)}</span>
                             </div>
-                            
-                            ${order.note ? `
-                                <div class="order-note">
-                                    <i class="fas fa-comment"></i> "${order.note}"
-                                </div>
-                            ` : ''}
                         </div>
-                        
+
                         <div class="order-actions">
-                            ${order.status === 'neu' ? `
-                                <button class="btn btn-primary" onclick="updateOrderStatus('${id}', 'zubereitung')">
-                                    <i class="fas fa-fire"></i> In Zubereitung
-                                </button>
-                                <button class="btn btn-success" onclick="updateOrderStatus('${id}', 'fertig')">
-                                    <i class="fas fa-check"></i> Direkt Fertig
-                                </button>
-                                <button class="btn btn-notify" onclick="notifyCustomer('${id}', 'Ihre Bestellung wird zubereitet', false)">
-                                    <i class="fas fa-bell"></i> Benachrichtigen
-                                </button>
-                            ` : ''}
-                            
-                            ${order.status === 'zubereitung' ? `
-                                <button class="btn btn-success" onclick="updateOrderStatus('${id}', 'fertig')">
-                                    <i class="fas fa-check"></i> Fertig
-                                </button>
-                                <button class="btn btn-notify" onclick="notifyCustomer('${id}', 'Ihre Bestellung ist bald fertig', false)">
-                                    <i class="fas fa-bell"></i> "Bald fertig"
-                                </button>
-                            ` : ''}
-                            
-                            ${order.status === 'fertig' ? `
-                                <button class="btn btn-notify" onclick="notifyCustomer('${id}', 'Ihre Bestellung ist fertig zur Abholung!', true)">
-                                    <i class="fas fa-bell"></i> "Fertig!"
-                                </button>
-                                <button class="btn btn-warning" onclick="notifyCustomer('${id}', 'Bitte holen Sie Ihre Bestellung ab - sie ist schon länger fertig!', true)">
-                                    <i class="fas fa-phone"></i> Kunde rufen
-                                </button>
-                                <button class="btn btn-danger" onclick="archiveOrder('${id}')">
-                                    <i class="fas fa-archive"></i> Abgeholt
-                                </button>
-                            ` : ''}
+                            ${actions}
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        // Bestellstatus aktualisieren
+        // ORDER ITEMS RENDERN
+        function renderOrderItems(order) {
+            if (!order.items || order.items.length === 0) {
+                return '<div style="color: rgba(255,255,255,0.6); font-style: italic;">Keine Artikel gefunden</div>';
+            }
+
+            return order.items.map(item => `
+                <div class="order-item">
+                    <div class="item-details">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-specs">${item.size || ''} ${item.extras ? '• ' + item.extras.join(', ') : ''}</div>
+                    </div>
+                    <div class="item-price">CHF ${(item.price || 0).toFixed(2)}</div>
+                </div>
+            `).join('');
+        }
+
+        // ORDER ACTIONS GENERIEREN
+        function getOrderActions(orderId, order) {
+            const status = order.status || 'neu';
+            let actions = '';
+
+            switch (status) {
+                case 'neu':
+                    actions = `
+                        <button class="action-btn primary" onclick="updateOrderStatus('${orderId}', 'zubereitung')">
+                            <i class="fas fa-fire"></i> Starten
+                        </button>
+                        <button class="action-btn warning" onclick="notifyCustomer('${orderId}', 'prepare')">
+                            <i class="fas fa-bell"></i> Benachrichtigen
+                        </button>
+                    `;
+                    break;
+                case 'zubereitung':
+                    actions = `
+                        <button class="action-btn success" onclick="updateOrderStatus('${orderId}', 'fertig')">
+                            <i class="fas fa-check"></i> Fertig
+                        </button>
+                        <button class="action-btn warning" onclick="notifyCustomer('${orderId}', 'update')">
+                            <i class="fas fa-bell"></i> Update
+                        </button>
+                    `;
+                    break;
+                case 'fertig':
+                    actions = `
+                        <button class="action-btn warning" onclick="notifyCustomer('${orderId}', 'ready')">
+                            <i class="fas fa-bell"></i> Rufen
+                        </button>
+                        <button class="action-btn danger" onclick="archiveOrder('${orderId}')">
+                            <i class="fas fa-archive"></i> Abgeholt
+                        </button>
+                    `;
+                    break;
+            }
+
+            return actions;
+        }
+
+        // WARTEZEIT-INFO FÜR BESTELLUNG
+        function getOrderWaitTime(order) {
+            const orderTime = new Date(order.timestamp);
+            const now = new Date();
+            const elapsed = Math.floor((now - orderTime) / (1000 * 60)); // Minuten
+
+            if (elapsed <= 5) {
+                return { status: 'normal', text: `${elapsed} Min` };
+            } else if (elapsed <= 10) {
+                return { status: 'warning', text: `${elapsed} Min` };
+            } else {
+                return { status: 'danger', text: `${elapsed} Min!` };
+            }
+        }
+
+        // BESTELLSTATUS UPDATE
         async function updateOrderStatus(orderId, newStatus) {
             try {
                 await database.ref(`orders/${orderId}/status`).set(newStatus);
-                await database.ref(`orders/${orderId}/statusUpdatedAt`).set(new Date().toISOString());
                 
-                // Automatische Benachrichtigung bei Status-Änderung
+                // Automatische Benachrichtigung bei bestimmten Status
                 let message = '';
-                let playSound = false; // Steuert ob Ton abgespielt wird
+                let playSound = false;
                 
                 switch (newStatus) {
                     case 'zubereitung':
                         message = 'Ihre Bestellung wird jetzt zubereitet';
-                        playSound = false; // KEIN Ton bei "in Zubereitung"
                         break;
                     case 'fertig':
                         message = 'Ihre Bestellung ist fertig zur Abholung!';
-                        playSound = true; // TON bei "fertig"
+                        playSound = true;
                         break;
                 }
                 
                 if (message) {
-                    await notifyCustomer(orderId, message, playSound);
+                    await notifyCustomer(orderId, 'auto', message, playSound);
                 }
                 
-                showNotification(`Bestellung #${orders[orderId].id || orderId.slice(-6)} → ${getStatusText(newStatus)}`);
+                showNotification(`Bestellung #${orders[orderId].id || orderId.slice(-6)} → ${getStatusText(newStatus)}`, 'success');
             } catch (error) {
                 console.error('Fehler beim Aktualisieren:', error);
                 showNotification('Fehler beim Aktualisieren des Status', 'error');
             }
         }
 
-        // Status-Text übersetzen
+        // KUNDE BENACHRICHTIGEN
+        async function notifyCustomer(orderId, type, customMessage = null, playSound = false) {
+            try {
+                const orderData = orders[orderId];
+                if (!orderData) return;
+
+                let message = customMessage;
+                if (!message) {
+                    switch (type) {
+                        case 'prepare':
+                            message = 'Ihre Bestellung wird jetzt zubereitet';
+                            break;
+                        case 'update':
+                            message = 'Ihre Bestellung ist in Zubereitung';
+                            break;
+                        case 'ready':
+                            message = 'Ihre Bestellung ist fertig zur Abholung!';
+                            playSound = true;
+                            break;
+                    }
+                }
+
+                // Notification zu Firebase senden
+                await database.ref(`notifications/${orderId}`).push({
+                    message: message,
+                    timestamp: new Date().toISOString(),
+                    type: type,
+                    playSound: playSound
+                });
+
+                const soundText = playSound ? ' (mit Ton)' : ' (still)';
+                showNotification(`Kunde benachrichtigt: ${message}${soundText}`, 'success');
+            } catch (error) {
+                console.error('Fehler beim Benachrichtigen:', error);
+                showNotification('Fehler beim Senden der Benachrichtigung', 'error');
+            }
+        }
+
+        // BESTELLUNG ARCHIVIEREN
+        async function archiveOrder(orderId) {
+            if (!confirm('Bestellung als abgeholt markieren und archivieren?')) return;
+
+            try {
+                const orderData = orders[orderId];
+                await database.ref(`archive/${orderId}`).set({
+                    ...orderData,
+                    archivedAt: new Date().toISOString(),
+                    archivedBy: 'admin',
+                    finalStatus: 'abgeholt'
+                });
+                await database.ref(`orders/${orderId}`).remove();
+                showNotification(`Bestellung #${orderData.id || orderId.slice(-6)} archiviert`, 'success');
+            } catch (error) {
+                console.error('Fehler beim Archivieren:', error);
+                showNotification('Fehler beim Archivieren der Bestellung', 'error');
+            }
+        }
+
+        // STATUS-TEXT ÜBERSETZEN
         function getStatusText(status) {
             const statusTexts = {
                 'neu': 'Neu',
@@ -1024,68 +575,61 @@
             return statusTexts[status] || status;
         }
 
-        // Bestellung archivieren
-        async function archiveOrder(orderId) {
-            if (!confirm('Bestellung als abgeholt markieren und archivieren?')) return;
-
-            try {
-                const orderData = orders[orderId];
-                await database.ref(`archive/${orderId}`).set({
-                    ...orderData,
-                    archivedAt: new Date().toISOString(),
-                    archivedBy: currentUser.email,
-                    finalStatus: 'abgeholt'
-                });
-                await database.ref(`orders/${orderId}`).remove();
-                showNotification(`Bestellung #${orderData.id || orderId.slice(-6)} archiviert`);
-            } catch (error) {
-                console.error('Fehler beim Archivieren:', error);
-                showNotification('Fehler beim Archivieren der Bestellung', 'error');
-            }
-        }
-
-        // Statistiken aktualisieren
+        // STATISTIKEN AKTUALISIEREN
         function updateStatistics() {
             const today = new Date().toDateString();
             const todayOrders = Object.values(orders).filter(order => 
                 new Date(order.timestamp).toDateString() === today
             );
-            const totalProducts = getTotalActiveProducts();
+            const newOrders = todayOrders.filter(order => (order.status || 'neu') === 'neu');
+            const totalRevenue = todayOrders.reduce((sum, order) => sum + (order.total || 0), 0);
 
-            const todayRevenue = todayOrders.reduce((sum, order) => sum + (order.total || 0), 0);
+            document.getElementById('totalOrders').textContent = todayOrders.length;
+            document.getElementById('newOrders').textContent = newOrders.length;
+            document.getElementById('todayRevenue').textContent = `CHF ${totalRevenue.toFixed(2)}`;
+        }
+
+        // GLOBAL STATUS UPDATE
+        function updateGlobalStatus() {
+            const statusIcon = document.getElementById('globalStatusIcon');
+            const statusText = document.getElementById('globalStatusText');
             
-            // Durchschnittliche Zubereitungszeit berechnen
-            const completedOrders = Object.values(orders).filter(order => 
-                order.status === 'fertig' && order.statusUpdatedAt
-            );
-            
-            let avgPrepTime = 0;
-            if (completedOrders.length > 0) {
-                const totalPrepTime = completedOrders.reduce((sum, order) => {
-                    const orderTime = new Date(order.timestamp);
-                    const completedTime = new Date(order.statusUpdatedAt);
-                    return sum + Math.max(0, (completedTime - orderTime) / (1000 * 60));
-                }, 0);
-                avgPrepTime = Math.round(totalPrepTime / completedOrders.length);
+            if (restaurantOpen) {
+                statusIcon.style.color = '#22c55e';
+                statusText.textContent = 'Aktiv';
+            } else {
+                statusIcon.style.color = '#ef4444';
+                statusText.textContent = 'Geschlossen';
             }
-
-            document.getElementById('todayOrders').textContent = todayOrders.length;
-            document.getElementById('todayRevenue').textContent = `CHF ${todayRevenue.toFixed(2)}`;
-            document.getElementById('activeOrders').textContent = totalProducts; // Produkte statt Bestellungen
-            document.getElementById('avgPrepTime').textContent = `${avgPrepTime} Min`;
         }
 
-        // Bestellungen manuell aktualisieren
-        function refreshOrders() {
-            showNotification('Bestellungen aktualisiert');
-            renderOrders();
-            updateStatistics();
+        // NOTIFICATION SOUND
+        function playNotificationSound() {
+            if (!soundEnabled) return;
+            
+            // Simple beep sound using Web Audio API
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
         }
 
-        // Benachrichtigung anzeigen
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            notification.innerHTML = `
+        // NOTIFICATION POPUP
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notificationPopup');
+            const messageSpan = document.getElementById('notificationMessage');
+            
+            messageSpan.innerHTML = `
                 <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}"></i> 
                 ${message}
             `;
@@ -1096,14 +640,14 @@
             }, 4000);
         }
 
-        // Zurück zur Hauptseite
+        // LOGOUT
         function logout() {
             localStorage.removeItem('pietroLoggedIn');
             localStorage.removeItem('loginTime');
-            window.location.href = 'index.html';
+            window.location.href = 'admin.html';
         }
 
-        console.log('Erweitertes Pietro Dashboard bereit!');
+        console.log('Pietro Admin Dashboard vollständig geladen!');
     </script>
 </body>
 </html>

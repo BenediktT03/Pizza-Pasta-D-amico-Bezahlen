@@ -1,330 +1,501 @@
-// Erweiterte Stripe Integration
-// Diese Funktionen können in customer.js eingefügt werden
+// ============================================================================
+// STRIPE PAYMENT INTEGRATION - Pizza&Pasta D'amico
+// Zu integrieren in: js/customer.js (neue Datei) oder direkt in index.html
+// ============================================================================
 
-// Stripe Checkout Session erstellen (für echte Integration)
+// STRIPE CONFIGURATION
+const STRIPE_PUBLIC_KEY = 'pk_test_51234567890abcdef'; // TEST KEY - In Production ersetzen!
+const stripe = Stripe(STRIPE_PUBLIC_KEY);
+
+// STRIPE CHECKOUT SESSION ERSTELLEN
 async function createStripeCheckoutSession(orderData) {
     try {
-        // Diese Funktion würde normalerweise einen Server-Endpoint aufrufen
-        // Da wir nur Frontend haben, simulieren wir es hier
-        
-        const checkoutData = {
-            line_items: [{
-                price_data: {
-                    currency: 'chf',
-                    product_data: {
-                        name: orderData.pizza.name,
-                        description: `Pizza Bella - ${orderData.table === 'takeaway' ? 'Takeaway' : 'Tisch ' + orderData.table}`,
-                        images: ['https://your-app.web.app/images/pizza-logo.png']
-                    },
-                    unit_amount: Math.round(orderData.pizza.price * 100) // Rappen
+        // Line Items für Stripe vorbereiten
+        const lineItems = orderData.items.map(item => ({
+            price_data: {
+                currency: 'chf',
+                product_data: {
+                    name: item.name,
+                    description: `Pizza&Pasta D'amico - ${item.quantity}x ${item.name}`,
+                    images: ['https://pizzapastadamico.web.app/images/logo.png']
                 },
-                quantity: 1
-            }],
+                unit_amount: Math.round(item.price * 100) // Rappen
+            },
+            quantity: item.quantity
+        }));
+
+        // Checkout Session Data
+        const sessionData = {
+            payment_method_types: ['card'],
+            line_items: lineItems,
             mode: 'payment',
-            success_url: `${window.location.origin}/success.html?order=${orderData.id}&table=${orderData.table}&payment=success`,
-            cancel_url: `${window.location.origin}/index.html?table=${orderData.table}&payment=cancelled`,
+            success_url: `${window.location.origin}/success.html?session_id={CHECKOUT_SESSION_ID}&order_id=${orderData.id}`,
+            cancel_url: `${window.location.origin}/index.html?payment=cancelled`,
             customer_email: null, // Optional: Email sammeln
             metadata: {
                 order_id: orderData.id,
-                table: orderData.table,
-                pizza: orderData.pizza.name
+                restaurant: 'Pizza&Pasta D\'amico',
+                timestamp: orderData.timestamp
+            },
+            payment_intent_data: {
+                metadata: {
+                    order_id: orderData.id,
+                    total_items: orderData.items.length
+                }
             }
         };
 
-        // Hier würdest du normalerweise deinen Server aufrufen:
-        // const response = await fetch('/create-checkout-session', {
+        // Da wir nur Frontend haben, simulieren wir Stripe Checkout
+        // In echter Implementation würde man Server-Endpoint aufrufen:
+        // const response = await fetch('/api/create-checkout-session', {
         //     method: 'POST',
         //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify(checkoutData)
+        //     body: JSON.stringify(sessionData)
         // });
-        // const session = await response.json();
         
-        // Für Demo: Direkt zur Success-Seite weiterleiten
-        console.log('Stripe Checkout würde erstellt mit:', checkoutData);
-        
-        // Simuliere erfolgreiche Zahlung nach 2 Sekunden
-        setTimeout(async () => {
-            await saveOrder();
-        }, 2000);
-        
+        // DEMO: Für Entwicklung - direkter Stripe Checkout
+        const session = await stripe.redirectToCheckout({
+            lineItems: lineItems,
+            mode: 'payment',
+            successUrl: `${window.location.origin}/success.html?order_id=${orderData.id}&payment=success`,
+            cancelUrl: `${window.location.origin}/index.html?payment=cancelled`,
+            customerEmail: null
+        });
+
+        if (session.error) {
+            throw new Error(session.error.message);
+        }
+
+        return session;
+
     } catch (error) {
         console.error('Stripe Checkout Fehler:', error);
         throw error;
     }
 }
 
-// Stripe Elements für eingebettete Zahlung (Alternative zu Checkout)
-function setupStripeElements() {
-    const elements = stripe.elements();
+// ERWEITERTE BESTELLFUNKTION MIT PAYMENT OPTIONS
+async function placeOrderWithPayment() {
+    if (Object.keys(cart).length === 0) return;
     
-    // Card Element erstellen
-    const cardElement = elements.create('card', {
-        style: {
-            base: {
-                fontSize: '16px',
-                color: '#424770',
-                '::placeholder': {
-                    color: '#aab7c4',
-                },
-                fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-            },
-            invalid: {
-                color: '#9e2146',
-            },
-        },
-    });
-
-    // Card Element mounten
-    cardElement.mount('#card-element');
-
-    // Fehler-Handling
-    cardElement.on('change', ({error}) => {
-        const displayError = document.getElementById('card-errors');
-        if (error) {
-            displayError.textContent = error.message;
-        } else {
-            displayError.textContent = '';
-        }
-    });
-
-    return { elements, cardElement };
-}
-
-// Payment Intent erstellen (für Stripe Elements)
-async function createPaymentIntent(orderData) {
-    // Server-Aufruf simuliert
-    const paymentIntentData = {
-        amount: Math.round(orderData.pizza.price * 100), // Rappen
-        currency: 'chf',
-        metadata: {
-            order_id: orderData.id,
-            table: orderData.table,
-            pizza: orderData.pizza.name
-        }
-    };
-
-    // Hier würdest du deinen Server aufrufen:
-    // const response = await fetch('/create-payment-intent', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(paymentIntentData)
-    // });
-    // const { client_secret } = await response.json();
-
-    // Für Demo: Client Secret simulieren
-    console.log('Payment Intent würde erstellt mit:', paymentIntentData);
-    return 'pi_demo_client_secret';
-}
-
-// Zahlung mit Stripe Elements bestätigen
-async function confirmStripePayment(cardElement, clientSecret, orderData) {
-    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-            card: cardElement,
-            billing_details: {
-                name: `${orderData.table === 'takeaway' ? 'Takeaway' : 'Tisch ' + orderData.table}`,
-            },
-        }
-    });
-
-    if (error) {
-        console.error('Zahlungsfehler:', error);
-        throw new Error(error.message);
-    }
-
-    if (paymentIntent.status === 'succeeded') {
-        console.log('Zahlung erfolgreich!');
-        return paymentIntent;
-    }
-}
-
-// TWINT QR-Code generieren (für echte Integration)
-function generateTwintQR(orderData) {
-    // TWINT QR-Code Parameter
-    const twintData = {
-        amount: orderData.pizza.price,
-        currency: 'CHF',
-        reference: orderData.id,
-        message: `Pizza Bella - ${orderData.pizza.name}`,
-        // Merchant IBAN oder TWINT Business Account
-        recipient: 'CH93 0076 2011 6238 5295 7' // Beispiel IBAN
-    };
-
-    // QR-Code String generieren (vereinfacht)
-    const qrString = `BCD\n002\n2\nSCT\n${twintData.recipient}\nPizza Bella\n${twintData.amount}\n${twintData.currency}\n\n${twintData.reference}\n${twintData.message}`;
+    // Payment Method Dialog anzeigen
+    const paymentMethod = await showPaymentMethodDialog();
     
-    console.log('TWINT QR-Code Daten:', twintData);
-    console.log('QR-String:', qrString);
+    if (!paymentMethod) return; // User cancelled
     
-    // Hier würdest du eine QR-Code Bibliothek verwenden:
-    // import QRCode from 'qrcode';
-    // QRCode.toDataURL(qrString, (err, url) => {
-    //     document.getElementById('twint-qr-image').src = url;
-    // });
+    const orderBtn = document.getElementById('orderBtn');
+    const originalText = orderBtn.innerHTML;
     
-    return qrString;
-}
-
-// Webhook Handler (Server-seitig - nur Beispiel)
-function handleStripeWebhook(event) {
-    // Diese Funktion würde auf deinem Server laufen
-    switch (event.type) {
-        case 'payment_intent.succeeded':
-            const paymentIntent = event.data.object;
-            console.log('Zahlung erfolgreich:', paymentIntent.id);
-            
-            // Bestellstatus in Firebase aktualisieren
-            const orderId = paymentIntent.metadata.order_id;
-            // updateOrderPaymentStatus(orderId, 'paid');
-            break;
-            
-        case 'payment_intent.payment_failed':
-            const failedPayment = event.data.object;
-            console.log('Zahlung fehlgeschlagen:', failedPayment.id);
-            
-            // Bestellstatus in Firebase aktualisieren
-            const failedOrderId = failedPayment.metadata.order_id;
-            // updateOrderPaymentStatus(failedOrderId, 'failed');
-            break;
-            
-        default:
-            console.log(`Unbekannter Event Type: ${event.type}`);
-    }
-}
-
-// Zahlungsstatus in Firebase aktualisieren
-async function updateOrderPaymentStatus(orderId, paymentStatus) {
+    // Loading-Status
+    orderBtn.disabled = true;
+    orderBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${window.t ? window.t('order.processing') : 'Bestellung wird verarbeitet...'}`;
+    
     try {
-        await database.ref(`orders/${orderId}/paymentStatus`).set(paymentStatus);
-        await database.ref(`orders/${orderId}/paymentTimestamp`).set(new Date().toISOString());
-        console.log(`Zahlungsstatus für Bestellung ${orderId}: ${paymentStatus}`);
+        // Bestelldaten vorbereiten
+        const orderData = {
+            id: generateOrderId(),
+            timestamp: new Date().toISOString(),
+            items: Object.entries(cart).map(([productId, quantity]) => ({
+                id: productId,
+                name: availableProducts[productId].name,
+                price: availableProducts[productId].price,
+                quantity: quantity
+            })),
+            total: Object.entries(cart).reduce((sum, [productId, quantity]) => {
+                return sum + (availableProducts[productId].price * quantity);
+            }, 0),
+            note: document.getElementById('orderNote').value.trim(),
+            status: 'neu',
+            waitTime: calculateWaitTime(),
+            paymentMethod: paymentMethod,
+            paymentStatus: paymentMethod === 'cash' ? 'pending' : 'processing'
+        };
+
+        if (paymentMethod === 'card') {
+            // Stripe Checkout initiieren
+            await createStripeCheckoutSession(orderData);
+            
+            // Bestellung temporär speichern (wird bei Stripe Success finalisiert)
+            await database.ref(`temp-orders/${orderData.id}`).set(orderData);
+            
+        } else {
+            // Barzahlung - direkt speichern
+            const orderRef = await database.ref('orders').push(orderData);
+            currentOrderId = orderRef.key;
+
+            // Erfolg anzeigen
+            const successText = window.t 
+                ? window.t('order.success', { id: orderData.id, time: orderData.waitTime })
+                : `✅ Bestellung #${orderData.id} eingegangen! Geschätzte Wartezeit: ${orderData.waitTime} Min`;
+            
+            showNotification(successText, 'success');
+
+            // Warenkorb leeren
+            cart = {};
+            updateCartDisplay();
+            
+            // Tracking-Popup anzeigen
+            setTimeout(() => showTrackingPopup(), 2000);
+        }
+
     } catch (error) {
-        console.error('Fehler beim Aktualisieren des Zahlungsstatus:', error);
+        console.error('Fehler beim Aufgeben der Bestellung:', error);
+        const errorText = window.t 
+            ? window.t('order.error')
+            : 'Fehler bei der Bestellung. Bitte versuchen Sie es erneut.';
+        showNotification(errorText, 'error');
+    } finally {
+        orderBtn.disabled = false;
+        orderBtn.innerHTML = originalText;
     }
 }
 
-// Stripe Test-Karten für Development
-const STRIPE_TEST_CARDS = {
-    success: '4242424242424242',
-    decline: '4000000000000002',
-    require_authentication: '4000002500003155',
-    insufficient_funds: '4000000000009995'
-};
+// PAYMENT METHOD DIALOG
+function showPaymentMethodDialog() {
+    return new Promise((resolve) => {
+        // Payment Dialog HTML erstellen
+        const dialog = document.createElement('div');
+        dialog.className = 'payment-dialog-overlay';
+        dialog.innerHTML = `
+            <div class="payment-dialog">
+                <div class="payment-header">
+                    <h3><i class="fas fa-credit-card"></i> Zahlungsmethode wählen</h3>
+                    <button class="close-btn" onclick="this.closest('.payment-dialog-overlay').remove(); resolve(null);">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="payment-options">
+                    <div class="payment-option" data-method="card">
+                        <div class="payment-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div class="payment-details">
+                            <h4>Kartenzahlung</h4>
+                            <p>Sicher bezahlen mit Kreditkarte</p>
+                            <div class="card-brands">
+                                <i class="fab fa-cc-visa"></i>
+                                <i class="fab fa-cc-mastercard"></i>
+                                <i class="fab fa-cc-amex"></i>
+                            </div>
+                        </div>
+                        <div class="payment-status">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-option" data-method="cash">
+                        <div class="payment-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="payment-details">
+                            <h4>Barzahlung</h4>
+                            <p>Bezahlen Sie bei der Abholung in bar</p>
+                        </div>
+                        <div class="payment-status">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-option coming-soon" data-method="twint">
+                        <div class="payment-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="payment-details">
+                            <h4>TWINT</h4>
+                            <p>Bald verfügbar</p>
+                        </div>
+                        <div class="payment-status">
+                            <span class="coming-soon-badge">Bald</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="payment-footer">
+                    <div class="total-summary">
+                        <span>Gesamtbetrag: </span>
+                        <strong id="dialogTotal">CHF ${calculateCartTotal().toFixed(2)}</strong>
+                    </div>
+                </div>
+            </div>
+        `;
 
-// Test-Zahlung für Development
-async function simulateTestPayment(cardNumber = STRIPE_TEST_CARDS.success) {
-    console.log('Simuliere Test-Zahlung mit Karte:', cardNumber);
-    
-    // Verschiedene Test-Szenarien
-    switch (cardNumber) {
-        case STRIPE_TEST_CARDS.success:
-            console.log('✅ Test-Zahlung erfolgreich');
-            return { success: true };
-            
-        case STRIPE_TEST_CARDS.decline:
-            console.log('❌ Test-Zahlung abgelehnt');
-            throw new Error('Ihre Karte wurde abgelehnt');
-            
-        case STRIPE_TEST_CARDS.require_authentication:
-            console.log('🔐 Test-Zahlung benötigt Authentifizierung');
-            return { success: true, requires_action: true };
-            
-        case STRIPE_TEST_CARDS.insufficient_funds:
-            console.log('💳 Test-Zahlung: Unzureichende Deckung');
-            throw new Error('Unzureichende Deckung');
-            
-        default:
-            return { success: true };
-    }
+        document.body.appendChild(dialog);
+
+        // Event Listeners für Payment Options
+        dialog.querySelectorAll('.payment-option:not(.coming-soon)').forEach(option => {
+            option.addEventListener('click', () => {
+                const method = option.dataset.method;
+                dialog.remove();
+                resolve(method);
+            });
+        });
+
+        // Close Dialog on Overlay Click
+        dialog.addEventListener('click', (e) => {
+            if (e.target === dialog) {
+                dialog.remove();
+                resolve(null);
+            }
+        });
+    });
 }
 
-// Apple Pay / Google Pay Setup
-function setupDigitalWallets() {
-    const paymentRequest = stripe.paymentRequest({
-        country: 'CH',
-        currency: 'chf',
-        total: {
-            label: 'Pizza Bella',
-            amount: 0, // Wird dynamisch gesetzt
-        },
-        requestPayerName: false,
-        requestPayerEmail: false,
-    });
-
-    const elements = stripe.elements();
-    const prButton = elements.create('paymentRequestButton', {
-        paymentRequest,
-        style: {
-            paymentRequestButton: {
-                type: 'default', // 'default' | 'book' | 'buy' | 'donate'
-                theme: 'dark', // 'dark' | 'light' | 'light-outline'
-                height: '40px',
-            },
-        },
-    });
-
-    // Prüfen ob Apple Pay / Google Pay verfügbar
-    paymentRequest.canMakePayment().then(function(result) {
-        if (result) {
-            prButton.mount('#payment-request-button');
-        } else {
-            document.getElementById('payment-request-button').style.display = 'none';
-        }
-    });
-
-    return { paymentRequest, prButton };
+// CART TOTAL BERECHNEN
+function calculateCartTotal() {
+    return Object.entries(cart).reduce((sum, [productId, quantity]) => {
+        return sum + (availableProducts[productId].price * quantity);
+    }, 0);
 }
 
-// Beispiel Server-Code (Node.js/Express - nur Referenz)
-const serverExample = `
-// server.js (Beispiel für Backend)
-const express = require('express');
-const stripe = require('stripe')('sk_test_DEIN_SECRET_KEY');
-const admin = require('firebase-admin');
-
-const app = express();
-app.use(express.json());
-
-// Payment Intent erstellen
-app.post('/create-payment-intent', async (req, res) => {
+// STRIPE SUCCESS HANDLER (für success.html)
+async function handleStripeSuccess(sessionId, orderId) {
     try {
-        const { amount, currency, metadata } = req.body;
+        // Temporäre Bestellung laden
+        const tempOrderRef = await database.ref(`temp-orders/${orderId}`).once('value');
+        const orderData = tempOrderRef.val();
         
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount,
-            currency,
-            metadata,
-            automatic_payment_methods: {
-                enabled: true,
-            },
-        });
+        if (!orderData) {
+            throw new Error('Bestellung nicht gefunden');
+        }
 
-        res.send({
-            client_secret: paymentIntent.client_secret
-        });
+        // Payment Status update
+        orderData.paymentStatus = 'completed';
+        orderData.stripeSessionId = sessionId;
+        orderData.confirmedAt = new Date().toISOString();
+
+        // Zu aktiven Bestellungen verschieben
+        const orderRef = await database.ref('orders').push(orderData);
+        
+        // Temporäre Bestellung löschen
+        await database.ref(`temp-orders/${orderId}`).remove();
+
+        console.log('Stripe Payment erfolgreich verarbeitet:', orderId);
+        return orderRef.key;
+
     } catch (error) {
-        res.status(400).send({ error: error.message });
+        console.error('Fehler beim Verarbeiten der Stripe-Zahlung:', error);
+        throw error;
     }
-});
+}
 
-// Stripe Webhook
-app.post('/webhook', express.raw({type: 'application/json'}), (req, res) => {
-    const sig = req.headers['stripe-signature'];
-    let event;
+// URL PARAMETER HELPER
+function getUrlParameter(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
 
-    try {
-        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-    } catch (err) {
-        console.log('Webhook signature verification failed.', err.message);
-        return res.status(400).send('Webhook Error: ' + err.message);
+// PAYMENT STATUS CHECK (für success.html)
+async function checkPaymentStatus() {
+    const sessionId = getUrlParameter('session_id');
+    const orderId = getUrlParameter('order_id');
+    const paymentStatus = getUrlParameter('payment');
+
+    if (sessionId && orderId) {
+        try {
+            const finalOrderId = await handleStripeSuccess(sessionId, orderId);
+            return { success: true, orderId: finalOrderId, paymentMethod: 'card' };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    } else if (paymentStatus === 'success' && orderId) {
+        // Barzahlung oder andere Methoden
+        return { success: true, orderId: orderId, paymentMethod: 'cash' };
+    } else if (paymentStatus === 'cancelled') {
+        return { success: false, cancelled: true };
     }
 
-    handleStripeWebhook(event);
-    res.json({received: true});
-});
+    return null;
+}
 
-app.listen(3000, () => console.log('Server läuft auf Port 3000'));
+// CSS FÜR PAYMENT DIALOG (zu css/styles.css hinzufügen)
+const paymentDialogCSS = `
+.payment-dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease;
+}
+
+.payment-dialog {
+    background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+    border-radius: 20px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.payment-header {
+    padding: 25px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.payment-header h3 {
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.6);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-btn:hover {
+    color: #ffffff;
+}
+
+.payment-options {
+    padding: 25px;
+}
+
+.payment-option {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    margin-bottom: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255,255,255,0.02);
+}
+
+.payment-option:hover {
+    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(59, 130, 246, 0.05);
+    transform: translateY(-2px);
+}
+
+.payment-option.coming-soon {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.payment-option.coming-soon:hover {
+    transform: none;
+    border-color: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.02);
+}
+
+.payment-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-right: 20px;
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.payment-option[data-method="cash"] .payment-icon {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.payment-option[data-method="twint"] .payment-icon {
+    background: rgba(168, 85, 247, 0.1);
+    color: #a855f7;
+}
+
+.payment-details {
+    flex: 1;
+}
+
+.payment-details h4 {
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.payment-details p {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.9rem;
+}
+
+.card-brands {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 1.2rem;
+}
+
+.card-brands i {
+    color: rgba(255,255,255,0.6);
+}
+
+.payment-status {
+    color: #22c55e;
+    font-size: 1.2rem;
+}
+
+.coming-soon-badge {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.payment-footer {
+    padding: 25px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.02);
+}
+
+.total-summary {
+    text-align: center;
+    font-size: 1.2rem;
+    color: rgba(255,255,255,0.8);
+}
+
+.total-summary strong {
+    color: #22c55e;
+    font-size: 1.4rem;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
 `;
 
-console.log('Stripe Integration bereit für erweiterte Funktionen');
-console.log('Server-Beispiel:', serverExample);
+// CSS zu Stylesheet hinzufügen
+function addPaymentDialogStyles() {
+    const style = document.createElement('style');
+    style.textContent = paymentDialogCSS;
+    document.head.appendChild(style);
+}
+
+// Auto-Initialize Payment Styles
+document.addEventListener('DOMContentLoaded', () => {
+    addPaymentDialogStyles();
+});
+
+// EXPORTS (wenn als Modul verwendet)
+// export { createStripeCheckoutSession, placeOrderWithPayment, handleStripeSuccess, checkPaymentStatus };

@@ -68,6 +68,444 @@
     </style>
 </head>
 <body>
+    <!-- Admin Navigation Component -->
+<!-- Füge diesen Code am Anfang des <body> Tags in ALLEN Admin-Seiten ein: -->
+<!-- admin-dashboard.html, admin-orders.html, admin-products.html -->
+
+<nav class="admin-nav">
+    <div class="nav-container">
+        <div class="nav-brand">
+            <span class="logo">🍕</span>
+            <h2>D'amico Admin</h2>
+        </div>
+        
+        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+        
+        <div class="nav-links" id="navLinks">
+            <a href="admin-dashboard.html" class="nav-link" id="nav-dashboard">
+                <span class="nav-icon">📊</span>
+                Dashboard
+            </a>
+            <a href="admin-orders.html" class="nav-link" id="nav-orders">
+                <span class="nav-icon">📋</span>
+                Bestellungen
+                <span class="notification-badge" id="orderCount" style="display: none;">0</span>
+            </a>
+            <a href="admin-products.html" class="nav-link" id="nav-products">
+                <span class="nav-icon">🍽️</span>
+                Produkte
+            </a>
+            <a href="#" class="nav-link" onclick="showSettings()">
+                <span class="nav-icon">⚙️</span>
+                Einstellungen
+            </a>
+        </div>
+        
+        <div class="user-menu">
+            <div class="user-info" onclick="toggleUserMenu()">
+                <div class="user-avatar">A</div>
+                <span class="user-name">Admin</span>
+                <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="user-dropdown" id="userDropdown">
+                <a href="#" onclick="showProfile()">
+                    <span class="nav-icon">👤</span> Mein Profil
+                </a>
+                <a href="#" onclick="showStats()">
+                    <span class="nav-icon">📈</span> Statistiken
+                </a>
+                <hr>
+                <a href="#" onclick="logout()" class="logout-link">
+                    <span class="nav-icon">🚪</span> Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Quick Stats Bar (Optional - unter der Navigation) -->
+<div class="quick-stats-bar">
+    <div class="stat-item">
+        <span class="stat-label">Wartezeit:</span>
+        <span class="stat-value" id="currentWaitTime">15 Min</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-label">Status:</span>
+        <span class="stat-value status-open" id="restaurantStatus">Geöffnet</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-label">Heute:</span>
+        <span class="stat-value">CHF <span id="todayRevenue">0.00</span></span>
+    </div>
+</div>
+
+<script>
+// Navigation Scripts
+(function() {
+    // Aktive Seite markieren
+    const currentPage = window.location.pathname.split('/').pop();
+    const navMap = {
+        'admin-dashboard.html': 'nav-dashboard',
+        'admin-orders.html': 'nav-orders',
+        'admin-products.html': 'nav-products'
+    };
+    
+    const activeNav = document.getElementById(navMap[currentPage]);
+    if (activeNav) {
+        activeNav.classList.add('active');
+    }
+    
+    // Ungelesene Bestellungen zählen
+    if (typeof firebase !== 'undefined' && firebase.database) {
+        firebase.database().ref('orders').on('value', (snapshot) => {
+            const orders = snapshot.val() || {};
+            const newOrders = Object.values(orders).filter(order => order.status === 'new').length;
+            const badge = document.getElementById('orderCount');
+            if (newOrders > 0) {
+                badge.textContent = newOrders;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+        
+        // Restaurant Status
+        firebase.database().ref('settings/restaurantOpen').on('value', (snapshot) => {
+            const isOpen = snapshot.val();
+            const statusEl = document.getElementById('restaurantStatus');
+            if (statusEl) {
+                statusEl.textContent = isOpen ? 'Geöffnet' : 'Geschlossen';
+                statusEl.className = isOpen ? 'stat-value status-open' : 'stat-value status-closed';
+            }
+        });
+        
+        // Wartezeit
+        firebase.database().ref('settings/waitTime').on('value', (snapshot) => {
+            const waitTime = snapshot.val() || 15;
+            const waitTimeEl = document.getElementById('currentWaitTime');
+            if (waitTimeEl) {
+                waitTimeEl.textContent = waitTime + ' Min';
+            }
+        });
+        
+        // Tagesumsatz
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        firebase.database().ref('orders')
+            .orderByChild('timestamp')
+            .startAt(today.getTime())
+            .on('value', (snapshot) => {
+                const orders = snapshot.val() || {};
+                const revenue = Object.values(orders)
+                    .filter(order => order.status === 'completed' || order.status === 'ready')
+                    .reduce((sum, order) => sum + (order.total || 0), 0);
+                const revenueEl = document.getElementById('todayRevenue');
+                if (revenueEl) {
+                    revenueEl.textContent = revenue.toFixed(2);
+                }
+            });
+    }
+})();
+
+// Mobile Menu Toggle
+function toggleMobileMenu() {
+    const navLinks = document.getElementById('navLinks');
+    navLinks.classList.toggle('show');
+}
+
+// User Menu Toggle
+function toggleUserMenu() {
+    const dropdown = document.getElementById('userDropdown');
+    dropdown.classList.toggle('show');
+    
+    // Click outside to close
+    document.addEventListener('click', function closeMenu(e) {
+        if (!e.target.closest('.user-menu')) {
+            dropdown.classList.remove('show');
+            document.removeEventListener('click', closeMenu);
+        }
+    });
+}
+
+// Navigation Functions
+function showSettings() {
+    // Placeholder - Implementiere Settings Modal
+    alert('Einstellungen werden in Phase 2 implementiert');
+}
+
+function showProfile() {
+    // Placeholder
+    alert('Profil-Verwaltung kommt bald');
+}
+
+function showStats() {
+    window.location.href = 'admin-dashboard.html#statistics';
+}
+
+function logout() {
+    if (confirm('Wirklich ausloggen?')) {
+        firebase.auth().signOut().then(() => {
+            window.location.href = 'admin.html';
+        });
+    }
+}
+
+// Keyboard Shortcuts
+document.addEventListener('keydown', (e) => {
+    if (e.altKey) {
+        switch(e.key) {
+            case '1':
+                window.location.href = 'admin-dashboard.html';
+                break;
+            case '2':
+                window.location.href = 'admin-orders.html';
+                break;
+            case '3':
+                window.location.href = 'admin-products.html';
+                break;
+        }
+    }
+});
+</script>
+
+<!-- 
+CSS ERGÄNZUNGEN für styles.css:
+Füge diese Styles zu deiner css/styles.css Datei hinzu, falls sie fehlen:
+-->
+<style>
+/* Nur die Styles, die wahrscheinlich nicht in styles.css sind */
+.admin-nav {
+    background: var(--primary-color, #2c3e50);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-brand h2 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+.nav-links {
+    display: flex;
+    gap: 0;
+    align-items: center;
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    padding: 20px 25px;
+    transition: background 0.3s;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-link:hover {
+    background: rgba(0,0,0,0.1);
+}
+
+.nav-link.active {
+    background: var(--accent-color, #e74c3c);
+}
+
+.nav-icon {
+    font-size: 1.2em;
+}
+
+.notification-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--danger-color, #e74c3c);
+    color: white;
+    border-radius: 50%;
+    min-width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 0 4px;
+}
+
+.user-menu {
+    position: relative;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 8px 15px;
+    border-radius: 25px;
+    background: rgba(255,255,255,0.1);
+    transition: background 0.3s;
+}
+
+.user-info:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.user-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: var(--accent-color, #e74c3c);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--card-bg, white);
+    border-radius: var(--border-radius, 8px);
+    box-shadow: var(--box-shadow, 0 4px 20px rgba(0,0,0,0.1));
+    min-width: 200px;
+    display: none;
+    margin-top: 10px;
+}
+
+.user-dropdown.show {
+    display: block;
+}
+
+.user-dropdown a {
+    display: block;
+    padding: 12px 20px;
+    color: var(--text-color, #333);
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.user-dropdown a:hover {
+    background: var(--hover-bg, #f5f5f5);
+}
+
+.user-dropdown hr {
+    margin: 0;
+    border: none;
+    border-top: 1px solid var(--border-color, #eee);
+}
+
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 10px;
+}
+
+/* Quick Stats Bar */
+.quick-stats-bar {
+    background: var(--bg-color, #f8f9fa);
+    border-bottom: 1px solid var(--border-color, #dee2e6);
+    padding: 10px 0;
+}
+
+.quick-stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 15px 20px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stat-label {
+    color: var(--text-muted, #6c757d);
+    font-size: 0.9em;
+}
+
+.stat-value {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: var(--text-color, #333);
+}
+
+.status-open {
+    color: var(--success-color, #28a745);
+}
+
+.status-closed {
+    color: var(--danger-color, #dc3545);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .nav-container {
+        flex-wrap: wrap;
+    }
+    
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    .nav-links {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        gap: 0;
+        background: rgba(0,0,0,0.1);
+        margin: 0 -20px;
+        padding: 10px 0;
+    }
+    
+    .nav-links.show {
+        display: flex;
+    }
+    
+    .nav-link {
+        width: 100%;
+        padding: 15px 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .user-menu {
+        margin-left: auto;
+        margin-right: 10px;
+    }
+    
+    .quick-stats-bar {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+    }
+}
+</style>
     <!-- ADMIN HEADER -->
     <div class="admin-header">
         <div class="header-content">

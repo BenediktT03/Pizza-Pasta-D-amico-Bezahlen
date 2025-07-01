@@ -1047,3 +1047,139 @@
         min-width: 80px;
     }
 }
+
+/* Füge diese Styles zu deiner css/styles.css hinzu */
+/* Nur wenn sie noch nicht vorhanden sind */
+
+/* Admin Navigation - Nutzt bestehende CSS Variablen */
+.admin-nav {
+    background: var(--primary-color, #2c3e50);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-container {
+    max-width: var(--max-width, 1200px);
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 var(--spacing, 20px);
+}
+
+.nav-links {
+    display: flex;
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    padding: var(--spacing, 20px);
+    transition: var(--transition, all 0.3s ease);
+    position: relative;
+}
+
+.nav-link:hover {
+    background: rgba(0,0,0,0.1);
+}
+
+.nav-link.active {
+    background: var(--accent-color, #e74c3c);
+}
+
+/* Notification Badge */
+.notification-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--danger-color, #e74c3c);
+    color: white;
+    border-radius: 50%;
+    min-width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* User Menu */
+.user-menu {
+    position: relative;
+}
+
+.user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--card-bg, white);
+    border-radius: var(--border-radius, 8px);
+    box-shadow: var(--box-shadow, 0 2px 10px rgba(0,0,0,0.1));
+    min-width: 200px;
+    display: none;
+    margin-top: 10px;
+}
+
+.user-dropdown.show {
+    display: block;
+}
+
+/* Quick Stats Bar */
+.quick-stats-bar {
+    background: var(--bg-color, #f8f9fa);
+    border-bottom: 1px solid var(--border-color, #dee2e6);
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    padding: var(--spacing-sm, 15px);
+}
+
+.stat-value {
+    font-weight: var(--font-weight-bold, 600);
+    color: var(--text-color, #333);
+}
+
+.status-open {
+    color: var(--success-color, #28a745);
+}
+
+.status-closed {
+    color: var(--danger-color, #dc3545);
+}
+
+/* Mobile Menu */
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        background: var(--primary-color, #2c3e50);
+    }
+    
+    .nav-links.show {
+        display: flex;
+    }
+    
+    .quick-stats-bar {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

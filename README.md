@@ -1,136 +1,95 @@
-Pizza&Pasta D'amico – Foodtruck-Bestellsystem
-Projektbeschreibung
-Dieses Projekt ist ein webbasiertes Bestellsystem für Foodtrucks wie „Pizza&Pasta D’amico“. Kunden können mobil per QR-Code einfach und schnell Pizza, Pasta und weitere Speisen bestellen und direkt bezahlen. Betreiber verwalten alle Bestellungen zentral über ein Admin-Panel, aktualisieren den Status und optimieren Abläufe.
+Pizza-Pasta D’amico – Foodtruck Bestellsystem
+Übersicht
+Dieses Projekt ist ein modernes, mobiles Bestellsystem speziell für Foodtrucks, das Kunden ermöglicht, per QR-Code direkt über ihr Handy Pizza und Pasta auszuwählen, zu bezahlen und Bestellungen einfach abzuwickeln. Gleichzeitig bietet es dem Foodtruck-Betreiber eine übersichtliche, effiziente Verwaltung aller Bestellungen mit Echtzeit-Updates, optimierter Planung und umfangreichen Admin-Funktionen.
 
-Das System ist modular und kann Schritt für Schritt um neue Funktionen erweitert werden.
-
-Inhaltsverzeichnis
-Technische Basis
-
-Kernfunktionen (MVP)
-
-Erweiterte Funktionen
-
-Betriebsoptimierung für Betreiber
-
-Sicherheit & Datenschutz
-
-UX & Design Extras
-
-Marketing & Kundenbindung
-
-Installation & Einrichtung
-
-Mitwirken & Weiterentwicklung
-
-Lizenz
-
-Technische Basis
-Frontend: HTML, CSS, JavaScript – responsives Design für Desktop und Mobilgeräte
-
-Backend: Firebase Realtime Database für Daten, Firebase Authentication für Admin-Login
-
-Zahlungsintegration: Schweizer Zahlungsmethoden (Twint, Kredit-/Debitkarten, Apple Pay, Google Pay, PayPal, PostFinance)
-
-Hosting: Webserver oder Firebase Hosting
-
-Architektur: Single Page Application (SPA)
+Das System ist modular aufgebaut und kann Schritt für Schritt erweitert werden.
 
 Kernfunktionen (MVP – Must-Have)
-QR-Code Bestellung:
-Kunden scannen QR-Code am Foodtruck oder Tisch und greifen auf das Menü zu.
+QR-Code Bestellung: Kunden scannen am Foodtruck oder Flyer einen QR-Code und gelangen zur mobilen Bestellseite.
 
-Produktwahl:
-Auswahl von Pizza, Pasta und anderen Gerichten.
+Produktwahl & Anpassungen: Kunden können Pizza, Pasta und weitere Gerichte auswählen und individuell anpassen.
 
-Sofortige Bezahlung:
-Integration aller gängigen Schweizer Zahlungsmethoden.
+Sofortige Bezahlung: Integration aller gängigen Zahlungsmethoden in der Schweiz:
 
-Bestellübersicht für Betreiber:
-Echtzeit-Anzeige aller Bestellungen im Admin-Panel mit Statusanzeigen.
+Twint
 
-Bestellstatus:
-Statusänderungen wie „In Zubereitung“ oder „Fertig zur Abholung“ für Kunden sichtbar.
+Kredit- und Debitkarten (Visa, Mastercard)
 
-Mehrsprachigkeit:
-Website und Bestellprozess mindestens in Deutsch, Französisch, Italienisch, Spanisch und Englisch.
+Apple Pay / Google Pay
 
-PDF-Rechnung:
-Automatische Generierung und Versand mehrsprachiger Rechnungen auf Wunsch.
+PayPal
 
-Admin Analytics:
-Umsatz, Bestellungen, Top-Produkte mit Exportfunktion (CSV/PDF).
+PostFinance
+
+Bestellübersicht Betreiber: Echtzeit-Übersicht aller eingehenden Bestellungen im Web- oder mobilen Admin-Panel.
+
+Bestellstatus: Status „Bestellung angenommen“, „In Zubereitung“, „Fertig zur Abholung“ mit Sichtbarkeit für Kunden.
+
+Mehrsprachigkeit: Website und Bestellprozess in Deutsch, Französisch, Italienisch, Spanisch und Englisch.
+
+Automatische Wartezeit-Berechnung: Basierend auf aktuellen Bestellungen und Anzahl der Produkte.
+
+PDF-Rechnung: Kunden können auf Wunsch eine mehrsprachige Rechnung als PDF erhalten.
+
+Admin Analytics: Übersicht und Export von Umsätzen, Bestellungen, beliebtesten Produkten (CSV/PDF).
+
+Dynamische Sortierung der Bestellungen nach Fertigstellungszeit:
+Bestellungen werden nicht nur nach Eingangszeit, sondern nach der berechneten Fertigstellungszeit sortiert. Das heißt, wenn Kunden eine Vorbestellzeit angeben (z. B. 13:00 Uhr), wird die Zubereitungsdauer mit einberechnet, sodass im Adminbereich die Bestellungen nach der Reihenfolge angezeigt werden, in der sie fertig sein müssen. So kann die Zubereitung optimal geplant und umgesetzt werden.
 
 Erweiterte Funktionen (Nice-to-Have)
-Bewertungssystem:
-Kunden können Rezensionen und Sterne auf Google abgeben (Verlinkung zum Foodtruck-Profil).
+Bewertungssystem: Kunden können nach Abschluss Rezensionen und Sterne vergeben.
 
-Vorbestellungen:
-Auswahl eines Abholzeitfensters (z.B. 30 Minuten später).
+Vorbestellung: Kunden können eine Abholzeit wählen (z. B. 30 Minuten später bestellen).
 
-Foodtruck-Kalender:
-Standort & Öffnungszeiten als Kalender mit Google Maps-Verlinkung.
+Foodtruck-Kalender: Standort und Öffnungszeiten als Kalender mit Google Maps-Verlinkung.
 
-Standort-Benachrichtigungen:
-Admin kann Standort manuell eintragen. Nutzer, die den Standort abonnieren, erhalten eine Benachrichtigung, wenn der Foodtruck dort ist.
+Live-Bestellverfolgung: Automatische Updates zum Status der Bestellung für Kunden.
 
-Design-Themes:
-Lightmode, Darkmode und weitere Farbschemata auswählbar.
+Mehrere Design-Themes: Auswahl zwischen Lightmode, Darkmode und weiteren Farbschemata.
 
-Trinkgeld-Option:
-Möglichkeit, beim Bezahlen Trinkgeld zu geben.
+Trinkgeld-Option: Kunden können beim Bezahlen Trinkgeld geben.
 
-Captcha-Schutz:
-Captcha aktiviert bei mehr als 2 Bestellungen in kurzer Zeit.
+Captcha-Schutz: Aktivierung bei mehr als 2 Bestellungen in kurzer Zeit zum Schutz vor Spam.
 
-Benachrichtigungen:
-Push- und E-Mail-Benachrichtigungen zu Bestellstatus und Standort.
+Benachrichtigungen: Push- und E-Mail-Benachrichtigungen für Kunden (z. B. wenn der Truck am Standort ist, Bestellung fertig).
 
-Betriebsoptimierung für Betreiber
-Küchenmodus:
-Spezielle Ansicht für Teammitglieder mit Sortierung nach Dringlichkeit.
+Newsletter-Integration: Anmeldung für Kunden zur Info über Standorte, Aktionen und Neuigkeiten.
 
-Digitale Küchenanzeige:
-Live-Bestellungen und Statusänderungen per Klick.
+Betriebsoptimierung & Effizienz (Für Foodtruck-Betreiber)
+Küchenmodus: Spezielle Ansicht für das Team mit sortierten und gefilterten Bestellungen nach Dringlichkeit.
 
-Tagesabschlussbericht:
-Automatischer Bericht zu Umsatz, Trinkgeldern, Top-Produkten; exportierbar.
+Digitale Küchenanzeige: Live-Display mit Bestellungen und Statusänderungen per Klick.
 
-Audit-Logs:
-Protokollierung aller Admin-Aktionen.
+Lagerverwaltung: Zutaten- und Material-Tracking mit Warnungen bei niedrigem Bestand.
 
-Offline-Modus:
-Zwischenspeicherung von Bestellungen bei Internetausfall.
+Tagesabschlussbericht: Einnahmen, Bestellanzahl, Trinkgelder und Top-Produkte, exportierbar als CSV/PDF.
 
-Wetterintegration:
-Wettervorhersage und Warnungen für geplante Standorte.
+Audit-Logs: Protokollierung aller Admin-Änderungen für Nachvollziehbarkeit.
 
-Sicherheit & Datenschutz
-IP-Tracking & Rate Limiting:
-Schutz vor Spam und Angriffen.
+Offline-Modus: Zwischenspeicherung von Bestellungen bei Netzausfall, später automatische Übertragung.
 
-Automatischer Captcha:
-Aktivierung bei verdächtigem Verhalten.
+Wetterintegration: Wettervorhersage für geplante Standorte mit Warnungen bei schlechtem Wetter.
 
-DSGVO-Konformität:
-Datenanfragen, Export und Löschung durch Kunden möglich.
+Sicherheit & Anti-Missbrauch
+IP-Tracking & Rate Limiting: Schutz vor Spam und DDoS-Attacken.
 
-Sichere Zahlungsabwicklung:
-Nutzung zertifizierter Payment-Provider.
+Automatische Captcha-Auslösung: Bei ungewöhnlichem Bestellverhalten (z. B. mehr als 2 Bestellungen in kurzer Zeit).
+
+DSGVO-Konformität: Kunden können jederzeit Daten anfordern oder löschen lassen.
 
 UX & Design Extras
-Barrierefreiheit:
-Screenreader-Support, hoher Kontrast, einfache Navigation.
+Darkmode / Lightmode Umschaltung
 
-Animationen & Soundfeedback:
-Visuelle und akustische Hinweise.
+Barrierefreiheit: Screenreader-Unterstützung, Kontrastanpassungen.
 
-Progressive Web App (PWA):
-Installation auf Smartphones, Offline-Funktion, Push-Benachrichtigungen.
+Animationen & Sound-Feedback: Visuelle und akustische Hinweise bei Bestellstatus-Updates.
+
+Progressive Web App (PWA): Installierbare App für Offline-Zugriff und bessere Performance.
 
 Marketing & Kundenbindung
-KI-gestützte Menüvorschläge:
-Personalisierte Empfehlungen basierend auf Bestellhistorie.
+KI-gestützte Menüvorschläge: Empfehlungen basierend auf Verkaufshistorie und aktuellen Trends.
 
-Social-Media-Integration:
-Teilen von Bestellungen und Bewertungen.
+Benachrichtigungen bei Foodtruck-Standort: Kunden können Alerts abonnieren, wenn der Truck in ihrer Nähe ist.
+
+Newsletter und Aktionen: Direkte Kommunikation mit Kunden.
+

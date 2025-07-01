@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizza&Pasta D'amico - Bestellung</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            padding: 15px;
+            color: #ffffff;
+        }
+
+        /* PIZZA LOADING ANIMATION */
+        .pizza-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease;
+        }
+
+        .pizza-loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinning-pizza {
+            font-size: 8rem;
+            animation: spinPizza 2s linear infinite;
+            margin-bottom: 2rem;
+            filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.3));
+        }
+
+        @keyframes spinPizza {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(1.1); }
+            50% { transform: rotate(180deg) scale(1); }
+            75% { transform: rotate(270deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .loading-text {
+            color: #ffffff;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .loading-subtext {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1rem;
+            animation: fadeInOut 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3730a3 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
+            animation: shimmer 8s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+            position: relative;
+            z-index: 2;
+        }
+
+        .location-info {
+            background: rgba(255,255,255,0.1);
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            position: relative;
+            z-index: 2;
+        }
+
+        .status-badges {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 2;
+        }
+
+        .status-badge {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+            padding: 6px 12px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: #ffffff;
+            margin-bottom: 24px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .category-tab {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .category-tab:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .category-tab.active {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        .products-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .product-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .product-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(59, 130, 246, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.1);
+        }
+
+        .product-card.selected {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5);
+        }
+
+        .product-card .checkmark {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .product-card.selected .checkmark {
+            display: flex;
+        }
+
+        .quantity-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            padding: 6px;
+        }
+
+        .product-card.selected .quantity-controls {
+            display: flex;
+        }
+
+        .quantity-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 50%;
+            background: #3b82f6;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .quantity-btn:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+        }
+
+        .quantity-display {
+            color: white;
+            font-weight: 600;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .product-emoji {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .product-details h3 {
+            color: #ffffff;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .product-details p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #22c55e;
+        }
+
+        .product-tags {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .product-tag {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .product-tag.spicy {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        .product-tag.vegetarian {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+
+        .product-tag.popular {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .note-section {
+            margin-bottom: 30px;
+        }
+
+        .note-input {
+            width: 100%;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-family: inherit;
+            color: #ffffff;
+            resize: vertical;
+            min-height: 80px;
+            font-size: 0.95rem;
+        }
+
+        .note-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .note-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .payment-methods {
+            display: grid;
+            gap: 12px;
+        }
+
+        .payment-option {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .payment-option:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+
+        .payment-option.selected {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+        }
+
+        .payment-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: white;
+        }
+
+        .stripe-icon { background: linear-gradient(135deg, #635bff, #5a52ff); }
+        .twint-icon { background: linear-gradient(135deg, #0066cc, #0052a3); }
+        .cash-icon { background: linear-gradient(135deg, #22c55e, #16a34a); }
+        .paypal-icon { background: linear-gradient(135deg, #0070ba, #003087); }
+
+        .payment-details h3 {
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .payment-details p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+        }
+
+        .cart-summary {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 24px;
+            border-radius: 16px;
+            margin: 24px 0;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .cart-item-details {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+        }
+
+        .cart-item-price {
+            color: #22c55e;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .cart-totals {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cart-total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .cart-total-row.final {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0;
+        }
+
+        .delivery-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .delivery-option {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .delivery-option:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .delivery-option.selected {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+        }
+
+        .delivery-option i {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: #3b82f6;
+        }
+
+        .delivery-option h4 {
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .delivery-option p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+        }
+
+        .order-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 24px;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .order-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .order-btn:hover::before {
+            left: 100%;
+        }
+
+        .order-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
+        }
+
+        .order-btn:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .order-btn:disabled::before {
+            display: none;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            margin: 20px 0;
+        }
+
+        .status-emoji {
+            font-size: 4rem;
+            margin-bottom: 24px;
+            opacity: 0.8;
+        }
+
+        .status-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+
+        .status-description {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 32px;
+            line-height: 1.5;
+            font-size: 1rem;
+        }
+
+        .status-button {
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+        }
+
+        .admin-section {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px 20px;
+            border-top: 2px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.02);
+            border-radius: 16px;
+        }
+
+        .admin-button {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border: none;
+            color: #000000;
+            padding: 18px 32px;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: 700;
+            box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .admin-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.5);
+        }
+
+        .admin-subtitle {
+            color: rgba(255,255,255,0.6);
+            margin-top: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            display: none;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
+            z-index: 9999;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            max-width: 300px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 20px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .product-info {
+                gap: 16px;
+            }
+            
+            .product-emoji {
+                width: 56px;
+                height: 56px;
+                font-size: 1.5rem;
+            }
+
+            .delivery-options {
+                grid-template-columns: 1fr;
+            }
+
+            .category-tabs {
+                gap: 8px;
+            }
+
+            .category-tab {
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- PIZZA LOADING SCREEN -->
+    <div class="pizza-loader" id="pizzaLoader">
+        <div class="spinning-pizza">🍕</div>
+        <div class="loading-text">Pizza&Pasta D'amico</div>
+        <div class="loading-subtext">Lade köstliche Speisekarte...</div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🍕 Pizza&Pasta D'amico</h1>
+            <p class="subtitle">Authentische italienische Küche</p>
+            <div class="location-info" id="locationInfo">
+                <i class="fas fa-truck"></i>
+                <span>Foodtruck • Abholung</span>
+            </div>
+            <div class="status-badges">
+                <div class="status-badge" id="statusBadge">
+                    <i class="fas fa-circle"></i> <span id="statusText">Wird geladen...</span>
+                </div>
+                <div class="status-badge" style="background: rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.3); color: #60a5fa;">
+                    <i class="fas fa-clock"></i> <span id="prepTime">15-25 Min</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- KEINE Lieferoptionen für Foodtruck -->
+
+            <!-- Produkte -->
+            <div class="section">
+                <h2>
+                    <div class="section-icon"><i class="fas fa-utensils"></i></div>
+                    Unsere Spezialitäten
+                </h2>
+                
+                <!-- Kategorien werden dynamisch vom Admin erstellt -->
+                <div class="category-tabs" id="categoryTabs">
+                    <!-- Wird dynamisch gefüllt basierend auf verfügbaren Produktkategorien -->
+                </div>
+
+                <div class="products-grid" id="productsGrid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Speisekarte wird geladen...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notizen -->
+            <div class="section note-section" style="display: none;" id="noteSection">
+                <h2>
+                    <div class="section-icon"><i class="fas fa-comment"></i></div>
+                    Besondere Wünsche
+                </h2>
+                <textarea class="note-input" id="orderNote" placeholder="z.B. extra scharf, ohne Zwiebeln, Allergien..."></textarea>
+            </div>
+
+            <!-- Zahlungsart -->
+            <div class="section" style="display: none;" id="paymentSection">
+                <h2>
+                    <div class="section-icon"><i class="fas fa-credit-card"></i></div>
+                    Zahlungsart wählen
+                </h2>
+                <div class="payment-methods">
+                    <div class="payment-option" data-payment="stripe">
+                        <div class="payment-icon stripe-icon">
+                            <i class="fab fa-stripe"></i>
+                        </div>
+                        <div class="payment-details">
+                            <h3>Kreditkarte / Digital</h3>
+                            <p>Visa, Mastercard, Apple Pay, Google Pay</p>
+                        </div>
+                    </div>
+
+                    <div class="payment-option" data-payment="twint">
+                        <div class="payment-icon twint-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="payment-details">
+                            <h3>TWINT</h3>
+                            <p>QR-Code scannen mit TWINT App</p>
+                        </div>
+                    </div>
+
+                    <div class="payment-option selected" data-payment="cash">
+                        <div class="payment-icon cash-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="payment-details">
+                            <h3>Barzahlung</h3>
+                            <p>Bezahlung bei Abholung/Lieferung</p>
+                        </div>
+                    </div>
+
+                    <div class="payment-option" data-payment="paypal">
+                        <div class="payment-icon paypal-icon">
+                            <i class="fab fa-paypal"></i>
+                        </div>
+                        <div class="payment-details">
+                            <h3>PayPal</h3>
+                            <p>Sicher bezahlen mit PayPal</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warenkorb -->
+            <div class="cart-summary" id="cartSummary" style="display: none;">
+                <h3 style="color: #ffffff; margin-bottom: 16px; font-size: 1.2rem;">
+                    <i class="fas fa-shopping-cart"></i> Warenkorb
+                </h3>
+                <div id="cartItems"></div>
+                <div class="cart-totals">
+                    <div class="cart-total-row">
+                        <span>Zwischensumme</span>
+                        <span id="subtotal">CHF 0.00</span>
+                    </div>
+                    <div class="cart-total-row" id="deliveryFeeRow" style="display: none;">
+                        <span>Liefergebühr</span>
+                        <span id="deliveryFee">CHF 0.00</span>
+                    </div>
+                    <div class="cart-total-row final">
+                        <span>Gesamttotal</span>
+                        <span id="totalPrice">CHF 0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="color: rgba(255,255,255,0.8);">Bestellung wird verarbeitet...</p>
+            </div>
+
+            <!-- Bestellen Button -->
+            <button class="order-btn" id="orderBtn" disabled>
+                <i class="fas fa-shopping-cart"></i> Produkt auswählen
+            </button>
+
+            <!-- Pietro Admin -->
+            <div class="admin-section">
+                <button class="admin-button" onclick="goToLogin()">
+                    🛡️ Pietro Admin Login
+                </button>
+                <p class="admin-subtitle">Zur Admin-Anmeldung</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check"></i> Benachrichtigung
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD3OCMvc4Iup58Ao0BiFNuvA0fnJokzYS8",
+            authDomain: "pizzapastadamico.firebaseapp.com",
+            databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pizzapastadamico",
+            storageBucket: "pizzapastadamico.firebasestorage.app",
+            messagingSenderId: "83240541532",
+            appId: "1:83240541532:web:11e3277850bf89a5b8b599",
+            measurementId: "G-6H2J5K88J7"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const stripe = Stripe('pk_test_51Rg6MY4I9wcGYX9JUBunT1Yh6kr776piJvLCk3Ln6ovyk0RGBQ0icKbbEYvOUInOIZGKdbvfsCPLZ14JDoOlrPeV00SJRbRsDo');
+
+        // App State
+        let foodtruckOpen = false;
+        let availableProducts = {};
+        let availableCategories = new Set(['pizza']); // Dynamisch vom Admin erstellt
+        let cart = {};
+        let selectedPayment = 'cash';
+        let selectedDelivery = 'pickup'; // Foodtruck = nur Abholung
+        let currentCategory = 'all';
+
+        // Pizza Loading Animation
+        function hidePizzaLoader() {
+            const loader = document.getElementById('pizzaLoader');
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                }, 500);
+            }, 1500); // 1.5 Sekunden Pizza-Animation
+        }
+
+        // Notification System
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : 'info-circle'}"></i>
+                ${message}
+            `;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // KEINE Geolocation für Foodtruck
+        function setupFoodtruckInfo() {
+            // Foodtruck Info ist statisch
+            console.log('Foodtruck-Modus: Nur Abholung verfügbar');
+        }
+
+        // Kategorien dynamisch erstellen
+        function updateCategoryTabs() {
+            const categoryTabs = document.getElementById('categoryTabs');
+            const categories = Array.from(availableCategories);
+            
+            if (categories.length <= 1) {
+                categoryTabs.style.display = 'none';
+                return;
+            }
+
+            categoryTabs.style.display = 'flex';
+            
+            const categoryEmojis = {
+                'pizza': '🍕',
+                'pasta': '🍝',
+                'drink': '🥤',
+                'dessert': '🍰',
+                'salad': '🥗',
+                'burger': '🍔',
+                'sandwich': '🥪'
+            };
+
+            categoryTabs.innerHTML = `
+                <div class="category-tab active" data-category="all">
+                    <i class="fas fa-th"></i> Alles
+                </div>
+                ${categories.map(cat => `
+                    <div class="category-tab" data-category="${cat}">
+                        ${categoryEmojis[cat] || '🍽️'} ${cat.charAt(0).toUpperCase() + cat.slice(1)}
+                    </div>
+                `).join('')}
+            `;
+
+            // Event Listeners für Kategorien
+            categoryTabs.querySelectorAll('.category-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    categoryTabs.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentCategory = tab.dataset.category;
+                    renderProducts();
+                });
+            });
+        }
+
+        // Status Badge aktualisieren
+        function updateStatusBadge() {
+            const badge = document.getElementById('statusBadge');
+            const text = document.getElementById('statusText');
+            
+            if (foodtruckOpen) {
+                badge.style.background = 'rgba(34, 197, 94, 0.2)';
+                badge.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+                badge.style.color = '#22c55e';
+                text.textContent = 'Geöffnet';
+            } else {
+                badge.style.background = 'rgba(239, 68, 68, 0.2)';
+                badge.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                badge.style.color = '#ef4444';
+                text.textContent = 'Geschlossen';
+            }
+        }
+
+        // App initialisieren
+        async function initApp() {
+            setupFoodtruckInfo();
+            
+            try {
+                // Foodtruck Status prüfen
+                const statusSnapshot = await database.ref('settings/foodtruckOpen').once('value');
+                foodtruckOpen = statusSnapshot.val() || false;
+                updateStatusBadge();
+
+                if (!foodtruckOpen) {
+                    hidePizzaLoader();
+                    showClosedMessage();
+                    return;
+                }
+
+                // Verfügbare Produkte laden
+                const productsSnapshot = await database.ref('products').once('value');
+                const allProducts = productsSnapshot.val() || {};
+                
+                availableProducts = Object.fromEntries(
+                    Object.entries(allProducts).filter(([id, product]) => product.available)
+                );
+
+                // Kategorien aus Produkten extrahieren
+                availableCategories = new Set();
+                Object.values(availableProducts).forEach(product => {
+                    if (product.category) {
+                        availableCategories.add(product.category);
+                    }
+                });
+
+                if (Object.keys(availableProducts).length === 0) {
+                    hidePizzaLoader();
+                    showNoProductsMessage();
+                    return;
+                }
+
+                // UI aufbauen
+                updateCategoryTabs();
+                renderProducts();
+                setupEventListeners();
+                hidePizzaLoader();
+
+                // Realtime Updates
+                database.ref('settings/foodtruckOpen').on('value', (snapshot) => {
+                    const isOpen = snapshot.val() || false;
+                    if (!isOpen && foodtruckOpen) {
+                        location.reload();
+                    }
+                    foodtruckOpen = isOpen;
+                    updateStatusBadge();
+                });
+
+                // Produkte live updates
+                database.ref('products').on('value', (snapshot) => {
+                    const newProducts = snapshot.val() || {};
+                    const newAvailableProducts = Object.fromEntries(
+                        Object.entries(newProducts).filter(([id, product]) => product.available)
+                    );
+
+                    // Kategorien neu berechnen
+                    const newCategories = new Set();
+                    Object.values(newAvailableProducts).forEach(product => {
+                        if (product.category) {
+                            newCategories.add(product.category);
+                        }
+                    });
+
+                    // Nur bei Änderungen neu rendern
+                    if (JSON.stringify(availableProducts) !== JSON.stringify(newAvailableProducts)) {
+                        availableProducts = newAvailableProducts;
+                        availableCategories = newCategories;
+                        updateCategoryTabs();
+                        renderProducts();
+                        
+                        showNotification('Speisekarte wurde aktualisiert', 'info');
+                    }
+                });
+
+            } catch (error) {
+                console.error('Fehler beim Laden:', error);
+                hidePizzaLoader();
+                showErrorMessage();
+            }
+        }
+
+        // Event Listeners setup (ohne Lieferoptionen)
+        function setupEventListeners() {
+            // Zahlungsoptionen
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+                    option.classList.add('selected');
+                    selectedPayment = option.dataset.payment;
+                });
+            });
+        }
+
+        // Produkte rendern
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            let filteredProducts = availableProducts;
+
+            if (currentCategory !== 'all') {
+                filteredProducts = Object.fromEntries(
+                    Object.entries(availableProducts).filter(([id, product]) => product.category === currentCategory)
+                );
+            }
+
+            const productEntries = Object.entries(filteredProducts);
+
+            if (productEntries.length === 0) {
+                grid.innerHTML = `
+                    <div class="status-message">
+                        <div class="status-emoji">🔍</div>
+                        <h2 class="status-title">Keine Produkte in dieser Kategorie</h2>
+                        <p class="status-description">Probieren Sie eine andere Kategorie.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const getEmoji = (category) => {
+                switch(category) {
+                    case 'pizza': return '🍕';
+                    case 'pasta': return '🍝';
+                    case 'drink': return '🥤';
+                    case 'dessert': return '🍰';
+                    default: return '🍽️';
+                }
+            };
+
+            const getTags = (product) => {
+                let tags = [];
+                if (product.spicy) tags.push('<span class="product-tag spicy">🌶️ Scharf</span>');
+                if (product.vegetarian) tags.push('<span class="product-tag vegetarian">🌱 Vegetarisch</span>');
+                if (product.popular) tags.push('<span class="product-tag popular">⭐ Beliebt</span>');
+                if (product.new) tags.push('<span class="product-tag">🆕 Neu</span>');
+                return tags.join('');
+            };
+
+            grid.innerHTML = productEntries.map(([id, product]) => `
+                <div class="product-card ${cart[id] ? 'selected' : ''}" data-product="${id}">
+                    <div class="checkmark"><i class="fas fa-check"></i></div>
+                    <div class="quantity-controls">
+                        <button class="quantity-btn" onclick="updateQuantity('${id}', -1)">-</button>
+                        <span class="quantity-display">${cart[id] || 0}</span>
+                        <button class="quantity-btn" onclick="updateQuantity('${id}', 1)">+</button>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-emoji">${getEmoji(product.category)}</div>
+                        <div class="product-details">
+                            <h3>${product.name}</h3>
+                            <p>${product.description}</p>
+                            <div class="product-price">CHF ${product.price.toFixed(2)}</div>
+                            <div class="product-tags">${getTags(product)}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Click Handler für Produkte
+            document.querySelectorAll('.product-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (e.target.closest('.quantity-controls')) return;
+                    
+                    const productId = card.dataset.product;
+                    if (cart[productId]) {
+                        updateQuantity(productId, 1);
+                    } else {
+                        updateQuantity(productId, 1);
+                    }
+                });
+            });
+
+            // Sections anzeigen
+            document.getElementById('noteSection').style.display = 'block';
+            document.getElementById('paymentSection').style.display = 'block';
+        }
+
+        // Quantity Management
+        function updateQuantity(productId, change) {
+            if (!cart[productId]) cart[productId] = 0;
+            cart[productId] += change;
+            
+            if (cart[productId] <= 0) {
+                delete cart[productId];
+            }
+
+            // UI Update
+            const card = document.querySelector(`[data-product="${productId}"]`);
+            if (cart[productId]) {
+                card.classList.add('selected');
+                const quantityDisplay = card.querySelector('.quantity-display');
+                if (quantityDisplay) {
+                    quantityDisplay.textContent = cart[productId];
+                }
+            } else {
+                card.classList.remove('selected');
+            }
+
+            updateCart();
+            updateOrderButton();
+        }
+
+        // Warenkorb aktualisieren (ohne Liefergebühr)
+        function updateCart() {
+            const cartSummary = document.getElementById('cartSummary');
+            const cartItems = document.getElementById('cartItems');
+            const cartEntries = Object.entries(cart);
+
+            if (cartEntries.length === 0) {
+                cartSummary.style.display = 'none';
+                return;
+            }
+
+            cartSummary.style.display = 'block';
+
+            let subtotal = 0;
+            cartItems.innerHTML = cartEntries.map(([productId, quantity]) => {
+                const product = availableProducts[productId];
+                const itemTotal = product.price * quantity;
+                subtotal += itemTotal;
+
+                return `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${product.name}</div>
+                            <div class="cart-item-details">${quantity}x CHF ${product.price.toFixed(2)}</div>
+                        </div>
+                        <div class="cart-item-price">CHF ${itemTotal.toFixed(2)}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Totals berechnen (keine Liefergebühr bei Foodtruck)
+            const total = subtotal;
+
+            document.getElementById('subtotal').textContent = `CHF ${subtotal.toFixed(2)}`;
+            document.getElementById('totalPrice').textContent = `CHF ${total.toFixed(2)}`;
+
+            // Liefergebühr immer versteckt bei Foodtruck
+            document.getElementById('deliveryFeeRow').style.display = 'none';
+        }
+
+        // Order Button aktualisieren
+        function updateOrderButton() {
+            const btn = document.getElementById('orderBtn');
+            const cartSize = Object.keys(cart).length;
+            
+            if (cartSize === 0) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-shopping-cart"></i> Produkt auswählen';
+            } else {
+                btn.disabled = false;
+                const totalItems = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+                btn.innerHTML = `<i class="fas fa-shopping-cart"></i> Bestellen (${totalItems} ${totalItems === 1 ? 'Artikel' : 'Artikel'})`;
+            }
+        }
+
+        // Bestellung abschicken
+        document.getElementById('orderBtn').addEventListener('click', async () => {
+            if (Object.keys(cart).length === 0) return;
+
+            const loading = document.getElementById('loading');
+            const btn = document.getElementById('orderBtn');
+            
+            loading.style.display = 'block';
+            btn.disabled = true;
+
+            try {
+                // Bestelldaten zusammenstellen (Foodtruck = nur Abholung)
+                const orderItems = Object.entries(cart).map(([productId, quantity]) => ({
+                    id: productId,
+                    name: availableProducts[productId].name,
+                    price: availableProducts[productId].price,
+                    quantity: quantity,
+                    total: availableProducts[productId].price * quantity
+                }));
+
+                const subtotal = orderItems.reduce((sum, item) => sum + item.total, 0);
+                const total = subtotal; // Keine Liefergebühr
+
+                const orderData = {
+                    id: Date.now().toString(),
+                    items: orderItems,
+                    paymentMethod: selectedPayment,
+                    deliveryType: 'pickup', // Foodtruck = immer Abholung
+                    note: document.getElementById('orderNote').value.trim(),
+                    timestamp: new Date().toISOString(),
+                    status: 'neu',
+                    subtotal: subtotal,
+                    deliveryFee: 0, // Keine Liefergebühr
+                    total: total
+                };
+
+                if (selectedPayment === 'stripe') {
+                    await processStripePayment(orderData);
+                } else {
+                    await saveOrder(orderData);
+                }
+
+            } catch (error) {
+                console.error('Fehler bei der Bestellung:', error);
+                showNotification('Fehler bei der Bestellung. Bitte versuchen Sie es erneut.', 'error');
+            } finally {
+                loading.style.display = 'none';
+                btn.disabled = false;
+            }
+        });
+
+        // Stripe Payment (vereinfacht)
+        async function processStripePayment(orderData) {
+            // Für Demo: direkt speichern
+            setTimeout(async () => {
+                await saveOrder(orderData);
+            }, 2000);
+        }
+
+        // Bestellung speichern
+        async function saveOrder(orderData) {
+            await database.ref('orders').push(orderData);
+            
+            // Erfolgs-Benachrichtigung
+            const itemCount = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+            showNotification(`✅ Bestellung eingegangen! ${itemCount} ${itemCount === 1 ? 'Artikel' : 'Artikel'} für CHF ${orderData.total.toFixed(2)}`, 'success');
+            
+            // Warenkorb leeren
+            cart = {};
+            updateCart();
+            updateOrderButton();
+            
+            // Produkte-UI zurücksetzen
+            document.querySelectorAll('.product-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Auto-scroll nach oben
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Status Messages
+        function showClosedMessage() {
+            document.getElementById('productsGrid').innerHTML = `
+                <div class="status-message">
+                    <div class="status-emoji">🕒</div>
+                    <h2 class="status-title">Momentan geschlossen</h2>
+                    <p class="status-description">Wir sind gerade nicht verfügbar. Pietro kann über den Admin-Button den Foodtruck öffnen.</p>
+                    <button class="status-button" onclick="location.reload()">
+                        <i class="fas fa-sync"></i> Aktualisieren
+                    </button>
+                </div>
+            `;
+        }
+
+        function showNoProductsMessage() {
+            document.getElementById('productsGrid').innerHTML = `
+                <div class="status-message">
+                    <div class="status-emoji">🍕</div>
+                    <h2 class="status-title">Keine Produkte verfügbar</h2>
+                    <p class="status-description">Momentan sind keine Gerichte verfügbar. Pietro kann über den Admin-Button neue Produkte hinzufügen.</p>
+                    <button class="status-button" onclick="location.reload()">
+                        <i class="fas fa-sync"></i> Aktualisieren
+                    </button>
+                </div>
+            `;
+        }
+
+        function showErrorMessage() {
+            document.getElementById('productsGrid').innerHTML = `
+                <div class="status-message">
+                    <div class="status-emoji">⚠️</div>
+                    <h2 class="status-title">Verbindungsfehler</h2>
+                    <p class="status-description">Es gab ein Problem beim Laden. Bitte versuchen Sie es erneut.</p>
+                    <button class="status-button" onclick="location.reload()">
+                        <i class="fas fa-sync"></i> Erneut versuchen
+                    </button>
+                </div>
+            `;
+        }
+
+        // Pietro Admin
+        function goToLogin() {
+            const timestamp = Date.now();
+            window.location.href = `login.html?v=${timestamp}`;
+        }
+
+        // App starten
+        initApp();
+        updateOrderButton();
+    </script>
+</body>
+</html>

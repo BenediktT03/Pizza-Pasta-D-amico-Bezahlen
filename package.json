@@ -1,0 +1,30 @@
+{
+  "name": "pizza-restaurant-app",
+  "version": "1.0.0",
+  "description": "Pizza Bestellsystem mit Firebase und Stripe",
+  "main": "index.js",
+  "scripts": {
+    "start": "firebase serve",
+    "build": "echo 'No build process needed for static files'",
+    "deploy": "firebase deploy",
+    "logs": "firebase functions:log"
+  },
+  "keywords": [
+    "pizza",
+    "restaurant",
+    "firebase",
+    "stripe",
+    "qr-code"
+  ],
+  "author": "Pizza Bella",
+  "license": "MIT",
+  "devDependencies": {
+    "firebase-tools": "^12.4.0"
+  },
+  "engines": {
+    "node": "18"
+  },
+  "dependencies": {
+    "firebase": "^11.10.0"
+  }
+}

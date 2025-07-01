@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Pizza&Pasta D'amico</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #ffffff;
+        }
+
+        .login-container {
+            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+            max-width: 400px;
+            width: 100%;
+            backdrop-filter: blur(20px);
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #1e3a8a, #3730a3);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 8px 24px rgba(30, 58, 138, 0.3);
+        }
+
+        h1 {
+            color: #ffffff;
+            margin-bottom: 8px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 40px;
+            text-align: center;
+            font-weight: 400;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 1rem;
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+        }
+
+        .login-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
+        }
+
+        .login-btn:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        .demo-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 24px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .demo-info:hover {
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 16px 0;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .forgot-password {
+            margin-top: 20px;
+            color: #60a5fa;
+            text-decoration: none;
+            font-size: 0.9rem;
+            text-align: center;
+            display: block;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password:hover {
+            color: #93c5fd;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <i class="fas fa-pizza-slice"></i>
+        </div>
+
+        <h1>Admin Bereich</h1>
+        <p class="subtitle">Pizza&Pasta D'amico</p>
+
+        <div class="error-message" id="errorMessage">
+            Ungültige Anmeldedaten
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">E-Mail Adresse</label>
+                <input type="email" id="email" class="form-input" placeholder="admin@damico.ch" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Passwort</label>
+                <input type="password" id="password" class="form-input" placeholder="••••••••" required>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="color: rgba(255,255,255,0.7);">Anmeldung läuft...</p>
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Anmelden
+            </button>
+        </form>
+
+        <a href="#" class="forgot-password" onclick="resetPassword()">
+            Passwort vergessen?
+        </a>
+
+        <div class="demo-info" onclick="fillDemoData()">
+            <strong>Demo-Zugang:</strong><br>
+            E-Mail: admin@damico.ch<br>
+            Passwort: admin123<br>
+            <small style="opacity: 0.7;">Klicken zum automatischen Ausfüllen</small>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase Configuration - DEINE ECHTEN DATEN!
+        const firebaseConfig = {
+            apiKey: "AIzaSyD3OCMvc4Iup58Ao0BiFNuvA0fnJokzYS8",
+            authDomain: "pizzapastadamico.firebaseapp.com",
+            databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pizzapastadamico",
+            storageBucket: "pizzapastadamico.firebasestorage.app",
+            messagingSenderId: "83240541532",
+            appId: "1:83240541532:web:11e3277850bf89a5b8b599",
+            measurementId: "G-6H2J5K88J7"
+        };
+
+        // Firebase initialisieren
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // Auth State Listener
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                window.location.href = 'admin-dashboard.html';
+            }
+        });
+
+        // Login Form Handler - EINFACH UND FUNKTIONIERT
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            const loading = document.getElementById('loading');
+            const loginBtn = document.getElementById('loginBtn');
+
+            errorMessage.style.display = 'none';
+            loading.style.display = 'block';
+            loginBtn.disabled = true;
+
+            try {
+                // Demo Login
+                if (email === 'admin@damico.ch' && password === 'admin123') {
+                    // Foodtruck öffnen und Produkte erstellen
+                    await database.ref('settings/foodtruckOpen').set(true);
+                    await createDefaultProducts();
+                    
+                    // Session setzen für Dashboard
+                    localStorage.setItem('pietroLoggedIn', 'true');
+                    localStorage.setItem('loginTime', Date.now().toString());
+                    
+                    // Cache-Busting für Dashboard
+                    const timestamp = Date.now();
+                    window.location.href = `admin-dashboard.html?v=${timestamp}`;
+                    return;
+                }
+
+                throw new Error('Ungültige Zugangsdaten');
+
+            } catch (error) {
+                console.error('Login Fehler:', error);
+                errorMessage.textContent = 'Falsches Passwort oder E-Mail';
+                errorMessage.style.display = 'block';
+                
+            } finally {
+                loading.style.display = 'none';
+                loginBtn.disabled = false;
+            }
+        });
+
+        // Standard-Produkte erstellen
+        async function createDefaultProducts() {
+            try {
+                const snapshot = await database.ref('products').once('value');
+                if (snapshot.exists()) return;
+
+                const defaultProducts = {
+                    margherita: {
+                        name: 'Pizza Margherita',
+                        description: 'Tomatensauce, Mozzarella, frisches Basilikum',
+                        price: 18.50,
+                        category: 'pizza',
+                        available: true,
+                        created: new Date().toISOString()
+                    },
+                    salami: {
+                        name: 'Pizza Salami', 
+                        description: 'Tomatensauce, Mozzarella, italienische Salami',
+                        price: 22.00,
+                        category: 'pizza',
+                        available: true,
+                        created: new Date().toISOString()
+                    },
+                    quattro: {
+                        name: 'Pizza Quattro Stagioni',
+                        description: 'Tomatensauce, Mozzarella, Schinken, Pilze, Artischocken, Oliven',
+                        price: 25.50,
+                        category: 'pizza',
+                        available: true,
+                        created: new Date().toISOString()
+                    },
+                    carbonara: {
+                        name: 'Pasta Carbonara',
+                        description: 'Spaghetti, Speck, Ei, Parmesan, schwarzer Pfeffer',
+                        price: 19.50,
+                        category: 'pasta',
+                        available: true,
+                        created: new Date().toISOString()
+                    },
+                    bolognese: {
+                        name: 'Pasta Bolognese',
+                        description: 'Tagliatelle mit hausgemachter Fleischsauce',
+                        price: 21.00,
+                        category: 'pasta',
+                        available: true,
+                        created: new Date().toISOString()
+                    }
+                };
+
+                await database.ref('products').set(defaultProducts);
+                console.log('Standard-Produkte erstellt');
+            } catch (error) {
+                console.error('Fehler beim Erstellen der Produkte:', error);
+            }
+        }
+
+        // Demo-Daten ausfüllen
+        function fillDemoData() {
+            document.getElementById('email').value = 'admin@damico.ch';
+            document.getElementById('password').value = 'admin123';
+        }
+
+        // Passwort zurücksetzen
+        function resetPassword() {
+            alert('Demo-Version: Passwort-Reset nicht verfügbar. Verwenden Sie die Demo-Zugangsdaten.');
+        }
+
+        // Enter-Taste Support
+        document.getElementById('password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>

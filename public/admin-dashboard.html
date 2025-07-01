@@ -3,1089 +3,785 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pietro Admin Dashboard - Pizza&Pasta D'amico</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="css/styles.css" rel="stylesheet">
-    
+    <title>Admin Dashboard - Pizza&Pasta D'amico</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ZUSÄTZLICHE ADMIN-SPEZIFISCHE STYLES */
-        body {
-            background: #0a0a0a;
+        /* Dashboard Specific Styles */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
         }
-        
-        .controls-section {
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .dashboard-title {
+            font-size: 2.5rem;
+            margin: 0 0 10px 0;
+            font-weight: 700;
+        }
+
+        .dashboard-subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db, #2ecc71);
             display: flex;
-            gap: 10px;
             align-items: center;
-            margin-bottom: 20px;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            margin-bottom: 15px;
         }
-        
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .quick-actions h2 {
+            margin: 0 0 20px 0;
+            color: #2c3e50;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .action-btn {
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .action-btn:hover {
+            border-color: #3498db;
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .action-btn i {
+            font-size: 2rem;
+            color: #3498db;
+        }
+
+        /* Settings Section */
+        .settings-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .settings-section h2 {
+            margin: 0 0 25px 0;
+            color: #2c3e50;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .setting-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
         .toggle-switch {
             position: relative;
             width: 60px;
             height: 30px;
-            background: #374151;
-            border-radius: 15px;
+            background: #ccc;
+            border-radius: 30px;
             cursor: pointer;
-            transition: background 0.3s ease;
+            transition: background 0.3s;
         }
-        
+
         .toggle-switch.active {
-            background: #22c55e;
+            background: #2ecc71;
         }
-        
-        .toggle-slider {
+
+        .toggle-switch::after {
+            content: '';
             position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             background: white;
             border-radius: 50%;
-            transition: transform 0.3s ease;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
         }
-        
-        .toggle-switch.active .toggle-slider {
+
+        .toggle-switch.active::after {
             transform: translateX(30px);
         }
-        
-        .custom-wait-input {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 8px 12px;
+
+        /* Wait Time Controls */
+        .wait-time-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .wait-time-btn {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
             border-radius: 8px;
-            width: 80px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
             text-align: center;
         }
-        
-        .custom-wait-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            background: rgba(255, 255, 255, 0.15);
+
+        .wait-time-btn:hover {
+            border-color: #3498db;
+            background: #f8f9fa;
+        }
+
+        .wait-time-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        /* Recent Orders Preview */
+        .recent-orders {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .recent-orders h2 {
+            margin: 0 0 20px 0;
+            color: #2c3e50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-preview {
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .order-preview:hover {
+            background: #f8f9fa;
+            border-color: #3498db;
+        }
+
+        .order-preview-info {
+            flex: 1;
+        }
+
+        .order-preview-id {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .order-preview-time {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .order-preview-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-neu {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .status-zubereitung {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-fertig {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-title {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Admin Navigation Component -->
-<!-- Füge diesen Code am Anfang des <body> Tags in ALLEN Admin-Seiten ein: -->
-<!-- admin-dashboard.html, admin-orders.html, admin-products.html -->
-
-<nav class="admin-nav">
-    <div class="nav-container">
-        <div class="nav-brand">
-            <span class="logo">🍕</span>
-            <h2>D'amico Admin</h2>
-        </div>
-        
-        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
-        
-        <div class="nav-links" id="navLinks">
-            <a href="admin-dashboard.html" class="nav-link" id="nav-dashboard">
-                <span class="nav-icon">📊</span>
-                Dashboard
-            </a>
-            <a href="admin-orders.html" class="nav-link" id="nav-orders">
-                <span class="nav-icon">📋</span>
-                Bestellungen
-                <span class="notification-badge" id="orderCount" style="display: none;">0</span>
-            </a>
-            <a href="admin-products.html" class="nav-link" id="nav-products">
-                <span class="nav-icon">🍽️</span>
-                Produkte
-            </a>
-            <a href="#" class="nav-link" onclick="showSettings()">
-                <span class="nav-icon">⚙️</span>
-                Einstellungen
-            </a>
-        </div>
-        
-        <div class="user-menu">
-            <div class="user-info" onclick="toggleUserMenu()">
-                <div class="user-avatar">A</div>
-                <span class="user-name">Admin</span>
-                <span class="dropdown-arrow">▼</span>
-            </div>
-            <div class="user-dropdown" id="userDropdown">
-                <a href="#" onclick="showProfile()">
-                    <span class="nav-icon">👤</span> Mein Profil
-                </a>
-                <a href="#" onclick="showStats()">
-                    <span class="nav-icon">📈</span> Statistiken
-                </a>
-                <hr>
-                <a href="#" onclick="logout()" class="logout-link">
-                    <span class="nav-icon">🚪</span> Logout
-                </a>
-            </div>
-        </div>
-    </div>
-</nav>
-
-<!-- Quick Stats Bar (Optional - unter der Navigation) -->
-<div class="quick-stats-bar">
-    <div class="stat-item">
-        <span class="stat-label">Wartezeit:</span>
-        <span class="stat-value" id="currentWaitTime">15 Min</span>
-    </div>
-    <div class="stat-item">
-        <span class="stat-label">Status:</span>
-        <span class="stat-value status-open" id="restaurantStatus">Geöffnet</span>
-    </div>
-    <div class="stat-item">
-        <span class="stat-label">Heute:</span>
-        <span class="stat-value">CHF <span id="todayRevenue">0.00</span></span>
-    </div>
-</div>
-
-<script>
-// Navigation Scripts
-(function() {
-    // Aktive Seite markieren
-    const currentPage = window.location.pathname.split('/').pop();
-    const navMap = {
-        'admin-dashboard.html': 'nav-dashboard',
-        'admin-orders.html': 'nav-orders',
-        'admin-products.html': 'nav-products'
-    };
-    
-    const activeNav = document.getElementById(navMap[currentPage]);
-    if (activeNav) {
-        activeNav.classList.add('active');
-    }
-    
-    // Ungelesene Bestellungen zählen
-    if (typeof firebase !== 'undefined' && firebase.database) {
-        firebase.database().ref('orders').on('value', (snapshot) => {
-            const orders = snapshot.val() || {};
-            const newOrders = Object.values(orders).filter(order => order.status === 'new').length;
-            const badge = document.getElementById('orderCount');
-            if (newOrders > 0) {
-                badge.textContent = newOrders;
-                badge.style.display = 'flex';
-            } else {
-                badge.style.display = 'none';
-            }
-        });
-        
-        // Restaurant Status
-        firebase.database().ref('settings/restaurantOpen').on('value', (snapshot) => {
-            const isOpen = snapshot.val();
-            const statusEl = document.getElementById('restaurantStatus');
-            if (statusEl) {
-                statusEl.textContent = isOpen ? 'Geöffnet' : 'Geschlossen';
-                statusEl.className = isOpen ? 'stat-value status-open' : 'stat-value status-closed';
-            }
-        });
-        
-        // Wartezeit
-        firebase.database().ref('settings/waitTime').on('value', (snapshot) => {
-            const waitTime = snapshot.val() || 15;
-            const waitTimeEl = document.getElementById('currentWaitTime');
-            if (waitTimeEl) {
-                waitTimeEl.textContent = waitTime + ' Min';
-            }
-        });
-        
-        // Tagesumsatz
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        firebase.database().ref('orders')
-            .orderByChild('timestamp')
-            .startAt(today.getTime())
-            .on('value', (snapshot) => {
-                const orders = snapshot.val() || {};
-                const revenue = Object.values(orders)
-                    .filter(order => order.status === 'completed' || order.status === 'ready')
-                    .reduce((sum, order) => sum + (order.total || 0), 0);
-                const revenueEl = document.getElementById('todayRevenue');
-                if (revenueEl) {
-                    revenueEl.textContent = revenue.toFixed(2);
-                }
-            });
-    }
-})();
-
-// Mobile Menu Toggle
-function toggleMobileMenu() {
-    const navLinks = document.getElementById('navLinks');
-    navLinks.classList.toggle('show');
-}
-
-// User Menu Toggle
-function toggleUserMenu() {
-    const dropdown = document.getElementById('userDropdown');
-    dropdown.classList.toggle('show');
-    
-    // Click outside to close
-    document.addEventListener('click', function closeMenu(e) {
-        if (!e.target.closest('.user-menu')) {
-            dropdown.classList.remove('show');
-            document.removeEventListener('click', closeMenu);
-        }
-    });
-}
-
-// Navigation Functions
-function showSettings() {
-    // Placeholder - Implementiere Settings Modal
-    alert('Einstellungen werden in Phase 2 implementiert');
-}
-
-function showProfile() {
-    // Placeholder
-    alert('Profil-Verwaltung kommt bald');
-}
-
-function showStats() {
-    window.location.href = 'admin-dashboard.html#statistics';
-}
-
-function logout() {
-    if (confirm('Wirklich ausloggen?')) {
-        firebase.auth().signOut().then(() => {
-            window.location.href = 'admin.html';
-        });
-    }
-}
-
-// Keyboard Shortcuts
-document.addEventListener('keydown', (e) => {
-    if (e.altKey) {
-        switch(e.key) {
-            case '1':
-                window.location.href = 'admin-dashboard.html';
-                break;
-            case '2':
-                window.location.href = 'admin-orders.html';
-                break;
-            case '3':
-                window.location.href = 'admin-products.html';
-                break;
-        }
-    }
-});
-</script>
-
-<!-- 
-CSS ERGÄNZUNGEN für styles.css:
-Füge diese Styles zu deiner css/styles.css Datei hinzu, falls sie fehlen:
--->
-<style>
-/* Nur die Styles, die wahrscheinlich nicht in styles.css sind */
-.admin-nav {
-    background: var(--primary-color, #2c3e50);
-    color: white;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.nav-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-}
-
-.nav-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.nav-brand h2 {
-    margin: 0;
-    font-size: 1.5em;
-}
-
-.nav-links {
-    display: flex;
-    gap: 0;
-    align-items: center;
-}
-
-.nav-link {
-    color: white;
-    text-decoration: none;
-    padding: 20px 25px;
-    transition: background 0.3s;
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.nav-link:hover {
-    background: rgba(0,0,0,0.1);
-}
-
-.nav-link.active {
-    background: var(--accent-color, #e74c3c);
-}
-
-.nav-icon {
-    font-size: 1.2em;
-}
-
-.notification-badge {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: var(--danger-color, #e74c3c);
-    color: white;
-    border-radius: 50%;
-    min-width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    padding: 0 4px;
-}
-
-.user-menu {
-    position: relative;
-}
-
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    padding: 8px 15px;
-    border-radius: 25px;
-    background: rgba(255,255,255,0.1);
-    transition: background 0.3s;
-}
-
-.user-info:hover {
-    background: rgba(255,255,255,0.2);
-}
-
-.user-avatar {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    background: var(--accent-color, #e74c3c);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
-
-.user-dropdown {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background: var(--card-bg, white);
-    border-radius: var(--border-radius, 8px);
-    box-shadow: var(--box-shadow, 0 4px 20px rgba(0,0,0,0.1));
-    min-width: 200px;
-    display: none;
-    margin-top: 10px;
-}
-
-.user-dropdown.show {
-    display: block;
-}
-
-.user-dropdown a {
-    display: block;
-    padding: 12px 20px;
-    color: var(--text-color, #333);
-    text-decoration: none;
-    transition: background 0.2s;
-}
-
-.user-dropdown a:hover {
-    background: var(--hover-bg, #f5f5f5);
-}
-
-.user-dropdown hr {
-    margin: 0;
-    border: none;
-    border-top: 1px solid var(--border-color, #eee);
-}
-
-.mobile-menu-toggle {
-    display: none;
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.5em;
-    cursor: pointer;
-    padding: 10px;
-}
-
-/* Quick Stats Bar */
-.quick-stats-bar {
-    background: var(--bg-color, #f8f9fa);
-    border-bottom: 1px solid var(--border-color, #dee2e6);
-    padding: 10px 0;
-}
-
-.quick-stats-bar {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 15px 20px;
-}
-
-.stat-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.stat-label {
-    color: var(--text-muted, #6c757d);
-    font-size: 0.9em;
-}
-
-.stat-value {
-    font-weight: bold;
-    font-size: 1.1em;
-    color: var(--text-color, #333);
-}
-
-.status-open {
-    color: var(--success-color, #28a745);
-}
-
-.status-closed {
-    color: var(--danger-color, #dc3545);
-}
-
-/* Mobile Responsive */
-@media (max-width: 768px) {
-    .nav-container {
-        flex-wrap: wrap;
-    }
-    
-    .mobile-menu-toggle {
-        display: block;
-    }
-    
-    .nav-links {
-        display: none;
-        width: 100%;
-        flex-direction: column;
-        gap: 0;
-        background: rgba(0,0,0,0.1);
-        margin: 0 -20px;
-        padding: 10px 0;
-    }
-    
-    .nav-links.show {
-        display: flex;
-    }
-    
-    .nav-link {
-        width: 100%;
-        padding: 15px 20px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .user-menu {
-        margin-left: auto;
-        margin-right: 10px;
-    }
-    
-    .quick-stats-bar {
-        flex-direction: column;
-        gap: 10px;
-        align-items: center;
-    }
-}
-</style>
-    <!-- ADMIN HEADER -->
-    <div class="admin-header">
-        <div class="header-content">
-            <div class="admin-title">
-                <h1><i class="fas fa-crown"></i> Pietro Dashboard</h1>
-                <div class="status-indicator">
-                    <i class="fas fa-circle" id="globalStatusIcon"></i>
-                    <span id="globalStatusText">Wird geladen...</span>
-                </div>
-            </div>
-            <button class="logout-btn" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> Abmelden
-            </button>
-        </div>
-    </div>
-
-    <!-- ADMIN CONTAINER -->
-    <div class="admin-container">
-        <!-- WARTEZEIT-KONTROLLE -->
-        <div class="wait-time-control">
-            <div class="wait-time-header">
-                <h3><i class="fas fa-clock"></i> Wartezeit-Management</h3>
-                <div class="wait-time-display" id="currentWaitTime">5 Min</div>
+    <!-- Navigation -->
+    <nav class="admin-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="logo">🍕</span>
+                <h2>D'amico Admin</h2>
             </div>
             
-            <div class="controls-section">
-                <span style="color: rgba(255,255,255,0.8); margin-right: 15px;">Foodtruck Status:</span>
-                <div class="toggle-switch" id="restaurantToggle">
-                    <div class="toggle-slider"></div>
-                </div>
-                <span id="restaurantStatusText" style="margin-left: 10px; font-weight: 600;">Geschlossen</span>
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+            
+            <div class="nav-links" id="navLinks">
+                <a href="admin-dashboard.html" class="nav-link active" id="nav-dashboard">
+                    <span class="nav-icon">📊</span>
+                    Dashboard
+                </a>
+                <a href="admin-orders.html" class="nav-link" id="nav-orders">
+                    <span class="nav-icon">📋</span>
+                    Bestellungen
+                    <span class="notification-badge" id="orderCount" style="display: none;">0</span>
+                </a>
+                <a href="admin-products.html" class="nav-link" id="nav-products">
+                    <span class="nav-icon">🍽️</span>
+                    Produkte
+                </a>
             </div>
             
-            <div class="wait-time-controls" id="waitTimePresets">
-                <div class="time-preset active" data-time="5">
-                    <div style="font-size: 1.2rem; font-weight: 700; color: #22c55e;">5 Min</div>
-                    <div style="font-size: 0.9rem; opacity: 0.8;">Normal</div>
+            <div class="user-menu">
+                <div class="user-info" onclick="toggleUserMenu()">
+                    <div class="user-avatar">A</div>
+                    <span class="dropdown-arrow">▼</span>
                 </div>
-                <div class="time-preset" data-time="10">
-                    <div style="font-size: 1.2rem; font-weight: 700; color: #f59e0b;">10 Min</div>
-                    <div style="font-size: 0.9rem; opacity: 0.8;">Beschäftigt</div>
-                </div>
-                <div class="time-preset" data-time="15">
-                    <div style="font-size: 1.2rem; font-weight: 700; color: #ef4444;">15 Min</div>
-                    <div style="font-size: 0.9rem; opacity: 0.8;">Sehr voll</div>
-                </div>
-                <div class="time-preset" data-time="custom">
-                    <div style="font-size: 1rem; font-weight: 700; color: #8b5cf6;">Custom</div>
-                    <input type="number" class="custom-wait-input" id="customWaitTime" 
-                           placeholder="Min" min="1" max="60" style="margin-top: 5px;">
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="#" onclick="logout()">
+                        <span class="nav-icon">🚪</span> Logout
+                    </a>
                 </div>
             </div>
         </div>
+    </nav>
 
-        <!-- STATISTIKEN -->
-        <div class="dashboard-grid">
-            <div class="stats-card">
-                <div class="stats-icon orders">
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Willkommen im Dashboard</h1>
+            <p class="dashboard-subtitle">Pizza&Pasta D'amico Verwaltungssystem</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
                     <i class="fas fa-shopping-cart"></i>
                 </div>
-                <div class="stats-number" id="totalOrders">0</div>
-                <div class="stats-label">Bestellungen heute</div>
+                <div class="stat-value" id="todayOrders">0</div>
+                <div class="stat-label">Bestellungen heute</div>
             </div>
             
-            <div class="stats-card">
-                <div class="stats-icon waiting">
+            <div class="stat-card">
+                <div class="stat-icon">
                     <i class="fas fa-clock"></i>
                 </div>
-                <div class="stats-number" id="newOrders">0</div>
-                <div class="stats-label">Wartend</div>
+                <div class="stat-value" id="pendingOrders">0</div>
+                <div class="stat-label">Wartende Bestellungen</div>
             </div>
             
-            <div class="stats-card">
-                <div class="stats-icon revenue">
+            <div class="stat-card">
+                <div class="stat-icon">
                     <i class="fas fa-euro-sign"></i>
                 </div>
-                <div class="stats-number" id="todayRevenue">CHF 0</div>
-                <div class="stats-label">Umsatz heute</div>
+                <div class="stat-value" id="todayRevenue">0.00</div>
+                <div class="stat-label">Heutiger Umsatz (CHF)</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="stat-value" id="currentWaitTime">15</div>
+                <div class="stat-label">Aktuelle Wartezeit (Min)</div>
             </div>
         </div>
 
-        <!-- BESTELLUNGEN -->
-        <div class="orders-section">
-            <div class="section-header">
-                <h3><i class="fas fa-list"></i> Aktive Bestellungen</h3>
-                <div class="sound-toggle" id="soundToggle">
-                    <i class="fas fa-volume-up"></i>
-                    <span>Sound AN</span>
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h2>Schnellzugriff</h2>
+            <div class="actions-grid">
+                <a href="admin-orders.html" class="action-btn">
+                    <i class="fas fa-list"></i>
+                    <span>Bestellungen</span>
+                </a>
+                <a href="admin-products.html" class="action-btn">
+                    <i class="fas fa-pizza-slice"></i>
+                    <span>Produkte</span>
+                </a>
+                <a href="#" class="action-btn" onclick="exportData()">
+                    <i class="fas fa-download"></i>
+                    <span>Daten exportieren</span>
+                </a>
+                <a href="#" class="action-btn" onclick="viewReports()">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Berichte</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="settings-section">
+            <h2>Einstellungen</h2>
+            
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Restaurant Status</div>
+                    <small>Schalte den Foodtruck online/offline</small>
+                </div>
+                <div class="toggle-switch" id="restaurantToggle" onclick="toggleRestaurant()"></div>
+            </div>
+            
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Wartezeit</div>
+                    <small>Aktuelle geschätzte Wartezeit für Kunden</small>
+                </div>
+                <div class="wait-time-controls">
+                    <button class="wait-time-btn" onclick="setWaitTime(5)">5 Min</button>
+                    <button class="wait-time-btn active" onclick="setWaitTime(15)">15 Min</button>
+                    <button class="wait-time-btn" onclick="setWaitTime(30)">30 Min</button>
+                    <button class="wait-time-btn" onclick="setWaitTime(45)">45 Min</button>
                 </div>
             </div>
             
-            <div class="orders-grid" id="ordersContainer">
-                <div class="empty-state">
-                    <i class="fas fa-clock"></i>
-                    <h3>Keine aktiven Bestellungen</h3>
-                    <p>Neue Bestellungen werden hier automatisch angezeigt</p>
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Sound-Benachrichtigungen</div>
+                    <small>Ton bei neuen Bestellungen</small>
                 </div>
+                <div class="toggle-switch active" id="soundToggle" onclick="toggleSound()"></div>
+            </div>
+        </div>
+
+        <!-- Recent Orders Preview -->
+        <div class="recent-orders">
+            <h2>
+                Letzte Bestellungen
+                <a href="admin-orders.html" style="font-size: 1rem; color: #3498db;">Alle anzeigen →</a>
+            </h2>
+            <div id="recentOrdersList">
+                <!-- Dynamisch geladen -->
             </div>
         </div>
     </div>
 
-    <!-- NOTIFICATION POPUP -->
-    <div class="notification-popup" id="notificationPopup">
-        <span id="notificationMessage"></span>
-    </div>
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
     <script>
-        // FIREBASE CONFIGURATION
+        // Firebase Konfiguration
         const firebaseConfig = {
-            apiKey: "AIzaSyBiVdp67AZmZnGpM8OlZXBGKJKhF4iDlsE",
-            authDomain: "pizzapastadamico.firebaseapp.com",
-            databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "pizzapastadamico",
-            storageBucket: "pizzapastadamico.appspot.com",
-            messagingSenderId: "168976461234",
-            appId: "1:168976461234:web:abc123def456ghi789"
+            // Füge hier deine Firebase-Konfiguration ein
         };
 
         // Firebase initialisieren
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        const auth = firebase.auth();
 
-        // GLOBAL VARIABLES
-        let orders = {};
-        let currentWaitTime = 5;
-        let restaurantOpen = false;
+        // Globale Variablen
         let soundEnabled = true;
+        let restaurantOpen = true;
+        let currentWaitTime = 15;
 
-        // LOGIN CHECK
-        const isLoggedIn = localStorage.getItem('pietroLoggedIn');
-        const loginTime = localStorage.getItem('loginTime');
-        const now = new Date().getTime();
-        const twoHours = 2 * 60 * 60 * 1000;
-
-        if (!isLoggedIn || !loginTime || (now - parseInt(loginTime)) > twoHours) {
-            window.location.href = 'admin.html';
-        }
-
-        // INITIALIZATION
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeAdmin();
-            loadOrders();
-            loadRestaurantStatus();
-            loadWaitTime();
-            setupEventListeners();
-            console.log('Pietro Admin Dashboard initialisiert');
+        // Auth Check
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'admin.html';
+            } else {
+                initializeDashboard();
+            }
         });
 
-        // EVENT LISTENERS SETUP
-        function setupEventListeners() {
-            // Restaurant Toggle
-            document.getElementById('restaurantToggle').addEventListener('click', toggleRestaurantStatus);
-            
-            // Wartezeit Presets
-            document.querySelectorAll('.time-preset').forEach(preset => {
-                preset.addEventListener('click', function() {
-                    const time = this.dataset.time;
-                    if (time === 'custom') {
-                        const customInput = document.getElementById('customWaitTime');
-                        customInput.focus();
-                        customInput.addEventListener('change', function() {
-                            if (this.value && this.value > 0) {
-                                updateWaitTime(parseInt(this.value));
-                            }
-                        });
-                    } else {
-                        updateWaitTime(parseInt(time));
-                    }
+        // Dashboard initialisieren
+        function initializeDashboard() {
+            loadStatistics();
+            loadRecentOrders();
+            loadSettings();
+            setupRealtimeListeners();
+        }
+
+        // Statistiken laden
+        function loadStatistics() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayTimestamp = today.getTime();
+
+            // Heutige Bestellungen
+            database.ref('orders').orderByChild('timestamp').startAt(todayTimestamp).on('value', (snapshot) => {
+                const orders = snapshot.val() || {};
+                const ordersList = Object.values(orders);
+                
+                // Bestellungen heute
+                document.getElementById('todayOrders').textContent = ordersList.length;
+                
+                // Wartende Bestellungen
+                const pending = ordersList.filter(order => order.status !== 'fertig' && order.status !== 'completed').length;
+                document.getElementById('pendingOrders').textContent = pending;
+                
+                // Heutiger Umsatz
+                const revenue = ordersList
+                    .filter(order => order.status === 'fertig' || order.status === 'completed')
+                    .reduce((sum, order) => sum + (order.total || 0), 0);
+                document.getElementById('todayRevenue').textContent = revenue.toFixed(2);
+            });
+
+            // Auch archivierte Bestellungen für Umsatz einbeziehen
+            database.ref('archive').orderByChild('timestamp').startAt(todayTimestamp).once('value', (snapshot) => {
+                const archived = snapshot.val() || {};
+                const archivedRevenue = Object.values(archived).reduce((sum, order) => sum + (order.total || 0), 0);
+                
+                // Zum bestehenden Umsatz addieren
+                const currentRevenue = parseFloat(document.getElementById('todayRevenue').textContent);
+                document.getElementById('todayRevenue').textContent = (currentRevenue + archivedRevenue).toFixed(2);
+            });
+        }
+
+        // Letzte Bestellungen laden
+        function loadRecentOrders() {
+            database.ref('orders').limitToLast(5).on('value', (snapshot) => {
+                const orders = snapshot.val() || {};
+                const ordersList = Object.entries(orders).reverse();
+                
+                const container = document.getElementById('recentOrdersList');
+                
+                if (ordersList.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">Keine aktuellen Bestellungen</p>';
+                    return;
+                }
+                
+                container.innerHTML = ordersList.map(([id, order]) => {
+                    const time = new Date(order.timestamp).toLocaleTimeString('de-CH', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
                     
-                    // Update active state
-                    document.querySelectorAll('.time-preset').forEach(p => p.classList.remove('active'));
-                    this.classList.add('active');
-                });
+                    return `
+                        <div class="order-preview">
+                            <div class="order-preview-info">
+                                <div class="order-preview-id">#${order.id || id.slice(-6)}</div>
+                                <div class="order-preview-time">${time} - ${order.customerName}</div>
+                            </div>
+                            <span class="order-preview-status status-${order.status || 'neu'}">
+                                ${getStatusText(order.status || 'neu')}
+                            </span>
+                        </div>
+                    `;
+                }).join('');
             });
-
-            // Sound Toggle
-            document.getElementById('soundToggle').addEventListener('click', function() {
-                soundEnabled = !soundEnabled;
-                this.innerHTML = soundEnabled 
-                    ? '<i class="fas fa-volume-up"></i><span>Sound AN</span>'
-                    : '<i class="fas fa-volume-off"></i><span>Sound AUS</span>';
-                this.classList.toggle('enabled', soundEnabled);
-            });
         }
 
-        // ADMIN INITIALIZATION
-        function initializeAdmin() {
-            console.log('Admin Dashboard wird initialisiert...');
-            updateGlobalStatus();
-        }
-
-        // RESTAURANT STATUS TOGGLE
-        async function toggleRestaurantStatus() {
-            try {
-                restaurantOpen = !restaurantOpen;
-                await database.ref('settings/restaurantOpen').set(restaurantOpen);
-                updateRestaurantUI();
-                
-                const status = restaurantOpen ? 'geöffnet' : 'geschlossen';
-                showNotification(`Foodtruck ${status}`, 'success');
-            } catch (error) {
-                console.error('Fehler beim Ändern des Status:', error);
-                showNotification('Fehler beim Ändern des Status', 'error');
-            }
-        }
-
-        // RESTAURANT STATUS LADEN
-        function loadRestaurantStatus() {
+        // Einstellungen laden
+        function loadSettings() {
+            // Restaurant Status
             database.ref('settings/restaurantOpen').on('value', (snapshot) => {
-                restaurantOpen = snapshot.val() || false;
-                updateRestaurantUI();
-                updateGlobalStatus();
+                restaurantOpen = snapshot.val() !== false; // Default true
+                document.getElementById('restaurantToggle').classList.toggle('active', restaurantOpen);
             });
-        }
-
-        // RESTAURANT UI UPDATE
-        function updateRestaurantUI() {
-            const toggle = document.getElementById('restaurantToggle');
-            const statusText = document.getElementById('restaurantStatusText');
             
-            toggle.classList.toggle('active', restaurantOpen);
-            statusText.textContent = restaurantOpen ? 'Geöffnet' : 'Geschlossen';
-            statusText.style.color = restaurantOpen ? '#22c55e' : '#ef4444';
-        }
-
-        // WARTEZEIT LADEN
-        function loadWaitTime() {
+            // Wartezeit
             database.ref('settings/waitTime').on('value', (snapshot) => {
-                currentWaitTime = snapshot.val() || 5;
-                updateWaitTimeDisplay();
+                currentWaitTime = snapshot.val() || 15;
+                document.getElementById('currentWaitTime').textContent = currentWaitTime;
+                
+                // Buttons aktualisieren
+                document.querySelectorAll('.wait-time-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (parseInt(btn.textContent) === currentWaitTime) {
+                        btn.classList.add('active');
+                    }
+                });
             });
         }
 
-        // WARTEZEIT UPDATE
-        async function updateWaitTime(minutes) {
-            try {
-                currentWaitTime = minutes;
-                await database.ref('settings/waitTime').set(minutes);
-                updateWaitTimeDisplay();
-                showNotification(`Wartezeit auf ${minutes} Min gesetzt`, 'success');
-            } catch (error) {
-                console.error('Fehler beim Update der Wartezeit:', error);
-                showNotification('Fehler beim Update der Wartezeit', 'error');
-            }
-        }
-
-        // WARTEZEIT DISPLAY UPDATE
-        function updateWaitTimeDisplay() {
-            document.getElementById('currentWaitTime').textContent = `${currentWaitTime} Min`;
-        }
-
-        // BESTELLUNGEN LADEN
-        function loadOrders() {
+        // Realtime Listeners
+        function setupRealtimeListeners() {
+            // Neue Bestellungen Sound
+            let lastOrderCount = 0;
             database.ref('orders').on('value', (snapshot) => {
-                const newOrders = snapshot.val() || {};
+                const orders = snapshot.val() || {};
+                const currentCount = Object.keys(orders).length;
                 
-                // Check for new orders (for sound notification)
-                Object.keys(newOrders).forEach(orderId => {
-                    if (!orders[orderId] && soundEnabled) {
-                        playNotificationSound();
-                        showNotification('🍕 Neue Bestellung eingegangen!', 'info');
-                    }
-                });
+                if (currentCount > lastOrderCount && lastOrderCount > 0 && soundEnabled) {
+                    playNotificationSound();
+                }
                 
-                orders = newOrders;
-                renderOrders();
-                updateStatistics();
+                lastOrderCount = currentCount;
+                
+                // Badge aktualisieren
+                const newOrders = Object.values(orders).filter(o => o.status === 'neu').length;
+                const badge = document.getElementById('orderCount');
+                if (newOrders > 0) {
+                    badge.textContent = newOrders;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
             });
         }
 
-        // BESTELLUNGEN RENDERN
-        function renderOrders() {
-            const container = document.getElementById('ordersContainer');
-            const orderList = Object.entries(orders);
+        // Restaurant Toggle
+        function toggleRestaurant() {
+            restaurantOpen = !restaurantOpen;
+            database.ref('settings/restaurantOpen').set(restaurantOpen);
+            document.getElementById('restaurantToggle').classList.toggle('active', restaurantOpen);
+            
+            const status = restaurantOpen ? 'geöffnet' : 'geschlossen';
+            showNotification(`Restaurant ist jetzt ${status}`);
+        }
 
-            if (orderList.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-clock"></i>
-                        <h3>Keine aktiven Bestellungen</h3>
-                        <p>Neue Bestellungen werden hier automatisch angezeigt</p>
-                    </div>
-                `;
-                return;
-            }
-
-            // Nach Status und Zeit sortieren
-            orderList.sort(([,a], [,b]) => {
-                const statusOrder = { 'neu': 0, 'zubereitung': 1, 'fertig': 2 };
-                const statusDiff = statusOrder[a.status] - statusOrder[b.status];
-                if (statusDiff !== 0) return statusDiff;
-                return new Date(a.timestamp) - new Date(b.timestamp);
+        // Wartezeit setzen
+        function setWaitTime(minutes) {
+            currentWaitTime = minutes;
+            database.ref('settings/waitTime').set(minutes);
+            
+            document.querySelectorAll('.wait-time-btn').forEach(btn => {
+                btn.classList.remove('active');
             });
-
-            container.innerHTML = orderList.map(([id, order]) => {
-                const orderTime = new Date(order.timestamp).toLocaleTimeString('de-CH', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-
-                const waitTimeInfo = getOrderWaitTime(order);
-                const actions = getOrderActions(id, order);
-
-                return `
-                    <div class="order-card status-${order.status || 'neu'}">
-                        <div class="order-header">
-                            <span class="order-id">#${order.id || id.slice(-6)}</span>
-                            <div class="order-time-info">
-                                <div class="order-time">${orderTime}</div>
-                                <div class="wait-time-badge ${waitTimeInfo.status}">
-                                    <i class="fas fa-clock"></i> ${waitTimeInfo.text}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="order-details">
-                            ${renderOrderItems(order)}
-                            
-                            <div class="order-total">
-                                <span class="total-label">Gesamt:</span>
-                                <span class="total-amount">CHF ${(order.total || 0).toFixed(2)}</span>
-                            </div>
-                        </div>
-
-                        <div class="order-actions">
-                            ${actions}
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            event.target.classList.add('active');
+            
+            showNotification(`Wartezeit auf ${minutes} Minuten gesetzt`);
         }
 
-        // ORDER ITEMS RENDERN
-        function renderOrderItems(order) {
-            if (!order.items || order.items.length === 0) {
-                return '<div style="color: rgba(255,255,255,0.6); font-style: italic;">Keine Artikel gefunden</div>';
-            }
-
-            return order.items.map(item => `
-                <div class="order-item">
-                    <div class="item-details">
-                        <div class="item-name">${item.name}</div>
-                        <div class="item-specs">${item.size || ''} ${item.extras ? '• ' + item.extras.join(', ') : ''}</div>
-                    </div>
-                    <div class="item-price">CHF ${(item.price || 0).toFixed(2)}</div>
-                </div>
-            `).join('');
+        // Sound Toggle
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundToggle').classList.toggle('active', soundEnabled);
+            localStorage.setItem('soundEnabled', soundEnabled);
+            
+            const status = soundEnabled ? 'aktiviert' : 'deaktiviert';
+            showNotification(`Sound-Benachrichtigungen ${status}`);
         }
 
-        // ORDER ACTIONS GENERIEREN
-        function getOrderActions(orderId, order) {
-            const status = order.status || 'neu';
-            let actions = '';
-
-            switch (status) {
-                case 'neu':
-                    actions = `
-                        <button class="action-btn primary" onclick="updateOrderStatus('${orderId}', 'zubereitung')">
-                            <i class="fas fa-fire"></i> Starten
-                        </button>
-                        <button class="action-btn warning" onclick="notifyCustomer('${orderId}', 'prepare')">
-                            <i class="fas fa-bell"></i> Benachrichtigen
-                        </button>
-                    `;
-                    break;
-                case 'zubereitung':
-                    actions = `
-                        <button class="action-btn success" onclick="updateOrderStatus('${orderId}', 'fertig')">
-                            <i class="fas fa-check"></i> Fertig
-                        </button>
-                        <button class="action-btn warning" onclick="notifyCustomer('${orderId}', 'update')">
-                            <i class="fas fa-bell"></i> Update
-                        </button>
-                    `;
-                    break;
-                case 'fertig':
-                    actions = `
-                        <button class="action-btn warning" onclick="notifyCustomer('${orderId}', 'ready')">
-                            <i class="fas fa-bell"></i> Rufen
-                        </button>
-                        <button class="action-btn danger" onclick="archiveOrder('${orderId}')">
-                            <i class="fas fa-archive"></i> Abgeholt
-                        </button>
-                    `;
-                    break;
-            }
-
-            return actions;
-        }
-
-        // WARTEZEIT-INFO FÜR BESTELLUNG
-        function getOrderWaitTime(order) {
-            const orderTime = new Date(order.timestamp);
-            const now = new Date();
-            const elapsed = Math.floor((now - orderTime) / (1000 * 60)); // Minuten
-
-            if (elapsed <= 5) {
-                return { status: 'normal', text: `${elapsed} Min` };
-            } else if (elapsed <= 10) {
-                return { status: 'warning', text: `${elapsed} Min` };
-            } else {
-                return { status: 'danger', text: `${elapsed} Min!` };
-            }
-        }
-
-        // BESTELLSTATUS UPDATE
-        async function updateOrderStatus(orderId, newStatus) {
-            try {
-                await database.ref(`orders/${orderId}/status`).set(newStatus);
-                
-                // Automatische Benachrichtigung bei bestimmten Status
-                let message = '';
-                let playSound = false;
-                
-                switch (newStatus) {
-                    case 'zubereitung':
-                        message = 'Ihre Bestellung wird jetzt zubereitet';
-                        break;
-                    case 'fertig':
-                        message = 'Ihre Bestellung ist fertig zur Abholung!';
-                        playSound = true;
-                        break;
-                }
-                
-                if (message) {
-                    await notifyCustomer(orderId, 'auto', message, playSound);
-                }
-                
-                showNotification(`Bestellung #${orders[orderId].id || orderId.slice(-6)} → ${getStatusText(newStatus)}`, 'success');
-            } catch (error) {
-                console.error('Fehler beim Aktualisieren:', error);
-                showNotification('Fehler beim Aktualisieren des Status', 'error');
-            }
-        }
-
-        // KUNDE BENACHRICHTIGEN
-        async function notifyCustomer(orderId, type, customMessage = null, playSound = false) {
-            try {
-                const orderData = orders[orderId];
-                if (!orderData) return;
-
-                let message = customMessage;
-                if (!message) {
-                    switch (type) {
-                        case 'prepare':
-                            message = 'Ihre Bestellung wird jetzt zubereitet';
-                            break;
-                        case 'update':
-                            message = 'Ihre Bestellung ist in Zubereitung';
-                            break;
-                        case 'ready':
-                            message = 'Ihre Bestellung ist fertig zur Abholung!';
-                            playSound = true;
-                            break;
-                    }
-                }
-
-                // Notification zu Firebase senden
-                await database.ref(`notifications/${orderId}`).push({
-                    message: message,
-                    timestamp: new Date().toISOString(),
-                    type: type,
-                    playSound: playSound
-                });
-
-                const soundText = playSound ? ' (mit Ton)' : ' (still)';
-                showNotification(`Kunde benachrichtigt: ${message}${soundText}`, 'success');
-            } catch (error) {
-                console.error('Fehler beim Benachrichtigen:', error);
-                showNotification('Fehler beim Senden der Benachrichtigung', 'error');
-            }
-        }
-
-        // BESTELLUNG ARCHIVIEREN
-        async function archiveOrder(orderId) {
-            if (!confirm('Bestellung als abgeholt markieren und archivieren?')) return;
-
-            try {
-                const orderData = orders[orderId];
-                await database.ref(`archive/${orderId}`).set({
-                    ...orderData,
-                    archivedAt: new Date().toISOString(),
-                    archivedBy: 'admin',
-                    finalStatus: 'abgeholt'
-                });
-                await database.ref(`orders/${orderId}`).remove();
-                showNotification(`Bestellung #${orderData.id || orderId.slice(-6)} archiviert`, 'success');
-            } catch (error) {
-                console.error('Fehler beim Archivieren:', error);
-                showNotification('Fehler beim Archivieren der Bestellung', 'error');
-            }
-        }
-
-        // STATUS-TEXT ÜBERSETZEN
+        // Status Text
         function getStatusText(status) {
-            const statusTexts = {
+            const texts = {
                 'neu': 'Neu',
                 'zubereitung': 'In Zubereitung',
-                'fertig': 'Fertig'
+                'fertig': 'Fertig',
+                'completed': 'Abgeschlossen'
             };
-            return statusTexts[status] || status;
+            return texts[status] || status;
         }
 
-        // STATISTIKEN AKTUALISIEREN
-        function updateStatistics() {
-            const today = new Date().toDateString();
-            const todayOrders = Object.values(orders).filter(order => 
-                new Date(order.timestamp).toDateString() === today
-            );
-            const newOrders = todayOrders.filter(order => (order.status || 'neu') === 'neu');
-            const totalRevenue = todayOrders.reduce((sum, order) => sum + (order.total || 0), 0);
-
-            document.getElementById('totalOrders').textContent = todayOrders.length;
-            document.getElementById('newOrders').textContent = newOrders.length;
-            document.getElementById('todayRevenue').textContent = `CHF ${totalRevenue.toFixed(2)}`;
-        }
-
-        // GLOBAL STATUS UPDATE
-        function updateGlobalStatus() {
-            const statusIcon = document.getElementById('globalStatusIcon');
-            const statusText = document.getElementById('globalStatusText');
-            
-            if (restaurantOpen) {
-                statusIcon.style.color = '#22c55e';
-                statusText.textContent = 'Aktiv';
-            } else {
-                statusIcon.style.color = '#ef4444';
-                statusText.textContent = 'Geschlossen';
-            }
-        }
-
-        // NOTIFICATION SOUND
-        function playNotificationSound() {
-            if (!soundEnabled) return;
-            
-            // Simple beep sound using Web Audio API
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-
-            oscillator.frequency.value = 800;
-            oscillator.type = 'sine';
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.5);
-        }
-
-        // NOTIFICATION POPUP
-        function showNotification(message, type = 'info') {
-            const notification = document.getElementById('notificationPopup');
-            const messageSpan = document.getElementById('notificationMessage');
-            
-            messageSpan.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}"></i> 
+        // Benachrichtigungen
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
                 ${message}
             `;
-            notification.className = `notification-popup ${type} show`;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
             
             setTimeout(() => {
                 notification.classList.remove('show');
-            }, 4000);
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
         }
 
-        // LOGOUT
+        // Sound abspielen
+        function playNotificationSound() {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBDGH0fPTgjMGHm7A7+OZURE...');
+            audio.play().catch(e => console.log('Sound play failed:', e));
+        }
+
+        // Navigation
+        function toggleMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('show');
+        }
+
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+            
+            document.addEventListener('click', function closeMenu(e) {
+                if (!e.target.closest('.user-menu')) {
+                    dropdown.classList.remove('show');
+                    document.removeEventListener('click', closeMenu);
+                }
+            });
+        }
+
         function logout() {
-            localStorage.removeItem('pietroLoggedIn');
-            localStorage.removeItem('loginTime');
-            window.location.href = 'admin.html';
+            if (confirm('Wirklich ausloggen?')) {
+                auth.signOut().then(() => {
+                    window.location.href = 'admin.html';
+                });
+            }
         }
 
-        console.log('Pietro Admin Dashboard vollständig geladen!');
+        // Placeholder Funktionen
+        function exportData() {
+            showNotification('Export-Funktion wird in Version 2.0 verfügbar sein', 'info');
+        }
+
+        function viewReports() {
+            showNotification('Berichte werden in Version 2.0 verfügbar sein', 'info');
+        }
+
+        // Load saved sound preference
+        soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+        document.getElementById('soundToggle').classList.toggle('active', soundEnabled);
     </script>
+
+    <!-- Notification Styles -->
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 2000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left: 4px solid #2ecc71;
+        }
+
+        .notification.error {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .notification.info {
+            border-left: 4px solid #3498db;
+        }
+
+        .notification i {
+            font-size: 1.2rem;
+        }
+
+        .notification.success i {
+            color: #2ecc71;
+        }
+
+        .notification.error i {
+            color: #e74c3c;
+        }
+
+        .notification.info i {
+            color: #3498db;
+        }
+    </style>
 </body>
 </html>

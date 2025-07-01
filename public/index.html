@@ -3,154 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pizza&Pasta D'amico - Authentische italienische Küche</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="css/styles.css" rel="stylesheet">
-    <script src="js/multilingual.js"></script>
+    <title>Pizza&Pasta D'amico - Online Bestellen</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Additional Styles für Fixes */
+        .error-message {
+            text-align: center;
+            padding: 40px;
+            color: #e74c3c;
+        }
+        
+        .error-message button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .closed-banner {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        #cartBackdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 998;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .cart-sidebar {
+                position: fixed;
+                right: 0;
+                top: 0;
+                height: 100vh;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                z-index: 999;
+                width: 300px;
+                max-width: 85vw;
+            }
+            
+            .cart-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+        
+        .payment-dialog {
+            display: none;
+        }
+        
+        .payment-dialog.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        #paymentBackdrop.show {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
 </head>
 <body>
-    <!-- PIZZA LOADING SCREEN -->
-    <div class="pizza-loader" id="pizzaLoader">
-        <div class="spinning-pizza">🍕</div>
-        <div class="loading-text" data-i18n="loading.title">Pizza&Pasta D'amico</div>
-        <div class="loading-subtext" data-i18n="loading.subtitle">Lade köstliche Speisekarte...</div>
-    </div>
-
-    <!-- WARTEZEIT BANNER -->
-    <div class="wait-time-banner" id="waitTimeBanner" style="display: none;">
-        <i class="fas fa-clock"></i> 
-        <span id="waitTimeText" data-i18n="waittime.current">Aktuelle Wartezeit: 5 Minuten</span>
-    </div>
-
-    <!-- SPRACHAUSWAHL -->
-    <div class="language-selector">
-        <!-- Wird von multilingual.js generiert -->
-    </div>
-
-    <div class="container">
-        <!-- HEADER -->
-        <div class="header">
-            <h1 data-i18n="site.title">🍕 Pizza&Pasta D'amico</h1>
-            <p class="subtitle" data-i18n="site.subtitle">Authentische italienische Küche</p>
-            <div class="location-info" id="locationInfo">
-                <i class="fas fa-truck"></i>
-                <span data-i18n="site.location">Foodtruck • Abholung</span>
-            </div>
-            <div class="status-badges">
-                <div class="status-badge" id="statusBadge">
-                    <i class="fas fa-circle"></i> 
-                    <span id="statusText" data-i18n="loading">Wird geladen...</span>
-                </div>
-                <div class="status-badge" style="background: rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.3); color: #60a5fa;">
-                    <i class="fas fa-clock"></i> 
-                    <span id="prepTime" data-i18n="waittime.estimate">5 Min</span>
-                </div>
-            </div>
+    <!-- Pizza Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="pizza-loader">
+            <div class="pizza-slice"></div>
+            <div class="pizza-slice"></div>
+            <div class="pizza-slice"></div>
+            <div class="pizza-slice"></div>
+            <div class="pizza-slice"></div>
+            <div class="pizza-slice"></div>
+            <div class="pizza-slice"></div>
+            <div class="pizza-slice"></div>
         </div>
+        <h2 class="loading-text">Pizza&Pasta D'amico</h2>
+        <p class="loading-subtext" data-i18n="loading">Lade leckere Speisen...</p>
+    </div>
 
-        <div class="content">
-            <!-- STATUS WENN GESCHLOSSEN -->
-            <div class="status-message" id="closedMessage" style="display: none;">
-                <div class="status-emoji">😴</div>
-                <h2 class="status-title" data-i18n="status.closed.title">Foodtruck geschlossen</h2>
-                <p class="status-description" data-i18n="status.closed.desc">Wir sind gerade geschlossen. Schauen Sie später wieder vorbei!</p>
-                <button class="status-retry-btn" onclick="location.reload()" data-i18n="status.retry">Erneut versuchen</button>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>🍕 Pizza&Pasta D'amico</h1>
             </div>
-
-            <!-- STATUS KEINE PRODUKTE -->
-            <div class="status-message" id="noProductsMessage" style="display: none;">
-                <div class="status-emoji">📦</div>
-                <h2 class="status-title" data-i18n="status.noproducts.title">Keine Produkte verfügbar</h2>
-                <p class="status-description" data-i18n="status.noproducts.desc">Momentan sind keine Gerichte verfügbar.</p>
-                <button class="status-retry-btn" onclick="location.reload()" data-i18n="status.retry">Erneut versuchen</button>
+            
+            <!-- Language Selector -->
+            <div class="language-selector">
+                <button class="lang-btn" onclick="window.ml.changeLanguage('de')">DE</button>
+                <button class="lang-btn" onclick="window.ml.changeLanguage('fr')">FR</button>
+                <button class="lang-btn" onclick="window.ml.changeLanguage('it')">IT</button>
+                <button class="lang-btn" onclick="window.ml.changeLanguage('es')">ES</button>
+                <button class="lang-btn" onclick="window.ml.changeLanguage('en')">EN</button>
             </div>
+            
+            <!-- Cart Button (Mobile) -->
+            <button class="cart-toggle" id="cartToggle">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" id="cartCount">0</span>
+            </button>
+        </div>
+    </header>
 
-            <!-- STATUS VERBINDUNGSFEHLER -->
-            <div class="status-message" id="errorMessage" style="display: none;">
-                <div class="status-emoji">⚠️</div>
-                <h2 class="status-title" data-i18n="status.error.title">Verbindungsfehler</h2>
-                <p class="status-description" data-i18n="status.error.desc">Es gab ein Problem beim Laden. Bitte versuchen Sie es erneut.</p>
-                <button class="status-retry-btn" onclick="location.reload()" data-i18n="status.retry">Erneut versuchen</button>
+    <!-- Restaurant Status Banner -->
+    <div id="restaurantStatus" style="display: none;"></div>
+
+    <!-- Wait Time Banner -->
+    <div class="wait-time-banner">
+        <i class="fas fa-clock"></i>
+        <span data-i18n="wait.current">Aktuelle Wartezeit:</span>
+        <strong id="currentWaitTime">15 Min</strong>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Products Section -->
+        <main class="products-section">
+            <div class="products-container" id="productsContainer">
+                <!-- Produkte werden hier dynamisch geladen -->
             </div>
+        </main>
 
-            <!-- PRODUKTE SECTION -->
-            <div class="section" id="productsSection">
-                <h2 class="section-title" data-i18n="products.title">Unsere Spezialitäten</h2>
-                <div class="products-grid" id="productsGrid">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p data-i18n="loading">Speisekarte wird geladen...</p>
+        <!-- Cart Sidebar -->
+        <aside class="cart-sidebar" id="cartSidebar">
+            <div class="cart-header">
+                <h2 data-i18n="cart.title">Warenkorb</h2>
+                <button class="cart-close" id="cartClose" onclick="toggleCart()">×</button>
+            </div>
+            
+            <div class="cart-items" id="cartItems">
+                <p class="empty-cart" data-i18n="cart.empty">Ihr Warenkorb ist leer</p>
+            </div>
+            
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span data-i18n="cart.total">Gesamt:</span>
+                    <span id="totalAmount">CHF 0.00</span>
+                </div>
+                <button class="checkout-btn" id="checkoutBtn" onclick="checkout()" disabled>
+                    <i class="fas fa-credit-card"></i>
+                    <span data-i18n="cart.checkout">Zur Kasse</span>
+                </button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Cart Backdrop (Mobile) -->
+    <div id="cartBackdrop"></div>
+
+    <!-- Payment Dialog -->
+    <div class="payment-backdrop" id="paymentBackdrop"></div>
+    <div class="payment-dialog" id="paymentDialog">
+        <div class="payment-header">
+            <h2 data-i18n="payment.title">Zahlungsmethode wählen</h2>
+            <button class="close-dialog" onclick="closePaymentDialog()">×</button>
+        </div>
+        
+        <div class="payment-content">
+            <div class="order-summary">
+                <h3 data-i18n="payment.summary">Bestellübersicht</h3>
+                <div id="paymentOrderItems"></div>
+                <div class="total-row">
+                    <strong data-i18n="payment.total">Gesamt:</strong>
+                    <strong id="paymentTotal">CHF 0.00</strong>
+                </div>
+            </div>
+            
+            <div class="customer-info">
+                <h3 data-i18n="payment.customer">Ihre Daten</h3>
+                <input type="text" id="customerName" placeholder="Name" required>
+                <input type="tel" id="customerPhone" placeholder="Telefon (für SMS-Benachrichtigung)">
+                <input type="email" id="customerEmail" placeholder="Email (optional)">
+            </div>
+            
+            <div class="payment-methods">
+                <h3 data-i18n="payment.method">Zahlungsmethode</h3>
+                
+                <label class="payment-option">
+                    <input type="radio" name="paymentMethod" value="stripe" checked>
+                    <div class="payment-option-content">
+                        <i class="fas fa-credit-card"></i>
+                        <span data-i18n="payment.card">Kartenzahlung</span>
+                        <small>Visa, Mastercard, American Express</small>
                     </div>
-                </div>
-            </div>
-
-            <!-- WARENKORB -->
-            <div class="cart-section" id="cartSection">
-                <div class="cart-header">
-                    <i class="fas fa-shopping-cart"></i>
-                    <h3 data-i18n="cart.title">Ihre Bestellung</h3>
-                </div>
-                <div id="cartItems"></div>
-                <div class="cart-totals">
-                    <div class="cart-total-row final">
-                        <span data-i18n="cart.total">Gesamttotal</span>
-                        <span id="totalPrice">CHF 0.00</span>
+                </label>
+                
+                <label class="payment-option">
+                    <input type="radio" name="paymentMethod" value="cash">
+                    <div class="payment-option-content">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span data-i18n="payment.cash">Barzahlung</span>
+                        <small>Bei Abholung bezahlen</small>
                     </div>
-                </div>
+                </label>
+                
+                <label class="payment-option disabled">
+                    <input type="radio" name="paymentMethod" value="twint" disabled>
+                    <div class="payment-option-content">
+                        <img src="https://www.twint.ch/content/dam/twint/logos/twint-logo.svg" alt="TWINT" style="height: 20px;">
+                        <span>TWINT</span>
+                        <small>Kommt bald</small>
+                    </div>
+                </label>
             </div>
-
-            <!-- NOTIZEN -->
-            <div class="note-section" style="display: none;" id="noteSection">
-                <h3>
-                    <i class="fas fa-comment"></i> 
-                    <span data-i18n="order.note">Besondere Wünsche</span>
-                </h3>
-                <textarea 
-                    id="orderNote" 
-                    class="note-input" 
-                    data-i18n="order.note.placeholder"
-                    placeholder="z.B. extra scharf, ohne Zwiebeln..."></textarea>
-            </div>
-
-            <!-- BESTELL-BUTTON -->
-            <button id="orderBtn" class="order-btn" disabled onclick="placeOrder()">
-                <i class="fas fa-shopping-cart"></i> 
-                <span data-i18n="cart.empty">Produkt auswählen</span>
+            
+            <textarea id="orderNotes" placeholder="Besondere Wünsche? (optional)" rows="3"></textarea>
+            
+            <button class="confirm-payment-btn" onclick="confirmPayment()">
+                <i class="fas fa-check-circle"></i>
+                <span data-i18n="payment.confirm">Bestellung abschließen</span>
             </button>
         </div>
     </div>
 
-    <!-- NOTIFICATION POPUP -->
+    <!-- Notification Popup -->
     <div class="notification-popup" id="notificationPopup">
         <span id="notificationMessage"></span>
     </div>
 
-    <!-- ORDER TRACKING POPUP -->
-    <div class="order-tracking-popup" id="orderTrackingPopup" style="display: none;">
-        <div class="popup-content">
-            <h3 data-i18n="order.track.title">Möchten Sie Ihre Bestellung verfolgen?</h3>
-            <div class="popup-buttons">
-                <button class="btn btn-primary" onclick="openTrackingPage()">
-                    <i class="fas fa-search"></i> Verfolgen
-                </button>
-                <button class="btn btn-secondary" onclick="closeTrackingPopup()">
-                    <i class="fas fa-times"></i> Schließen
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
     <!-- Stripe SDK -->
     <script src="https://js.stripe.com/v3/"></script>
+    
+    <!-- Multilingual Support -->
+    <script src="js/multilingual.js"></script>
 
     <script>
-        // FIREBASE CONFIGURATION
-         const firebaseConfig = {
+        // Firebase Konfiguration - DEINE ECHTEN DATEN
+        const firebaseConfig = {
             apiKey: "AIzaSyBiVdp67AZmZnGpM8OlZXBGKJKhF4iDlsE",
             authDomain: "pizzapastadamico.firebaseapp.com",
             databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
@@ -160,449 +263,530 @@
             appId: "1:168976461234:web:abc123def456ghi789"
         };
 
-        // STRIPE CONFIGURATION
-        const stripe = Stripe('pk_test_51234567890abcdef'); // TEST KEY - In Production ersetzen!
-
         // Firebase initialisieren
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // GLOBAL VARIABLES
-        let availableProducts = {};
-        let cart = {};
-        let currentWaitTime = 5;
-        let restaurantOpen = false;
-        let currentOrderId = null;
+        // Stripe initialisieren
+        const stripe = Stripe('pk_test_51NqKxXKN6yMlXqF2e5VZoYwY8fVJwPpW7KQUZjQqvRxZUzqnMQGKSgPqSJrYfxCaAKJR0wfbNqOUxXp1kSpSfxXx00HGQqvJYH');
 
-        // INITIALIZATION
+        // Globale Variablen
+        let cart = [];
+        let products = {};
+        let currentWaitTime = 15;
+        let restaurantOpen = true;
+
+        // Placeholder Image
+        const PLACEHOLDER_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9iMzAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSI+S2VpbiBCaWxkPC90ZXh0Pjwvc3ZnPg==';
+
+        // Initialisierung
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Pizza&Pasta D\'amico wird geladen...');
+            console.log('Pizza&Pasta D\'amico wird initialisiert...');
             
-            // Sprache initialisieren
+            // Multilingual initialisieren
             if (window.ml) {
                 window.ml.init();
             }
             
-            // Core-Funktionen laden
-            loadRestaurantStatus();
-            loadWaitTime();
+            // Komponenten initialisieren
             loadProducts();
-            setupNotificationListener();
+            setupRealtimeListeners();
+            loadCartFromLocalStorage();
+            updateCartUI();
             
-            // Loading-Screen nach 2 Sekunden verstecken
-            setTimeout(hideLoadingScreen, 2000);
+            // Loading Screen ausblenden
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.display = 'none';
+            }, 1500);
         });
 
-        // LOADING SCREEN VERSTECKEN
-        function hideLoadingScreen() {
-            const loader = document.getElementById('pizzaLoader');
-            loader.classList.add('hidden');
-        }
-
-        // RESTAURANT STATUS LADEN
-        function loadRestaurantStatus() {
-            database.ref('settings/restaurantOpen').on('value', (snapshot) => {
-                restaurantOpen = snapshot.val() || false;
-                updateRestaurantStatus();
-            });
-        }
-
-        // RESTAURANT STATUS UPDATE
-        function updateRestaurantStatus() {
-            const statusBadge = document.getElementById('statusBadge');
-            const statusText = document.getElementById('statusText');
-            const closedMessage = document.getElementById('closedMessage');
-            const productsSection = document.getElementById('productsSection');
-
-            if (restaurantOpen) {
-                statusBadge.style.background = 'rgba(34, 197, 94, 0.2)';
-                statusBadge.style.borderColor = 'rgba(34, 197, 94, 0.3)';
-                statusBadge.style.color = '#22c55e';
-                statusText.textContent = window.t ? window.t('status.open') : 'Geöffnet';
+        // Produkte laden
+        async function loadProducts() {
+            try {
+                const snapshot = await database.ref('products').once('value');
+                const productsData = snapshot.val();
                 
-                closedMessage.style.display = 'none';
-                productsSection.style.display = 'block';
-            } else {
-                statusBadge.style.background = 'rgba(239, 68, 68, 0.2)';
-                statusBadge.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-                statusBadge.style.color = '#ef4444';
-                statusText.textContent = window.t ? window.t('status.closed') : 'Geschlossen';
+                if (!productsData || Object.keys(productsData).length === 0) {
+                    console.log('Keine Produkte gefunden, erstelle Demo-Produkte...');
+                    await createDemoProducts();
+                    loadProducts(); // Neu laden
+                    return;
+                }
                 
-                closedMessage.style.display = 'block';
-                productsSection.style.display = 'none';
-            }
-        }
-
-        // WARTEZEIT LADEN
-        function loadWaitTime() {
-            database.ref('settings/waitTime').on('value', (snapshot) => {
-                currentWaitTime = snapshot.val() || 5;
-                updateWaitTimeDisplay();
-            });
-        }
-
-        // WARTEZEIT ANZEIGE UPDATE
-        function updateWaitTimeDisplay() {
-            const prepTime = document.getElementById('prepTime');
-            const waitTimeBanner = document.getElementById('waitTimeBanner');
-            const waitTimeText = document.getElementById('waitTimeText');
-
-            prepTime.textContent = `${currentWaitTime} Min`;
-            
-            if (currentWaitTime > 5) {
-                waitTimeBanner.style.display = 'flex';
-                waitTimeText.textContent = window.t 
-                    ? window.t('waittime.current', { time: currentWaitTime })
-                    : `Aktuelle Wartezeit: ${currentWaitTime} Minuten`;
-            } else {
-                waitTimeBanner.style.display = 'none';
-            }
-        }
-
-        // PRODUKTE LADEN
-        function loadProducts() {
-            database.ref('products').on('value', (snapshot) => {
-                availableProducts = snapshot.val() || {};
-                renderProducts();
-            }, (error) => {
+                products = productsData;
+                displayProducts(products);
+            } catch (error) {
                 console.error('Fehler beim Laden der Produkte:', error);
-                showErrorMessage();
+                document.getElementById('productsContainer').innerHTML = `
+                    <div class="error-message">
+                        <p>Fehler beim Laden der Produkte.</p>
+                        <button onclick="location.reload()">Neu laden</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Demo-Produkte erstellen
+        async function createDemoProducts() {
+            const demoProducts = {
+                'pizza-margherita': {
+                    name: 'Pizza Margherita',
+                    category: 'pizza',
+                    price: 18.50,
+                    description: 'Tomatensauce, Mozzarella, Basilikum',
+                    available: true,
+                    image: PLACEHOLDER_IMAGE
+                },
+                'pizza-salami': {
+                    name: 'Pizza Salami',
+                    category: 'pizza',
+                    price: 22.00,
+                    description: 'Tomatensauce, Mozzarella, Salami',
+                    available: true,
+                    image: PLACEHOLDER_IMAGE
+                },
+                'spaghetti-carbonara': {
+                    name: 'Spaghetti Carbonara',
+                    category: 'pasta',
+                    price: 19.50,
+                    description: 'Spaghetti, Ei, Speck, Parmesan',
+                    available: true,
+                    image: PLACEHOLDER_IMAGE
+                },
+                'penne-arrabiata': {
+                    name: 'Penne Arrabiata',
+                    category: 'pasta',
+                    price: 17.00,
+                    description: 'Penne, scharfe Tomatensauce',
+                    available: true,
+                    image: PLACEHOLDER_IMAGE
+                },
+                'caesar-salad': {
+                    name: 'Caesar Salat',
+                    category: 'salate',
+                    price: 16.50,
+                    description: 'Römersalat, Croutons, Parmesan, Caesar-Dressing',
+                    available: true,
+                    image: PLACEHOLDER_IMAGE
+                },
+                'cola': {
+                    name: 'Coca Cola',
+                    category: 'getränke',
+                    price: 4.50,
+                    description: '0.5l',
+                    available: true,
+                    image: PLACEHOLDER_IMAGE
+                }
+            };
+
+            // Kategorien erstellen
+            await database.ref('categories').set(['pizza', 'pasta', 'salate', 'getränke']);
+            
+            // Produkte erstellen
+            for (const [id, product] of Object.entries(demoProducts)) {
+                await database.ref(`products/${id}`).set(product);
+            }
+        }
+
+        // Produkte anzeigen
+        function displayProducts(products) {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = '';
+            
+            // Nach Kategorien gruppieren
+            const categories = {};
+            Object.entries(products).forEach(([id, product]) => {
+                if (!categories[product.category]) {
+                    categories[product.category] = [];
+                }
+                categories[product.category].push({ ...product, id });
+            });
+            
+            // Kategorien anzeigen
+            Object.entries(categories).forEach(([category, items]) => {
+                const section = document.createElement('div');
+                section.className = 'category-section';
+                section.innerHTML = `
+                    <h2 class="category-title">${category.charAt(0).toUpperCase() + category.slice(1)}</h2>
+                    <div class="products-grid">
+                        ${items.map(product => createProductCard(product)).join('')}
+                    </div>
+                `;
+                container.appendChild(section);
             });
         }
 
-        // PRODUKTE RENDERN
-        function renderProducts() {
-            const grid = document.getElementById('productsGrid');
-            const products = Object.entries(availableProducts).filter(([_, product]) => product.available);
-            
-            if (products.length === 0) {
-                showNoProductsMessage();
-                return;
-            }
-            
-            grid.innerHTML = products.map(([id, product]) => `
-                <div class="product-card" data-product="${id}">
+        // Produkt-Karte erstellen
+        function createProductCard(product) {
+            return `
+                <div class="product-card ${!product.available ? 'unavailable' : ''}" data-id="${product.id}">
+                    <img src="${product.image || PLACEHOLDER_IMAGE}" alt="${product.name}" class="product-image">
                     <div class="product-info">
-                        <div class="product-emoji">${getProductEmoji(product.category)}</div>
-                        <div class="product-details">
-                            <h3>${product.name}</h3>
-                            <div class="product-price">CHF ${product.price.toFixed(2)}</div>
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-description">${product.description || ''}</p>
+                        <div class="product-footer">
+                            <span class="product-price">CHF ${product.price.toFixed(2)}</span>
+                            ${product.available ? `
+                                <button class="add-to-cart-btn" onclick="addToCart('${product.id}')">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            ` : '<span class="unavailable-text">Nicht verfügbar</span>'}
                         </div>
                     </div>
-                    <p class="product-description">${product.description}</p>
-                    <div class="quantity-controls">
-                        <button class="quantity-btn" onclick="updateCart('${id}', -1)">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <span class="quantity-display" id="qty-${id}">0</span>
-                        <button class="quantity-btn" onclick="updateCart('${id}', 1)">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
                 </div>
-            `).join('');
-
-            hideStatusMessages();
+            `;
         }
 
-        // PRODUKT EMOJI ERMITTELN
-        function getProductEmoji(category) {
-            const emojis = {
-                'pizza': '🍕',
-                'pasta': '🍝',
-                'salad': '🥗',
-                'drink': '🥤',
-                'dessert': '🍰'
-            };
-            return emojis[category] || '🍽️';
-        }
-
-        // STATUS NACHRICHTEN VERBERGEN
-        function hideStatusMessages() {
-            document.getElementById('closedMessage').style.display = 'none';
-            document.getElementById('noProductsMessage').style.display = 'none';
-            document.getElementById('errorMessage').style.display = 'none';
-            document.getElementById('productsSection').style.display = 'block';
-        }
-
-        // KEINE PRODUKTE NACHRICHT
-        function showNoProductsMessage() {
-            document.getElementById('noProductsMessage').style.display = 'block';
-            document.getElementById('productsSection').style.display = 'none';
-        }
-
-        // FEHLER NACHRICHT
-        function showErrorMessage() {
-            document.getElementById('errorMessage').style.display = 'block';
-            document.getElementById('productsSection').style.display = 'none';
-        }
-
-        // WARENKORB AKTUALISIEREN
-        function updateCart(productId, change) {
-            if (!availableProducts[productId]) return;
+        // Realtime Listeners
+        function setupRealtimeListeners() {
+            // Restaurant Status
+            database.ref('settings/restaurantOpen').on('value', (snapshot) => {
+                restaurantOpen = snapshot.val() !== false;
+                updateRestaurantStatus(restaurantOpen);
+            });
             
-            if (!cart[productId]) cart[productId] = 0;
-            cart[productId] = Math.max(0, cart[productId] + change);
+            // Wartezeit
+            database.ref('settings/waitTime').on('value', (snapshot) => {
+                currentWaitTime = snapshot.val() || 15;
+                updateWaitTimeDisplay(currentWaitTime);
+            });
+        }
+
+        // Restaurant Status Update
+        function updateRestaurantStatus(isOpen) {
+            const statusBanner = document.getElementById('restaurantStatus');
+            const checkoutBtn = document.getElementById('checkoutBtn');
             
-            if (cart[productId] === 0) {
-                delete cart[productId];
+            if (!isOpen) {
+                statusBanner.innerHTML = `
+                    <div class="closed-banner">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Restaurant ist momentan geschlossen</span>
+                    </div>
+                `;
+                statusBanner.style.display = 'block';
+                
+                if (checkoutBtn) {
+                    checkoutBtn.disabled = true;
+                    checkoutBtn.innerHTML = '<i class="fas fa-times"></i> Geschlossen';
+                }
+            } else {
+                statusBanner.style.display = 'none';
+                updateCartUI();
+            }
+        }
+
+        // Wartezeit anzeigen
+        function updateWaitTimeDisplay(minutes) {
+            const element = document.getElementById('currentWaitTime');
+            if (element) {
+                element.textContent = `${minutes} Min`;
+            }
+        }
+
+        // Zum Warenkorb hinzufügen
+        function addToCart(productId) {
+            const product = products[productId];
+            if (!product || !product.available) return;
+            
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({
+                    id: productId,
+                    name: product.name,
+                    price: product.price,
+                    description: product.description,
+                    quantity: 1
+                });
             }
             
-            document.getElementById(`qty-${productId}`).textContent = cart[productId] || 0;
-            updateCartDisplay();
+            updateCartUI();
+            saveCartToLocalStorage();
+            showNotification(`${product.name} wurde zum Warenkorb hinzugefügt`);
+            
+            // Mobile: Cart öffnen
+            if (window.innerWidth < 768) {
+                toggleCart();
+            }
         }
 
-        // WARENKORB-ANZEIGE AKTUALISIEREN
-        function updateCartDisplay() {
-            const cartSection = document.getElementById('cartSection');
+        // Warenkorb UI aktualisieren
+        function updateCartUI() {
             const cartItems = document.getElementById('cartItems');
-            const totalPrice = document.getElementById('totalPrice');
-            const orderBtn = document.getElementById('orderBtn');
-            const noteSection = document.getElementById('noteSection');
+            const totalAmount = document.getElementById('totalAmount');
+            const cartCount = document.getElementById('cartCount');
+            const checkoutBtn = document.getElementById('checkoutBtn');
             
-            const items = Object.entries(cart);
-            
-            if (items.length === 0) {
-                cartSection.classList.remove('visible');
-                noteSection.style.display = 'none';
-                orderBtn.disabled = true;
-                orderBtn.innerHTML = `<i class="fas fa-shopping-cart"></i> ${window.t ? window.t('cart.empty') : 'Produkt auswählen'}`;
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p class="empty-cart" data-i18n="cart.empty">Ihr Warenkorb ist leer</p>';
+                totalAmount.textContent = 'CHF 0.00';
+                cartCount.textContent = '0';
+                cartCount.style.display = 'none';
+                checkoutBtn.disabled = true;
                 return;
             }
             
-            cartSection.classList.add('visible');
-            noteSection.style.display = 'block';
-            
             let total = 0;
-            cartItems.innerHTML = items.map(([productId, quantity]) => {
-                const product = availableProducts[productId];
-                const itemTotal = product.price * quantity;
+            let itemCount = 0;
+            
+            cartItems.innerHTML = cart.map((item, index) => {
+                const itemTotal = item.price * item.quantity;
                 total += itemTotal;
+                itemCount += item.quantity;
                 
                 return `
                     <div class="cart-item">
                         <div class="cart-item-info">
-                            <div class="cart-item-name">${product.name}</div>
-                            <div class="cart-item-details">${quantity}x CHF ${product.price.toFixed(2)}</div>
+                            <h4>${item.name}</h4>
+                            <p>CHF ${item.price.toFixed(2)}</p>
                         </div>
-                        <div class="cart-item-price">CHF ${itemTotal.toFixed(2)}</div>
+                        <div class="cart-item-controls">
+                            <button onclick="updateQuantity(${index}, -1)">-</button>
+                            <span>${item.quantity}</span>
+                            <button onclick="updateQuantity(${index}, 1)">+</button>
+                            <button class="remove-btn" onclick="removeFromCart(${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
             }).join('');
             
-            totalPrice.textContent = `CHF ${total.toFixed(2)}`;
-            
-            const itemCount = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-            orderBtn.disabled = false;
-            
-            const orderText = window.t 
-                ? window.t('order.button', { count: itemCount })
-                : `Bestellen (${itemCount} Artikel)`;
-            orderBtn.innerHTML = `<i class="fas fa-shopping-cart"></i> ${orderText}`;
+            totalAmount.textContent = `CHF ${total.toFixed(2)}`;
+            cartCount.textContent = itemCount;
+            cartCount.style.display = itemCount > 0 ? 'flex' : 'none';
+            checkoutBtn.disabled = !restaurantOpen || itemCount === 0;
         }
 
-        // BESTELLUNG AUFGEBEN
-        async function placeOrder() {
-            if (Object.keys(cart).length === 0) return;
+        // Menge aktualisieren
+        function updateQuantity(index, change) {
+            cart[index].quantity += change;
             
-            const orderBtn = document.getElementById('orderBtn');
-            const originalText = orderBtn.innerHTML;
-            
-            // Loading-Status
-            orderBtn.disabled = true;
-            orderBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${window.t ? window.t('order.processing') : 'Bestellung wird verarbeitet...'}`;
-            
-            try {
-                // Bestelldaten vorbereiten
-                const orderData = {
-                    id: generateOrderId(),
-                    timestamp: new Date().toISOString(),
-                    items: Object.entries(cart).map(([productId, quantity]) => ({
-                        id: productId,
-                        name: availableProducts[productId].name,
-                        price: availableProducts[productId].price,
-                        quantity: quantity
-                    })),
-                    total: Object.entries(cart).reduce((sum, [productId, quantity]) => {
-                        return sum + (availableProducts[productId].price * quantity);
-                    }, 0),
-                    note: document.getElementById('orderNote').value.trim(),
-                    status: 'neu',
-                    waitTime: calculateWaitTime(),
-                    paymentMethod: 'cash' // Default zu Barzahlung
-                };
-
-                // Bestellung zu Firebase senden
-                const orderRef = await database.ref('orders').push(orderData);
-                currentOrderId = orderRef.key;
-
-                // Erfolg anzeigen
-                const successText = window.t 
-                    ? window.t('order.success', { id: orderData.id, time: orderData.waitTime })
-                    : `✅ Bestellung #${orderData.id} eingegangen! Geschätzte Wartezeit: ${orderData.waitTime} Min`;
-                
-                showNotification(successText, 'success');
-
-                // Warenkorb leeren
-                cart = {};
-                updateCartDisplay();
-                
-                // Tracking-Popup anzeigen
-                setTimeout(() => {
-                    showTrackingPopup();
-                }, 2000);
-
-            } catch (error) {
-                console.error('Fehler beim Aufgeben der Bestellung:', error);
-                const errorText = window.t 
-                    ? window.t('order.error')
-                    : 'Fehler bei der Bestellung. Bitte versuchen Sie es erneut.';
-                showNotification(errorText, 'error');
-            } finally {
-                orderBtn.disabled = false;
-                orderBtn.innerHTML = originalText;
+            if (cart[index].quantity <= 0) {
+                cart.splice(index, 1);
             }
-        }
-
-        // BESTELLNUMMER GENERIEREN
-        function generateOrderId() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
-            return `${hours}${minutes}${random}`;
-        }
-
-        // WARTEZEIT BERECHNEN
-        function calculateWaitTime() {
-            const totalItems = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
             
-            if (totalItems < 6) {
-                return Math.max(currentWaitTime, 5);
-            } else if (totalItems < 12) {
-                return Math.max(currentWaitTime, 10);
+            updateCartUI();
+            saveCartToLocalStorage();
+        }
+
+        // Aus Warenkorb entfernen
+        function removeFromCart(index) {
+            const item = cart[index];
+            cart.splice(index, 1);
+            updateCartUI();
+            saveCartToLocalStorage();
+            showNotification(`${item.name} wurde entfernt`);
+        }
+
+        // Cart Toggle (Mobile)
+        function toggleCart() {
+            const cartSidebar = document.getElementById('cartSidebar');
+            const backdrop = document.getElementById('cartBackdrop');
+            
+            const isOpen = cartSidebar.classList.contains('open');
+            
+            if (isOpen) {
+                cartSidebar.classList.remove('open');
+                backdrop.style.display = 'none';
             } else {
-                const extraTime = Math.ceil((totalItems - 12) / 3) * 5;
-                return Math.max(currentWaitTime, 10 + extraTime);
+                cartSidebar.classList.add('open');
+                backdrop.style.display = 'block';
+                backdrop.onclick = () => toggleCart();
             }
         }
 
-        // NOTIFICATION LISTENER SETUP
-        function setupNotificationListener() {
-            if (!currentOrderId) return;
+        // Checkout
+        function checkout() {
+            if (cart.length === 0 || !restaurantOpen) return;
             
-            database.ref(`notifications/${currentOrderId}`).on('child_added', (snapshot) => {
-                const notification = snapshot.val();
-                showNotification(notification.message, 'info', notification.playSound);
-            });
+            // Payment Dialog vorbereiten
+            const orderItems = document.getElementById('paymentOrderItems');
+            const paymentTotal = document.getElementById('paymentTotal');
+            
+            let total = 0;
+            orderItems.innerHTML = cart.map(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                return `
+                    <div class="payment-order-item">
+                        <span>${item.quantity}x ${item.name}</span>
+                        <span>CHF ${itemTotal.toFixed(2)}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            paymentTotal.textContent = `CHF ${total.toFixed(2)}`;
+            
+            // Dialog anzeigen
+            showPaymentDialog();
         }
 
-        // NOTIFICATION ANZEIGEN
-        function showNotification(message, type = 'info', playSound = false) {
-            const notification = document.getElementById('notificationPopup');
-            const messageSpan = document.getElementById('notificationMessage');
+        // Payment Dialog anzeigen
+        function showPaymentDialog() {
+            const dialog = document.getElementById('paymentDialog');
+            const backdrop = document.getElementById('paymentBackdrop');
             
-            messageSpan.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}"></i> 
-                ${message}
-            `;
-            notification.className = `notification-popup ${type} show`;
-            
-            if (playSound) {
-                playNotificationSound();
-            }
+            dialog.style.display = 'block';
+            backdrop.style.display = 'block';
             
             setTimeout(() => {
-                notification.classList.remove('show');
-            }, 5000);
+                dialog.classList.add('show');
+                backdrop.classList.add('show');
+            }, 10);
         }
 
-        // NOTIFICATION SOUND
-        function playNotificationSound() {
-            try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
+        // Payment Dialog schließen
+        function closePaymentDialog() {
+            const dialog = document.getElementById('paymentDialog');
+            const backdrop = document.getElementById('paymentBackdrop');
+            
+            dialog.classList.remove('show');
+            backdrop.classList.remove('show');
+            
+            setTimeout(() => {
+                dialog.style.display = 'none';
+                backdrop.style.display = 'none';
+            }, 300);
+        }
 
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-
-                oscillator.frequency.value = 1000;
-                oscillator.type = 'sine';
-                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
-
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.8);
-            } catch (error) {
-                console.log('Sound nicht verfügbar:', error);
+        // Payment bestätigen
+        async function confirmPayment() {
+            const customerName = document.getElementById('customerName').value.trim();
+            const customerPhone = document.getElementById('customerPhone').value.trim();
+            const customerEmail = document.getElementById('customerEmail').value.trim();
+            const orderNotes = document.getElementById('orderNotes').value.trim();
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            
+            if (!customerName) {
+                showNotification('Bitte geben Sie Ihren Namen ein', 'error');
+                return;
             }
-        }
-
-        // TRACKING POPUP ANZEIGEN
-        function showTrackingPopup() {
-            document.getElementById('orderTrackingPopup').style.display = 'flex';
-        }
-
-        // TRACKING POPUP SCHLIESSEN
-        function closeTrackingPopup() {
-            document.getElementById('orderTrackingPopup').style.display = 'none';
-        }
-
-        // TRACKING SEITE ÖFFNEN
-        function openTrackingPage() {
-            if (currentOrderId) {
-                window.open(`track.html?order=${currentOrderId}`, '_blank');
-            }
-            closeTrackingPopup();
-        }
-
-        // DEMO PRODUKTE ERSTELLEN (nur wenn keine vorhanden)
-        function createDemoProducts() {
-            const demoProducts = {
-                'margherita': {
-                    name: 'Pizza Margherita',
-                    description: 'Klassische Pizza mit Tomaten, Mozzarella und frischem Basilikum',
-                    price: 18.50,
-                    category: 'pizza',
-                    available: true
-                },
-                'quattro-stagioni': {
-                    name: 'Pizza Quattro Stagioni',
-                    description: 'Mit Champignons, Artischocken, Schinken und Oliven',
-                    price: 22.50,
-                    category: 'pizza',
-                    available: true
-                },
-                'carbonara': {
-                    name: 'Pasta Carbonara',
-                    description: 'Cremige Pasta mit Pancetta, Ei und Parmesan',
-                    price: 19.00,
-                    category: 'pasta',
-                    available: true
-                },
-                'puttanesca': {
-                    name: 'Pasta Puttanesca',
-                    description: 'Würzige Pasta mit Tomaten, Oliven, Kapern und Anchovis',
-                    price: 20.50,
-                    category: 'pasta',
-                    available: true
-                }
+            
+            // Wartezeit berechnen
+            const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const estimatedWaitTime = itemCount < 6 ? 5 : itemCount < 12 ? 10 : Math.round(itemCount * 1.5);
+            
+            const orderData = {
+                customerName,
+                phone: customerPhone,
+                email: customerEmail,
+                notes: orderNotes,
+                items: cart,
+                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                paymentMethod,
+                status: 'neu',
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                estimatedWaitTime: Math.max(estimatedWaitTime, currentWaitTime),
+                id: generateOrderId()
             };
-
-            // Nur erstellen wenn keine Produkte vorhanden
-            database.ref('products').once('value', (snapshot) => {
-                if (!snapshot.exists()) {
-                    database.ref('products').set(demoProducts);
-                    console.log('Demo-Produkte erstellt');
-                }
-            });
+            
+            if (paymentMethod === 'stripe') {
+                await processStripePayment(orderData);
+            } else {
+                await processCashPayment(orderData);
+            }
         }
 
-        // Demo-Produkte erstellen beim ersten Laden
-        setTimeout(createDemoProducts, 1000);
+        // Stripe Payment
+        async function processStripePayment(orderData) {
+            try {
+                // Temporäre Bestellung für Stripe
+                const tempOrderRef = await database.ref('temp-orders').push({
+                    ...orderData,
+                    createdAt: firebase.database.ServerValue.TIMESTAMP
+                });
+                
+                // Stripe Checkout Session erstellen
+                const { error } = await stripe.redirectToCheckout({
+                    lineItems: cart.map(item => ({
+                        price_data: {
+                            currency: 'chf',
+                            product_data: {
+                                name: item.name,
+                                description: item.description || ''
+                            },
+                            unit_amount: Math.round(item.price * 100)
+                        },
+                        quantity: item.quantity
+                    })),
+                    mode: 'payment',
+                    successUrl: `${window.location.origin}/success.html?order=${tempOrderRef.key}`,
+                    cancelUrl: `${window.location.origin}/index.html`
+                });
+                
+                if (error) {
+                    console.error('Stripe Error:', error);
+                    showNotification('Fehler bei der Zahlung: ' + error.message, 'error');
+                    await tempOrderRef.remove();
+                }
+            } catch (error) {
+                console.error('Payment Error:', error);
+                showNotification('Zahlungsfehler. Bitte versuchen Sie es erneut.', 'error');
+            }
+        }
 
-        console.log('Pizza&Pasta D\'amico Customer Interface geladen!');
+        // Barzahlung
+        async function processCashPayment(orderData) {
+            try {
+                const orderRef = await database.ref('orders').push(orderData);
+                
+                // Warenkorb leeren
+                cart = [];
+                updateCartUI();
+                saveCartToLocalStorage();
+                closePaymentDialog();
+                
+                // Zur Erfolgsseite
+                window.location.href = `success.html?order=${orderRef.key}`;
+            } catch (error) {
+                console.error('Order Error:', error);
+                showNotification('Fehler beim Erstellen der Bestellung', 'error');
+            }
+        }
+
+        // Order ID generieren
+        function generateOrderId() {
+            return Math.random().toString(36).substr(2, 6).toUpperCase();
+        }
+
+        // LocalStorage
+        function saveCartToLocalStorage() {
+            try {
+                localStorage.setItem('pizzaCart', JSON.stringify(cart));
+            } catch (e) {
+                console.error('LocalStorage error:', e);
+            }
+        }
+
+        function loadCartFromLocalStorage() {
+            try {
+                const savedCart = localStorage.getItem('pizzaCart');
+                if (savedCart) {
+                    cart = JSON.parse(savedCart);
+                }
+            } catch (e) {
+                console.error('LocalStorage error:', e);
+                cart = [];
+            }
+        }
+
+        // Notifications
+        function showNotification(message, type = 'success') {
+            const popup = document.getElementById('notificationPopup');
+            const messageEl = document.getElementById('notificationMessage');
+            
+            messageEl.textContent = message;
+            popup.className = `notification-popup ${type}`;
+            popup.style.display = 'block';
+            
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 3000);
+        }
     </script>
 </body>
 </html>

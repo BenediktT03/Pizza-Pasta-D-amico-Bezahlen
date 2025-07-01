@@ -1,236 +1,136 @@
-# 🍕 Pizza&Pasta D'amico - Foodtruck Bestellsystem
+Pizza&Pasta D'amico – Foodtruck-Bestellsystem
+Projektbeschreibung
+Dieses Projekt ist ein webbasiertes Bestellsystem für Foodtrucks wie „Pizza&Pasta D’amico“. Kunden können mobil per QR-Code einfach und schnell Pizza, Pasta und weitere Speisen bestellen und direkt bezahlen. Betreiber verwalten alle Bestellungen zentral über ein Admin-Panel, aktualisieren den Status und optimieren Abläufe.
 
-Eine vollständige Bestelllösung für den italienischen Foodtruck "Pizza&Pasta D'amico" mit Echtzeit-Updates, dynamischen Wartezeiten und intelligentem Benachrichtigungssystem.
+Das System ist modular und kann Schritt für Schritt um neue Funktionen erweitert werden.
 
-## 📋 Aktueller Entwicklungsstand
+Inhaltsverzeichnis
+Technische Basis
 
-### ✅ **IMPLEMENTIERT - Grundfunktionen**
+Kernfunktionen (MVP)
 
-#### 🛒 **Kundenseite (index.html)**
-- ✅ Responsive Pizza-Loading-Animation
-- ✅ Dynamische Produktanzeige (Pizza & Pasta)
-- ✅ Interaktiver Warenkorb mit +/- Buttons
-- ✅ Bestellnotizen-Funktion
-- ✅ Firebase-Integration für Bestellungen
-- ✅ Stripe-Zahlungsintegration (Test-Modus)
-- ✅ Status-Anzeige (Foodtruck offen/geschlossen)
-- ✅ Admin-Login-Zugang
+Erweiterte Funktionen
 
-#### 🛡️ **Admin-System**
-- ✅ Sicheres Login-System (`admin@damico.ch` / `admin123`)
-- ✅ Bestellungsübersicht mit Echtzeit-Updates
-- ✅ Status-Management (Neu → Zubereitung → Fertig)
-- ✅ Foodtruck Ein/Aus-Schalter
-- ✅ Statistiken (Tagesumsatz, Bestellanzahl)
-- ✅ Bestellungen archivieren
+Betriebsoptimierung für Betreiber
 
-#### 🔥 **Backend & Infrastruktur**
-- ✅ Firebase Realtime Database
-- ✅ Komplette Firebase-Konfiguration
-- ✅ Echtzeit-Synchronisation zwischen Kunden und Admin
-- ✅ Automatische Produkterstellung bei Login
+Sicherheit & Datenschutz
 
----
+UX & Design Extras
 
-### 🆕 **NEU IMPLEMENTIERT - Erweiterte Features**
+Marketing & Kundenbindung
 
-#### ⏰ **Intelligente Wartezeit-Berechnung**
-- ✅ **Produktbasiert** (nicht bestellungsbasiert)
-- ✅ `< 6 Produkte = 5 Minuten`
-- ✅ `6-11 Produkte = 10 Minuten`
-- ✅ `12+ Produkte = 10 + (weitere 6er-Gruppen × 5-10 Min)`
-- ✅ Wartezeit-Banner auf Kundenseite
-- ✅ Live-Updates bei Änderungen
+Installation & Einrichtung
 
-#### 🔄 **Admin-Wartezeit-Management**
-- ✅ 4 voreingestellte Modi (Normal, Beschäftigt, Sehr voll, Custom)
-- ✅ Manuelle Überschreibung der automatischen Berechnung
-- ✅ **Live-Synchronisation**: Admin ändert → sofort bei Kunden sichtbar
-- ✅ Warteschlangen-Anzeige mit Produktanzahl
+Mitwirken & Weiterentwicklung
 
-#### 📱 **Push-Benachrichtigungssystem (Grundlage)**
-- ✅ Browser-Notification-Berechtigung-Anfrage
-- ✅ Infrastructure für 3-Stufen-Benachrichtigungen
-- ✅ Intelligente Ton-Steuerung (playSound true/false)
-- ✅ Bestellstatus-Überwachung
-- ✅ Lokale Tracking-Speicherung
+Lizenz
 
-#### 📊 **Verbesserte Admin-Features**
-- ✅ Wartezeit-Kontrollbereich im Dashboard
-- ✅ Produktanzahl in Warteschlange (statt Bestellungen)
-- ✅ Durchschnittliche Zubereitungszeit-Berechnung
-- ✅ Erweiterte Statistiken
+Technische Basis
+Frontend: HTML, CSS, JavaScript – responsives Design für Desktop und Mobilgeräte
 
-#### 🎯 **Bestellverfolgung**
-- ✅ Tracking-Popup nach Bestellung
-- ✅ Eindeutige Bestellnummern (`D + 8 Ziffern`)
-- ✅ Geschätzte Wartezeit-Anzeige
-- ✅ Produktanzahl in Zubereitung
+Backend: Firebase Realtime Database für Daten, Firebase Authentication für Admin-Login
 
----
+Zahlungsintegration: Schweizer Zahlungsmethoden (Twint, Kredit-/Debitkarten, Apple Pay, Google Pay, PayPal, PostFinance)
 
-## 🔧 **IN ENTWICKLUNG - Teilweise implementiert**
+Hosting: Webserver oder Firebase Hosting
 
-### 🔔 **3-Stufen Benachrichtigungssystem**
-**Status:** 80% implementiert, Admin-Interface fehlt noch
+Architektur: Single Page Application (SPA)
 
-#### ✅ **Bereits implementiert:**
-- Infrastructure für alle 3 Stufen
-- Ton-Steuerung (stille vs. akustische Benachrichtigung)
-- Firebase-basierte Nachrichtenübertragung
-- Browser-Notification-System
+Kernfunktionen (MVP – Must-Have)
+QR-Code Bestellung:
+Kunden scannen QR-Code am Foodtruck oder Tisch und greifen auf das Menü zu.
 
-#### ❌ **Noch zu implementieren in admin-dashboard.html:**
-1. **"Zubereitung" (ohne Ton)** - Button hinzufügen
-2. **"Fertig" (mit Ton)** - Button erweitern  
-3. **"Kunde rufen" (mit Ton)** - Neuer oranger Button
+Produktwahl:
+Auswahl von Pizza, Pasta und anderen Gerichten.
 
-### 📈 **Erweiterte Statistiken**
-**Status:** 60% implementiert
+Sofortige Bezahlung:
+Integration aller gängigen Schweizer Zahlungsmethoden.
 
-#### ✅ **Vorhanden:**
-- Tagesbestellungen und Umsatz
-- Aktive Produktanzahl
-- Durchschnittliche Zubereitungszeit
+Bestellübersicht für Betreiber:
+Echtzeit-Anzeige aller Bestellungen im Admin-Panel mit Statusanzeigen.
 
-#### ❌ **Geplant:**
-- Umsatz nach Produktkategorien
-- Stoßzeiten-Analyse
-- Wochenvergleiche
+Bestellstatus:
+Statusänderungen wie „In Zubereitung“ oder „Fertig zur Abholung“ für Kunden sichtbar.
 
----
+Mehrsprachigkeit:
+Website und Bestellprozess mindestens in Deutsch, Französisch, Italienisch, Spanisch und Englisch.
 
-## ❌ **NOCH ZU IMPLEMENTIEREN**
+PDF-Rechnung:
+Automatische Generierung und Versand mehrsprachiger Rechnungen auf Wunsch.
 
-### 🔥 **Hochpriorität**
+Admin Analytics:
+Umsatz, Bestellungen, Top-Produkte mit Exportfunktion (CSV/PDF).
 
-1. **Admin-Dashboard Benachrichtigungs-Buttons**
-   - 3 verschiedene Benachrichtigungs-Buttons pro Bestellung
-   - Automatische Benachrichtigungen bei Status-Änderungen
-   - Korrekte Ton-Zuordnung
+Erweiterte Funktionen (Nice-to-Have)
+Bewertungssystem:
+Kunden können Rezensionen und Sterne auf Google abgeben (Verlinkung zum Foodtruck-Profil).
 
-2. **Erweiterte Bestellverfolgung**
-   - Separate Tracking-Seite (`order-tracking.html`)
-   - QR-Code für Bestellungsnummer-Eingabe
-   - Live-Countdown bis zur Fertigstellung
+Vorbestellungen:
+Auswahl eines Abholzeitfensters (z.B. 30 Minuten später).
 
-3. **Optimierte Mobile-Experience**
-   - Touch-optimierte Buttons
-   - Bessere Produktkarten für kleine Bildschirme
-   - Swipe-Gesten für Admin-Dashboard
+Foodtruck-Kalender:
+Standort & Öffnungszeiten als Kalender mit Google Maps-Verlinkung.
 
-### 🚀 **Mittlere Priorität**
+Standort-Benachrichtigungen:
+Admin kann Standort manuell eintragen. Nutzer, die den Standort abonnieren, erhalten eine Benachrichtigung, wenn der Foodtruck dort ist.
 
-4. **SMS-Benachrichtigungen**
-   - Integration mit SMS-Service (z.B. Twilio)
-   - Optionale Telefonnummer bei Bestellung
-   - SMS bei Fertigstellung
+Design-Themes:
+Lightmode, Darkmode und weitere Farbschemata auswählbar.
 
-5. **Erweiterte Zahlungsoptionen**
-   - TWINT-Integration
-   - Barzahlung-Workflow
-   - PayPal-Support
+Trinkgeld-Option:
+Möglichkeit, beim Bezahlen Trinkgeld zu geben.
 
-6. **Inventory Management**
-   - Produktverfügbarkeit togglen
-   - Tagesaktuelle Angebote
-   - Ausverkauft-Status
+Captcha-Schutz:
+Captcha aktiviert bei mehr als 2 Bestellungen in kurzer Zeit.
 
-### 🎯 **Niedrige Priorität**
+Benachrichtigungen:
+Push- und E-Mail-Benachrichtigungen zu Bestellstatus und Standort.
 
-7. **QR-Code Integration**
-   - QR-Codes für verschiedene Standorte
-   - Tisch-spezifische Bestellungen
-   - Standort-Tracking
+Betriebsoptimierung für Betreiber
+Küchenmodus:
+Spezielle Ansicht für Teammitglieder mit Sortierung nach Dringlichkeit.
 
-8. **Analytics Dashboard**
-   - Detaillierte Verkaufsanalysen
-   - Export-Funktionen
-   - Graphische Auswertungen
+Digitale Küchenanzeige:
+Live-Bestellungen und Statusänderungen per Klick.
 
-9. **Multi-Language Support**
-   - Deutsch/Italienisch/Englisch
-   - Automatische Spracherkennung
+Tagesabschlussbericht:
+Automatischer Bericht zu Umsatz, Trinkgeldern, Top-Produkten; exportierbar.
 
-10. **Loyalty Program**
-    - Kundenkarten-System
-    - Rabatt-Codes
-    - Stammkunden-Vergünstigungen
+Audit-Logs:
+Protokollierung aller Admin-Aktionen.
 
----
+Offline-Modus:
+Zwischenspeicherung von Bestellungen bei Internetausfall.
 
-## 🏗️ **Technische Architektur**
+Wetterintegration:
+Wettervorhersage und Warnungen für geplante Standorte.
 
-### **Frontend**
-- **Vanilla JavaScript** (keine Frameworks)
-- **Firebase SDK** für Realtime Database
-- **Stripe.js** für Zahlungen
-- **Responsive CSS** mit Inter Font
+Sicherheit & Datenschutz
+IP-Tracking & Rate Limiting:
+Schutz vor Spam und Angriffen.
 
-### **Backend**
-- **Firebase Realtime Database** (Europe-West1)
-- **Firebase Hosting** für Deployment
-- **Stripe Test-Modus** für Zahlungen
+Automatischer Captcha:
+Aktivierung bei verdächtigem Verhalten.
 
-### **Entwicklungsumgebung**
-- **Node.js** für Firebase CLI
-- **Git** für Versionskontrolle
-- **VS Code** empfohlen
+DSGVO-Konformität:
+Datenanfragen, Export und Löschung durch Kunden möglich.
 
----
+Sichere Zahlungsabwicklung:
+Nutzung zertifizierter Payment-Provider.
 
-## 📊 **Metriken & KPIs**
+UX & Design Extras
+Barrierefreiheit:
+Screenreader-Support, hoher Kontrast, einfache Navigation.
 
-### **Aktuelle Performance**
-- ⚡ **Ladezeit**: < 2 Sekunden
-- 📱 **Mobile-Kompatibilität**: 95%
-- 🔄 **Echtzeit-Updates**: < 500ms
-- 💾 **Firebase-Limits**: Weit unter kostenlosen Limits
+Animationen & Soundfeedback:
+Visuelle und akustische Hinweise.
 
-### **Business-Metriken (Simulation)**
-- 🍕 **Durchschnittliche Bestellung**: CHF 22.50
-- ⏱️ **Durchschnittliche Wartezeit**: 8 Minuten
-- 📈 **Conversion Rate**: 85% (Warenkorb → Bestellung)
+Progressive Web App (PWA):
+Installation auf Smartphones, Offline-Funktion, Push-Benachrichtigungen.
 
----
+Marketing & Kundenbindung
+KI-gestützte Menüvorschläge:
+Personalisierte Empfehlungen basierend auf Bestellhistorie.
 
-## 🚨 **Bekannte Issues**
-
-### **Kritisch**
-- [ ] JavaScript-Syntax-Fehler in alter index.html behoben ✅
-- [ ] Doppelte Wartezeit-Icons behoben ✅
-
-### **Geringfügig**
-- [ ] iOS Safari: Push-Notifications nicht vollständig unterstützt
-- [ ] Sehr alte Browser: CSS-Grid Fallback fehlt
-- [ ] Offline-Modus: Noch nicht implementiert
-
----
-
-## 🎯 **Nächste Schritte (empfohlene Reihenfolge)**
-
-1. **Admin-Dashboard erweitern** - 3-Stufen-Benachrichtigungen implementieren
-2. **Bestellverfolgung verbessern** - Separate Tracking-Seite erstellen  
-3. **Mobile-Optimierung** - Touch-Experience verfeinern
-4. **SMS-Integration** - Twilio für Benachrichtigungen
-5. **Testing & Deployment** - Auf echtes Firebase-Projekt migrieren
-
----
-
-## 📞 **Support & Wartung**
-
-### **Demo-Zugangsdaten**
-- **Admin**: `admin@damico.ch` / `admin123`
-- **Firebase**: Vollständig konfiguriert
-- **Stripe**: Test-Modus aktiv
-
-### **Dokumentation**
-- Code ist vollständig kommentiert
-- Firebase-Setup in separater README
-- Deployment-Anleitung verfügbar
-
----
-
-**Version**: 2.0 (Erweitert)  
-**Letztes Update**: Juli 2025  
-**Status**: 🟢 Produktionsbereit (Grundfunktionen) | 🟡 In Entwicklung (Erweiterte Features)
+Social-Media-Integration:
+Teilen von Bestellungen und Bewertungen.

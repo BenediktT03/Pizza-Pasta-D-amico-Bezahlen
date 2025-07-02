@@ -3,588 +3,646 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pizza&Pasta D'amico - Bestellung</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Pizza&Pasta D'amico - Online Bestellen</title>
+    <link href="css/style.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="js/multilingual.js"></script>
-</head> 
+</head>
 <body>
-    <!-- Sprachauswahl -->
+    <!-- Pizza Loader -->
+    <div class="pizza-loader" id="pizzaLoader">
+        <div class="spinning-pizza">🍕</div>
+        <div class="loading-text">Pizza&Pasta D'amico</div>
+        <div class="loading-subtext" data-i18n="loading">Menü wird geladen...</div>
+    </div>
+
+    <!-- Language Selector -->
     <div class="language-selector">
         <!-- Wird von multilingual.js generiert -->
     </div>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <i class="fas fa-pizza-slice"></i>
-                <span>Pizza&Pasta D'amico</span>
-            </div>
-            <div class="header-actions">
-                <div class="wait-time-badge">
-                    <i class="far fa-clock"></i>
-                    <span data-i18n="waitTime">Wartezeit: </span>
-                    <span id="currentWaitTime">15</span> <span data-i18n="minutes">Min</span>
-                </div>
-                <button class="cart-button" onclick="toggleCart()">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span data-i18n="cart">Warenkorb</span>
-                    <span class="cart-count" id="cartCount">0</span>
-                </button>
+    <!-- Container -->
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🍕 Pizza&Pasta D'amico</h1>
+            <p class="subtitle" data-i18n="header.subtitle">Authentisch italienisch seit 1985</p>
+            <div class="location-info">
+                <i class="fas fa-map-marker-alt"></i>
+                <span data-i18n="header.location">Foodtruck am Marktplatz</span>
             </div>
         </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="container">
+        <!-- Content -->
+        <div class="content">
+            <!-- Wait Time Banner -->
+            <div class="wait-time-banner" id="waitTimeBanner">
+                <i class="fas fa-clock"></i>
+                <span data-i18n="waitTime.current">Aktuelle Wartezeit:</span>
+                <strong id="currentWaitTime">5</strong>
+                <span data-i18n="waitTime.minutes">Minuten</span>
+            </div>
+
+            <!-- Status Badges -->
+            <div class="status-badges">
+                <span class="status-badge active" id="openStatus">
+                    <i class="fas fa-door-open"></i>
+                    <span data-i18n="status.open">Geöffnet</span>
+                </span>
+                <span class="status-badge" id="closedStatus" style="display: none;">
+                    <i class="fas fa-door-closed"></i>
+                    <span data-i18n="status.closed">Geschlossen</span>
+                </span>
+                <span class="status-badge">
+                    <i class="fas fa-truck"></i>
+                    <span data-i18n="status.delivery">Nur Abholung</span>
+                </span>
+            </div>
+
             <!-- Closed Notice -->
-            <div class="closed-notice" id="closedNotice">
-                <i class="fas fa-exclamation-circle"></i>
-                <h2 data-i18n="closed.title">Momentan geschlossen</h2>
-                <p data-i18n="closed.message">Wir sind gerade nicht verfügbar. Bitte versuchen Sie es später erneut.</p>
+            <div class="closed-notice" id="closedNotice" style="display: none;">
+                <div class="status-emoji">😴</div>
+                <h2 class="status-title" data-i18n="closed.title">Momentan geschlossen</h2>
+                <p class="status-description" data-i18n="closed.message">
+                    Wir sind gerade nicht verfügbar. Bitte versuchen Sie es später erneut.
+                </p>
             </div>
 
             <!-- Category Tabs -->
             <div class="category-tabs" id="categoryTabs">
-                <!-- Wird dynamisch geladen -->
+                <button class="category-tab active" onclick="filterByCategory('all')">
+                    <i class="fas fa-th"></i>
+                    <span data-i18n="category.all">Alle</span>
+                </button>
+                <button class="category-tab" onclick="filterByCategory('pizza')">
+                    <i class="fas fa-pizza-slice"></i>
+                    <span data-i18n="category.pizza">Pizza</span>
+                </button>
+                <button class="category-tab" onclick="filterByCategory('pasta')">
+                    <i class="fas fa-utensils"></i>
+                    <span data-i18n="category.pasta">Pasta</span>
+                </button>
+                <button class="category-tab" onclick="filterByCategory('drinks')">
+                    <i class="fas fa-glass-martini"></i>
+                    <span data-i18n="category.drinks">Getränke</span>
+                </button>
+                <button class="category-tab" onclick="filterByCategory('desserts')">
+                    <i class="fas fa-ice-cream"></i>
+                    <span data-i18n="category.desserts">Desserts</span>
+                </button>
             </div>
 
             <!-- Products Grid -->
-            <div class="products-grid" id="productsGrid">
-                <!-- Wird dynamisch geladen -->
+            <div class="products-grid" id="productsContainer">
+                <!-- Wird dynamisch gefüllt -->
             </div>
-        </div>
-    </main>
 
-    <!-- Cart Sidebar -->
-    <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
-    <div class="cart-sidebar" id="cartSidebar">
-        <div class="cart-header">
-            <h2 data-i18n="cart.title">Warenkorb</h2>
-            <button class="close-cart" onclick="toggleCart()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="cart-items" id="cartItems">
-            <!-- Wird dynamisch gefüllt -->
-        </div>
-        <div class="cart-footer">
-            <div class="cart-total">
-                <span data-i18n="total">Gesamt:</span>
-                <span id="cartTotal">CHF 0.00</span>
+            <!-- Cart -->
+            <div class="cart-section" id="cartSection">
+                <h2 class="cart-title">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span data-i18n="cart.title">Warenkorb</span>
+                </h2>
+                
+                <div id="cartEmpty" class="empty-cart">
+                    <i class="fas fa-shopping-basket"></i>
+                    <p data-i18n="cart.empty">Ihr Warenkorb ist leer</p>
+                </div>
+                
+                <div id="cartItems" class="cart-items" style="display: none;">
+                    <!-- Wird dynamisch gefüllt -->
+                </div>
+                
+                <div id="cartTotals" class="cart-totals" style="display: none;">
+                    <div class="cart-total-row">
+                        <span data-i18n="cart.subtotal">Zwischensumme:</span>
+                        <span id="subtotal">CHF 0.00</span>
+                    </div>
+                    <div class="cart-total-row final">
+                        <span data-i18n="cart.total">Gesamtbetrag:</span>
+                        <span id="total">CHF 0.00</span>
+                    </div>
+                </div>
+                
+                <button class="order-btn" id="orderButton" onclick="showCheckout()" disabled>
+                    <i class="fas fa-credit-card"></i>
+                    <span data-i18n="cart.checkout">Zur Kasse</span>
+                </button>
             </div>
-            <button class="checkout-btn" onclick="proceedToCheckout()" id="checkoutBtn" disabled>
-                <span data-i18n="checkout">Zur Kasse</span>
-            </button>
+
+            <!-- Admin Link -->
+            <div class="admin-section">
+                <p data-i18n="footer.adminHint">Sind Sie ein Administrator?</p>
+                <a href="admin.html" class="admin-login-btn">
+                    <i class="fas fa-user-shield"></i>
+                    <span data-i18n="footer.adminLogin">Zum Admin-Bereich</span>
+                </a>
+            </div>
         </div>
     </div>
 
-    <!-- Checkout Form Modal -->
+    <!-- Checkout Modal -->
     <div class="modal" id="checkoutModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 data-i18n="checkout.title">Bestellung abschließen</h2>
-                <button class="close-modal" onclick="closeCheckout()">
-                    <i class="fas fa-times"></i>
-                </button>
+                <h3 data-i18n="checkout.title">Bestellung abschließen</h3>
+                <button class="modal-close" onclick="closeCheckout()">×</button>
             </div>
-            <form id="checkoutForm" class="checkout-form">
-                <div class="form-group">
-                    <label class="form-label" for="customerName">
-                        <span data-i18n="form.name">Name</span> *
-                    </label>
-                    <input type="text" id="customerName" class="form-input" required>
+            <form id="checkoutForm" onsubmit="processCheckout(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="checkout.name">Name *</label>
+                        <input type="text" id="customerName" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="checkout.phone">Telefon *</label>
+                        <input type="tel" id="customerPhone" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="checkout.email">E-Mail (optional)</label>
+                        <input type="email" id="customerEmail" class="form-input">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="checkout.notes">Bemerkungen</label>
+                        <textarea id="orderNotes" class="form-textarea" rows="3"></textarea>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label class="form-label" for="customerPhone">
-                        <span data-i18n="form.phone">Telefon</span> *
-                    </label>
-                    <input type="tel" id="customerPhone" class="form-input" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="customerEmail">
-                        <span data-i18n="form.email">E-Mail</span>
-                    </label>
-                    <input type="email" id="customerEmail" class="form-input">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="orderType">
-                        <span data-i18n="form.orderType">Bestellart</span>
-                    </label>
-                    <select id="orderType" class="form-select">
-                        <option value="pickup" data-i18n="form.pickup">Abholung</option>
-                        <option value="dinein" data-i18n="form.dinein">Vor Ort essen</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="specialNotes">
-                        <span data-i18n="form.notes">Besondere Hinweise</span>
-                    </label>
-                    <textarea id="specialNotes" class="form-textarea" rows="3"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-checkbox">
-                        <input type="checkbox" id="acceptTerms" required>
-                        <span data-i18n="form.terms">Ich akzeptiere die Geschäftsbedingungen</span>
-                    </label>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <span data-i18n="form.continue">Weiter zur Zahlung</span>
-                    </button>
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeCheckout()">
-                        <span data-i18n="cancel">Abbrechen</span>
+                        <span data-i18n="checkout.cancel">Abbrechen</span>
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i>
+                        <span data-i18n="checkout.confirm">Bestellung aufgeben</span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Payment Dialog -->
-    <div class="payment-dialog" id="paymentDialog">
-        <div class="payment-content">
-            <div class="payment-header">
-                <h2 data-i18n="payment.title">Zahlung abschließen</h2>
-                <p data-i18n="payment.secure">Sichere Zahlung mit Stripe</p>
+    <!-- Payment Modal -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n="payment.title">Zahlungsmethode wählen</h3>
+                <button class="modal-close" onclick="closePayment()">×</button>
             </div>
-            
-            <div class="payment-summary">
-                <h3 data-i18n="payment.summary">Bestellübersicht</h3>
-                <div id="paymentSummary">
-                    <!-- Wird dynamisch gefüllt -->
-                </div>
-            </div>
-            
-            <div class="payment-form">
-                <form id="payment-form">
-                    <div class="form-group">
-                        <label class="form-label" data-i18n="payment.cardDetails">Kartendetails</label>
-                        <div id="card-element">
-                            <!-- Stripe Card Element wird hier eingefügt -->
-                        </div>
-                        <div id="card-errors" role="alert"></div>
-                    </div>
+            <div class="modal-body">
+                <div class="payment-options">
+                    <button class="payment-option" onclick="selectPayment('card')">
+                        <i class="fas fa-credit-card"></i>
+                        <span data-i18n="payment.card">Kartenzahlung</span>
+                        <small data-i18n="payment.cardDesc">Visa, Mastercard, etc.</small>
+                    </button>
                     
-                    <div class="payment-actions">
-                        <button type="submit" class="pay-button" id="payButton">
-                            <span data-i18n="payment.pay">Jetzt bezahlen</span>
-                            <span id="payAmount"></span>
-                        </button>
-                        <button type="button" class="cancel-payment" onclick="cancelPayment()">
-                            <span data-i18n="cancel">Abbrechen</span>
-                        </button>
+                    <button class="payment-option" onclick="selectPayment('cash')">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span data-i18n="payment.cash">Barzahlung</span>
+                        <small data-i18n="payment.cashDesc">Bei Abholung bezahlen</small>
+                    </button>
+                    
+                    <button class="payment-option disabled">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span data-i18n="payment.twint">TWINT</span>
+                        <small data-i18n="payment.comingSoon">Bald verfügbar</small>
+                        <span class="coming-soon-badge">Coming Soon</span>
+                    </button>
+                </div>
+                
+                <div class="order-summary">
+                    <h4 data-i18n="payment.summary">Bestellübersicht</h4>
+                    <div id="paymentSummary"></div>
+                    <div class="order-total">
+                        <span data-i18n="payment.total">Gesamtbetrag:</span>
+                        <span id="paymentTotal">CHF 0.00</span>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
-        <div class="loading-spinner"></div>
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <div class="notification-content">
+            <i class="fas fa-check-circle"></i>
+            <span id="notificationMessage"></span>
+        </div>
     </div>
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-
+    
     <!-- Stripe -->
     <script src="https://js.stripe.com/v3/"></script>
 
-    <!-- App JavaScript -->
     <script>
         // Firebase Konfiguration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBiVdp67AZmZnGpM8OlZXBGKJKhF4iDlsE",
-            authDomain: "pizzapastadamico.firebaseapp.com",
-            databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "pizzapastadamico",
-            storageBucket: "pizzapastadamico.appspot.com",
-            messagingSenderId: "168976461234",
-            appId: "1:168976461234:web:abc123def456ghi789"
-        };
+       const firebaseConfig = {
+  apiKey: "AIzaSyD3OCMvc4Iup58Ao0BiFNuvA0fnJokzYS8",
+  authDomain: "pizzapastadamico.firebaseapp.com",
+  databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "pizzapastadamico",
+  storageBucket: "pizzapastadamico.firebasestorage.app",
+  messagingSenderId: "83240541532",
+  appId: "1:83240541532:web:11e3277850bf89a5b8b599",
+  measurementId: "G-6H2J5K88J7"
+};
 
         // Firebase initialisieren
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Stripe initialisieren (Test-Key)
-        const stripe = Stripe('pk_test_51234567890abcdefghijklmnopqrstuvwxyz');
+        // Stripe initialisieren
+        const stripe = Stripe('YOUR_STRIPE_PUBLIC_KEY');
 
         // Globale Variablen
         let cart = [];
-        let products = {};
-        let categories = [];
+        let products = [];
         let currentCategory = 'all';
-        let foodtruckOpen = true;
+        let isOpen = true;
+        let currentWaitTime = 5;
 
-        // Initialisierung
-        document.addEventListener('DOMContentLoaded', () => {
-            loadSettings();
-            loadCategories();
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide loader after delay
+            setTimeout(() => {
+                document.getElementById('pizzaLoader').style.display = 'none';
+            }, 1500);
+
+            // Load multilingual
+            if (window.ml) {
+                window.ml.init();
+            }
+
+            // Load products
             loadProducts();
-            updateCartUI();
             
-            // Event Listeners
-            document.getElementById('checkoutForm').addEventListener('submit', handleCheckoutSubmit);
-            document.getElementById('payment-form').addEventListener('submit', handlePaymentSubmit);
+            // Listen to settings
+            listenToSettings();
+            
+            // Load cart from localStorage
+            const savedCart = localStorage.getItem('cart');
+            if (savedCart) {
+                cart = JSON.parse(savedCart);
+                updateCart();
+            }
         });
 
-        // Einstellungen laden
-        function loadSettings() {
-            database.ref('settings').on('value', (snapshot) => {
-                const settings = snapshot.val() || {};
-                foodtruckOpen = settings.foodtruckOpen !== false;
-                document.getElementById('currentWaitTime').textContent = settings.waitTime || 15;
+        // Load Products
+        function loadProducts() {
+            database.ref('products').on('value', (snapshot) => {
+                products = [];
                 
-                const closedNotice = document.getElementById('closedNotice');
-                if (!foodtruckOpen) {
-                    closedNotice.classList.add('show');
+                snapshot.forEach((child) => {
+                    const product = { id: child.key, ...child.val() };
+                    if (product.available !== false) {
+                        products.push(product);
+                    }
+                });
+                
+                // Create demo products if empty
+                if (products.length === 0) {
+                    createDemoProducts();
                 } else {
-                    closedNotice.classList.remove('show');
+                    displayProducts();
                 }
             });
         }
 
-        // Kategorien laden
-        function loadCategories() {
-            database.ref('categories').on('value', (snapshot) => {
-                categories = Object.values(snapshot.val() || {});
-                renderCategoryTabs();
-            });
-        }
-
-        // Produkte laden
-        function loadProducts() {
-            database.ref('products').on('value', (snapshot) => {
-                products = snapshot.val() || {};
-                renderProducts();
-            });
-        }
-
-        // Kategorie-Tabs rendern
-        function renderCategoryTabs() {
-            const container = document.getElementById('categoryTabs');
-            container.innerHTML = `
-                <div class="category-tab ${currentCategory === 'all' ? 'active' : ''}" 
-                     onclick="setCategory('all')">
-                    <span data-i18n="category.all">Alle</span>
-                </div>
-                ${categories.map(cat => `
-                    <div class="category-tab ${currentCategory === cat ? 'active' : ''}" 
-                         onclick="setCategory('${cat}')">
-                        <span>${cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
-                    </div>
-                `).join('')}
-            `;
-        }
-
-        // Kategorie setzen
-        function setCategory(category) {
-            currentCategory = category;
-            renderCategoryTabs();
-            renderProducts();
-        }
-
-        // Produkte rendern
-        function renderProducts() {
-            const container = document.getElementById('productsGrid');
-            const productsList = Object.entries(products)
-                .filter(([id, product]) => 
-                    currentCategory === 'all' || product.category === currentCategory
-                );
-
-            if (productsList.length === 0) {
+        // Display Products
+        function displayProducts() {
+            const container = document.getElementById('productsContainer');
+            let filteredProducts = products;
+            
+            if (currentCategory !== 'all') {
+                filteredProducts = products.filter(p => p.category === currentCategory);
+            }
+            
+            if (filteredProducts.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-pizza-slice"></i>
-                        <h3 data-i18n="products.empty">Keine Produkte in dieser Kategorie</h3>
+                        <p data-i18n="products.none">Keine Produkte in dieser Kategorie</p>
                     </div>
                 `;
                 return;
             }
-
-            container.innerHTML = productsList.map(([id, product]) => `
-                <div class="product-card ${!product.available ? 'unavailable' : ''}">
-                    <img src="${product.image || 'https://dummyimage.com/300x200/f4f4f4/999999&text=Kein+Bild'}" 
-                         alt="${product.name}" 
-                         class="product-image">
-                    <div class="product-info">
+            
+            container.innerHTML = filteredProducts.map(product => `
+                <div class="product-card">
+                    <div class="product-emoji">${product.emoji || getCategoryEmoji(product.category)}</div>
+                    <div class="product-details">
                         <h3 class="product-name">${product.name}</h3>
-                        <p class="product-description">${product.description || ''}</p>
+                        ${product.description ? `<p class="product-description">${product.description}</p>` : ''}
                         <div class="product-footer">
                             <span class="product-price">CHF ${product.price.toFixed(2)}</span>
-                            <button class="add-to-cart" 
-                                    onclick="addToCart('${id}')" 
-                                    ${!product.available || !foodtruckOpen ? 'disabled' : ''}>
-                                <i class="fas fa-plus"></i>
-                                <span data-i18n="addToCart">Hinzufügen</span>
-                            </button>
+                            <div class="quantity-controls">
+                                ${getQuantityControls(product.id)}
+                            </div>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        // Zum Warenkorb hinzufügen
-        function addToCart(productId) {
-            const product = products[productId];
-            if (!product || !product.available || !foodtruckOpen) return;
-
-            const existingItem = cart.find(item => item.id === productId);
-            if (existingItem) {
-                existingItem.quantity++;
-            } else {
-                cart.push({
-                    id: productId,
-                    name: product.name,
-                    price: product.price,
-                    image: product.image,
-                    quantity: 1
-                });
+        // Get Quantity Controls
+        function getQuantityControls(productId) {
+            const cartItem = cart.find(item => item.id === productId);
+            const quantity = cartItem ? cartItem.quantity : 0;
+            
+            if (quantity === 0) {
+                return `
+                    <button class="quantity-btn add" onclick="addToCart('${productId}')">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                `;
             }
-
-            updateCartUI();
-            showNotification(window.ml.t('cart.itemAdded'), 'success');
+            
+            return `
+                <button class="quantity-btn" onclick="updateQuantity('${productId}', ${quantity - 1})">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <span class="quantity-display">${quantity}</span>
+                <button class="quantity-btn" onclick="updateQuantity('${productId}', ${quantity + 1})">
+                    <i class="fas fa-plus"></i>
+                </button>
+            `;
         }
 
-        // Warenkorb UI aktualisieren
-        function updateCartUI() {
-            const cartCount = document.getElementById('cartCount');
+        // Add to Cart
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            cart.push({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: 1
+            });
+            
+            updateCart();
+            displayProducts();
+            showNotification(`${product.name} wurde zum Warenkorb hinzugefügt`);
+        }
+
+        // Update Quantity
+        function updateQuantity(productId, newQuantity) {
+            if (newQuantity <= 0) {
+                cart = cart.filter(item => item.id !== productId);
+            } else {
+                const item = cart.find(item => item.id === productId);
+                if (item) {
+                    item.quantity = newQuantity;
+                }
+            }
+            
+            updateCart();
+            displayProducts();
+        }
+
+        // Update Cart
+        function updateCart() {
             const cartItems = document.getElementById('cartItems');
-            const cartTotal = document.getElementById('cartTotal');
-            const checkoutBtn = document.getElementById('checkoutBtn');
-            
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            
-            cartCount.textContent = totalItems;
-            cartCount.style.display = totalItems > 0 ? 'flex' : 'none';
+            const cartEmpty = document.getElementById('cartEmpty');
+            const cartTotals = document.getElementById('cartTotals');
+            const orderButton = document.getElementById('orderButton');
             
             if (cart.length === 0) {
-                cartItems.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-shopping-cart"></i>
-                        <h3 data-i18n="cart.empty">Ihr Warenkorb ist leer</h3>
-                    </div>
-                `;
-                checkoutBtn.disabled = true;
+                cartItems.style.display = 'none';
+                cartTotals.style.display = 'none';
+                cartEmpty.style.display = 'block';
+                orderButton.disabled = true;
             } else {
+                cartEmpty.style.display = 'none';
+                cartItems.style.display = 'block';
+                cartTotals.style.display = 'block';
+                orderButton.disabled = false;
+                
+                // Display cart items
                 cartItems.innerHTML = cart.map(item => `
                     <div class="cart-item">
-                        <img src="${item.image || 'https://dummyimage.com/300x200/f4f4f4/999999&text=Kein+Bild'}" 
-                             alt="${item.name}" 
-                             class="cart-item-image">
                         <div class="cart-item-info">
                             <div class="cart-item-name">${item.name}</div>
-                            <div class="cart-item-price">CHF ${item.price.toFixed(2)}</div>
+                            <div class="cart-item-quantity">${item.quantity}x CHF ${item.price.toFixed(2)}</div>
                         </div>
-                        <div class="quantity-controls">
-                            <button class="quantity-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
-                            <span>${item.quantity}</span>
-                            <button class="quantity-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
-                        </div>
-                        <i class="fas fa-trash remove-item" onclick="removeFromCart('${item.id}')"></i>
+                        <div class="cart-item-price">CHF ${(item.price * item.quantity).toFixed(2)}</div>
                     </div>
                 `).join('');
-                checkoutBtn.disabled = false;
+                
+                // Calculate totals
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                document.getElementById('subtotal').textContent = `CHF ${total.toFixed(2)}`;
+                document.getElementById('total').textContent = `CHF ${total.toFixed(2)}`;
             }
             
-            cartTotal.textContent = `CHF ${totalPrice.toFixed(2)}`;
+            // Save cart
+            localStorage.setItem('cart', JSON.stringify(cart));
         }
 
-        // Menge aktualisieren
-        function updateQuantity(productId, change) {
-            const item = cart.find(item => item.id === productId);
-            if (!item) return;
+        // Filter by Category
+        function filterByCategory(category) {
+            currentCategory = category;
             
-            item.quantity += change;
-            if (item.quantity <= 0) {
-                removeFromCart(productId);
-            } else {
-                updateCartUI();
-            }
-        }
-
-        // Aus Warenkorb entfernen
-        function removeFromCart(productId) {
-            cart = cart.filter(item => item.id !== productId);
-            updateCartUI();
-        }
-
-        // Warenkorb toggle
-        function toggleCart() {
-            const sidebar = document.getElementById('cartSidebar');
-            const overlay = document.getElementById('cartOverlay');
+            // Update tab states
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.closest('.category-tab').classList.add('active');
             
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('show');
+            displayProducts();
         }
 
-        // Zur Kasse gehen
-        function proceedToCheckout() {
-            if (cart.length === 0) return;
-            toggleCart();
-            document.getElementById('checkoutModal').classList.add('show');
+        // Listen to Settings
+        function listenToSettings() {
+            // Restaurant status
+            database.ref('settings/isOpen').on('value', (snapshot) => {
+                isOpen = snapshot.val() !== false;
+                
+                const openStatus = document.getElementById('openStatus');
+                const closedStatus = document.getElementById('closedStatus');
+                const closedNotice = document.getElementById('closedNotice');
+                const categoryTabs = document.getElementById('categoryTabs');
+                const productsContainer = document.getElementById('productsContainer');
+                const cartSection = document.getElementById('cartSection');
+                
+                if (isOpen) {
+                    openStatus.style.display = '';
+                    closedStatus.style.display = 'none';
+                    closedNotice.style.display = 'none';
+                    categoryTabs.style.display = '';
+                    productsContainer.style.display = '';
+                    cartSection.style.display = '';
+                } else {
+                    openStatus.style.display = 'none';
+                    closedStatus.style.display = '';
+                    closedNotice.style.display = 'block';
+                    categoryTabs.style.display = 'none';
+                    productsContainer.style.display = 'none';
+                    cartSection.style.display = 'none';
+                }
+            });
+            
+            // Wait time
+            database.ref('settings/waitTime').on('value', (snapshot) => {
+                currentWaitTime = snapshot.val() || 5;
+                document.getElementById('currentWaitTime').textContent = currentWaitTime;
+            });
         }
 
-        // Checkout schließen
+        // Checkout Functions
+        function showCheckout() {
+            if (!isOpen || cart.length === 0) return;
+            document.getElementById('checkoutModal').classList.add('active');
+        }
+
         function closeCheckout() {
-            document.getElementById('checkoutModal').classList.remove('show');
+            document.getElementById('checkoutModal').classList.remove('active');
         }
 
-        // Checkout Form Handler
-        async function handleCheckoutSubmit(e) {
-            e.preventDefault();
+        function processCheckout(event) {
+            event.preventDefault();
             
-            const formData = {
-                customerName: document.getElementById('customerName').value,
-                customerPhone: document.getElementById('customerPhone').value,
-                customerEmail: document.getElementById('customerEmail').value,
-                orderType: document.getElementById('orderType').value,
-                specialNotes: document.getElementById('specialNotes').value,
-                acceptTerms: document.getElementById('acceptTerms').checked
+            const customerData = {
+                name: document.getElementById('customerName').value,
+                phone: document.getElementById('customerPhone').value,
+                email: document.getElementById('customerEmail').value,
+                notes: document.getElementById('orderNotes').value
             };
             
-            if (!formData.acceptTerms) {
-                showNotification(window.ml.t('form.acceptTermsError'), 'error');
-                return;
-            }
+            // Save customer data temporarily
+            sessionStorage.setItem('customerData', JSON.stringify(customerData));
             
-            // Speichere Kundendaten temporär
-            window.customerData = formData;
-            
+            // Close checkout and show payment
             closeCheckout();
-            showPaymentDialog();
+            showPayment();
         }
 
-        // Payment Dialog anzeigen
-        function showPaymentDialog() {
-            const dialog = document.getElementById('paymentDialog');
-            const summary = document.getElementById('paymentSummary');
-            const payAmount = document.getElementById('payAmount');
-            
+        function showPayment() {
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             
-            summary.innerHTML = cart.map(item => `
-                <div class="summary-row">
+            // Update payment summary
+            document.getElementById('paymentSummary').innerHTML = cart.map(item => `
+                <div class="payment-item">
                     <span>${item.quantity}x ${item.name}</span>
                     <span>CHF ${(item.price * item.quantity).toFixed(2)}</span>
                 </div>
-            `).join('') + `
-                <div class="summary-row">
-                    <strong data-i18n="total">Gesamt</strong>
-                    <strong>CHF ${total.toFixed(2)}</strong>
-                </div>
-            `;
+            `).join('');
             
-            payAmount.textContent = `CHF ${total.toFixed(2)}`;
-            dialog.classList.add('show');
-            
-            // Stripe Card Element initialisieren
-            initializeStripe();
+            document.getElementById('paymentTotal').textContent = `CHF ${total.toFixed(2)}`;
+            document.getElementById('paymentModal').classList.add('active');
         }
 
-        // Stripe initialisieren
-        function initializeStripe() {
-            const elements = stripe.elements();
-            const cardElement = elements.create('card', {
-                style: {
-                    base: {
-                        fontSize: '16px',
-                        color: '#32325d',
-                        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                        '::placeholder': {
-                            color: '#aab7c4'
-                        }
-                    }
-                }
-            });
-            
-            cardElement.mount('#card-element');
-            window.cardElement = cardElement;
-            
-            cardElement.on('change', (event) => {
-                const displayError = document.getElementById('card-errors');
-                if (event.error) {
-                    displayError.textContent = event.error.message;
-                } else {
-                    displayError.textContent = '';
-                }
-            });
+        function closePayment() {
+            document.getElementById('paymentModal').classList.remove('active');
         }
 
-        // Payment Handler
-        async function handlePaymentSubmit(e) {
-            e.preventDefault();
+        function selectPayment(method) {
+            const customerData = JSON.parse(sessionStorage.getItem('customerData'));
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             
-            const payButton = document.getElementById('payButton');
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            
-            payButton.disabled = true;
-            loadingOverlay.style.display = 'flex';
-            
-            try {
-                // Bestellung in Firebase speichern
-                const orderData = {
-                    ...window.customerData,
-                    items: cart,
-                    total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-                    status: 'neu',
-                    timestamp: firebase.database.ServerValue.TIMESTAMP,
-                    orderNumber: generateOrderNumber()
-                };
-                
-                const orderRef = await database.ref('orders').push(orderData);
-                
-                // Hier würde normalerweise die Stripe-Zahlung erfolgen
-                // Für Demo-Zwecke simulieren wir erfolgreiche Zahlung
-                setTimeout(() => {
-                    window.location.href = `success.html?order=${orderRef.key}`;
-                }, 2000);
-                
-            } catch (error) {
-                console.error('Payment error:', error);
-                showNotification(window.ml.t('payment.error'), 'error');
-                payButton.disabled = false;
-                loadingOverlay.style.display = 'none';
+            if (method === 'card') {
+                processCardPayment(customerData, total);
+            } else if (method === 'cash') {
+                processCashPayment(customerData, total);
             }
         }
 
-        // Zahlung abbrechen
-        function cancelPayment() {
-            document.getElementById('paymentDialog').classList.remove('show');
-        }
-
-        // Bestellnummer generieren
-        function generateOrderNumber() {
-            return Math.floor(100000 + Math.random() * 900000).toString();
-        }
-
-        // Benachrichtigung anzeigen
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type} show`;
-            notification.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-                ${message}
-            `;
+        async function processCardPayment(customerData, total) {
+            showNotification('Weiterleitung zur Zahlung...', 'info');
             
-            document.body.appendChild(notification);
+            // Create order in Firebase
+            const orderData = {
+                ...customerData,
+                items: cart,
+                total: total,
+                paymentMethod: 'card',
+                status: 'neu',
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                waitTime: calculateWaitTime()
+            };
+            
+            const orderRef = await database.ref('orders').push(orderData);
+            
+            // Here would be Stripe integration
+            // For demo, simulate success
+            setTimeout(() => {
+                window.location.href = `success.html?order=${orderRef.key}`;
+            }, 1000);
+        }
+
+        async function processCashPayment(customerData, total) {
+            showNotification('Bestellung wird verarbeitet...', 'info');
+            
+            // Create order in Firebase
+            const orderData = {
+                ...customerData,
+                items: cart,
+                total: total,
+                paymentMethod: 'cash',
+                status: 'neu',
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                waitTime: calculateWaitTime()
+            };
+            
+            const orderRef = await database.ref('orders').push(orderData);
+            
+            // Clear cart and redirect
+            localStorage.removeItem('cart');
+            window.location.href = `success.html?order=${orderRef.key}`;
+        }
+
+        // Utility Functions
+        function calculateWaitTime() {
+            const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            if (itemCount < 6) return 5;
+            if (itemCount <= 11) return 10;
+            return Math.min(15 + Math.floor((itemCount - 11) / 3) * 5, 30);
+        }
+
+        function getCategoryEmoji(category) {
+            const emojis = {
+                pizza: '🍕',
+                pasta: '🍝',
+                drinks: '🥤',
+                desserts: '🍰'
+            };
+            return emojis[category] || '🍽️';
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const messageEl = document.getElementById('notificationMessage');
+            
+            messageEl.textContent = message;
+            notification.className = `notification ${type} show`;
             
             setTimeout(() => {
                 notification.classList.remove('show');
-                setTimeout(() => notification.remove(), 300);
             }, 3000);
+        }
+
+        // Create Demo Products
+        function createDemoProducts() {
+            const demoProducts = [
+                { name: 'Pizza Margherita', category: 'pizza', price: 18.50, emoji: '🍕', description: 'Tomaten, Mozzarella, Basilikum' },
+                { name: 'Pizza Salami', category: 'pizza', price: 21.00, emoji: '🍕', description: 'Tomaten, Mozzarella, Salami' },
+                { name: 'Pasta Carbonara', category: 'pasta', price: 19.50, emoji: '🍝', description: 'Speck, Ei, Parmesan' },
+                { name: 'Pasta Arrabbiata', category: 'pasta', price: 17.00, emoji: '🍝', description: 'Tomaten, Knoblauch, Chili' },
+                { name: 'Coca Cola', category: 'drinks', price: 4.50, emoji: '🥤', description: '0.5L' },
+                { name: 'Wasser', category: 'drinks', price: 3.50, emoji: '💧', description: '0.5L' },
+                { name: 'Tiramisu', category: 'desserts', price: 8.50, emoji: '🍰', description: 'Hausgemacht' },
+                { name: 'Panna Cotta', category: 'desserts', price: 7.50, emoji: '🍮', description: 'Mit Beerensauce' }
+            ];
+            
+            demoProducts.forEach(product => {
+                database.ref('products').push(product);
+            });
         }
     </script>
 </body>

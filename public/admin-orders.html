@@ -3,355 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="admin.orders.title">Bestellverwaltung - Pizza&Pasta D'amico Admin</title>
-        <link href="css/style.css" rel="stylesheet">>
+    <title data-i18n="admin.orders.title">Bestellverwaltung - Pizza&Pasta D'amico</title>
+    <link href="css/style.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="js/multilingual.js"></script>
-    <style>
-        /* Orders Page Specific Styles */
-        .orders-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 30px;
-        }
-
-        .orders-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .page-title {
-            font-size: 2rem;
-            color: #2c3e50;
-            margin: 0;
-        }
-
-        /* Stats Bar */
-        .stats-bar {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-box {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #2c3e50;
-            margin: 5px 0;
-        }
-
-        .stat-label {
-            color: #7f8c8d;
-            font-size: 0.9rem;
-        }
-
-        /* Filter Controls */
-        .filter-controls {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            margin-bottom: 30px;
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 10px 20px;
-            border: 2px solid #e0e0e0;
-            background: white;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-        }
-
-        .filter-btn:hover {
-            border-color: #3498db;
-            background: #f8f9fa;
-        }
-
-        .filter-btn.active {
-            background: #3498db;
-            color: white;
-            border-color: #3498db;
-        }
-
-        .sound-toggle {
-            margin-left: auto;
-            padding: 10px 20px;
-            background: #2ecc71;
-            color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .sound-toggle.disabled {
-            background: #95a5a6;
-        }
-
-        /* Orders Grid */
-        .orders-grid {
-            display: grid;
-            gap: 25px;
-        }
-
-        .order-card {
-            background: #1a1a2e;
-            border-radius: 15px;
-            padding: 25px;
-            color: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .order-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #3498db, #2ecc71);
-        }
-
-        .order-card.status-neu::before {
-            background: linear-gradient(90deg, #e74c3c, #c0392b);
-        }
-
-        .order-card.status-zubereitung::before {
-            background: linear-gradient(90deg, #f39c12, #d68910);
-        }
-
-        .order-card.status-fertig::before {
-            background: linear-gradient(90deg, #27ae60, #229954);
-        }
-
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
-        }
-
-        .order-id {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #3498db;
-        }
-
-        .order-time-info {
-            text-align: right;
-        }
-
-        .order-time {
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.7);
-        }
-
-        .wait-time-badge {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.85rem;
-            margin-top: 5px;
-            font-weight: 600;
-        }
-
-        .wait-time-badge.normal {
-            background: rgba(46, 204, 113, 0.2);
-            color: #2ecc71;
-        }
-
-        .wait-time-badge.warning {
-            background: rgba(241, 196, 15, 0.2);
-            color: #f1c40f;
-        }
-
-        .wait-time-badge.critical {
-            background: rgba(231, 76, 60, 0.2);
-            color: #e74c3c;
-        }
-
-        .customer-info {
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .customer-name {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .customer-contact {
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.7);
-        }
-
-        .order-items {
-            margin-bottom: 20px;
-        }
-
-        .order-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-
-        .item-details {
-            flex: 1;
-        }
-
-        .item-name {
-            font-weight: 600;
-            margin-bottom: 3px;
-        }
-
-        .item-specs {
-            font-size: 0.85rem;
-            color: rgba(255,255,255,0.6);
-        }
-
-        .item-price {
-            font-weight: 700;
-            color: #2ecc71;
-        }
-
-        .order-total {
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .total-label {
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-
-        .total-amount {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #2ecc71;
-        }
-
-        .order-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-        }
-
-        .action-btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        .action-btn.primary {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-        }
-
-        .action-btn.success {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-            color: white;
-        }
-
-        .action-btn.warning {
-            background: linear-gradient(135deg, #f39c12, #d68910);
-            color: white;
-        }
-
-        .action-btn.danger {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 60px;
-            color: #7f8c8d;
-        }
-
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .orders-container {
-                padding: 15px;
-            }
-
-            .orders-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .filter-controls {
-                flex-direction: column;
-            }
-
-            .sound-toggle {
-                margin-left: 0;
-                width: 100%;
-            }
-        }
-    </style>
 </head>
 <body>
-    <!-- Sprachauswahl -->
+    <!-- Pizza Loader -->
+    <div class="pizza-loader" id="pizzaLoader">
+        <div class="spinning-pizza">🍕</div>
+        <div class="loading-text">Pizza&Pasta D'amico</div>
+        <div class="loading-subtext">Bestellungen werden geladen...</div>
+    </div>
+
+    <!-- Language Selector -->
     <div class="language-selector">
         <!-- Wird von multilingual.js generiert -->
     </div>
 
-    <!-- Navigation -->
+    <!-- Admin Navigation -->
     <nav class="admin-nav">
         <div class="nav-container">
             <div class="nav-brand">
@@ -359,576 +29,491 @@
                 <h2>D'amico Admin</h2>
             </div>
             
-            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
             
             <div class="nav-links" id="navLinks">
-                <a href="admin-dashboard.html" class="nav-link" id="nav-dashboard">
-                    <span class="nav-icon">📊</span>
+                <a href="admin-dashboard.html" class="nav-link">
+                    <i class="fas fa-chart-line"></i>
                     <span data-i18n="admin.nav.dashboard">Dashboard</span>
                 </a>
-                <a href="admin-orders.html" class="nav-link active" id="nav-orders">
-                    <span class="nav-icon">📋</span>
+                <a href="admin-orders.html" class="nav-link active">
+                    <i class="fas fa-receipt"></i>
                     <span data-i18n="admin.nav.orders">Bestellungen</span>
                     <span class="notification-badge" id="orderCount" style="display: none;">0</span>
                 </a>
-                <a href="admin-products.html" class="nav-link" id="nav-products">
-                    <span class="nav-icon">🍽️</span>
+                <a href="admin-products.html" class="nav-link">
+                    <i class="fas fa-pizza-slice"></i>
                     <span data-i18n="admin.nav.products">Produkte</span>
                 </a>
-            </div>
-            
-            <div class="user-menu">
-                <div class="user-info" onclick="toggleUserMenu()">
-                    <div class="user-avatar">A</div>
-                    <span class="dropdown-arrow">▼</span>
-                </div>
-                <div class="user-dropdown" id="userDropdown">
-                    <a href="#" onclick="logout()">
-                        <span class="nav-icon">🚪</span> 
-                        <span data-i18n="admin.nav.logout">Logout</span>
-                    </a>
-                </div>
+                <a href="#" onclick="logout()" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span data-i18n="admin.nav.logout">Logout</span>
+                </a>
             </div>
         </div>
     </nav>
 
-    <div class="orders-container">
-        <!-- Page Header -->
+    <!-- Main Container -->
+    <div class="admin-container">
+        <!-- Header -->
         <div class="orders-header">
-            <h1 class="page-title" data-i18n="admin.orders.title">Bestellverwaltung</h1>
+            <h1 data-i18n="admin.orders.title">Bestellverwaltung</h1>
+            <p class="subtitle" data-i18n="admin.orders.subtitle">Verwalten Sie alle eingehenden Bestellungen</p>
         </div>
 
-        <!-- Statistics -->
-        <div class="stats-bar">
-            <div class="stat-box">
+        <!-- Stats Bar -->
+        <div class="stats-grid">
+            <div class="stat-card compact">
                 <div class="stat-value" id="totalOrders">0</div>
                 <div class="stat-label" data-i18n="admin.stats.ordersToday">Bestellungen heute</div>
             </div>
-            <div class="stat-box">
+            <div class="stat-card compact">
                 <div class="stat-value" id="newOrders">0</div>
                 <div class="stat-label" data-i18n="admin.orders.new">Neue Bestellungen</div>
             </div>
-            <div class="stat-box">
+            <div class="stat-card compact">
                 <div class="stat-value" id="todayRevenue">CHF 0.00</div>
                 <div class="stat-label" data-i18n="admin.stats.revenue">Heutiger Umsatz</div>
+            </div>
+            <div class="stat-card compact">
+                <div class="stat-value" id="avgPrepTime">0 Min</div>
+                <div class="stat-label" data-i18n="admin.stats.avgPrepTime">Ø Zubereitungszeit</div>
             </div>
         </div>
 
         <!-- Filter Controls -->
-        <div class="filter-controls">
-            <button class="filter-btn active" data-filter="all" data-i18n="admin.orders.filters.all">Alle</button>
-            <button class="filter-btn" data-filter="neu" data-i18n="order.status.new">Neu</button>
-            <button class="filter-btn" data-filter="zubereitung" data-i18n="order.status.preparation">In Zubereitung</button>
-            <button class="filter-btn" data-filter="fertig" data-i18n="order.status.ready">Fertig</button>
-            
-            <button class="sound-toggle" id="soundToggle">
-                <i class="fas fa-volume-up"></i>
-                <span data-i18n="notify.sound.on">Sound aktiviert</span>
-            </button>
+        <div class="filter-section">
+            <div class="filter-controls">
+                <button class="filter-btn active" onclick="filterOrders('all')">
+                    <i class="fas fa-list"></i>
+                    <span data-i18n="admin.filter.all">Alle</span>
+                </button>
+                <button class="filter-btn" onclick="filterOrders('neu')">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span data-i18n="admin.filter.new">Neu</span>
+                </button>
+                <button class="filter-btn" onclick="filterOrders('zubereitung')">
+                    <i class="fas fa-fire"></i>
+                    <span data-i18n="admin.filter.preparing">In Zubereitung</span>
+                </button>
+                <button class="filter-btn" onclick="filterOrders('fertig')">
+                    <i class="fas fa-check-circle"></i>
+                    <span data-i18n="admin.filter.ready">Fertig</span>
+                </button>
+                
+                <div class="sound-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="soundEnabled" checked>
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">
+                            <i class="fas fa-volume-up"></i>
+                            <span data-i18n="admin.sound">Ton</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
         </div>
 
-        <!-- Orders List -->
+        <!-- Orders Grid -->
         <div class="orders-grid" id="ordersContainer">
-            <!-- Dynamisch geladen -->
+            <!-- Wird dynamisch gefüllt -->
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3 data-i18n="admin.noOrders">Keine Bestellungen</h3>
+                <p data-i18n="admin.noOrdersDesc">Hier werden neue Bestellungen angezeigt</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div class="modal" id="orderDetailsModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="modalOrderId">Bestellung #123456</h3>
+                <button class="modal-close" onclick="closeOrderDetails()">×</button>
+            </div>
+            <div class="modal-body" id="orderDetailsContent">
+                <!-- Wird dynamisch gefüllt -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeOrderDetails()">
+                    <span data-i18n="admin.close">Schließen</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Popup -->
+    <div class="notification" id="notification">
+        <div class="notification-content">
+            <i class="fas fa-bell"></i>
+            <span id="notificationMessage"></span>
         </div>
     </div>
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
     <script>
         // Firebase Konfiguration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBiVdp67AZmZnGpM8OlZXBGKJKhF4iDlsE",
-            authDomain: "pizzapastadamico.firebaseapp.com",
-            databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "pizzapastadamico",
-            storageBucket: "pizzapastadamico.appspot.com",
-            messagingSenderId: "168976461234",
-            appId: "1:168976461234:web:abc123def456ghi789"
-        };
+      const firebaseConfig = {
+  apiKey: "AIzaSyD3OCMvc4Iup58Ao0BiFNuvA0fnJokzYS8",
+  authDomain: "pizzapastadamico.firebaseapp.com",
+  databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "pizzapastadamico",
+  storageBucket: "pizzapastadamico.firebasestorage.app",
+  messagingSenderId: "83240541532",
+  appId: "1:83240541532:web:11e3277850bf89a5b8b599",
+  measurementId: "G-6H2J5K88J7"
+};
 
         // Firebase initialisieren
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const auth = firebase.auth();
 
         // Globale Variablen
-        let orders = {};
+        let allOrders = [];
         let currentFilter = 'all';
         let soundEnabled = true;
-        let lastOrderCount = 0;
 
-       // Vereinfachte Auth-Prüfung ohne Firebase
-function checkAdminAuth() {
-    const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
-    const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
-    const now = Date.now();
-    
-    // Session läuft nach 2 Stunden ab
-    const sessionExpired = (now - loginTime) > (2 * 60 * 60 * 1000);
-    
-    if (!isLoggedIn || sessionExpired) {
-        // Nicht eingeloggt oder Session abgelaufen
-        localStorage.clear();
-        window.location.href = 'admin.html';
-        return false;
-    }
-    return true;
-}
-
-// Prüfe Auth sofort
-if (!checkAdminAuth()) {
-    // Stop execution
-    throw new Error('Not authenticated');
-}
-
-        // Initialisierung
-        function initializeOrders() {
-            loadOrders();
-            setupEventListeners();
-            loadSoundPreference();
+        // Auth Check
+        function checkAuth() {
+            const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+            const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
+            const now = Date.now();
+            
+            if (!isLoggedIn || (now - loginTime) > (2 * 60 * 60 * 1000)) {
+                localStorage.clear();
+                window.location.href = 'admin.html';
+                return false;
+            }
+            return true;
         }
 
-        // Bestellungen laden
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!checkAuth()) return;
+            
+            // Hide loader
+            setTimeout(() => {
+                document.getElementById('pizzaLoader').style.display = 'none';
+            }, 1000);
+
+            // Load multilingual
+            if (window.ml) {
+                window.ml.init();
+            }
+
+            // Sound toggle
+            document.getElementById('soundEnabled').addEventListener('change', (e) => {
+                soundEnabled = e.target.checked;
+            });
+
+            // Load orders
+            loadOrders();
+        });
+
+        // Load Orders
         function loadOrders() {
+            const today = new Date().toDateString();
+            
             database.ref('orders').on('value', (snapshot) => {
-                const newOrders = snapshot.val() || {};
-                const currentCount = Object.keys(newOrders).length;
+                allOrders = [];
+                let todayCount = 0;
+                let newCount = 0;
+                let todayRevenue = 0;
                 
-                // Sound bei neuer Bestellung
-                if (currentCount > lastOrderCount && lastOrderCount > 0 && soundEnabled) {
+                snapshot.forEach((child) => {
+                    const order = { id: child.key, ...child.val() };
+                    allOrders.push(order);
+                    
+                    const orderDate = new Date(order.timestamp).toDateString();
+                    if (orderDate === today) {
+                        todayCount++;
+                        todayRevenue += order.total || 0;
+                        
+                        if (order.status === 'neu') {
+                            newCount++;
+                        }
+                    }
+                });
+                
+                // Update stats
+                document.getElementById('totalOrders').textContent = todayCount;
+                document.getElementById('newOrders').textContent = newCount;
+                document.getElementById('todayRevenue').textContent = `CHF ${todayRevenue.toFixed(2)}`;
+                
+                // Sort by timestamp (newest first)
+                allOrders.sort((a, b) => b.timestamp - a.timestamp);
+                
+                // Display orders
+                displayOrders();
+                
+                // New order notification
+                if (newCount > 0 && soundEnabled) {
                     playNotificationSound();
-                    showNotification(window.ml.t('notify.new.order'), 'info');
                 }
-                
-                lastOrderCount = currentCount;
-                orders = newOrders;
-                
-                renderOrders();
-                updateStats();
-                updateBadge();
             });
         }
 
-        // Bestellungen rendern
-        function renderOrders() {
+        // Display Orders
+        function displayOrders() {
             const container = document.getElementById('ordersContainer');
-            let ordersList = Object.entries(orders);
+            const filteredOrders = currentFilter === 'all' 
+                ? allOrders 
+                : allOrders.filter(order => order.status === currentFilter);
             
-            // Filter anwenden
-            if (currentFilter !== 'all') {
-                ordersList = ordersList.filter(([id, order]) => order.status === currentFilter);
-            }
-            
-            if (ordersList.length === 0) {
+            if (filteredOrders.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-inbox"></i>
-                        <h3 data-i18n="admin.orders.empty">Keine Bestellungen</h3>
-                        <p data-i18n="admin.orders.empty.desc">Es gibt keine ${currentFilter === 'all' ? '' : getStatusText(currentFilter)} Bestellungen</p>
+                        <h3 data-i18n="admin.noOrders">Keine Bestellungen</h3>
+                        <p data-i18n="admin.noOrdersDesc">Hier werden neue Bestellungen angezeigt</p>
                     </div>
                 `;
-                
-                // Übersetzungen anwenden
-                window.ml.applyTranslations();
                 return;
             }
             
-            // Nach Zeit sortieren (neueste zuerst)
-            ordersList.sort(([,a], [,b]) => (b.timestamp || 0) - (a.timestamp || 0));
-            
-            container.innerHTML = ordersList.map(([id, order]) => createOrderCard(id, order)).join('');
-            
-            // Übersetzungen anwenden
-            window.ml.applyTranslations();
-        }
-
-        // Bestellkarte erstellen
-        function createOrderCard(orderId, order) {
-            const orderTime = new Date(order.timestamp).toLocaleTimeString('de-CH', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-            
-            const waitTime = getWaitTime(order);
-            const status = order.status || 'neu';
-            
-            return `
-                <div class="order-card status-${status}">
+            container.innerHTML = filteredOrders.map(order => `
+                <div class="order-card status-${order.status || 'neu'}" onclick="showOrderDetails('${order.id}')">
                     <div class="order-header">
-                        <div class="order-id">#${order.id || orderId.slice(-6)}</div>
-                        <div class="order-time-info">
-                            <div class="order-time">${orderTime}</div>
-                            <div class="wait-time-badge ${waitTime.class}">
-                                <i class="fas fa-clock"></i> ${waitTime.text}
+                        <div>
+                            <div class="order-id">#${order.id.slice(-6)}</div>
+                            <div class="order-time">
+                                <i class="fas fa-clock"></i>
+                                ${new Date(order.timestamp).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' })}
                             </div>
+                        </div>
+                        <span class="order-status ${order.status || 'neu'}">
+                            ${getStatusText(order.status || 'neu')}
+                        </span>
+                    </div>
+                    
+                    <div class="order-body">
+                        <div class="customer-info">
+                            <div class="customer-name">
+                                <i class="fas fa-user"></i>
+                                ${order.customerName || 'Gast'}
+                            </div>
+                            ${order.phone ? `
+                                <div class="customer-phone">
+                                    <i class="fas fa-phone"></i>
+                                    ${order.phone}
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="order-summary">
+                            <div class="order-items-count">
+                                <i class="fas fa-shopping-bag"></i>
+                                ${order.items ? order.items.length : 0} Artikel
+                            </div>
+                            <div class="order-total">
+                                CHF ${(order.total || 0).toFixed(2)}
+                            </div>
+                        </div>
+                        
+                        <div class="order-wait-time">
+                            <i class="fas fa-hourglass-half"></i>
+                            Wartezeit: ${calculateWaitTime(order)} Min
                         </div>
                     </div>
                     
-                    <div class="customer-info">
-                        <div class="customer-name">${order.customerName || 'Gast'}</div>
-                        ${order.phone ? `<div class="customer-contact"><i class="fas fa-phone"></i> ${order.phone}</div>` : ''}
-                    </div>
-                    
-                    <div class="order-items">
-                        ${renderOrderItems(order.items || [])}
-                    </div>
-                    
-                    <div class="order-total">
-                        <span class="total-label" data-i18n="admin.orders.total">Gesamt:</span>
-                        <span class="total-amount">CHF ${(order.total || 0).toFixed(2)}</span>
-                    </div>
-                    
                     <div class="order-actions">
-                        ${renderOrderActions(orderId, order)}
+                        ${order.status === 'neu' ? `
+                            <button class="btn btn-warning" onclick="updateStatus(event, '${order.id}', 'zubereitung')">
+                                <i class="fas fa-fire"></i>
+                                <span>Zubereiten</span>
+                            </button>
+                        ` : ''}
+                        ${order.status === 'zubereitung' ? `
+                            <button class="btn btn-success" onclick="updateStatus(event, '${order.id}', 'fertig')">
+                                <i class="fas fa-check"></i>
+                                <span>Fertig</span>
+                            </button>
+                        ` : ''}
+                        ${order.status === 'fertig' ? `
+                            <button class="btn btn-primary" onclick="notifyCustomer(event, '${order.id}')">
+                                <i class="fas fa-bell"></i>
+                                <span>Kunde rufen</span>
+                            </button>
+                        ` : ''}
                     </div>
-                </div>
-            `;
-        }
-
-        // Bestellpositionen rendern
-        function renderOrderItems(items) {
-            if (!items || items.length === 0) {
-                return '<div class="order-item" data-i18n="admin.orders.noItems">Keine Artikel</div>';
-            }
-            
-            return items.map(item => `
-                <div class="order-item">
-                    <div class="item-details">
-                        <div class="item-name">${item.quantity || 1}x ${item.name}</div>
-                        ${item.size ? `<div class="item-specs">Größe: ${item.size}</div>` : ''}
-                        ${item.extras && item.extras.length > 0 ? `<div class="item-specs">Extras: ${item.extras.join(', ')}</div>` : ''}
-                    </div>
-                    <div class="item-price">CHF ${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</div>
                 </div>
             `).join('');
         }
 
-        // Bestellaktionen rendern
-        function renderOrderActions(orderId, order) {
-            const status = order.status || 'neu';
+        // Filter Orders
+        function filterOrders(filter) {
+            currentFilter = filter;
             
-            switch (status) {
-                case 'neu':
-                    return `
-                        <button class="action-btn primary" onclick="updateOrderStatus('${orderId}', 'zubereitung')">
-                            <i class="fas fa-fire"></i> <span data-i18n="admin.orders.startPreparation">Zubereitung starten</span>
-                        </button>
-                        <button class="action-btn warning" onclick="notifyCustomer('${orderId}', 'prepare')">
-                            <i class="fas fa-bell"></i> <span data-i18n="admin.orders.notifyCustomer">Kunde informieren</span>
-                        </button>
-                    `;
-                
-                case 'zubereitung':
-                    return `
-                        <button class="action-btn success" onclick="updateOrderStatus('${orderId}', 'fertig')">
-                            <i class="fas fa-check"></i> <span data-i18n="admin.orders.markReady">Fertig melden</span>
-                        </button>
-                        <button class="action-btn warning" onclick="notifyCustomer('${orderId}', 'ready')">
-                            <i class="fas fa-bell"></i> <span data-i18n="order.action.notify">Abholung</span>
-                        </button>
-                    `;
-                
-                case 'fertig':
-                    return `
-                        <button class="action-btn success" onclick="archiveOrder('${orderId}')">
-                            <i class="fas fa-archive"></i> <span data-i18n="order.action.archive">Abgeholt</span>
-                        </button>
-                        <button class="action-btn danger" onclick="notifyCustomer('${orderId}', 'urgent')">
-                            <i class="fas fa-bullhorn"></i> <span data-i18n="admin.orders.callCustomer">Dringend rufen</span>
-                        </button>
-                    `;
-                
-                default:
-                    return '';
-            }
-        }
-
-        // Wartezeit berechnen
-        function getWaitTime(order) {
-            const now = Date.now();
-            const orderTime = order.timestamp || now;
-            const elapsed = Math.floor((now - orderTime) / 60000); // Minuten
-            
-            if (elapsed < 10) {
-                return { text: `${elapsed} Min`, class: 'normal' };
-            } else if (elapsed < 20) {
-                return { text: `${elapsed} Min`, class: 'warning' };
-            } else {
-                return { text: `${elapsed} Min ⚠️`, class: 'critical' };
-            }
-        }
-
-        // Bestellstatus aktualisieren
-        async function updateOrderStatus(orderId, newStatus) {
-            try {
-                await database.ref(`orders/${orderId}`).update({
-                    status: newStatus,
-                    [`${newStatus}At`]: firebase.database.ServerValue.TIMESTAMP
-                });
-                
-                const statusText = window.ml.t(`order.status.${newStatus}`);
-                showNotification(window.ml.t('admin.orders.statusUpdated', { status: statusText }), 'success');
-                
-                // Bei "fertig" automatisch Push-Notification senden
-                if (newStatus === 'fertig') {
-                    await database.ref(`notifications/${orderId}`).set({
-                        type: 'ready',
-                        timestamp: firebase.database.ServerValue.TIMESTAMP,
-                        message: window.ml.t('notify.order.ready'),
-                        sound: true
-                    });
-                }
-            } catch (error) {
-                console.error('Fehler:', error);
-                showNotification(window.ml.t('error'), 'error');
-            }
-        }
-
-        // Kunde benachrichtigen
-        async function notifyCustomer(orderId, type) {
-            const messages = {
-                prepare: window.ml.t('notify.order.preparation'),
-                ready: window.ml.t('notify.order.ready'),
-                urgent: window.ml.t('notify.order.call')
-            };
-            
-            const playSound = type !== 'prepare';
-            
-            try {
-                await database.ref(`notifications/${orderId}`).set({
-                    type: type,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP,
-                    message: messages[type],
-                    sound: playSound
-                });
-                
-                const notifyMessage = window.ml.t('notify.customer.notified', { message: messages[type] });
-                showNotification(notifyMessage, 'success');
-                
-                // SMS senden wenn Telefonnummer vorhanden
-                if (orders[orderId]?.phone && window.SMSNotificationService) {
-                    const smsService = new SMSNotificationService();
-                    if (type === 'ready') {
-                        await smsService.sendOrderReady(orders[orderId]);
-                    }
-                }
-            } catch (error) {
-                console.error('Fehler:', error);
-                showNotification(window.ml.t('error'), 'error');
-            }
-        }
-
-        // Bestellung archivieren
-        async function archiveOrder(orderId) {
-            if (!confirm(window.ml.t('admin.orders.confirmArchive'))) return;
-            
-            try {
-                const orderData = orders[orderId];
-                
-                // In Archiv verschieben
-                await database.ref(`archive/${orderId}`).set({
-                    ...orderData,
-                    archivedAt: firebase.database.ServerValue.TIMESTAMP,
-                    completedAt: Date.now()
-                });
-                
-                // Aus aktiven Bestellungen löschen
-                await database.ref(`orders/${orderId}`).remove();
-                
-                showNotification(window.ml.t('admin.orders.archived'), 'success');
-            } catch (error) {
-                console.error('Fehler:', error);
-                showNotification(window.ml.t('error'), 'error');
-            }
-        }
-
-        // Statistiken aktualisieren
-        function updateStats() {
-            const today = new Date().toDateString();
-            const todayOrders = Object.values(orders).filter(order => 
-                new Date(order.timestamp).toDateString() === today
-            );
-            
-            document.getElementById('totalOrders').textContent = todayOrders.length;
-            document.getElementById('newOrders').textContent = todayOrders.filter(o => o.status === 'neu').length;
-            
-            const revenue = todayOrders.reduce((sum, order) => sum + (order.total || 0), 0);
-            document.getElementById('todayRevenue').textContent = `CHF ${revenue.toFixed(2)}`;
-        }
-
-        // Badge aktualisieren
-        function updateBadge() {
-            const newOrdersCount = Object.values(orders).filter(o => o.status === 'neu').length;
-            const badge = document.getElementById('orderCount');
-            
-            if (newOrdersCount > 0) {
-                badge.textContent = newOrdersCount;
-                badge.style.display = 'flex';
-            } else {
-                badge.style.display = 'none';
-            }
-        }
-
-        // Event Listeners
-        function setupEventListeners() {
-            // Filter Buttons
+            // Update button states
             document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                    e.target.classList.add('active');
-                    currentFilter = e.target.dataset.filter;
-                    renderOrders();
-                });
+                btn.classList.remove('active');
             });
+            event.target.closest('.filter-btn').classList.add('active');
             
-            // Sound Toggle
-            document.getElementById('soundToggle').addEventListener('click', toggleSound);
+            displayOrders();
         }
 
-        // Sound Preferences
-        function loadSoundPreference() {
-            soundEnabled = localStorage.getItem('orderSoundEnabled') !== 'false';
-            updateSoundButton();
-        }
-
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            localStorage.setItem('orderSoundEnabled', soundEnabled);
-            updateSoundButton();
+        // Update Order Status
+        function updateStatus(event, orderId, newStatus) {
+            event.stopPropagation();
             
-            const statusKey = soundEnabled ? 'notify.sound.on' : 'notify.sound.off';
-            showNotification(window.ml.t(statusKey), 'info');
+            database.ref(`orders/${orderId}/status`).set(newStatus);
+            
+            // Send notification
+            if (newStatus === 'zubereitung') {
+                sendNotification(orderId, 'Ihre Bestellung wird jetzt zubereitet', false);
+            } else if (newStatus === 'fertig') {
+                sendNotification(orderId, 'Ihre Bestellung ist fertig! Bitte abholen.', true);
+            }
+            
+            showNotification(`Status geändert: ${getStatusText(newStatus)}`);
         }
 
-        function updateSoundButton() {
-            const btn = document.getElementById('soundToggle');
-            btn.classList.toggle('disabled', !soundEnabled);
-            btn.innerHTML = `
-                <i class="fas fa-volume-${soundEnabled ? 'up' : 'mute'}"></i>
-                <span data-i18n="${soundEnabled ? 'notify.sound.on' : 'notify.sound.off'}">${window.ml.t(soundEnabled ? 'notify.sound.on' : 'notify.sound.off')}</span>
+        // Send Customer Notification
+        function sendNotification(orderId, message, playSound) {
+            database.ref(`notifications/${orderId}`).push({
+                message: message,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                playSound: playSound
+            });
+        }
+
+        // Notify Customer (Stage 3)
+        function notifyCustomer(event, orderId) {
+            event.stopPropagation();
+            
+            sendNotification(orderId, '🔔 BITTE KOMMEN SIE ZUR ABHOLUNG! Ihre Bestellung wartet auf Sie.', true);
+            showNotification('Kunde wurde benachrichtigt', 'success');
+        }
+
+        // Show Order Details
+        function showOrderDetails(orderId) {
+            const order = allOrders.find(o => o.id === orderId);
+            if (!order) return;
+            
+            document.getElementById('modalOrderId').textContent = `Bestellung #${orderId.slice(-6)}`;
+            
+            const content = document.getElementById('orderDetailsContent');
+            content.innerHTML = `
+                <div class="order-detail-section">
+                    <h4>Kundeninformationen</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Name:</span>
+                            <span class="detail-value">${order.customerName || 'Gast'}</span>
+                        </div>
+                        ${order.phone ? `
+                            <div class="detail-item">
+                                <span class="detail-label">Telefon:</span>
+                                <span class="detail-value">${order.phone}</span>
+                            </div>
+                        ` : ''}
+                        ${order.email ? `
+                            <div class="detail-item">
+                                <span class="detail-label">E-Mail:</span>
+                                <span class="detail-value">${order.email}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <div class="order-detail-section">
+                    <h4>Bestelldetails</h4>
+                    <div class="order-items-detail">
+                        ${order.items.map(item => `
+                            <div class="order-item-detail">
+                                <div>
+                                    <div class="item-name">${item.name}</div>
+                                    <div class="item-quantity">Anzahl: ${item.quantity}</div>
+                                </div>
+                                <div class="item-price">CHF ${(item.price * item.quantity).toFixed(2)}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="order-total-detail">
+                        <span>Gesamtbetrag:</span>
+                        <span>CHF ${order.total.toFixed(2)}</span>
+                    </div>
+                </div>
+                
+                <div class="order-detail-section">
+                    <h4>Bestellinformationen</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Bestellzeit:</span>
+                            <span class="detail-value">${new Date(order.timestamp).toLocaleString('de-CH')}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value">
+                                <span class="order-status ${order.status || 'neu'}">
+                                    ${getStatusText(order.status || 'neu')}
+                                </span>
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Geschätzte Wartezeit:</span>
+                            <span class="detail-value">${calculateWaitTime(order)} Minuten</span>
+                        </div>
+                    </div>
+                </div>
             `;
-        }
-
-        // Sound abspielen
-        function playNotificationSound() {
-            if (!soundEnabled) return;
             
-            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBDGH0fPTgjMGHm7A7+OZURE...');
-            audio.play().catch(e => console.log('Sound play failed:', e));
+            document.getElementById('orderDetailsModal').classList.add('active');
         }
 
-        // Status Text
+        function closeOrderDetails() {
+            document.getElementById('orderDetailsModal').classList.remove('active');
+        }
+
+        // Utility Functions
+        function calculateWaitTime(order) {
+            const itemCount = order.items ? order.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+            if (itemCount < 6) return 5;
+            if (itemCount <= 11) return 10;
+            return Math.min(15 + Math.floor((itemCount - 11) / 3) * 5, 30);
+        }
+
         function getStatusText(status) {
-            return window.ml.t(`order.status.${status}`);
+            const texts = {
+                'neu': 'Neu',
+                'zubereitung': 'In Zubereitung',
+                'fertig': 'Fertig'
+            };
+            return texts[status] || status;
         }
 
-        // Benachrichtigungen
         function showNotification(message, type = 'success') {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-                ${message}
-            `;
+            const notification = document.getElementById('notification');
+            const messageEl = document.getElementById('notificationMessage');
             
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.classList.add('show');
-            }, 100);
+            messageEl.textContent = message;
+            notification.className = `notification ${type} show`;
             
             setTimeout(() => {
                 notification.classList.remove('show');
-                setTimeout(() => notification.remove(), 300);
             }, 3000);
         }
 
-        // Navigation
-        function toggleMobileMenu() {
-            const navLinks = document.getElementById('navLinks');
-            navLinks.classList.toggle('show');
+        function playNotificationSound() {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBi+Bz/LXijMHFGS97OehTQ0MW6zn775mJAYwe8vz2oU8CRdmvOzpoVMQDViP7OukRhEKTaPf8sNuLAUme8v02Ag/BxNUr+3btp');
+            audio.play();
         }
 
-        function toggleUserMenu() {
-            const dropdown = document.getElementById('userDropdown');
-            dropdown.classList.toggle('show');
-            
-            document.addEventListener('click', function closeMenu(e) {
-                if (!e.target.closest('.user-menu')) {
-                    dropdown.classList.remove('show');
-                    document.removeEventListener('click', closeMenu);
-                }
-            });
+        function toggleMobileMenu() {
+            document.getElementById('navLinks').classList.toggle('active');
         }
 
         function logout() {
-            if (confirm(window.ml.t('admin.logout.confirm'))) {
-                auth.signOut().then(() => {
-                    window.location.href = 'admin.html';
-                });
-            }
+            localStorage.clear();
+            window.location.href = 'admin.html';
         }
-
-        // Auto-refresh alle 30 Sekunden
-        setInterval(() => {
-            updateStats();
-        }, 30000);
     </script>
-
-    <!-- Notification Styles -->
-    <style>
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            z-index: 2000;
-            max-width: 350px;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.success {
-            border-left: 4px solid #2ecc71;
-        }
-
-        .notification.error {
-            border-left: 4px solid #e74c3c;
-        }
-
-        .notification.info {
-            border-left: 4px solid #3498db;
-        }
-
-        .notification i {
-            font-size: 1.2rem;
-        }
-
-        .notification.success i {
-            color: #2ecc71;
-        }
-
-        .notification.error i {
-            color: #e74c3c;
-        }
-
-        .notification.info i {
-            color: #3498db;
-        }
-    </style>
 </body>
 </html>

@@ -4,365 +4,197 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="admin.login.title">Admin Login - Pizza&Pasta D'amico</title>
-    <!-- CSS Pfad korrigiert - nur style.css ohne 's' -->
-        <link href="css/style.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="js/multilingual.js"></script>
-    <style>
-        /* Login Specific Styles - Falls style.css nicht lädt */
-        body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-
-        .login-container {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .login-logo {
-            font-size: 3rem;
-            margin-bottom: 20px;
-        }
-
-        .login-title {
-            font-size: 2rem;
-            color: white;
-            margin: 0 0 10px 0;
-            font-weight: 700;
-        }
-
-        .login-subtitle {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1rem;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            color: white;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
-
-        .form-input:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 0.15);
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .form-input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-        }
-
-        .login-btn:hover {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
-        }
-
-        .login-btn:disabled {
-            background: #6b7280;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .error-message {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #f87171;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-            text-align: center;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.7);
-            margin-top: 20px;
-        }
-
-        .spinner {
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-top-color: #3b82f6;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .demo-info {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .demo-info:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .demo-info strong {
-            color: white;
-        }
-    </style>
 </head>
 <body>
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <!-- Wird von multilingual.js generiert -->
+    </div>
+
     <div class="login-container">
         <div class="login-header">
             <div class="login-logo">🍕</div>
-            <h1 class="login-title" data-i18n="admin.login.title">Admin Login</h1>
-            <p class="login-subtitle" data-i18n="admin.login.subtitle">Pizza&Pasta D'amico</p>
+            <h1 class="login-title">Pizza&Pasta D'amico</h1>
+            <p class="login-subtitle" data-i18n="admin.login.subtitle">Admin-Bereich</p>
         </div>
 
-        <div class="error-message" id="errorMessage">
-            <span data-i18n="admin.login.error.generic">Login fehlgeschlagen</span>
-        </div>
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="error-message" id="errorMessage">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorText" data-i18n="admin.login.error">Ungültige Anmeldedaten</span>
+            </div>
 
-        <form id="loginForm">
             <div class="form-group">
-                <label class="form-label" for="email" data-i18n="admin.login.email">E-Mail</label>
-                <input 
-                    type="email" 
-                    id="email" 
-                    class="form-input" 
-                    placeholder="admin@damico.ch"
-                    required
-                    autocomplete="email"
-                >
+                <label class="form-label" for="username" data-i18n="admin.login.username">Benutzername</label>
+                <div class="input-icon">
+                    <i class="fas fa-user"></i>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        class="form-input" 
+                        placeholder="admin@damico.ch"
+                        required
+                        autocomplete="username"
+                    >
+                </div>
             </div>
 
             <div class="form-group">
                 <label class="form-label" for="password" data-i18n="admin.login.password">Passwort</label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    class="form-input" 
-                    placeholder="••••••••"
-                    required
-                    autocomplete="current-password"
-                >
+                <div class="input-icon">
+                    <i class="fas fa-lock"></i>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        class="form-input" 
+                        placeholder="••••••••"
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
             </div>
 
-            <button type="submit" class="login-btn" id="loginBtn">
-                <span data-i18n="admin.login.button">Anmelden</span>
+            <div class="form-group">
+                <label class="form-checkbox">
+                    <input type="checkbox" id="rememberMe">
+                    <span data-i18n="admin.login.remember">Angemeldet bleiben</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" id="loginButton">
+                <i class="fas fa-sign-in-alt"></i>
+                <span data-i18n="admin.login.submit">Anmelden</span>
             </button>
         </form>
 
-        <div class="loading" id="loading">
-            <span class="spinner"></span>
-            <span data-i18n="loading">Wird geladen...</span>
-        </div>
-
-        <div class="demo-info" onclick="fillDemoData()">
-            <strong>Demo-Zugang:</strong><br>
-            E-Mail: admin@damico.ch<br>
-            Passwort: admin123<br>
-            <small style="opacity: 0.7;">Klicken zum automatischen Ausfüllen</small>
+        <div class="login-footer">
+            <p class="text-muted">
+                <i class="fas fa-info-circle"></i>
+                <span data-i18n="admin.login.info">Zugang nur für autorisiertes Personal</span>
+            </p>
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
     <script>
-        // Firebase Konfiguration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBiVdp67AZmZnGpM8OlZXBGKJKhF4iDlsE",
-            authDomain: "pizzapastadamico.firebaseapp.com",
-            databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "pizzapastadamico",
-            storageBucket: "pizzapastadamico.appspot.com",
-            messagingSenderId: "168976461234",
-            appId: "1:168976461234:web:abc123def456ghi789"
-        };
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load multilingual
+            if (window.ml) {
+                window.ml.init();
+            }
 
-        // Firebase initialisieren
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const database = firebase.database();
-
-        // Demo-Daten einfüllen
-        function fillDemoData() {
-            document.getElementById('email').value = 'admin@damico.ch';
-            document.getElementById('password').value = 'admin123';
-        }
-
-        // Auth State Check
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                console.log('User already logged in, redirecting...');
+            // Check if already logged in
+            const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+            const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
+            const now = Date.now();
+            
+            if (isLoggedIn && (now - loginTime) < (2 * 60 * 60 * 1000)) {
                 window.location.href = 'admin-dashboard.html';
             }
+
+            // Focus username field
+            document.getElementById('username').focus();
         });
 
-        // VEREINFACHTER Login ohne Firebase Auth
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Handle Login
+        function handleLogin(event) {
+            event.preventDefault();
             
-            const email = document.getElementById('email').value;
+            const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('errorMessage');
-            const loading = document.getElementById('loading');
-            const loginBtn = document.getElementById('loginBtn');
-
-            errorMessage.style.display = 'none';
-            loading.style.display = 'block';
-            loginBtn.disabled = true;
-
-            try {
-                // DEMO LOGIN - Ohne echte Firebase Authentication
-                if (email === 'admin@damico.ch' && password === 'admin123') {
-                    console.log('Demo login successful');
-                    
-                    // Erstelle einen Mock User für die Session
-                    const mockUser = {
-                        email: email,
-                        uid: 'demo-admin-user',
-                        displayName: 'Admin'
-                    };
-                    
-                    // Speichere Login-Status
+            const rememberMe = document.getElementById('rememberMe').checked;
+            const button = document.getElementById('loginButton');
+            const errorDiv = document.getElementById('errorMessage');
+            
+            // Show loading state
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Anmelden...</span>';
+            
+            // Hide error message
+            errorDiv.style.display = 'none';
+            
+            // Simulate authentication (replace with real auth)
+            setTimeout(() => {
+                // Demo credentials
+                if (username === 'admin@damico.ch' && password === 'admin123') {
+                    // Set login session
                     localStorage.setItem('adminLoggedIn', 'true');
-                    localStorage.setItem('adminUser', JSON.stringify(mockUser));
                     localStorage.setItem('loginTime', Date.now().toString());
+                    localStorage.setItem('adminUsername', username);
                     
-                    // Öffne Foodtruck
-                    await database.ref('settings/foodtruckOpen').set(true);
-                    
-                    // Erstelle Standard-Produkte wenn nötig
-                    const snapshot = await database.ref('products').once('value');
-                    if (!snapshot.exists()) {
-                        await createDefaultProducts();
+                    if (rememberMe) {
+                        localStorage.setItem('rememberMe', 'true');
                     }
                     
-                    // Redirect zum Dashboard
-                    setTimeout(() => {
-                        window.location.href = 'admin-dashboard.html';
-                    }, 500);
-                    
+                    // Redirect to dashboard
+                    window.location.href = 'admin-dashboard.html';
                 } else {
-                    throw new Error('Ungültige Zugangsdaten');
+                    // Show error
+                    errorDiv.style.display = 'block';
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-sign-in-alt"></i> <span data-i18n="admin.login.submit">Anmelden</span>';
+                    
+                    // Shake animation
+                    errorDiv.classList.add('shake');
+                    setTimeout(() => {
+                        errorDiv.classList.remove('shake');
+                    }, 500);
                 }
+            }, 1000);
+        }
+    </script>
 
-            } catch (error) {
-                console.error('Login error:', error);
-                errorMessage.textContent = 'Falsches Passwort oder E-Mail';
-                errorMessage.style.display = 'block';
-                loading.style.display = 'none';
-                loginBtn.disabled = false;
-            }
-        });
-
-        // Standard-Produkte erstellen
-        async function createDefaultProducts() {
-            const defaultProducts = {
-                margherita: {
-                    name: 'Pizza Margherita',
-                    description: 'Tomatensauce, Mozzarella, frisches Basilikum',
-                    price: 18.50,
-                    category: 'pizza',
-                    available: true,
-                    image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400'
-                },
-                salami: {
-                    name: 'Pizza Salami', 
-                    description: 'Tomatensauce, Mozzarella, italienische Salami',
-                    price: 22.00,
-                    category: 'pizza',
-                    available: true,
-                    image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400'
-                },
-                carbonara: {
-                    name: 'Pasta Carbonara',
-                    description: 'Spaghetti, Ei, Pancetta, Parmigiano',
-                    price: 19.50,
-                    category: 'pasta',
-                    available: true,
-                    image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400'
-                }
-            };
-
-            // Kategorien erstellen
-            await database.ref('categories').set({
-                cat1: 'pizza',
-                cat2: 'pasta',
-                cat3: 'getränke'
-            });
-
-            // Produkte erstellen
-            for (const [key, product] of Object.entries(defaultProducts)) {
-                await database.ref(`products/${key}`).set(product);
-            }
-
-            console.log('Default products created');
+    <style>
+        /* Login specific styles */
+        body {
+            background: var(--bg-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
 
-        // Auto-fill für schnelleres Testen
-        console.log('Demo Login: admin@damico.ch / admin123');
-    </script>
+        .input-icon {
+            position: relative;
+        }
+
+        .input-icon i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .input-icon .form-input {
+            padding-left: 44px;
+        }
+
+        .btn-block {
+            width: 100%;
+            margin-top: 24px;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+    </style>
 </body>
 </html>

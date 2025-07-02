@@ -4,323 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="admin.dashboard.title">Admin Dashboard - Pizza&Pasta D'amico</title>
-        <link href="css/style.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="js/multilingual.js"></script>
-    <style>
-        /* Dashboard Specific Styles */
-        .dashboard-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 30px;
-        }
-
-        .dashboard-header {
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .dashboard-title {
-            font-size: 2.5rem;
-            margin: 0 0 10px 0;
-            font-weight: 700;
-        }
-
-        .dashboard-subtitle {
-            opacity: 0.9;
-            font-size: 1.1rem;
-        }
-
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #3498db, #2ecc71);
-        }
-
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #3498db, #2ecc71);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            color: white;
-            margin-bottom: 15px;
-        }
-
-        .stat-value {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: #2c3e50;
-            margin: 10px 0;
-        }
-
-        .stat-label {
-            color: #7f8c8d;
-            font-size: 1rem;
-            font-weight: 500;
-        }
-
-        /* Quick Actions */
-        .quick-actions {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            margin-bottom: 30px;
-        }
-
-        .quick-actions h2 {
-            margin: 0 0 20px 0;
-            color: #2c3e50;
-        }
-
-        .actions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .action-btn {
-            padding: 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            text-decoration: none;
-            color: #2c3e50;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .action-btn:hover {
-            border-color: #3498db;
-            background: #f8f9fa;
-            transform: translateY(-2px);
-        }
-
-        .action-btn i {
-            font-size: 2rem;
-            color: #3498db;
-        }
-
-        /* Settings Section */
-        .settings-section {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            margin-bottom: 30px;
-        }
-
-        .settings-section h2 {
-            margin: 0 0 25px 0;
-            color: #2c3e50;
-        }
-
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        .setting-label {
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .toggle-switch {
-            position: relative;
-            width: 60px;
-            height: 30px;
-            background: #ccc;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .toggle-switch.active {
-            background: #2ecc71;
-        }
-
-        .toggle-switch::after {
-            content: '';
-            position: absolute;
-            width: 26px;
-            height: 26px;
-            background: white;
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
-            transition: transform 0.3s;
-        }
-
-        .toggle-switch.active::after {
-            transform: translateX(30px);
-        }
-
-        /* Wait Time Controls */
-        .wait-time-controls {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .wait-time-btn {
-            padding: 15px 20px;
-            border: 2px solid #e0e0e0;
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .wait-time-btn:hover {
-            border-color: #3498db;
-            background: #f8f9fa;
-        }
-
-        .wait-time-btn.active {
-            background: #3498db;
-            color: white;
-            border-color: #3498db;
-        }
-
-        /* Recent Orders Preview */
-        .recent-orders {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-
-        .recent-orders h2 {
-            margin: 0 0 20px 0;
-            color: #2c3e50;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .order-preview {
-            padding: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s;
-        }
-
-        .order-preview:hover {
-            background: #f8f9fa;
-            border-color: #3498db;
-        }
-
-        .order-preview-info {
-            flex: 1;
-        }
-
-        .order-preview-id {
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .order-preview-time {
-            font-size: 0.9rem;
-            color: #7f8c8d;
-        }
-
-        .order-preview-status {
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .status-neu {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-
-        .status-zubereitung {
-            background: #fef3c7;
-            color: #d97706;
-        }
-
-        .status-fertig {
-            background: #d1fae5;
-            color: #059669;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .dashboard-container {
-                padding: 15px;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .dashboard-title {
-                font-size: 2rem;
-            }
-        }
-    </style>
 </head>
 <body>
-    <!-- Sprachauswahl -->
+    <!-- Pizza Loader -->
+    <div class="pizza-loader" id="pizzaLoader">
+        <div class="spinning-pizza">🍕</div>
+        <div class="loading-text">Pizza&Pasta D'amico</div>
+        <div class="loading-subtext">Admin wird geladen...</div>
+    </div>
+
+    <!-- Language Selector -->
     <div class="language-selector">
         <!-- Wird von multilingual.js generiert -->
     </div>
 
-    <!-- Navigation -->
+    <!-- Admin Navigation -->
     <nav class="admin-nav">
         <div class="nav-container">
             <div class="nav-brand">
@@ -328,149 +29,208 @@
                 <h2>D'amico Admin</h2>
             </div>
             
-            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
             
             <div class="nav-links" id="navLinks">
-                <a href="admin-dashboard.html" class="nav-link active" id="nav-dashboard">
-                    <span class="nav-icon">📊</span>
+                <a href="admin-dashboard.html" class="nav-link active">
+                    <i class="fas fa-chart-line"></i>
                     <span data-i18n="admin.nav.dashboard">Dashboard</span>
                 </a>
-                <a href="admin-orders.html" class="nav-link" id="nav-orders">
-                    <span class="nav-icon">📋</span>
+                <a href="admin-orders.html" class="nav-link">
+                    <i class="fas fa-receipt"></i>
                     <span data-i18n="admin.nav.orders">Bestellungen</span>
                     <span class="notification-badge" id="orderCount" style="display: none;">0</span>
                 </a>
-                <a href="admin-products.html" class="nav-link" id="nav-products">
-                    <span class="nav-icon">🍽️</span>
+                <a href="admin-products.html" class="nav-link">
+                    <i class="fas fa-pizza-slice"></i>
                     <span data-i18n="admin.nav.products">Produkte</span>
                 </a>
-            </div>
-            
-            <div class="user-menu">
-                <div class="user-info" onclick="toggleUserMenu()">
-                    <div class="user-avatar">A</div>
-                    <span class="dropdown-arrow">▼</span>
-                </div>
-                <div class="user-dropdown" id="userDropdown">
-                    <a href="#" onclick="logout()">
-                        <span class="nav-icon">🚪</span> 
-                        <span data-i18n="admin.nav.logout">Logout</span>
-                    </a>
-                </div>
+                <a href="#" onclick="logout()" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span data-i18n="admin.nav.logout">Logout</span>
+                </a>
             </div>
         </div>
     </nav>
 
-    <div class="dashboard-container">
-        <!-- Dashboard Header -->
+    <!-- Main Container -->
+    <div class="admin-container">
+        <!-- Header -->
         <div class="dashboard-header">
-            <h1 class="dashboard-title" data-i18n="admin.dashboard.welcome">Willkommen im Dashboard</h1>
-            <p class="dashboard-subtitle" data-i18n="admin.dashboard.subtitle">Pizza&Pasta D'amico Verwaltungssystem</p>
+            <h1 data-i18n="admin.dashboard.title">Dashboard</h1>
+            <p class="subtitle" data-i18n="admin.dashboard.subtitle">Willkommen im Admin-Bereich</p>
+            <div class="header-date" id="currentDate"></div>
         </div>
 
-        <!-- Statistics Cards -->
+        <!-- Quick Stats -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-shopping-cart"></i>
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <div class="stat-label" data-i18n="admin.stats.ordersToday">Bestellungen heute</div>
                 </div>
-                <div class="stat-value" id="todayOrders">0</div>
-                <div class="stat-label" data-i18n="admin.stats.ordersToday">Bestellungen heute</div>
+                <div class="stat-value" id="ordersToday">0</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+12% vs. gestern</span>
+                </div>
             </div>
-            
+
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-clock"></i>
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-euro-sign"></i>
+                    </div>
+                    <div class="stat-label" data-i18n="admin.stats.revenue">Heutiger Umsatz</div>
                 </div>
-                <div class="stat-value" id="pendingOrders">0</div>
-                <div class="stat-label" data-i18n="admin.stats.pending">Wartende Bestellungen</div>
+                <div class="stat-value" id="revenueToday">CHF 0.00</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+8% vs. gestern</span>
+                </div>
             </div>
-            
+
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-euro-sign"></i>
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-label" data-i18n="admin.stats.waitingOrders">Wartende Bestellungen</div>
                 </div>
-                <div class="stat-value" id="todayRevenue">0.00</div>
-                <div class="stat-label" data-i18n="admin.stats.revenue">Heutiger Umsatz (CHF)</div>
+                <div class="stat-value" id="waitingOrders">0</div>
+                <div class="stat-info">
+                    <span>Ø Wartezeit: <strong id="avgWaitTime">0</strong> Min</span>
+                </div>
             </div>
-            
+
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-fire"></i>
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-store"></i>
+                    </div>
+                    <div class="stat-label" data-i18n="admin.stats.status">Truck Status</div>
                 </div>
-                <div class="stat-value" id="currentWaitTime">15</div>
-                <div class="stat-label" data-i18n="admin.stats.waitTime">Aktuelle Wartezeit (Min)</div>
+                <div class="stat-value">
+                    <span class="status-badge active" id="truckStatus">Geöffnet</span>
+                </div>
+                <button class="btn btn-secondary" onclick="toggleTruckStatus()">
+                    <i class="fas fa-power-off"></i>
+                    <span data-i18n="admin.toggle">Status ändern</span>
+                </button>
             </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="quick-actions">
-            <h2 data-i18n="admin.quickActions.title">Schnellzugriff</h2>
-            <div class="actions-grid">
-                <a href="admin-orders.html" class="action-btn">
-                    <i class="fas fa-list"></i>
-                    <span data-i18n="admin.quickActions.orders">Bestellungen</span>
-                </a>
-                <a href="admin-products.html" class="action-btn">
-                    <i class="fas fa-pizza-slice"></i>
-                    <span data-i18n="admin.quickActions.products">Produkte</span>
-                </a>
-                <a href="#" class="action-btn" onclick="exportData()">
-                    <i class="fas fa-download"></i>
-                    <span data-i18n="admin.quickActions.export">Daten exportieren</span>
-                </a>
-                <a href="#" class="action-btn" onclick="viewReports()">
-                    <i class="fas fa-chart-bar"></i>
-                    <span data-i18n="admin.quickActions.reports">Berichte</span>
-                </a>
-            </div>
-        </div>
+        <!-- Control Section -->
+        <div class="control-section">
+            <h2 class="section-title">
+                <i class="fas fa-sliders-h"></i>
+                <span data-i18n="admin.controls.title">Schnellsteuerung</span>
+            </h2>
 
-        <!-- Settings Section -->
-        <div class="settings-section">
-            <h2 data-i18n="admin.settings.title">Einstellungen</h2>
-            
-            <div class="setting-item">
-                <div>
-                    <div class="setting-label" data-i18n="admin.settings.restaurantStatus">Restaurant Status</div>
-                    <small data-i18n="admin.settings.restaurantDesc">Schalte den Foodtruck online/offline</small>
-                </div>
-                <div class="toggle-switch" id="restaurantToggle" onclick="toggleRestaurant()"></div>
-            </div>
-            
-            <div class="setting-item">
-                <div>
-                    <div class="setting-label" data-i18n="admin.settings.waitTime">Wartezeit</div>
-                    <small data-i18n="admin.settings.waitTimeDesc">Aktuelle geschätzte Wartezeit für Kunden</small>
-                </div>
+            <!-- Wait Time Control -->
+            <div class="control-card">
+                <h3 data-i18n="admin.waitTime.title">Wartezeit-Management</h3>
                 <div class="wait-time-controls">
-                    <button class="wait-time-btn" onclick="setWaitTime(5)">5 Min</button>
-                    <button class="wait-time-btn active" onclick="setWaitTime(15)">15 Min</button>
-                    <button class="wait-time-btn" onclick="setWaitTime(30)">30 Min</button>
-                    <button class="wait-time-btn" onclick="setWaitTime(45)">45 Min</button>
+                    <button class="wait-time-btn" onclick="setWaitTime(5)">
+                        <i class="fas fa-bolt"></i>
+                        <span>Normal</span>
+                        <small>5 Min</small>
+                    </button>
+                    <button class="wait-time-btn" onclick="setWaitTime(10)">
+                        <i class="fas fa-fire"></i>
+                        <span>Beschäftigt</span>
+                        <small>10 Min</small>
+                    </button>
+                    <button class="wait-time-btn" onclick="setWaitTime(15)">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Sehr voll</span>
+                        <small>15 Min</small>
+                    </button>
+                    <button class="wait-time-btn custom" onclick="showCustomWaitTime()">
+                        <i class="fas fa-edit"></i>
+                        <span>Custom</span>
+                    </button>
+                </div>
+                <div class="current-wait-time">
+                    <span>Aktuelle Wartezeit:</span>
+                    <strong id="currentWaitTimeDisplay">5 Minuten</strong>
                 </div>
             </div>
-            
-            <div class="setting-item">
-                <div>
-                    <div class="setting-label" data-i18n="admin.settings.notifications">Sound-Benachrichtigungen</div>
-                    <small data-i18n="admin.settings.notificationsDesc">Ton bei neuen Bestellungen</small>
+
+            <!-- Notification Control -->
+            <div class="control-card">
+                <h3 data-i18n="admin.notifications.title">Benachrichtigungen</h3>
+                <div class="notification-controls">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="soundEnabled" checked>
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label" data-i18n="admin.notifications.sound">Ton bei neuen Bestellungen</span>
+                    </label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="pushEnabled">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label" data-i18n="admin.notifications.push">Push-Benachrichtigungen</span>
+                    </label>
                 </div>
-                <div class="toggle-switch active" id="soundToggle" onclick="toggleSound()"></div>
             </div>
         </div>
 
         <!-- Recent Orders Preview -->
-        <div class="recent-orders">
-            <h2>
-                <span data-i18n="admin.recentOrders.title">Letzte Bestellungen</span>
-                <a href="admin-orders.html" style="font-size: 1rem; color: #3498db;">
-                    <span data-i18n="admin.recentOrders.viewAll">Alle anzeigen</span> →
+        <div class="orders-preview-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-list"></i>
+                    <span data-i18n="admin.recentOrders">Aktuelle Bestellungen</span>
+                </h2>
+                <a href="admin-orders.html" class="btn btn-primary">
+                    <span data-i18n="admin.viewAll">Alle anzeigen</span>
+                    <i class="fas fa-arrow-right"></i>
                 </a>
-            </h2>
-            <div id="recentOrdersList">
-                <!-- Dynamisch geladen -->
             </div>
+            
+            <div class="orders-preview-grid" id="recentOrdersPreview">
+                <!-- Wird dynamisch gefüllt -->
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p data-i18n="admin.noOrders">Keine aktuellen Bestellungen</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Wait Time Modal -->
+    <div class="modal" id="customWaitTimeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n="admin.customWaitTime">Benutzerdefinierte Wartezeit</h3>
+                <button class="modal-close" onclick="closeCustomWaitTime()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label data-i18n="admin.minutes">Minuten:</label>
+                    <input type="number" id="customMinutes" min="1" max="60" value="20" class="form-input">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeCustomWaitTime()">
+                    <span data-i18n="admin.cancel">Abbrechen</span>
+                </button>
+                <button class="btn btn-primary" onclick="applyCustomWaitTime()">
+                    <span data-i18n="admin.apply">Anwenden</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Popup -->
+    <div class="notification" id="notification">
+        <div class="notification-content">
+            <i class="fas fa-check-circle"></i>
+            <span id="notificationMessage"></span>
         </div>
     </div>
 
@@ -482,356 +242,230 @@
     <script>
         // Firebase Konfiguration
         const firebaseConfig = {
-            apiKey: "AIzaSyBiVdp67AZmZnGpM8OlZXBGKJKhF4iDlsE",
-            authDomain: "pizzapastadamico.firebaseapp.com",
-            databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "pizzapastadamico",
-            storageBucket: "pizzapastadamico.appspot.com",
-            messagingSenderId: "168976461234",
-            appId: "1:168976461234:web:abc123def456ghi789"
-        };
+  apiKey: "AIzaSyD3OCMvc4Iup58Ao0BiFNuvA0fnJokzYS8",
+  authDomain: "pizzapastadamico.firebaseapp.com",
+  databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "pizzapastadamico",
+  storageBucket: "pizzapastadamico.firebasestorage.app",
+  messagingSenderId: "83240541532",
+  appId: "1:83240541532:web:11e3277850bf89a5b8b599",
+  measurementId: "G-6H2J5K88J7"
+};
 
         // Firebase initialisieren
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const auth = firebase.auth();
 
-        // Globale Variablen
-        let soundEnabled = true;
-        let restaurantOpen = true;
-        let currentWaitTime = 15;
-
-       // Vereinfachte Auth-Prüfung
-function checkAuth() {
-    const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
-    const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
-    const now = Date.now();
-    
-    // Session läuft nach 2 Stunden ab
-    const sessionExpired = (now - loginTime) > (2 * 60 * 60 * 1000);
-    
-    if (!isLoggedIn || sessionExpired) {
-        localStorage.clear();
-        window.location.href = 'admin.html';
-        return false;
-    }
-    return true;
-}
-
-// Prüfe Auth sofort
-if (!checkAuth()) {
-    // Stop execution if not authenticated
-    throw new Error('Not authenticated');
-}
-
-function logout() {
-    // Ohne multilingual.js - direkte Bestätigung
-    if (confirm('Wirklich ausloggen?')) {
-        // LocalStorage-basiertes Logout
-        localStorage.removeItem('adminLoggedIn');
-        localStorage.removeItem('adminUser');
-        localStorage.removeItem('loginTime');
-        
-        // Redirect zu admin.html
-        window.location.href = 'admin.html';
-    }
-}
-
-        // Dashboard initialisieren
-        function initializeDashboard() {
-            loadStatistics();
-            loadRecentOrders();
-            loadSettings();
-            setupRealtimeListeners();
+        // Auth Check
+        function checkAuth() {
+            const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+            const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
+            const now = Date.now();
+            
+            if (!isLoggedIn || (now - loginTime) > (2 * 60 * 60 * 1000)) {
+                localStorage.clear();
+                window.location.href = 'admin.html';
+                return false;
+            }
+            return true;
         }
 
-        // Statistiken laden
-        function loadStatistics() {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const todayTimestamp = today.getTime();
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!checkAuth()) return;
+            
+            // Hide loader
+            setTimeout(() => {
+                document.getElementById('pizzaLoader').style.display = 'none';
+            }, 1000);
 
-            // Heutige Bestellungen
-            database.ref('orders').orderByChild('timestamp').startAt(todayTimestamp).on('value', (snapshot) => {
-                const orders = snapshot.val() || {};
-                const ordersList = Object.values(orders);
-                
-                // Bestellungen heute
-                document.getElementById('todayOrders').textContent = ordersList.length;
-                
-                // Wartende Bestellungen
-                const pending = ordersList.filter(order => order.status !== 'fertig' && order.status !== 'completed').length;
-                document.getElementById('pendingOrders').textContent = pending;
-                
-                // Heutiger Umsatz
-                const revenue = ordersList
-                    .filter(order => order.status === 'fertig' || order.status === 'completed')
-                    .reduce((sum, order) => sum + (order.total || 0), 0);
-                document.getElementById('todayRevenue').textContent = revenue.toFixed(2);
+            // Load multilingual
+            if (window.ml) {
+                window.ml.init();
+            }
+
+            // Set current date
+            const date = new Date();
+            document.getElementById('currentDate').textContent = date.toLocaleDateString('de-CH', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
             });
 
-            // Auch archivierte Bestellungen für Umsatz einbeziehen
-            database.ref('archive').orderByChild('timestamp').startAt(todayTimestamp).once('value', (snapshot) => {
-                const archived = snapshot.val() || {};
-                const archivedRevenue = Object.values(archived).reduce((sum, order) => sum + (order.total || 0), 0);
+            // Load dashboard data
+            loadDashboardData();
+            
+            // Real-time listeners
+            listenToOrders();
+            listenToSettings();
+        });
+
+        // Load Dashboard Data
+        function loadDashboardData() {
+            // Today's orders
+            const today = new Date().toDateString();
+            database.ref('orders').on('value', (snapshot) => {
+                let todayOrders = 0;
+                let todayRevenue = 0;
+                let waitingOrders = 0;
                 
-                // Zum bestehenden Umsatz addieren
-                const currentRevenue = parseFloat(document.getElementById('todayRevenue').textContent);
-                document.getElementById('todayRevenue').textContent = (currentRevenue + archivedRevenue).toFixed(2);
+                snapshot.forEach((child) => {
+                    const order = child.val();
+                    const orderDate = new Date(order.timestamp).toDateString();
+                    
+                    if (orderDate === today) {
+                        todayOrders++;
+                        todayRevenue += order.total || 0;
+                        
+                        if (order.status === 'neu' || order.status === 'zubereitung') {
+                            waitingOrders++;
+                        }
+                    }
+                });
+                
+                document.getElementById('ordersToday').textContent = todayOrders;
+                document.getElementById('revenueToday').textContent = `CHF ${todayRevenue.toFixed(2)}`;
+                document.getElementById('waitingOrders').textContent = waitingOrders;
             });
         }
 
-        // Letzte Bestellungen laden
-        function loadRecentOrders() {
-            database.ref('orders').limitToLast(5).on('value', (snapshot) => {
-                const orders = snapshot.val() || {};
-                const ordersList = Object.entries(orders).reverse();
+        // Listen to orders for preview
+        function listenToOrders() {
+            database.ref('orders').orderByChild('timestamp').limitToLast(5).on('value', (snapshot) => {
+                const container = document.getElementById('recentOrdersPreview');
+                const orders = [];
                 
-                const container = document.getElementById('recentOrdersList');
+                snapshot.forEach((child) => {
+                    orders.push({ id: child.key, ...child.val() });
+                });
                 
-                if (ordersList.length === 0) {
-                    container.innerHTML = `<p style="text-align: center; color: #7f8c8d;" data-i18n="admin.orders.empty">Keine aktuellen Bestellungen</p>`;
+                if (orders.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p data-i18n="admin.noOrders">Keine aktuellen Bestellungen</p>
+                        </div>
+                    `;
                     return;
                 }
                 
-                container.innerHTML = ordersList.map(([id, order]) => {
-                    const time = new Date(order.timestamp).toLocaleTimeString('de-CH', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                    
-                    return `
-                        <div class="order-preview">
-                            <div class="order-preview-info">
-                                <div class="order-preview-id">#${order.id || id.slice(-6)}</div>
-                                <div class="order-preview-time">${time} - ${order.customerName}</div>
-                            </div>
-                            <span class="order-preview-status status-${order.status || 'neu'}">
-                                ${getStatusText(order.status || 'neu')}
-                            </span>
+                container.innerHTML = orders.reverse().map(order => `
+                    <div class="order-preview" onclick="window.location.href='admin-orders.html'">
+                        <div class="order-preview-header">
+                            <span class="order-preview-id">#${order.id.slice(-6)}</span>
+                            <span class="order-preview-time">${new Date(order.timestamp).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
-                    `;
-                }).join('');
-                
-                // Status-Texte übersetzen
-                updateStatusTranslations();
+                        <div class="order-preview-info">
+                            <span class="order-preview-customer">${order.customerName || 'Gast'}</span>
+                            <span class="order-preview-total">CHF ${(order.total || 0).toFixed(2)}</span>
+                        </div>
+                        <span class="order-status ${order.status || 'neu'}">${getStatusText(order.status || 'neu')}</span>
+                    </div>
+                `).join('');
             });
         }
 
-        // Status Text übersetzen
-        function getStatusText(status) {
-            const key = `order.status.${status}`;
-            return window.ml.t(key);
-        }
-
-        // Status-Übersetzungen aktualisieren
-        function updateStatusTranslations() {
-            document.querySelectorAll('.order-preview-status').forEach(element => {
-                const status = element.className.match(/status-(\w+)/)?.[1];
-                if (status) {
-                    element.textContent = getStatusText(status);
-                }
-            });
-        }
-
-        // Einstellungen laden
-        function loadSettings() {
-            // Restaurant Status
-            database.ref('settings/restaurantOpen').on('value', (snapshot) => {
-                restaurantOpen = snapshot.val() !== false; // Default true
-                document.getElementById('restaurantToggle').classList.toggle('active', restaurantOpen);
-            });
-            
-            // Wartezeit
+        // Listen to settings
+        function listenToSettings() {
+            // Wait time
             database.ref('settings/waitTime').on('value', (snapshot) => {
-                currentWaitTime = snapshot.val() || 15;
-                document.getElementById('currentWaitTime').textContent = currentWaitTime;
+                const waitTime = snapshot.val() || 5;
+                document.getElementById('currentWaitTimeDisplay').textContent = `${waitTime} Minuten`;
                 
-                // Buttons aktualisieren
+                // Update button states
                 document.querySelectorAll('.wait-time-btn').forEach(btn => {
                     btn.classList.remove('active');
-                    if (parseInt(btn.textContent) === currentWaitTime) {
-                        btn.classList.add('active');
-                    }
                 });
             });
-        }
-
-        // Realtime Listeners
-        function setupRealtimeListeners() {
-            // Neue Bestellungen Sound
-            let lastOrderCount = 0;
-            database.ref('orders').on('value', (snapshot) => {
-                const orders = snapshot.val() || {};
-                const currentCount = Object.keys(orders).length;
-                
-                if (currentCount > lastOrderCount && lastOrderCount > 0 && soundEnabled) {
-                    playNotificationSound();
-                }
-                
-                lastOrderCount = currentCount;
-                
-                // Badge aktualisieren
-                const newOrders = Object.values(orders).filter(o => o.status === 'neu').length;
-                const badge = document.getElementById('orderCount');
-                if (newOrders > 0) {
-                    badge.textContent = newOrders;
-                    badge.style.display = 'flex';
-                } else {
-                    badge.style.display = 'none';
-                }
+            
+            // Truck status
+            database.ref('settings/isOpen').on('value', (snapshot) => {
+                const isOpen = snapshot.val() !== false;
+                const statusEl = document.getElementById('truckStatus');
+                statusEl.textContent = isOpen ? 'Geöffnet' : 'Geschlossen';
+                statusEl.className = isOpen ? 'status-badge active' : 'status-badge inactive';
             });
         }
 
-        // Restaurant Toggle
-        function toggleRestaurant() {
-            restaurantOpen = !restaurantOpen;
-            database.ref('settings/restaurantOpen').set(restaurantOpen);
-            document.getElementById('restaurantToggle').classList.toggle('active', restaurantOpen);
-            
-            const statusKey = restaurantOpen ? 'admin.restaurant.opened' : 'admin.restaurant.closed';
-            showNotification(window.ml.t(statusKey));
-        }
-
-        // Wartezeit setzen
+        // Control Functions
         function setWaitTime(minutes) {
-            currentWaitTime = minutes;
             database.ref('settings/waitTime').set(minutes);
-            
-            document.querySelectorAll('.wait-time-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            showNotification(window.ml.t('admin.waitTime.set', { time: minutes }));
+            showNotification(`Wartezeit auf ${minutes} Minuten gesetzt`);
         }
 
-        // Sound Toggle
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            document.getElementById('soundToggle').classList.toggle('active', soundEnabled);
-            localStorage.setItem('soundEnabled', soundEnabled);
-            
-            const statusKey = soundEnabled ? 'notify.sound.on' : 'notify.sound.off';
-            showNotification(window.ml.t(statusKey));
-        }
-
-        // Benachrichtigungen
-        function showNotification(message, type = 'success') {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                ${message}
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.classList.add('show');
-            }, 100);
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
-
-        // Sound abspielen
-        function playNotificationSound() {
-            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBDGH0fPTgjMGHm7A7+OZURE...');
-            audio.play().catch(e => console.log('Sound play failed:', e));
-        }
-
-        // Navigation
-        function toggleMobileMenu() {
-            const navLinks = document.getElementById('navLinks');
-            navLinks.classList.toggle('show');
-        }
-
-        function toggleUserMenu() {
-            const dropdown = document.getElementById('userDropdown');
-            dropdown.classList.toggle('show');
-            
-            document.addEventListener('click', function closeMenu(e) {
-                if (!e.target.closest('.user-menu')) {
-                    dropdown.classList.remove('show');
-                    document.removeEventListener('click', closeMenu);
-                }
+        function toggleTruckStatus() {
+            database.ref('settings/isOpen').once('value', (snapshot) => {
+                const currentStatus = snapshot.val() !== false;
+                database.ref('settings/isOpen').set(!currentStatus);
+                showNotification(currentStatus ? 'Foodtruck geschlossen' : 'Foodtruck geöffnet');
             });
         }
 
-        function logout() {
-            if (confirm(window.ml.t('admin.logout.confirm'))) {
-                auth.signOut().then(() => {
-                    window.location.href = 'admin.html';
-                });
+        function showCustomWaitTime() {
+            document.getElementById('customWaitTimeModal').classList.add('active');
+        }
+
+        function closeCustomWaitTime() {
+            document.getElementById('customWaitTimeModal').classList.remove('active');
+        }
+
+        function applyCustomWaitTime() {
+            const minutes = parseInt(document.getElementById('customMinutes').value);
+            if (minutes > 0 && minutes <= 60) {
+                setWaitTime(minutes);
+                closeCustomWaitTime();
             }
         }
 
-        // Placeholder Funktionen
-        function exportData() {
-            showNotification(window.ml.t('admin.feature.comingSoon'), 'info');
+        function toggleMobileMenu() {
+            document.getElementById('navLinks').classList.toggle('active');
         }
 
-        function viewReports() {
-            showNotification(window.ml.t('admin.feature.comingSoon'), 'info');
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'admin.html';
         }
 
-        // Load saved sound preference
-        soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
-        document.getElementById('soundToggle').classList.toggle('active', soundEnabled);
+        function getStatusText(status) {
+            const texts = {
+                'neu': 'Neu',
+                'zubereitung': 'In Zubereitung',
+                'fertig': 'Fertig'
+            };
+            return texts[status] || status;
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const messageEl = document.getElementById('notificationMessage');
+            
+            messageEl.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Sound notification for new orders
+        let lastOrderCount = 0;
+        database.ref('orders').on('value', (snapshot) => {
+            const currentCount = snapshot.numChildren();
+            if (currentCount > lastOrderCount && lastOrderCount > 0) {
+                if (document.getElementById('soundEnabled').checked) {
+                    playNotificationSound();
+                }
+                showNotification('Neue Bestellung eingegangen!', 'info');
+            }
+            lastOrderCount = currentCount;
+        });
+
+        function playNotificationSound() {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBi+Bz/LXijMHFGS97OehTQ0MW6zn775mJAYwe8vz2oU8CRdmvOzpoVMQDViP7OukRhEKTaPf8sNuLAUme8v02Ag/BxNUr+3btp');
+            audio.play();
+        }
     </script>
-
-    <!-- Notification Styles -->
-    <style>
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            z-index: 2000;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.success {
-            border-left: 4px solid #2ecc71;
-        }
-
-        .notification.error {
-            border-left: 4px solid #e74c3c;
-        }
-
-        .notification.info {
-            border-left: 4px solid #3498db;
-        }
-
-        .notification i {
-            font-size: 1.2rem;
-        }
-
-        .notification.success i {
-            color: #2ecc71;
-        }
-
-        .notification.error i {
-            color: #e74c3c;
-        }
-
-        .notification.info i {
-            color: #3498db;
-        }
-    </style>
 </body>
 </html>

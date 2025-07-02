@@ -4,429 +4,450 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bestellung verfolgen - Pizza&Pasta D'amico</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="js/multilingual.js"></script>
 </head>
 <body>
-    <!-- LOADING SCREEN -->
+    <!-- Pizza Loader -->
     <div class="pizza-loader" id="pizzaLoader">
         <div class="spinning-pizza">🍕</div>
         <div class="loading-text">Pizza&Pasta D'amico</div>
         <div class="loading-subtext">Bestellverfolgung wird geladen...</div>
     </div>
 
-    <!-- SPRACHAUSWAHL -->
+    <!-- Language Selector -->
     <div class="language-selector">
         <!-- Wird von multilingual.js generiert -->
     </div>
 
     <div class="container">
-        <!-- HEADER -->
+        <!-- Header -->
         <div class="header">
             <h1>🔍 Bestellung verfolgen</h1>
-            <p class="subtitle">Verfolgen Sie den Status Ihrer Bestellung live</p>
+            <p class="subtitle" data-i18n="track.subtitle">Verfolgen Sie den Status Ihrer Bestellung live</p>
             <div class="location-info">
                 <i class="fas fa-truck"></i>
                 <span>Pizza&Pasta D'amico • Live-Tracking</span>
             </div>
         </div>
 
+        <!-- Content -->
         <div class="content">
-            <div class="tracking-container">
-                <!-- TRACKING INPUT -->
-                <div class="tracking-input-section">
-                    <div class="tracking-header">
-                        <h2 style="color: #ffffff; margin-bottom: 10px;">
-                            <i class="fas fa-search"></i> Bestellnummer eingeben
-                        </h2>
-                        <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">
-                            Geben Sie Ihre 6-stellige Bestellnummer ein, um den aktuellen Status zu sehen
-                        </p>
-                    </div>
-
+            <!-- Track Form -->
+            <div class="track-container">
+                <div class="track-form-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-search"></i>
+                        <span data-i18n="track.enterNumber">Bestellnummer eingeben</span>
+                    </h2>
+                    <p class="text-muted" data-i18n="track.instruction">
+                        Geben Sie Ihre 6-stellige Bestellnummer ein, um den aktuellen Status zu sehen
+                    </p>
+                    
                     <form id="trackingForm" onsubmit="trackOrder(event)">
-                        <div class="input-group">
-                            <div class="form-group">
-                                <label class="form-label" for="orderIdInput">
-                                    <i class="fas fa-hashtag"></i> Bestellnummer
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="orderIdInput" 
-                                    class="form-input"
-                                    placeholder="z.B. 142357"
-                                    maxlength="6"
-                                    pattern="[0-9]{6}"
-                                    required
-                                    autocomplete="off"
-                                >
-                            </div>
-                            <button type="submit" class="track-btn" id="trackBtn">
+                        <div class="track-input-group">
+                            <input 
+                                type="text" 
+                                id="orderIdInput" 
+                                class="track-input"
+                                placeholder="z.B. 142357"
+                                maxlength="6"
+                                pattern="[0-9A-Za-z]{6}"
+                                required
+                                autocomplete="off"
+                            >
+                            <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-search"></i>
-                                <span>Verfolgen</span>
+                                <span data-i18n="track.search">Suchen</span>
                             </button>
                         </div>
                     </form>
-
-                    <!-- QUICK ACCESS -->
-                    <div style="margin-top: 20px; text-align: center;">
-                        <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 10px;">
-                            Oder verwenden Sie einen Quick-Link:
-                        </p>
-                        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                            <button class="btn btn-secondary" onclick="trackOrderById('demo1')" style="padding: 8px 15px; font-size: 0.9rem;">
+                    
+                    <!-- Demo Links -->
+                    <div class="demo-links">
+                        <p class="text-muted" data-i18n="track.demo">Zum Testen:</p>
+                        <div class="demo-buttons">
+                            <button class="btn btn-secondary btn-small" onclick="trackDemoOrder('demo1')">
                                 Demo #1
                             </button>
-                            <button class="btn btn-secondary" onclick="trackOrderById('demo2')" style="padding: 8px 15px; font-size: 0.9rem;">
+                            <button class="btn btn-secondary btn-small" onclick="trackDemoOrder('demo2')">
                                 Demo #2
                             </button>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- ERROR MESSAGE -->
-                <div class="tracking-error" id="trackingError">
-                    <i class="fas fa-exclamation-triangle error-icon"></i>
-                    <span id="errorMessage">Bestellung nicht gefunden. Prüfen Sie Ihre Bestellnummer.</span>
+            <!-- Tracking Result -->
+            <div class="tracking-result" id="trackingResult" style="display: none;">
+                <!-- Order Header -->
+                <div class="order-tracking-header">
+                    <div class="order-tracking-id" id="trackedOrderId">#000000</div>
+                    <div class="order-tracking-time" id="orderTimestamp">-</div>
                 </div>
 
-                <!-- TRACKING RESULT -->
-                <div class="order-tracking-result" id="trackingResult">
-                    <!-- ORDER HEADER -->
-                    <div style="text-align: center; margin-bottom: 30px;">
-                        <div style="font-size: 2rem; font-weight: 700; color: #3b82f6; margin-bottom: 10px;" id="trackedOrderId">
-                            Bestellung #142357
-                        </div>
-                        <div style="color: rgba(255,255,255,0.7);" id="orderTimestamp">
-                            Bestellt heute um 14:23 Uhr
-                        </div>
-                    </div>
-
-                    <!-- LIVE STATUS TRACKER -->
-                    <div class="status-tracker">
-                        <h4 style="text-align: center; margin-bottom: 20px; color: #ffffff;">
-                            <i class="fas fa-clock"></i> Live-Status
-                        </h4>
-                        <div class="status-steps" id="statusSteps">
-                            <div class="status-step">
-                                <div class="step-icon active" id="step-ordered">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                <div class="step-label">Bestellt</div>
-                                <div class="step-line"></div>
+                <!-- Status Tracker -->
+                <div class="status-tracker">
+                    <h3 class="section-title">
+                        <i class="fas fa-clock"></i>
+                        <span data-i18n="track.liveStatus">Live-Status</span>
+                    </h3>
+                    
+                    <div class="status-steps">
+                        <div class="status-step">
+                            <div class="step-icon" id="step-ordered">
+                                <i class="fas fa-shopping-cart"></i>
                             </div>
-                            <div class="status-step">
-                                <div class="step-icon pending" id="step-preparing">
-                                    <i class="fas fa-fire"></i>
-                                </div>
-                                <div class="step-label">Zubereitung</div>
-                                <div class="step-line"></div>
-                            </div>
-                            <div class="status-step">
-                                <div class="step-icon pending" id="step-ready">
-                                    <i class="fas fa-bell"></i>
-                                </div>
-                                <div class="step-label">Fertig</div>
-                            </div>
+                            <span data-i18n="status.ordered">Bestellt</span>
                         </div>
-
-                        <!-- STATUS MESSAGE -->
-                        <div style="text-align: center; margin-top: 20px; padding: 15px; background: rgba(59,130,246,0.1); border-radius: 12px; border: 1px solid rgba(59,130,246,0.2);">
-                            <div style="color: #3b82f6; font-weight: 600; font-size: 1.1rem;" id="currentStatusMessage">
-                                <i class="fas fa-info-circle"></i> Ihre Bestellung wurde angenommen und wartet auf Zubereitung
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ORDER DETAILS -->
-                    <div class="order-details-card">
-                        <h4 style="color: #ffffff; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-list"></i> Bestelldetails
-                        </h4>
                         
-                        <div id="orderItemsList">
-                            <!-- Wird dynamisch gefüllt -->
+                        <div class="status-line"></div>
+                        
+                        <div class="status-step">
+                            <div class="step-icon" id="step-preparing">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <span data-i18n="status.preparing">Zubereitung</span>
                         </div>
-
-                        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
-                            <div class="detail-row">
-                                <span class="detail-label">Geschätzte Wartezeit:</span>
-                                <span class="detail-value" id="estimatedWaitTime">8 Minuten</span>
+                        
+                        <div class="status-line"></div>
+                        
+                        <div class="status-step">
+                            <div class="step-icon" id="step-ready">
+                                <i class="fas fa-bell"></i>
                             </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Zahlungsmethode:</span>
-                                <span class="detail-value" id="paymentMethodDisplay">Barzahlung</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Gesamtbetrag:</span>
-                                <span class="detail-value amount" id="totalAmountDisplay">CHF 0.00</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- LIVE UPDATES -->
-                    <div style="background: rgba(34,197,94,0.1); border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid rgba(34,197,94,0.2);">
-                        <h4 style="color: #22c55e; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-broadcast-tower"></i> Live-Updates
-                        </h4>
-                        <div id="liveUpdatesList">
-                            <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem; font-style: italic;">
-                                Warten auf Updates...
-                            </div>
+                            <span data-i18n="status.ready">Fertig</span>
                         </div>
                     </div>
-
-                    <!-- ACTIONS -->
-                    <div class="actions">
-                        <a href="index.html" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Neue Bestellung
-                        </a>
-                        <button class="btn btn-secondary" onclick="refreshTracking()">
-                            <i class="fas fa-sync-alt"></i> Aktualisieren
-                        </button>
+                    
+                    <div class="status-message" id="currentStatusMessage">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Status wird geladen...</span>
                     </div>
                 </div>
+
+                <!-- Order Details -->
+                <div class="order-details-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-list"></i>
+                        <span data-i18n="track.orderDetails">Bestelldetails</span>
+                    </h3>
+                    
+                    <div id="orderItemsList" class="order-items-list">
+                        <!-- Wird dynamisch gefüllt -->
+                    </div>
+                    
+                    <div class="order-detail-info">
+                        <div class="detail-row">
+                            <span class="detail-label" data-i18n="track.waitTime">Geschätzte Wartezeit:</span>
+                            <span class="detail-value" id="estimatedWaitTime">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label" data-i18n="track.total">Gesamtbetrag:</span>
+                            <span class="detail-value" id="orderTotal">CHF 0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Updates -->
+                <div class="updates-feed">
+                    <h3 class="section-title">
+                        <i class="fas fa-bell"></i>
+                        <span data-i18n="track.liveUpdates">Live-Updates</span>
+                    </h3>
+                    <div id="liveUpdatesList" class="updates-list">
+                        <div class="update-item">
+                            <span class="update-message" data-i18n="track.waitingUpdates">Warten auf Updates...</span>
+                            <span class="update-time">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="track-actions">
+                    <button class="btn btn-secondary" onclick="refreshTracking()">
+                        <i class="fas fa-sync"></i>
+                        <span data-i18n="track.refresh">Aktualisieren</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="trackNewOrder()">
+                        <i class="fas fa-search"></i>
+                        <span data-i18n="track.newSearch">Neue Suche</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div class="error-state" id="errorState" style="display: none;">
+                <div class="status-emoji">🔍❌</div>
+                <h2 class="status-title" data-i18n="track.notFound">Bestellung nicht gefunden</h2>
+                <p class="status-description" id="errorMessage">
+                    Die eingegebene Bestellnummer konnte nicht gefunden werden.
+                </p>
+                <button class="btn btn-primary" onclick="trackNewOrder()">
+                    <i class="fas fa-arrow-left"></i>
+                    <span data-i18n="track.tryAgain">Erneut versuchen</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- NOTIFICATION POPUP -->
-    <div class="notification-popup" id="notificationPopup">
-        <span id="notificationMessage"></span>
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <div class="notification-content">
+            <i class="fas fa-bell"></i>
+            <span id="notificationMessage"></span>
+        </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <script>
-        // FIREBASE CONFIGURATION
+        // Firebase Konfiguration
         const firebaseConfig = {
-            apiKey: "AIzaSyBiVdp67AZmZnGpM8OlZXBGKJKhF4iDlsE",
-            authDomain: "pizzapastadamico.firebaseapp.com",
-            databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "pizzapastadamico",
-            storageBucket: "pizzapastadamico.appspot.com",
-            messagingSenderId: "168976461234",
-            appId: "1:168976461234:web:abc123def456ghi789"
-        };
+  apiKey: "AIzaSyD3OCMvc4Iup58Ao0BiFNuvA0fnJokzYS8",
+  authDomain: "pizzapastadamico.firebaseapp.com",
+  databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "pizzapastadamico",
+  storageBucket: "pizzapastadamico.firebasestorage.app",
+  messagingSenderId: "83240541532",
+  appId: "1:83240541532:web:11e3277850bf89a5b8b599",
+  measurementId: "G-6H2J5K88J7"
+};
 
         // Firebase initialisieren
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        // Globale Variablen
         let currentTrackedOrder = null;
         let updateListeners = [];
+        let notificationSound = null;
 
-        // INITIALIZATION
+        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Order Tracking wird geladen...');
-            
+            // Hide loader
+            setTimeout(() => {
+                document.getElementById('pizzaLoader').style.display = 'none';
+            }, 1000);
+
+            // Load multilingual
             if (window.ml) {
                 window.ml.init();
             }
-            
-            // URL Parameter prüfen
+
+            // Initialize notification sound
+            notificationSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBi+Bz/LXijMHFGS97OehTQ0MW6zn775mJAYwe8vz2oU8CRdmvOzpoVMQDViP7OukRhEKTaPf8sNuLAUme8v02Ag/BxNUr+3btp');
+
+            // Check URL parameter
             const urlParams = new URLSearchParams(window.location.search);
-            const orderId = urlParams.get('order');
+            const orderId = urlParams.get('order') || urlParams.get('orderId');
             
             if (orderId) {
-                document.getElementById('orderIdInput').value = orderId;
-                setTimeout(() => trackOrderById(orderId), 1000);
-            }
-            
-            setTimeout(hideLoadingScreen, 1500);
-        });
-
-        // LOADING SCREEN VERSTECKEN
-        function hideLoadingScreen() {
-            const loader = document.getElementById('pizzaLoader');
-            loader.classList.add('hidden');
-        }
-
-        // TRACKING FORM HANDLER
-        function trackOrder(event) {
-            event.preventDefault();
-            const orderId = document.getElementById('orderIdInput').value.trim();
-            if (orderId) {
+                document.getElementById('orderIdInput').value = orderId.slice(-6);
                 trackOrderById(orderId);
             }
+        });
+
+        // Track Order
+        function trackOrder(event) {
+            event.preventDefault();
+            
+            const orderId = document.getElementById('orderIdInput').value.trim();
+            if (orderId.length !== 6) {
+                showError('Bitte geben Sie eine 6-stellige Bestellnummer ein');
+                return;
+            }
+            
+            // Show loading
+            showNotification('Suche Bestellung...', 'info');
+            
+            // Search in Firebase
+            searchOrder(orderId);
         }
 
-        // ORDER BY ID VERFOLGEN
-        async function trackOrderById(orderId) {
-            const trackBtn = document.getElementById('trackBtn');
-            const originalText = trackBtn.innerHTML;
-            
-            // Loading State
-            trackBtn.disabled = true;
-            trackBtn.innerHTML = '<div class="loading-spinner"></div> Suchen...';
-            
-            hideError();
-            hideResult();
-
+        // Search Order
+        async function searchOrder(searchId) {
             try {
-                // Zuerst in aktiven Bestellungen suchen
-                const activeOrder = await findOrderInActive(orderId);
-                if (activeOrder) {
-                    displayOrderTracking(activeOrder.data, activeOrder.key);
-                    startLiveUpdates(activeOrder.key);
+                // First check if it's a demo order
+                if (searchId.toLowerCase().startsWith('demo')) {
+                    displayDemoOrder(searchId);
                     return;
                 }
-
-                // Dann in archivierten Bestellungen suchen
-                const archivedOrder = await findOrderInArchive(orderId);
-                if (archivedOrder) {
-                    displayArchivedOrder(archivedOrder.data);
-                    return;
+                
+                // Search in active orders
+                const ordersSnapshot = await database.ref('orders').once('value');
+                let foundOrder = null;
+                let foundKey = null;
+                
+                ordersSnapshot.forEach((child) => {
+                    const order = child.val();
+                    const key = child.key;
+                    
+                    // Check if order ID matches (last 6 characters)
+                    if (key.slice(-6).toLowerCase() === searchId.toLowerCase() ||
+                        (order.id && order.id.slice(-6).toLowerCase() === searchId.toLowerCase())) {
+                        foundOrder = order;
+                        foundKey = key;
+                    }
+                });
+                
+                if (foundOrder) {
+                    displayOrder(foundKey, foundOrder);
+                } else {
+                    // Search in archived orders
+                    const archiveSnapshot = await database.ref('archive').once('value');
+                    
+                    archiveSnapshot.forEach((child) => {
+                        const order = child.val();
+                        const key = child.key;
+                        
+                        if (key.slice(-6).toLowerCase() === searchId.toLowerCase()) {
+                            foundOrder = order;
+                            foundKey = key;
+                        }
+                    });
+                    
+                    if (foundOrder) {
+                        displayOrder(foundKey, foundOrder, true);
+                    } else {
+                        showError('Bestellung nicht gefunden. Bitte überprüfen Sie die Bestellnummer.');
+                    }
                 }
-
-                // Demo-Bestellungen für Testing
-                if (orderId === 'demo1' || orderId === 'demo2') {
-                    displayDemoOrder(orderId);
-                    return;
-                }
-
-                // Nicht gefunden
-                showError('Bestellung nicht gefunden. Prüfen Sie Ihre Bestellnummer.');
-
             } catch (error) {
-                console.error('Tracking-Fehler:', error);
-                showError('Fehler beim Laden der Bestelldaten. Versuchen Sie es erneut.');
-            } finally {
-                trackBtn.disabled = false;
-                trackBtn.innerHTML = originalText;
+                console.error('Search error:', error);
+                showError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
             }
         }
 
-        // AKTIVE BESTELLUNG FINDEN
-        async function findOrderInActive(orderId) {
-            const snapshot = await database.ref('orders').once('value');
-            const orders = snapshot.val() || {};
-            
-            for (const [key, order] of Object.entries(orders)) {
-                if (order.id === orderId || key.slice(-6) === orderId) {
-                    return { key, data: order };
+        // Track Order by ID
+        function trackOrderById(orderId) {
+            database.ref(`orders/${orderId}`).once('value', (snapshot) => {
+                const order = snapshot.val();
+                
+                if (order) {
+                    displayOrder(orderId, order);
+                } else {
+                    // Check archive
+                    database.ref(`archive/${orderId}`).once('value', (archiveSnapshot) => {
+                        const archivedOrder = archiveSnapshot.val();
+                        if (archivedOrder) {
+                            displayOrder(orderId, archivedOrder, true);
+                        } else {
+                            showError('Bestellung nicht gefunden');
+                        }
+                    });
                 }
-            }
-            return null;
-        }
-
-        // ARCHIVIERTE BESTELLUNG FINDEN
-        async function findOrderInArchive(orderId) {
-            const snapshot = await database.ref('archive').once('value');
-            const orders = snapshot.val() || {};
-            
-            for (const [key, order] of Object.entries(orders)) {
-                if (order.id === orderId || key.slice(-6) === orderId) {
-                    return { key, data: order };
-                }
-            }
-            return null;
-        }
-
-        // ORDER TRACKING ANZEIGEN
-        function displayOrderTracking(orderData, orderKey) {
-            currentTrackedOrder = orderKey;
-            
-            // Order Header
-            document.getElementById('trackedOrderId').textContent = `Bestellung #${orderData.id}`;
-            
-            const orderTime = new Date(orderData.timestamp);
-            const timeStr = orderTime.toLocaleString('de-CH', {
-                day: '2-digit',
-                month: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
             });
-            document.getElementById('orderTimestamp').textContent = `Bestellt am ${timeStr}`;
-
-            // Status Tracker
-            updateStatusDisplay(orderData.status || 'neu');
-
-            // Order Items
-            displayOrderItems(orderData.items || []);
-
-            // Order Details
-            document.getElementById('estimatedWaitTime').textContent = `${orderData.waitTime || 5} Minuten`;
-            
-            const paymentMethods = {
-                'card': 'Kartenzahlung',
-                'cash': 'Barzahlung',
-                'twint': 'TWINT'
-            };
-            document.getElementById('paymentMethodDisplay').textContent = 
-                paymentMethods[orderData.paymentMethod] || 'Barzahlung';
-            
-            document.getElementById('totalAmountDisplay').textContent = `CHF ${(orderData.total || 0).toFixed(2)}`;
-
-            showResult();
         }
 
-        // STATUS DISPLAY UPDATE
+        // Display Order
+        function displayOrder(orderKey, order, isArchived = false) {
+            currentTrackedOrder = { key: orderKey, data: order };
+            
+            // Update UI
+            document.getElementById('trackedOrderId').textContent = `Bestellung #${orderKey.slice(-6).toUpperCase()}`;
+            
+            const orderDate = new Date(order.timestamp);
+            const timeString = orderDate.toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' });
+            const dateString = orderDate.toLocaleDateString('de-CH');
+            const isToday = orderDate.toDateString() === new Date().toDateString();
+            
+            document.getElementById('orderTimestamp').textContent = 
+                isToday ? `Heute um ${timeString} Uhr` : `${dateString} um ${timeString} Uhr`;
+            
+            // Display items
+            if (order.items && order.items.length > 0) {
+                const itemsList = document.getElementById('orderItemsList');
+                itemsList.innerHTML = order.items.map(item => `
+                    <div class="order-item">
+                        <div>
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-quantity">${item.quantity}x CHF ${item.price.toFixed(2)}</div>
+                        </div>
+                        <div class="item-total">CHF ${(item.price * item.quantity).toFixed(2)}</div>
+                    </div>
+                `).join('');
+            }
+            
+            // Wait time
+            document.getElementById('estimatedWaitTime').textContent = `${order.waitTime || 10} Minuten`;
+            
+            // Total
+            document.getElementById('orderTotal').textContent = `CHF ${(order.total || 0).toFixed(2)}`;
+            
+            // Update status
+            updateStatusDisplay(order.status || 'neu');
+            
+            // Show result
+            document.querySelector('.track-container').style.display = 'none';
+            document.getElementById('errorState').style.display = 'none';
+            document.getElementById('trackingResult').style.display = 'block';
+            
+            // Start live updates if not archived
+            if (!isArchived) {
+                startLiveUpdates(orderKey);
+            } else {
+                document.getElementById('currentStatusMessage').innerHTML = `
+                    <i class="fas fa-check-circle"></i>
+                    <span>Diese Bestellung wurde bereits abgeholt und archiviert</span>
+                `;
+                addLiveUpdate('Bestellung wurde erfolgreich abgeholt und archiviert');
+            }
+        }
+
+        // Update Status Display
         function updateStatusDisplay(status) {
+            const steps = {
+                'neu': 1,
+                'zubereitung': 2,
+                'fertig': 3
+            };
+            
+            const currentStep = steps[status] || 1;
+            
+            // Update step icons
             const stepOrdered = document.getElementById('step-ordered');
             const stepPreparing = document.getElementById('step-preparing');
             const stepReady = document.getElementById('step-ready');
-            const statusMessage = document.getElementById('currentStatusMessage');
-
-            // Reset all steps
-            stepOrdered.className = 'step-icon active';
-            stepPreparing.className = 'step-icon pending';
-            stepReady.className = 'step-icon pending';
-
-            let message = '';
-            let messageColor = '#3b82f6';
-
-            switch (status) {
-                case 'neu':
-                    message = '<i class="fas fa-clock"></i> Ihre Bestellung wurde angenommen und wartet auf Zubereitung';
-                    break;
-                case 'zubereitung':
-                    stepPreparing.className = 'step-icon active';
-                    message = '<i class="fas fa-fire"></i> Ihre Bestellung wird gerade zubereitet';
-                    messageColor = '#f59e0b';
-                    break;
-                case 'fertig':
-                    stepPreparing.className = 'step-icon active';
-                    stepReady.className = 'step-icon active';
-                    message = '<i class="fas fa-bell"></i> Ihre Bestellung ist fertig zur Abholung!';
-                    messageColor = '#22c55e';
-                    break;
-            }
-
-            statusMessage.innerHTML = message;
-            statusMessage.style.color = messageColor;
-            statusMessage.parentElement.style.borderColor = messageColor.replace('#', 'rgba(') + ', 0.2)';
-            statusMessage.parentElement.style.background = messageColor.replace('#', 'rgba(') + ', 0.1)';
-        }
-
-        // ORDER ITEMS ANZEIGEN
-        function displayOrderItems(items) {
-            const container = document.getElementById('orderItemsList');
             
-            if (!items || items.length === 0) {
-                container.innerHTML = '<div style="color: rgba(255,255,255,0.6); font-style: italic;">Keine Artikel gefunden</div>';
-                return;
-            }
-
-            container.innerHTML = items.map(item => `
-                <div class="detail-row">
-                    <span class="detail-label">${item.quantity || 1}x ${item.name}</span>
-                    <span class="detail-value">CHF ${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</span>
-                </div>
-            `).join('');
+            // Reset classes
+            stepOrdered.className = 'step-icon';
+            stepPreparing.className = 'step-icon';
+            stepReady.className = 'step-icon';
+            
+            // Set completed steps
+            if (currentStep >= 1) stepOrdered.className = 'step-icon completed';
+            if (currentStep >= 2) stepPreparing.className = 'step-icon completed';
+            if (currentStep >= 3) stepReady.className = 'step-icon completed';
+            
+            // Set active step
+            if (currentStep === 1 && status === 'neu') stepOrdered.className = 'step-icon active';
+            if (currentStep === 2) stepPreparing.className = 'step-icon active';
+            if (currentStep === 3) stepReady.className = 'step-icon active';
+            
+            // Update status message
+            const messages = {
+                'neu': 'Ihre Bestellung wurde angenommen und wartet auf Zubereitung',
+                'zubereitung': 'Ihre Bestellung wird gerade frisch zubereitet',
+                'fertig': '🎉 Ihre Bestellung ist fertig! Bitte kommen Sie zur Abholung.'
+            };
+            
+            document.getElementById('currentStatusMessage').innerHTML = `
+                <i class="fas fa-${status === 'fertig' ? 'check-circle' : status === 'zubereitung' ? 'fire' : 'info-circle'}"></i>
+                <span>${messages[status] || 'Status wird aktualisiert...'}</span>
+            `;
         }
 
-        // LIVE UPDATES STARTEN
+        // Start Live Updates
         function startLiveUpdates(orderKey) {
-            // Cleanup previous listeners
+            // Clean up previous listeners
             updateListeners.forEach(listener => listener.off());
             updateListeners = [];
-
-            // Status Listener
+            
+            // Status listener
             const statusRef = database.ref(`orders/${orderKey}/status`);
             statusRef.on('value', (snapshot) => {
                 const status = snapshot.val();
@@ -436,198 +457,299 @@
                 }
             });
             updateListeners.push(statusRef);
-
-            // Notifications Listener
+            
+            // Notifications listener
             const notifRef = database.ref(`notifications/${orderKey}`);
             notifRef.on('child_added', (snapshot) => {
                 const notification = snapshot.val();
-                addLiveUpdate(notification.message, notification.playSound);
-                
-                if (notification.playSound) {
-                    showNotification(notification.message, 'info', true);
+                if (notification) {
+                    addLiveUpdate(notification.message, notification.playSound);
+                    
+                    if (notification.playSound && notificationSound) {
+                        notificationSound.play().catch(e => console.log('Sound play failed'));
+                    }
+                    
+                    showNotification(notification.message, 'info');
                 }
             });
             updateListeners.push(notifRef);
         }
 
-        // LIVE UPDATE HINZUFÜGEN
-        function addLiveUpdate(message, playSound = false) {
+        // Add Live Update
+        function addLiveUpdate(message, isImportant = false) {
             const container = document.getElementById('liveUpdatesList');
             const timestamp = new Date().toLocaleTimeString('de-CH', {
                 hour: '2-digit',
                 minute: '2-digit'
             });
-
-            const updateElement = document.createElement('div');
-            updateElement.style.cssText = `
-                padding: 10px 0;
-                border-bottom: 1px solid rgba(255,255,255,0.1);
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                animation: slideIn 0.3s ease;
-            `;
             
-            updateElement.innerHTML = `
-                <span style="color: rgba(255,255,255,0.9);">
-                    ${playSound ? '<i class="fas fa-volume-up" style="color: #f59e0b; margin-right: 8px;"></i>' : ''}
-                    ${message}
-                </span>
-                <span style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">${timestamp}</span>
-            `;
-
-            // Erstes Update entfernen wenn es "Warten auf Updates..." war
+            // Remove initial waiting message
             if (container.children.length === 1 && container.textContent.includes('Warten auf Updates')) {
                 container.innerHTML = '';
             }
-
-            container.insertBefore(updateElement, container.firstChild);
-
-            // Maximal 5 Updates anzeigen
-            while (container.children.length > 5) {
+            
+            const updateDiv = document.createElement('div');
+            updateDiv.className = 'update-item';
+            updateDiv.innerHTML = `
+                <span class="update-message ${isImportant ? 'important' : ''}">
+                    ${isImportant ? '<i class="fas fa-bell"></i> ' : ''}
+                    ${message}
+                </span>
+                <span class="update-time">${timestamp}</span>
+            `;
+            
+            container.insertBefore(updateDiv, container.firstChild);
+            
+            // Keep only last 10 updates
+            while (container.children.length > 10) {
                 container.removeChild(container.lastChild);
             }
         }
 
-        // STATUS TEXT ÜBERSETZEN
-        function getStatusText(status) {
-            const statusTexts = {
-                'neu': 'Neu',
-                'zubereitung': 'In Zubereitung',
-                'fertig': 'Fertig'
-            };
-            return statusTexts[status] || status;
+        // Demo Orders
+        function trackDemoOrder(demoId) {
+            document.getElementById('orderIdInput').value = demoId;
+            displayDemoOrder(demoId);
         }
 
-        // DEMO ORDER ANZEIGEN
         function displayDemoOrder(demoId) {
             const demoOrders = {
                 'demo1': {
                     id: 'DEMO1',
-                    timestamp: new Date(Date.now() - 300000).toISOString(), // 5 Min ago
+                    timestamp: new Date(Date.now() - 300000).toISOString(), // 5 min ago
                     status: 'zubereitung',
                     items: [
                         { name: 'Pizza Margherita', quantity: 1, price: 18.50 },
-                        { name: 'Pasta Carbonara', quantity: 1, price: 19.00 }
+                        { name: 'Pasta Carbonara', quantity: 1, price: 19.50 },
+                        { name: 'Coca Cola', quantity: 2, price: 4.50 }
                     ],
-                    total: 37.50,
-                    waitTime: 8,
-                    paymentMethod: 'card'
+                    total: 47.00,
+                    waitTime: 10,
+                    customerName: 'Demo Kunde'
                 },
                 'demo2': {
                     id: 'DEMO2',
-                    timestamp: new Date(Date.now() - 900000).toISOString(), // 15 Min ago
+                    timestamp: new Date(Date.now() - 900000).toISOString(), // 15 min ago
                     status: 'fertig',
                     items: [
-                        { name: 'Pizza Quattro Stagioni', quantity: 2, price: 22.50 }
+                        { name: 'Pizza Salami', quantity: 2, price: 21.00 },
+                        { name: 'Tiramisu', quantity: 2, price: 8.50 }
                     ],
-                    total: 45.00,
-                    waitTime: 12,
-                    paymentMethod: 'cash'
+                    total: 59.00,
+                    waitTime: 15,
+                    customerName: 'Test Bestellung'
                 }
             };
-
-            const orderData = demoOrders[demoId];
-            if (orderData) {
-                displayOrderTracking(orderData, 'demo');
+            
+            const order = demoOrders[demoId.toLowerCase()];
+            if (order) {
+                displayOrder(demoId.toUpperCase(), order);
                 
-                // Demo Live Updates
+                // Add some demo updates
                 setTimeout(() => {
-                    addLiveUpdate('Demo-Bestellung - Live-Updates simuliert');
-                }, 1000);
+                    addLiveUpdate('Demo-Modus: Dies ist eine Test-Bestellung');
+                }, 500);
                 
-                setTimeout(() => {
-                    addLiveUpdate('Küche informiert - Zubereitung beginnt bald');
-                }, 3000);
+                if (order.status === 'fertig') {
+                    setTimeout(() => {
+                        addLiveUpdate('🔔 Ihre Bestellung ist fertig! Bitte abholen.', true);
+                    }, 1000);
+                }
+            } else {
+                showError('Demo-Bestellung nicht gefunden');
             }
         }
 
-        // ARCHIVIERTE BESTELLUNG ANZEIGEN
-        function displayArchivedOrder(orderData) {
-            displayOrderTracking(orderData, null);
-            
-            // Spezielle Nachricht für archivierte Bestellungen
-            document.getElementById('currentStatusMessage').innerHTML = 
-                '<i class="fas fa-archive"></i> Diese Bestellung wurde bereits abgeholt und archiviert';
-            document.getElementById('currentStatusMessage').style.color = '#6b7280';
-            
-            addLiveUpdate('Bestellung wurde erfolgreich abgeholt und archiviert');
+        // Utility Functions
+        function getStatusText(status) {
+            const texts = {
+                'neu': 'Neu',
+                'zubereitung': 'In Zubereitung',
+                'fertig': 'Fertig'
+            };
+            return texts[status] || status;
         }
 
-        // ERROR/RESULT HANDLING
-        function showError(message) {
-            document.getElementById('errorMessage').textContent = message;
-            document.getElementById('trackingError').classList.add('show');
-        }
-
-        function hideError() {
-            document.getElementById('trackingError').classList.remove('show');
-        }
-
-        function showResult() {
-            document.getElementById('trackingResult').classList.add('show');
-        }
-
-        function hideResult() {
-            document.getElementById('trackingResult').classList.remove('show');
-        }
-
-        // REFRESH TRACKING
         function refreshTracking() {
             if (currentTrackedOrder) {
-                const orderId = document.getElementById('trackedOrderId').textContent.replace('Bestellung #', '');
-                trackOrderById(orderId);
+                // Re-fetch current order
+                trackOrderById(currentTrackedOrder.key);
+                showNotification('Aktualisiert', 'success');
             }
         }
 
-        // NOTIFICATION ANZEIGEN
-        function showNotification(message, type = 'info', playSound = false) {
-            const notification = document.getElementById('notificationPopup');
-            const messageSpan = document.getElementById('notificationMessage');
+        function trackNewOrder() {
+            // Reset UI
+            document.getElementById('trackingForm').reset();
+            document.querySelector('.track-container').style.display = 'block';
+            document.getElementById('trackingResult').style.display = 'none';
+            document.getElementById('errorState').style.display = 'none';
             
-            messageSpan.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}"></i> 
-                ${message}
-            `;
-            notification.className = `notification-popup ${type} show`;
+            // Clean up listeners
+            updateListeners.forEach(listener => listener.off());
+            updateListeners = [];
             
-            if (playSound) {
-                playNotificationSound();
-            }
+            // Focus input
+            document.getElementById('orderIdInput').focus();
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.querySelector('.track-container').style.display = 'none';
+            document.getElementById('trackingResult').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const messageEl = document.getElementById('notificationMessage');
+            
+            // Update icon based on type
+            const icon = type === 'error' ? 'fa-exclamation-circle' : 
+                        type === 'info' ? 'fa-info-circle' : 'fa-check-circle';
+            
+            notification.querySelector('i').className = `fas ${icon}`;
+            messageEl.textContent = message;
+            notification.className = `notification ${type} show`;
             
             setTimeout(() => {
                 notification.classList.remove('show');
-            }, 5000);
+            }, 3000);
+        }
+    </script>
+
+    <style>
+        /* Track page specific styles */
+        .track-input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
         }
 
-        // NOTIFICATION SOUND
-        function playNotificationSound() {
-            try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
+        .track-input {
+            flex: 1;
+            text-align: center;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
 
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
+        .demo-links {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-color);
+        }
 
-                oscillator.frequency.value = 1200;
-                oscillator.type = 'sine';
-                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
+        .demo-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
 
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.6);
-            } catch (error) {
-                console.log('Sound nicht verfügbar:', error);
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .tracking-result {
+            animation: fadeIn 0.5s ease;
+        }
+
+        .order-tracking-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-lg);
+        }
+
+        .order-tracking-id {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin-bottom: 10px;
+        }
+
+        .order-tracking-time {
+            color: var(--text-secondary);
+        }
+
+        .updates-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .update-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            animation: slideIn 0.3s ease;
+        }
+
+        .update-item:last-child {
+            border-bottom: none;
+        }
+
+        .update-message {
+            flex: 1;
+            color: var(--text-primary);
+        }
+
+        .update-message.important {
+            color: var(--accent-yellow);
+            font-weight: 600;
+        }
+
+        .update-time {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-left: 15px;
+        }
+
+        .track-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
             }
         }
 
-        // CLEANUP beim Verlassen der Seite
-        window.addEventListener('beforeunload', () => {
-            updateListeners.forEach(listener => listener.off());
-        });
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
 
-        console.log('Order Tracking Page geladen');
-    </script>
+        @media (max-width: 480px) {
+            .track-input-group {
+                flex-direction: column;
+            }
+            
+            .track-actions {
+                flex-direction: column;
+            }
+            
+            .track-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
 </body>
 </html>

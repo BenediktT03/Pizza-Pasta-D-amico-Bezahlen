@@ -179,14 +179,29 @@
         const storage = firebase.storage();
         const auth = firebase.auth();
 
-        // WICHTIG: Auth Check - Redirect zu admin.html wenn nicht eingeloggt
-        auth.onAuthStateChanged((user) => {
-            if (!user) {
-                window.location.href = 'admin.html';
-            } else {
-                initializeProducts();
-            }
-        });
+        // Vereinfachte Auth-Prüfung ohne Firebase
+function checkAdminAuth() {
+    const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+    const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
+    const now = Date.now();
+    
+    // Session läuft nach 2 Stunden ab
+    const sessionExpired = (now - loginTime) > (2 * 60 * 60 * 1000);
+    
+    if (!isLoggedIn || sessionExpired) {
+        // Nicht eingeloggt oder Session abgelaufen
+        localStorage.clear();
+        window.location.href = 'admin.html';
+        return false;
+    }
+    return true;
+}
+
+// Prüfe Auth sofort
+if (!checkAdminAuth()) {
+    // Stop execution
+    throw new Error('Not authenticated');
+}
 
         // Placeholder Image
         const PLACEHOLDER_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiPktlaW4gQmlsZDwvdGV4dD48L3N2Zz4=';

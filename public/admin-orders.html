@@ -461,14 +461,29 @@
         let soundEnabled = true;
         let lastOrderCount = 0;
 
-        // Auth Check
-        auth.onAuthStateChanged((user) => {
-            if (!user) {
-                window.location.href = 'admin.html';
-            } else {
-                initializeOrders();
-            }
-        });
+       // Vereinfachte Auth-Prüfung ohne Firebase
+function checkAdminAuth() {
+    const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+    const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
+    const now = Date.now();
+    
+    // Session läuft nach 2 Stunden ab
+    const sessionExpired = (now - loginTime) > (2 * 60 * 60 * 1000);
+    
+    if (!isLoggedIn || sessionExpired) {
+        // Nicht eingeloggt oder Session abgelaufen
+        localStorage.clear();
+        window.location.href = 'admin.html';
+        return false;
+    }
+    return true;
+}
+
+// Prüfe Auth sofort
+if (!checkAdminAuth()) {
+    // Stop execution
+    throw new Error('Not authenticated');
+}
 
         // Initialisierung
         function initializeOrders() {

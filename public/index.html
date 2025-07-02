@@ -315,7 +315,7 @@
 
             container.innerHTML = productsList.map(([id, product]) => `
                 <div class="product-card ${!product.available ? 'unavailable' : ''}">
-                    <img src="${product.image || 'https://via.placeholder.com/300x200'}" 
+                    <img src="${product.image || 'https://dummyimage.com/300x200/f4f4f4/999999&text=Kein+Bild'}" 
                          alt="${product.name}" 
                          class="product-image">
                     <div class="product-info">
@@ -381,7 +381,7 @@
             } else {
                 cartItems.innerHTML = cart.map(item => `
                     <div class="cart-item">
-                        <img src="${item.image || 'https://via.placeholder.com/60x60'}" 
+                        <img src="${item.image || 'https://dummyimage.com/300x200/f4f4f4/999999&text=Kein+Bild'}" 
                              alt="${item.name}" 
                              class="cart-item-image">
                         <div class="cart-item-info">

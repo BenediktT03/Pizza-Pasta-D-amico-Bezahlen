@@ -501,14 +501,36 @@
         let restaurantOpen = true;
         let currentWaitTime = 15;
 
-        // Auth Check
-        auth.onAuthStateChanged((user) => {
-            if (!user) {
-                window.location.href = 'admin.html';
-            } else {
-                initializeDashboard();
-            }
-        });
+       // Vereinfachte Auth-Prüfung
+function checkAuth() {
+    const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+    const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
+    const now = Date.now();
+    
+    // Session läuft nach 2 Stunden ab
+    const sessionExpired = (now - loginTime) > (2 * 60 * 60 * 1000);
+    
+    if (!isLoggedIn || sessionExpired) {
+        localStorage.clear();
+        window.location.href = 'admin.html';
+        return false;
+    }
+    return true;
+}
+
+// Prüfe Auth sofort
+if (!checkAuth()) {
+    // Stop execution if not authenticated
+    throw new Error('Not authenticated');
+}
+
+// ERSETZE auch die logout() Funktion:
+function logout() {
+    if (confirm(window.ml.t('admin.logout.confirm'))) {
+        localStorage.clear();
+        window.location.href = 'admin.html';
+    }
+}
 
         // Dashboard initialisieren
         function initializeDashboard() {

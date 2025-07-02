@@ -3,256 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pizza&Pasta D'amico - Online Bestellen</title>
+    <title>Pizza&Pasta D'amico - Bestellung</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        /* Additional Styles für Fixes */
-        .error-message {
-            text-align: center;
-            padding: 40px;
-            color: #e74c3c;
-        }
-        
-        .error-message button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        .closed-banner {
-            background: #e74c3c;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        #cartBackdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 998;
-            display: none;
-        }
-        
-        @media (max-width: 768px) {
-            .cart-sidebar {
-                position: fixed;
-                right: 0;
-                top: 0;
-                height: 100vh;
-                transform: translateX(100%);
-                transition: transform 0.3s ease;
-                z-index: 999;
-                width: 300px;
-                max-width: 85vw;
-            }
-            
-            .cart-sidebar.open {
-                transform: translateX(0);
-            }
-        }
-        
-        .payment-dialog {
-            display: none;
-        }
-        
-        .payment-dialog.show {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        #paymentBackdrop.show {
-            display: block;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-    </style>
+    <script src="js/multilingual.js"></script>
 </head>
 <body>
-    <!-- Pizza Loading Screen -->
-    <div class="loading-screen" id="loadingScreen">
-        <div class="pizza-loader">
-            <div class="pizza-slice"></div>
-            <div class="pizza-slice"></div>
-            <div class="pizza-slice"></div>
-            <div class="pizza-slice"></div>
-            <div class="pizza-slice"></div>
-            <div class="pizza-slice"></div>
-            <div class="pizza-slice"></div>
-            <div class="pizza-slice"></div>
-        </div>
-        <h2 class="loading-text">Pizza&Pasta D'amico</h2>
-        <p class="loading-subtext" data-i18n="loading">Lade leckere Speisen...</p>
+    <!-- Sprachauswahl -->
+    <div class="language-selector">
+        <!-- Wird von multilingual.js generiert -->
     </div>
 
     <!-- Header -->
     <header class="header">
         <div class="header-content">
             <div class="logo">
-                <h1>🍕 Pizza&Pasta D'amico</h1>
+                <i class="fas fa-pizza-slice"></i>
+                <span>Pizza&Pasta D'amico</span>
             </div>
-            
-            <!-- Language Selector -->
-            <div class="language-selector">
-                <button class="lang-btn" onclick="window.ml.changeLanguage('de')">DE</button>
-                <button class="lang-btn" onclick="window.ml.changeLanguage('fr')">FR</button>
-                <button class="lang-btn" onclick="window.ml.changeLanguage('it')">IT</button>
-                <button class="lang-btn" onclick="window.ml.changeLanguage('es')">ES</button>
-                <button class="lang-btn" onclick="window.ml.changeLanguage('en')">EN</button>
+            <div class="header-actions">
+                <div class="wait-time-badge">
+                    <i class="far fa-clock"></i>
+                    <span data-i18n="waitTime">Wartezeit: </span>
+                    <span id="currentWaitTime">15</span> <span data-i18n="minutes">Min</span>
+                </div>
+                <button class="cart-button" onclick="toggleCart()">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span data-i18n="cart">Warenkorb</span>
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
             </div>
-            
-            <!-- Cart Button (Mobile) -->
-            <button class="cart-toggle" id="cartToggle">
-                <i class="fas fa-shopping-cart"></i>
-                <span class="cart-count" id="cartCount">0</span>
-            </button>
         </div>
     </header>
 
-    <!-- Restaurant Status Banner -->
-    <div id="restaurantStatus" style="display: none;"></div>
-
-    <!-- Wait Time Banner -->
-    <div class="wait-time-banner">
-        <i class="fas fa-clock"></i>
-        <span data-i18n="wait.current">Aktuelle Wartezeit:</span>
-        <strong id="currentWaitTime">15 Min</strong>
-    </div>
-
     <!-- Main Content -->
-    <div class="main-container">
-        <!-- Products Section -->
-        <main class="products-section">
-            <div class="products-container" id="productsContainer">
-                <!-- Produkte werden hier dynamisch geladen -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Closed Notice -->
+            <div class="closed-notice" id="closedNotice">
+                <i class="fas fa-exclamation-circle"></i>
+                <h2 data-i18n="closed.title">Momentan geschlossen</h2>
+                <p data-i18n="closed.message">Wir sind gerade nicht verfügbar. Bitte versuchen Sie es später erneut.</p>
             </div>
-        </main>
 
-        <!-- Cart Sidebar -->
-        <aside class="cart-sidebar" id="cartSidebar">
-            <div class="cart-header">
-                <h2 data-i18n="cart.title">Warenkorb</h2>
-                <button class="cart-close" id="cartClose" onclick="toggleCart()">×</button>
+            <!-- Category Tabs -->
+            <div class="category-tabs" id="categoryTabs">
+                <!-- Wird dynamisch geladen -->
             </div>
-            
-            <div class="cart-items" id="cartItems">
-                <p class="empty-cart" data-i18n="cart.empty">Ihr Warenkorb ist leer</p>
-            </div>
-            
-            <div class="cart-footer">
-                <div class="cart-total">
-                    <span data-i18n="cart.total">Gesamt:</span>
-                    <span id="totalAmount">CHF 0.00</span>
-                </div>
-                <button class="checkout-btn" id="checkoutBtn" onclick="checkout()" disabled>
-                    <i class="fas fa-credit-card"></i>
-                    <span data-i18n="cart.checkout">Zur Kasse</span>
-                </button>
-            </div>
-        </aside>
-    </div>
 
-    <!-- Cart Backdrop (Mobile) -->
-    <div id="cartBackdrop"></div>
-
-    <!-- Payment Dialog -->
-    <div class="payment-backdrop" id="paymentBackdrop"></div>
-    <div class="payment-dialog" id="paymentDialog">
-        <div class="payment-header">
-            <h2 data-i18n="payment.title">Zahlungsmethode wählen</h2>
-            <button class="close-dialog" onclick="closePaymentDialog()">×</button>
+            <!-- Products Grid -->
+            <div class="products-grid" id="productsGrid">
+                <!-- Wird dynamisch geladen -->
+            </div>
         </div>
-        
-        <div class="payment-content">
-            <div class="order-summary">
-                <h3 data-i18n="payment.summary">Bestellübersicht</h3>
-                <div id="paymentOrderItems"></div>
-                <div class="total-row">
-                    <strong data-i18n="payment.total">Gesamt:</strong>
-                    <strong id="paymentTotal">CHF 0.00</strong>
-                </div>
+    </main>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2 data-i18n="cart.title">Warenkorb</h2>
+            <button class="close-cart" onclick="toggleCart()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <!-- Wird dynamisch gefüllt -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span data-i18n="total">Gesamt:</span>
+                <span id="cartTotal">CHF 0.00</span>
             </div>
-            
-            <div class="customer-info">
-                <h3 data-i18n="payment.customer">Ihre Daten</h3>
-                <input type="text" id="customerName" placeholder="Name" required>
-                <input type="tel" id="customerPhone" placeholder="Telefon (für SMS-Benachrichtigung)">
-                <input type="email" id="customerEmail" placeholder="Email (optional)">
-            </div>
-            
-            <div class="payment-methods">
-                <h3 data-i18n="payment.method">Zahlungsmethode</h3>
-                
-                <label class="payment-option">
-                    <input type="radio" name="paymentMethod" value="stripe" checked>
-                    <div class="payment-option-content">
-                        <i class="fas fa-credit-card"></i>
-                        <span data-i18n="payment.card">Kartenzahlung</span>
-                        <small>Visa, Mastercard, American Express</small>
-                    </div>
-                </label>
-                
-                <label class="payment-option">
-                    <input type="radio" name="paymentMethod" value="cash">
-                    <div class="payment-option-content">
-                        <i class="fas fa-money-bill-wave"></i>
-                        <span data-i18n="payment.cash">Barzahlung</span>
-                        <small>Bei Abholung bezahlen</small>
-                    </div>
-                </label>
-                
-                <label class="payment-option disabled">
-                    <input type="radio" name="paymentMethod" value="twint" disabled>
-                    <div class="payment-option-content">
-                        <img src="https://www.twint.ch/content/dam/twint/logos/twint-logo.svg" alt="TWINT" style="height: 20px;">
-                        <span>TWINT</span>
-                        <small>Kommt bald</small>
-                    </div>
-                </label>
-            </div>
-            
-            <textarea id="orderNotes" placeholder="Besondere Wünsche? (optional)" rows="3"></textarea>
-            
-            <button class="confirm-payment-btn" onclick="confirmPayment()">
-                <i class="fas fa-check-circle"></i>
-                <span data-i18n="payment.confirm">Bestellung abschließen</span>
+            <button class="checkout-btn" onclick="proceedToCheckout()" id="checkoutBtn" disabled>
+                <span data-i18n="checkout">Zur Kasse</span>
             </button>
         </div>
     </div>
 
-    <!-- Notification Popup -->
-    <div class="notification-popup" id="notificationPopup">
-        <span id="notificationMessage"></span>
+    <!-- Checkout Form Modal -->
+    <div class="modal" id="checkoutModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-i18n="checkout.title">Bestellung abschließen</h2>
+                <button class="close-modal" onclick="closeCheckout()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="checkoutForm" class="checkout-form">
+                <div class="form-group">
+                    <label class="form-label" for="customerName">
+                        <span data-i18n="form.name">Name</span> *
+                    </label>
+                    <input type="text" id="customerName" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="customerPhone">
+                        <span data-i18n="form.phone">Telefon</span> *
+                    </label>
+                    <input type="tel" id="customerPhone" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="customerEmail">
+                        <span data-i18n="form.email">E-Mail</span>
+                    </label>
+                    <input type="email" id="customerEmail" class="form-input">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="orderType">
+                        <span data-i18n="form.orderType">Bestellart</span>
+                    </label>
+                    <select id="orderType" class="form-select">
+                        <option value="pickup" data-i18n="form.pickup">Abholung</option>
+                        <option value="dinein" data-i18n="form.dinein">Vor Ort essen</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="specialNotes">
+                        <span data-i18n="form.notes">Besondere Hinweise</span>
+                    </label>
+                    <textarea id="specialNotes" class="form-textarea" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-checkbox">
+                        <input type="checkbox" id="acceptTerms" required>
+                        <span data-i18n="form.terms">Ich akzeptiere die Geschäftsbedingungen</span>
+                    </label>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <span data-i18n="form.continue">Weiter zur Zahlung</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeCheckout()">
+                        <span data-i18n="cancel">Abbrechen</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment Dialog -->
+    <div class="payment-dialog" id="paymentDialog">
+        <div class="payment-content">
+            <div class="payment-header">
+                <h2 data-i18n="payment.title">Zahlung abschließen</h2>
+                <p data-i18n="payment.secure">Sichere Zahlung mit Stripe</p>
+            </div>
+            
+            <div class="payment-summary">
+                <h3 data-i18n="payment.summary">Bestellübersicht</h3>
+                <div id="paymentSummary">
+                    <!-- Wird dynamisch gefüllt -->
+                </div>
+            </div>
+            
+            <div class="payment-form">
+                <form id="payment-form">
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="payment.cardDetails">Kartendetails</label>
+                        <div id="card-element">
+                            <!-- Stripe Card Element wird hier eingefügt -->
+                        </div>
+                        <div id="card-errors" role="alert"></div>
+                    </div>
+                    
+                    <div class="payment-actions">
+                        <button type="submit" class="pay-button" id="payButton">
+                            <span data-i18n="payment.pay">Jetzt bezahlen</span>
+                            <span id="payAmount"></span>
+                        </button>
+                        <button type="button" class="cancel-payment" onclick="cancelPayment()">
+                            <span data-i18n="cancel">Abbrechen</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-spinner"></div>
     </div>
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    
-    <!-- Stripe SDK -->
-    <script src="https://js.stripe.com/v3/"></script>
-    
-    <!-- Multilingual Support -->
-    <script src="js/multilingual.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
+    <!-- Stripe -->
+    <script src="https://js.stripe.com/v3/"></script>
+
+    <!-- App JavaScript -->
     <script>
-        // Firebase Konfiguration - DEINE ECHTEN DATEN
+        // Firebase Konfiguration
         const firebaseConfig = {
             apiKey: "AIzaSyBiVdp67AZmZnGpM8OlZXBGKJKhF4iDlsE",
             authDomain: "pizzapastadamico.firebaseapp.com",
@@ -267,230 +217,130 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Stripe initialisieren
-        const stripe = Stripe('pk_test_51NqKxXKN6yMlXqF2e5VZoYwY8fVJwPpW7KQUZjQqvRxZUzqnMQGKSgPqSJrYfxCaAKJR0wfbNqOUxXp1kSpSfxXx00HGQqvJYH');
+        // Stripe initialisieren (Test-Key)
+        const stripe = Stripe('pk_test_51234567890abcdefghijklmnopqrstuvwxyz');
 
         // Globale Variablen
         let cart = [];
         let products = {};
-        let currentWaitTime = 15;
-        let restaurantOpen = true;
-
-        // Placeholder Image
-        const PLACEHOLDER_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9iMzAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSI+S2VpbiBCaWxkPC90ZXh0Pjwvc3ZnPg==';
+        let categories = [];
+        let currentCategory = 'all';
+        let foodtruckOpen = true;
 
         // Initialisierung
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Pizza&Pasta D\'amico wird initialisiert...');
-            
-            // Multilingual initialisieren
-            if (window.ml) {
-                window.ml.init();
-            }
-            
-            // Komponenten initialisieren
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            loadCategories();
             loadProducts();
-            setupRealtimeListeners();
-            loadCartFromLocalStorage();
             updateCartUI();
             
-            // Loading Screen ausblenden
-            setTimeout(() => {
-                document.getElementById('loadingScreen').style.display = 'none';
-            }, 1500);
+            // Event Listeners
+            document.getElementById('checkoutForm').addEventListener('submit', handleCheckoutSubmit);
+            document.getElementById('payment-form').addEventListener('submit', handlePaymentSubmit);
         });
 
+        // Einstellungen laden
+        function loadSettings() {
+            database.ref('settings').on('value', (snapshot) => {
+                const settings = snapshot.val() || {};
+                foodtruckOpen = settings.foodtruckOpen !== false;
+                document.getElementById('currentWaitTime').textContent = settings.waitTime || 15;
+                
+                const closedNotice = document.getElementById('closedNotice');
+                if (!foodtruckOpen) {
+                    closedNotice.classList.add('show');
+                } else {
+                    closedNotice.classList.remove('show');
+                }
+            });
+        }
+
+        // Kategorien laden
+        function loadCategories() {
+            database.ref('categories').on('value', (snapshot) => {
+                categories = Object.values(snapshot.val() || {});
+                renderCategoryTabs();
+            });
+        }
+
         // Produkte laden
-        async function loadProducts() {
-            try {
-                const snapshot = await database.ref('products').once('value');
-                const productsData = snapshot.val();
-                
-                if (!productsData || Object.keys(productsData).length === 0) {
-                    console.log('Keine Produkte gefunden, erstelle Demo-Produkte...');
-                    await createDemoProducts();
-                    loadProducts(); // Neu laden
-                    return;
-                }
-                
-                products = productsData;
-                displayProducts(products);
-            } catch (error) {
-                console.error('Fehler beim Laden der Produkte:', error);
-                document.getElementById('productsContainer').innerHTML = `
-                    <div class="error-message">
-                        <p>Fehler beim Laden der Produkte.</p>
-                        <button onclick="location.reload()">Neu laden</button>
-                    </div>
-                `;
-            }
-        }
-
-        // Demo-Produkte erstellen
-        async function createDemoProducts() {
-            const demoProducts = {
-                'pizza-margherita': {
-                    name: 'Pizza Margherita',
-                    category: 'pizza',
-                    price: 18.50,
-                    description: 'Tomatensauce, Mozzarella, Basilikum',
-                    available: true,
-                    image: PLACEHOLDER_IMAGE
-                },
-                'pizza-salami': {
-                    name: 'Pizza Salami',
-                    category: 'pizza',
-                    price: 22.00,
-                    description: 'Tomatensauce, Mozzarella, Salami',
-                    available: true,
-                    image: PLACEHOLDER_IMAGE
-                },
-                'spaghetti-carbonara': {
-                    name: 'Spaghetti Carbonara',
-                    category: 'pasta',
-                    price: 19.50,
-                    description: 'Spaghetti, Ei, Speck, Parmesan',
-                    available: true,
-                    image: PLACEHOLDER_IMAGE
-                },
-                'penne-arrabiata': {
-                    name: 'Penne Arrabiata',
-                    category: 'pasta',
-                    price: 17.00,
-                    description: 'Penne, scharfe Tomatensauce',
-                    available: true,
-                    image: PLACEHOLDER_IMAGE
-                },
-                'caesar-salad': {
-                    name: 'Caesar Salat',
-                    category: 'salate',
-                    price: 16.50,
-                    description: 'Römersalat, Croutons, Parmesan, Caesar-Dressing',
-                    available: true,
-                    image: PLACEHOLDER_IMAGE
-                },
-                'cola': {
-                    name: 'Coca Cola',
-                    category: 'getränke',
-                    price: 4.50,
-                    description: '0.5l',
-                    available: true,
-                    image: PLACEHOLDER_IMAGE
-                }
-            };
-
-            // Kategorien erstellen
-            await database.ref('categories').set(['pizza', 'pasta', 'salate', 'getränke']);
-            
-            // Produkte erstellen
-            for (const [id, product] of Object.entries(demoProducts)) {
-                await database.ref(`products/${id}`).set(product);
-            }
-        }
-
-        // Produkte anzeigen
-        function displayProducts(products) {
-            const container = document.getElementById('productsContainer');
-            container.innerHTML = '';
-            
-            // Nach Kategorien gruppieren
-            const categories = {};
-            Object.entries(products).forEach(([id, product]) => {
-                if (!categories[product.category]) {
-                    categories[product.category] = [];
-                }
-                categories[product.category].push({ ...product, id });
-            });
-            
-            // Kategorien anzeigen
-            Object.entries(categories).forEach(([category, items]) => {
-                const section = document.createElement('div');
-                section.className = 'category-section';
-                section.innerHTML = `
-                    <h2 class="category-title">${category.charAt(0).toUpperCase() + category.slice(1)}</h2>
-                    <div class="products-grid">
-                        ${items.map(product => createProductCard(product)).join('')}
-                    </div>
-                `;
-                container.appendChild(section);
+        function loadProducts() {
+            database.ref('products').on('value', (snapshot) => {
+                products = snapshot.val() || {};
+                renderProducts();
             });
         }
 
-        // Produkt-Karte erstellen
-        function createProductCard(product) {
-            return `
-                <div class="product-card ${!product.available ? 'unavailable' : ''}" data-id="${product.id}">
-                    <img src="${product.image || PLACEHOLDER_IMAGE}" alt="${product.name}" class="product-image">
+        // Kategorie-Tabs rendern
+        function renderCategoryTabs() {
+            const container = document.getElementById('categoryTabs');
+            container.innerHTML = `
+                <div class="category-tab ${currentCategory === 'all' ? 'active' : ''}" 
+                     onclick="setCategory('all')">
+                    <span data-i18n="category.all">Alle</span>
+                </div>
+                ${categories.map(cat => `
+                    <div class="category-tab ${currentCategory === cat ? 'active' : ''}" 
+                         onclick="setCategory('${cat}')">
+                        <span>${cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        // Kategorie setzen
+        function setCategory(category) {
+            currentCategory = category;
+            renderCategoryTabs();
+            renderProducts();
+        }
+
+        // Produkte rendern
+        function renderProducts() {
+            const container = document.getElementById('productsGrid');
+            const productsList = Object.entries(products)
+                .filter(([id, product]) => 
+                    currentCategory === 'all' || product.category === currentCategory
+                );
+
+            if (productsList.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-pizza-slice"></i>
+                        <h3 data-i18n="products.empty">Keine Produkte in dieser Kategorie</h3>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = productsList.map(([id, product]) => `
+                <div class="product-card ${!product.available ? 'unavailable' : ''}">
+                    <img src="${product.image || 'https://via.placeholder.com/300x200'}" 
+                         alt="${product.name}" 
+                         class="product-image">
                     <div class="product-info">
                         <h3 class="product-name">${product.name}</h3>
                         <p class="product-description">${product.description || ''}</p>
                         <div class="product-footer">
                             <span class="product-price">CHF ${product.price.toFixed(2)}</span>
-                            ${product.available ? `
-                                <button class="add-to-cart-btn" onclick="addToCart('${product.id}')">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            ` : '<span class="unavailable-text">Nicht verfügbar</span>'}
+                            <button class="add-to-cart" 
+                                    onclick="addToCart('${id}')" 
+                                    ${!product.available || !foodtruckOpen ? 'disabled' : ''}>
+                                <i class="fas fa-plus"></i>
+                                <span data-i18n="addToCart">Hinzufügen</span>
+                            </button>
                         </div>
                     </div>
                 </div>
-            `;
-        }
-
-        // Realtime Listeners
-        function setupRealtimeListeners() {
-            // Restaurant Status
-            database.ref('settings/restaurantOpen').on('value', (snapshot) => {
-                restaurantOpen = snapshot.val() !== false;
-                updateRestaurantStatus(restaurantOpen);
-            });
-            
-            // Wartezeit
-            database.ref('settings/waitTime').on('value', (snapshot) => {
-                currentWaitTime = snapshot.val() || 15;
-                updateWaitTimeDisplay(currentWaitTime);
-            });
-        }
-
-        // Restaurant Status Update
-        function updateRestaurantStatus(isOpen) {
-            const statusBanner = document.getElementById('restaurantStatus');
-            const checkoutBtn = document.getElementById('checkoutBtn');
-            
-            if (!isOpen) {
-                statusBanner.innerHTML = `
-                    <div class="closed-banner">
-                        <i class="fas fa-times-circle"></i>
-                        <span>Restaurant ist momentan geschlossen</span>
-                    </div>
-                `;
-                statusBanner.style.display = 'block';
-                
-                if (checkoutBtn) {
-                    checkoutBtn.disabled = true;
-                    checkoutBtn.innerHTML = '<i class="fas fa-times"></i> Geschlossen';
-                }
-            } else {
-                statusBanner.style.display = 'none';
-                updateCartUI();
-            }
-        }
-
-        // Wartezeit anzeigen
-        function updateWaitTimeDisplay(minutes) {
-            const element = document.getElementById('currentWaitTime');
-            if (element) {
-                element.textContent = `${minutes} Min`;
-            }
+            `).join('');
         }
 
         // Zum Warenkorb hinzufügen
         function addToCart(productId) {
             const product = products[productId];
-            if (!product || !product.available) return;
-            
+            if (!product || !product.available || !foodtruckOpen) return;
+
             const existingItem = cart.find(item => item.id === productId);
-            
             if (existingItem) {
                 existingItem.quantity++;
             } else {
@@ -498,293 +348,242 @@
                     id: productId,
                     name: product.name,
                     price: product.price,
-                    description: product.description,
+                    image: product.image,
                     quantity: 1
                 });
             }
-            
+
             updateCartUI();
-            saveCartToLocalStorage();
-            showNotification(`${product.name} wurde zum Warenkorb hinzugefügt`);
-            
-            // Mobile: Cart öffnen
-            if (window.innerWidth < 768) {
-                toggleCart();
-            }
+            showNotification(window.ml.t('cart.itemAdded'), 'success');
         }
 
         // Warenkorb UI aktualisieren
         function updateCartUI() {
-            const cartItems = document.getElementById('cartItems');
-            const totalAmount = document.getElementById('totalAmount');
             const cartCount = document.getElementById('cartCount');
+            const cartItems = document.getElementById('cartItems');
+            const cartTotal = document.getElementById('cartTotal');
             const checkoutBtn = document.getElementById('checkoutBtn');
             
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            cartCount.textContent = totalItems;
+            cartCount.style.display = totalItems > 0 ? 'flex' : 'none';
+            
             if (cart.length === 0) {
-                cartItems.innerHTML = '<p class="empty-cart" data-i18n="cart.empty">Ihr Warenkorb ist leer</p>';
-                totalAmount.textContent = 'CHF 0.00';
-                cartCount.textContent = '0';
-                cartCount.style.display = 'none';
-                checkoutBtn.disabled = true;
-                return;
-            }
-            
-            let total = 0;
-            let itemCount = 0;
-            
-            cartItems.innerHTML = cart.map((item, index) => {
-                const itemTotal = item.price * item.quantity;
-                total += itemTotal;
-                itemCount += item.quantity;
-                
-                return `
-                    <div class="cart-item">
-                        <div class="cart-item-info">
-                            <h4>${item.name}</h4>
-                            <p>CHF ${item.price.toFixed(2)}</p>
-                        </div>
-                        <div class="cart-item-controls">
-                            <button onclick="updateQuantity(${index}, -1)">-</button>
-                            <span>${item.quantity}</span>
-                            <button onclick="updateQuantity(${index}, 1)">+</button>
-                            <button class="remove-btn" onclick="removeFromCart(${index})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
+                cartItems.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-shopping-cart"></i>
+                        <h3 data-i18n="cart.empty">Ihr Warenkorb ist leer</h3>
                     </div>
                 `;
-            }).join('');
+                checkoutBtn.disabled = true;
+            } else {
+                cartItems.innerHTML = cart.map(item => `
+                    <div class="cart-item">
+                        <img src="${item.image || 'https://via.placeholder.com/60x60'}" 
+                             alt="${item.name}" 
+                             class="cart-item-image">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-price">CHF ${item.price.toFixed(2)}</div>
+                        </div>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
+                            <span>${item.quantity}</span>
+                            <button class="quantity-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
+                        </div>
+                        <i class="fas fa-trash remove-item" onclick="removeFromCart('${item.id}')"></i>
+                    </div>
+                `).join('');
+                checkoutBtn.disabled = false;
+            }
             
-            totalAmount.textContent = `CHF ${total.toFixed(2)}`;
-            cartCount.textContent = itemCount;
-            cartCount.style.display = itemCount > 0 ? 'flex' : 'none';
-            checkoutBtn.disabled = !restaurantOpen || itemCount === 0;
+            cartTotal.textContent = `CHF ${totalPrice.toFixed(2)}`;
         }
 
         // Menge aktualisieren
-        function updateQuantity(index, change) {
-            cart[index].quantity += change;
+        function updateQuantity(productId, change) {
+            const item = cart.find(item => item.id === productId);
+            if (!item) return;
             
-            if (cart[index].quantity <= 0) {
-                cart.splice(index, 1);
+            item.quantity += change;
+            if (item.quantity <= 0) {
+                removeFromCart(productId);
+            } else {
+                updateCartUI();
             }
-            
-            updateCartUI();
-            saveCartToLocalStorage();
         }
 
         // Aus Warenkorb entfernen
-        function removeFromCart(index) {
-            const item = cart[index];
-            cart.splice(index, 1);
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
             updateCartUI();
-            saveCartToLocalStorage();
-            showNotification(`${item.name} wurde entfernt`);
         }
 
-        // Cart Toggle (Mobile)
+        // Warenkorb toggle
         function toggleCart() {
-            const cartSidebar = document.getElementById('cartSidebar');
-            const backdrop = document.getElementById('cartBackdrop');
+            const sidebar = document.getElementById('cartSidebar');
+            const overlay = document.getElementById('cartOverlay');
             
-            const isOpen = cartSidebar.classList.contains('open');
-            
-            if (isOpen) {
-                cartSidebar.classList.remove('open');
-                backdrop.style.display = 'none';
-            } else {
-                cartSidebar.classList.add('open');
-                backdrop.style.display = 'block';
-                backdrop.onclick = () => toggleCart();
-            }
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
         }
 
-        // Checkout
-        function checkout() {
-            if (cart.length === 0 || !restaurantOpen) return;
+        // Zur Kasse gehen
+        function proceedToCheckout() {
+            if (cart.length === 0) return;
+            toggleCart();
+            document.getElementById('checkoutModal').classList.add('show');
+        }
+
+        // Checkout schließen
+        function closeCheckout() {
+            document.getElementById('checkoutModal').classList.remove('show');
+        }
+
+        // Checkout Form Handler
+        async function handleCheckoutSubmit(e) {
+            e.preventDefault();
             
-            // Payment Dialog vorbereiten
-            const orderItems = document.getElementById('paymentOrderItems');
-            const paymentTotal = document.getElementById('paymentTotal');
+            const formData = {
+                customerName: document.getElementById('customerName').value,
+                customerPhone: document.getElementById('customerPhone').value,
+                customerEmail: document.getElementById('customerEmail').value,
+                orderType: document.getElementById('orderType').value,
+                specialNotes: document.getElementById('specialNotes').value,
+                acceptTerms: document.getElementById('acceptTerms').checked
+            };
             
-            let total = 0;
-            orderItems.innerHTML = cart.map(item => {
-                const itemTotal = item.price * item.quantity;
-                total += itemTotal;
-                return `
-                    <div class="payment-order-item">
-                        <span>${item.quantity}x ${item.name}</span>
-                        <span>CHF ${itemTotal.toFixed(2)}</span>
-                    </div>
-                `;
-            }).join('');
+            if (!formData.acceptTerms) {
+                showNotification(window.ml.t('form.acceptTermsError'), 'error');
+                return;
+            }
             
-            paymentTotal.textContent = `CHF ${total.toFixed(2)}`;
+            // Speichere Kundendaten temporär
+            window.customerData = formData;
             
-            // Dialog anzeigen
+            closeCheckout();
             showPaymentDialog();
         }
 
         // Payment Dialog anzeigen
         function showPaymentDialog() {
             const dialog = document.getElementById('paymentDialog');
-            const backdrop = document.getElementById('paymentBackdrop');
+            const summary = document.getElementById('paymentSummary');
+            const payAmount = document.getElementById('payAmount');
             
-            dialog.style.display = 'block';
-            backdrop.style.display = 'block';
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             
-            setTimeout(() => {
-                dialog.classList.add('show');
-                backdrop.classList.add('show');
-            }, 10);
+            summary.innerHTML = cart.map(item => `
+                <div class="summary-row">
+                    <span>${item.quantity}x ${item.name}</span>
+                    <span>CHF ${(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+            `).join('') + `
+                <div class="summary-row">
+                    <strong data-i18n="total">Gesamt</strong>
+                    <strong>CHF ${total.toFixed(2)}</strong>
+                </div>
+            `;
+            
+            payAmount.textContent = `CHF ${total.toFixed(2)}`;
+            dialog.classList.add('show');
+            
+            // Stripe Card Element initialisieren
+            initializeStripe();
         }
 
-        // Payment Dialog schließen
-        function closePaymentDialog() {
-            const dialog = document.getElementById('paymentDialog');
-            const backdrop = document.getElementById('paymentBackdrop');
-            
-            dialog.classList.remove('show');
-            backdrop.classList.remove('show');
-            
-            setTimeout(() => {
-                dialog.style.display = 'none';
-                backdrop.style.display = 'none';
-            }, 300);
-        }
-
-        // Payment bestätigen
-        async function confirmPayment() {
-            const customerName = document.getElementById('customerName').value.trim();
-            const customerPhone = document.getElementById('customerPhone').value.trim();
-            const customerEmail = document.getElementById('customerEmail').value.trim();
-            const orderNotes = document.getElementById('orderNotes').value.trim();
-            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-            
-            if (!customerName) {
-                showNotification('Bitte geben Sie Ihren Namen ein', 'error');
-                return;
-            }
-            
-            // Wartezeit berechnen
-            const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-            const estimatedWaitTime = itemCount < 6 ? 5 : itemCount < 12 ? 10 : Math.round(itemCount * 1.5);
-            
-            const orderData = {
-                customerName,
-                phone: customerPhone,
-                email: customerEmail,
-                notes: orderNotes,
-                items: cart,
-                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-                paymentMethod,
-                status: 'neu',
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                estimatedWaitTime: Math.max(estimatedWaitTime, currentWaitTime),
-                id: generateOrderId()
-            };
-            
-            if (paymentMethod === 'stripe') {
-                await processStripePayment(orderData);
-            } else {
-                await processCashPayment(orderData);
-            }
-        }
-
-        // Stripe Payment
-        async function processStripePayment(orderData) {
-            try {
-                // Temporäre Bestellung für Stripe
-                const tempOrderRef = await database.ref('temp-orders').push({
-                    ...orderData,
-                    createdAt: firebase.database.ServerValue.TIMESTAMP
-                });
-                
-                // Stripe Checkout Session erstellen
-                const { error } = await stripe.redirectToCheckout({
-                    lineItems: cart.map(item => ({
-                        price_data: {
-                            currency: 'chf',
-                            product_data: {
-                                name: item.name,
-                                description: item.description || ''
-                            },
-                            unit_amount: Math.round(item.price * 100)
-                        },
-                        quantity: item.quantity
-                    })),
-                    mode: 'payment',
-                    successUrl: `${window.location.origin}/success.html?order=${tempOrderRef.key}`,
-                    cancelUrl: `${window.location.origin}/index.html`
-                });
-                
-                if (error) {
-                    console.error('Stripe Error:', error);
-                    showNotification('Fehler bei der Zahlung: ' + error.message, 'error');
-                    await tempOrderRef.remove();
+        // Stripe initialisieren
+        function initializeStripe() {
+            const elements = stripe.elements();
+            const cardElement = elements.create('card', {
+                style: {
+                    base: {
+                        fontSize: '16px',
+                        color: '#32325d',
+                        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                        '::placeholder': {
+                            color: '#aab7c4'
+                        }
+                    }
                 }
-            } catch (error) {
-                console.error('Payment Error:', error);
-                showNotification('Zahlungsfehler. Bitte versuchen Sie es erneut.', 'error');
-            }
+            });
+            
+            cardElement.mount('#card-element');
+            window.cardElement = cardElement;
+            
+            cardElement.on('change', (event) => {
+                const displayError = document.getElementById('card-errors');
+                if (event.error) {
+                    displayError.textContent = event.error.message;
+                } else {
+                    displayError.textContent = '';
+                }
+            });
         }
 
-        // Barzahlung
-        async function processCashPayment(orderData) {
+        // Payment Handler
+        async function handlePaymentSubmit(e) {
+            e.preventDefault();
+            
+            const payButton = document.getElementById('payButton');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            
+            payButton.disabled = true;
+            loadingOverlay.style.display = 'flex';
+            
             try {
+                // Bestellung in Firebase speichern
+                const orderData = {
+                    ...window.customerData,
+                    items: cart,
+                    total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                    status: 'neu',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    orderNumber: generateOrderNumber()
+                };
+                
                 const orderRef = await database.ref('orders').push(orderData);
                 
-                // Warenkorb leeren
-                cart = [];
-                updateCartUI();
-                saveCartToLocalStorage();
-                closePaymentDialog();
+                // Hier würde normalerweise die Stripe-Zahlung erfolgen
+                // Für Demo-Zwecke simulieren wir erfolgreiche Zahlung
+                setTimeout(() => {
+                    window.location.href = `success.html?order=${orderRef.key}`;
+                }, 2000);
                 
-                // Zur Erfolgsseite
-                window.location.href = `success.html?order=${orderRef.key}`;
             } catch (error) {
-                console.error('Order Error:', error);
-                showNotification('Fehler beim Erstellen der Bestellung', 'error');
+                console.error('Payment error:', error);
+                showNotification(window.ml.t('payment.error'), 'error');
+                payButton.disabled = false;
+                loadingOverlay.style.display = 'none';
             }
         }
 
-        // Order ID generieren
-        function generateOrderId() {
-            return Math.random().toString(36).substr(2, 6).toUpperCase();
+        // Zahlung abbrechen
+        function cancelPayment() {
+            document.getElementById('paymentDialog').classList.remove('show');
         }
 
-        // LocalStorage
-        function saveCartToLocalStorage() {
-            try {
-                localStorage.setItem('pizzaCart', JSON.stringify(cart));
-            } catch (e) {
-                console.error('LocalStorage error:', e);
-            }
+        // Bestellnummer generieren
+        function generateOrderNumber() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
         }
 
-        function loadCartFromLocalStorage() {
-            try {
-                const savedCart = localStorage.getItem('pizzaCart');
-                if (savedCart) {
-                    cart = JSON.parse(savedCart);
-                }
-            } catch (e) {
-                console.error('LocalStorage error:', e);
-                cart = [];
-            }
-        }
-
-        // Notifications
-        function showNotification(message, type = 'success') {
-            const popup = document.getElementById('notificationPopup');
-            const messageEl = document.getElementById('notificationMessage');
+        // Benachrichtigung anzeigen
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type} show`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                ${message}
+            `;
             
-            messageEl.textContent = message;
-            popup.className = `notification-popup ${type}`;
-            popup.style.display = 'block';
+            document.body.appendChild(notification);
             
             setTimeout(() => {
-                popup.style.display = 'none';
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
             }, 3000);
         }
     </script>

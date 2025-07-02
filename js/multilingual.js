@@ -1,38 +1,33 @@
 /* ========================================
    PIZZA&PASTA D'AMICO - MEHRSPRACHIGKEIT
-   Automatische Browser-Spracherkennung + Manuelle Auswahl
+   Vollständige Implementierung
    ======================================== */
 
 class MultiLanguage {
     constructor() {
-        this.currentLang = 'de'; // Standard
+        this.currentLang = 'de';
         this.supportedLangs = ['de', 'fr', 'it', 'es', 'en'];
         this.translations = {};
         this.init();
     }
 
-    // Automatische Browser-Spracherkennung
+    // Browser-Spracherkennung
     detectBrowserLanguage() {
         const browserLang = navigator.language || navigator.userLanguage;
         const langCode = browserLang.split('-')[0].toLowerCase();
         
-        // Prüfe ob Browser-Sprache unterstützt wird
         if (this.supportedLangs.includes(langCode)) {
-            console.log(`Browser-Sprache erkannt: ${langCode}`);
             return langCode;
         }
-        
-        // Fallback auf Deutsch
-        console.log(`Browser-Sprache ${langCode} nicht unterstützt, verwende Deutsch`);
-        return 'de';
+        return 'de'; // Fallback
     }
 
     // Initialisierung
-    async init() {
+    init() {
         // Lade Übersetzungen
-        await this.loadTranslations();
+        this.loadTranslations();
         
-        // Bestimme Sprache: 1. LocalStorage, 2. Browser, 3. Standard (DE)
+        // Bestimme Sprache
         const savedLang = localStorage.getItem('selectedLanguage');
         if (savedLang && this.supportedLangs.includes(savedLang)) {
             this.currentLang = savedLang;
@@ -41,553 +36,251 @@ class MultiLanguage {
             localStorage.setItem('selectedLanguage', this.currentLang);
         }
         
-        // Erstelle Sprachauswahl-UI
-        this.createLanguageSelector();
-        
-        // Wende Übersetzungen an
-        this.applyTranslations();
-        
-        console.log(`Mehrsprachigkeit initialisiert: ${this.currentLang.toUpperCase()}`);
+        // DOM Ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.createLanguageSelector();
+                this.applyTranslations();
+            });
+        } else {
+            this.createLanguageSelector();
+            this.applyTranslations();
+        }
     }
 
     // Übersetzungen laden
-    async loadTranslations() {
+    loadTranslations() {
         this.translations = {
             de: {
-                // ALLGEMEIN
+                // Admin Login
+                'admin.login.title': 'Admin Login - Pizza&Pasta D\'amico',
+                'admin.login.subtitle': 'Pizza&Pasta D\'amico',
+                'admin.login.email': 'E-Mail',
+                'admin.login.password': 'Passwort',
+                'admin.login.button': 'Anmelden',
+                'admin.login.error.generic': 'Login fehlgeschlagen. Bitte versuchen Sie es erneut.',
+                'admin.login.error.email': 'Ungültige E-Mail-Adresse',
+                'admin.login.error.notfound': 'Benutzer nicht gefunden',
+                'admin.login.error.password': 'Falsches Passwort',
+                'admin.login.error.toomany': 'Zu viele Versuche. Bitte später erneut versuchen.',
+                
+                // Admin Navigation
+                'admin.nav.dashboard': 'Dashboard',
+                'admin.nav.orders': 'Bestellungen',
+                'admin.nav.products': 'Produkte',
+                'admin.nav.logout': 'Logout',
+                
+                // Admin Dashboard
+                'admin.dashboard.title': 'Admin Dashboard - Pizza&Pasta D\'amico',
+                'admin.dashboard.welcome': 'Willkommen im Dashboard',
+                'admin.dashboard.subtitle': 'Pizza&Pasta D\'amico Verwaltungssystem',
+                
+                // Statistiken
+                'admin.stats.ordersToday': 'Bestellungen heute',
+                'admin.stats.pending': 'Wartende Bestellungen',
+                'admin.stats.revenue': 'Heutiger Umsatz (CHF)',
+                'admin.stats.waitTime': 'Aktuelle Wartezeit (Min)',
+                
+                // Allgemein
                 'loading': 'Wird geladen...',
                 'error': 'Fehler',
                 'success': 'Erfolgreich',
-                'close': 'Schließen',
-                'cancel': 'Abbrechen',
-                'confirm': 'Bestätigen',
-                'yes': 'Ja',
-                'no': 'Nein',
                 'save': 'Speichern',
-                'edit': 'Bearbeiten',
+                'cancel': 'Abbrechen',
                 'delete': 'Löschen',
-                'back': 'Zurück',
-                'next': 'Weiter',
-                'refresh': 'Aktualisieren',
-                
-                // KUNDENSEITE
-                'site.title': 'Pizza&Pasta D\'amico - Authentische italienische Küche',
-                'site.subtitle': 'Authentische italienische Küche',
-                'site.location': 'Foodtruck • Abholung',
-                'loading.title': 'Pizza&Pasta D\'amico',
-                'loading.subtitle': 'Lade köstliche Speisekarte...',
-                'status.open': 'Geöffnet',
-                'status.closed': 'Geschlossen',
-                'waittime.current': 'Aktuelle Wartezeit: {time} Minuten',
-                'waittime.estimate': '{time} Min',
-                
-                // PRODUKTE & BESTELLUNG
-                'products.title': 'Unsere Spezialitäten',
-                'cart.title': 'Ihre Bestellung',
-                'cart.total': 'Gesamttotal',
-                'cart.empty': 'Produkt auswählen',
-                'order.button': 'Bestellen ({count} Artikel)',
-                'order.note': 'Besondere Wünsche',
-                'order.note.placeholder': 'z.B. extra scharf, ohne Zwiebeln...',
-                'order.processing': 'Bestellung wird verarbeitet...',
-                'order.success': '✅ Bestellung #{id} eingegangen! Geschätzte Wartezeit: {time} Min',
-                'order.error': 'Fehler bei der Bestellung. Bitte versuchen Sie es erneut.',
-                'order.track.title': 'Möchten Sie Ihre Bestellung verfolgen?',
-                
-                // STATUS NACHRICHTEN
-                'status.closed.title': 'Foodtruck geschlossen',
-                'status.closed.desc': 'Wir sind gerade geschlossen. Schauen Sie später wieder vorbei!',
-                'status.noproducts.title': 'Keine Produkte verfügbar',
-                'status.noproducts.desc': 'Momentan sind keine Gerichte verfügbar.',
-                'status.error.title': 'Verbindungsfehler',
-                'status.error.desc': 'Es gab ein Problem beim Laden. Bitte versuchen Sie es erneut.',
-                'status.retry': 'Nochmal versuchen',
-                
-                // ADMIN
-                'admin.login': 'Pietro Admin Login',
-                'admin.subtitle': 'Zum Admin-Bereich',
-                'admin.orders.title': 'Bestellungen',
-                'admin.orders.today': 'Heute',
-                'admin.orders.new': 'Neu',
-                'admin.orders.revenue': 'Umsatz',
-                'admin.orders.all': 'Alle',
-                'admin.orders.preparation': 'In Zubereitung',
-                'admin.orders.ready': 'Fertig',
-                'admin.orders.empty': 'Keine Bestellungen',
-                'admin.orders.empty.desc': 'Neue Bestellungen werden hier automatisch angezeigt',
-                
-                // BESTELLSTATUS
-                'order.status.new': 'Neu',
-                'order.status.preparation': 'In Zubereitung',
-                'order.status.ready': 'Fertig',
-                'order.action.start': 'Zubereitung',
-                'order.action.finish': 'Fertig',
-                'order.action.notify': 'Benachrichtigen',
-                'order.action.call': 'Kunde rufen',
-                'order.action.archive': 'Abgeholt',
-                
-                // BENACHRICHTIGUNGEN
-                'notify.new.order': '🍕 Neue Bestellung eingegangen!',
-                'notify.order.preparation': 'Ihre Bestellung wird jetzt zubereitet',
-                'notify.order.ready': 'Ihre Bestellung ist fertig zur Abholung!',
-                'notify.order.call': 'Bitte holen Sie Ihre Bestellung ab - sie ist schon länger fertig!',
-                'notify.customer.notified': 'Kunde benachrichtigt: {message}',
-                'notify.sound.on': 'Sound AN',
-                'notify.sound.off': 'Sound AUS',
+                'edit': 'Bearbeiten',
+                'add': 'Hinzufügen',
+                'close': 'Schließen',
+                'confirm': 'Bestätigen',
+                'back': 'Zurück'
             },
             
             fr: {
-                // ALLGEMEIN
+                // Admin Login
+                'admin.login.title': 'Connexion Admin - Pizza&Pasta D\'amico',
+                'admin.login.subtitle': 'Pizza&Pasta D\'amico',
+                'admin.login.email': 'E-mail',
+                'admin.login.password': 'Mot de passe',
+                'admin.login.button': 'Se connecter',
+                'admin.login.error.generic': 'Échec de la connexion. Veuillez réessayer.',
+                'admin.login.error.email': 'Adresse e-mail invalide',
+                'admin.login.error.notfound': 'Utilisateur non trouvé',
+                'admin.login.error.password': 'Mot de passe incorrect',
+                'admin.login.error.toomany': 'Trop de tentatives. Veuillez réessayer plus tard.',
+                
+                // Admin Navigation
+                'admin.nav.dashboard': 'Tableau de bord',
+                'admin.nav.orders': 'Commandes',
+                'admin.nav.products': 'Produits',
+                'admin.nav.logout': 'Déconnexion',
+                
+                // Admin Dashboard
+                'admin.dashboard.title': 'Tableau de bord Admin - Pizza&Pasta D\'amico',
+                'admin.dashboard.welcome': 'Bienvenue dans le tableau de bord',
+                'admin.dashboard.subtitle': 'Système de gestion Pizza&Pasta D\'amico',
+                
+                // Statistiques
+                'admin.stats.ordersToday': 'Commandes aujourd\'hui',
+                'admin.stats.pending': 'Commandes en attente',
+                'admin.stats.revenue': 'Chiffre d\'affaires du jour (CHF)',
+                'admin.stats.waitTime': 'Temps d\'attente actuel (Min)',
+                
+                // Allgemein
                 'loading': 'Chargement...',
                 'error': 'Erreur',
                 'success': 'Succès',
-                'close': 'Fermer',
-                'cancel': 'Annuler',
-                'confirm': 'Confirmer',
-                'yes': 'Oui',
-                'no': 'Non',
                 'save': 'Enregistrer',
-                'edit': 'Modifier',
+                'cancel': 'Annuler',
                 'delete': 'Supprimer',
-                'back': 'Retour',
-                'next': 'Suivant',
-                'refresh': 'Actualiser',
-                
-                // KUNDENSEITE
-                'site.title': 'Pizza&Pasta D\'amico - Cuisine italienne authentique',
-                'site.subtitle': 'Cuisine italienne authentique',
-                'site.location': 'Food truck • À emporter',
-                'loading.title': 'Pizza&Pasta D\'amico',
-                'loading.subtitle': 'Chargement de la délicieuse carte...',
-                'status.open': 'Ouvert',
-                'status.closed': 'Fermé',
-                'waittime.current': 'Temps d\'attente actuel: {time} minutes',
-                'waittime.estimate': '{time} Min',
-                
-                // PRODUKTE & BESTELLUNG
-                'products.title': 'Nos spécialités',
-                'cart.title': 'Votre commande',
-                'cart.total': 'Total général',
-                'cart.empty': 'Sélectionner un produit',
-                'order.button': 'Commander ({count} articles)',
-                'order.note': 'Souhaits particuliers',
-                'order.note.placeholder': 'ex. extra épicé, sans oignons...',
-                'order.processing': 'Commande en cours de traitement...',
-                'order.success': '✅ Commande #{id} reçue! Temps d\'attente estimé: {time} Min',
-                'order.error': 'Erreur lors de la commande. Veuillez réessayer.',
-                'order.track.title': 'Voulez-vous suivre votre commande?',
-                
-                // STATUS NACHRICHTEN
-                'status.closed.title': 'Food truck fermé',
-                'status.closed.desc': 'Nous sommes actuellement fermés. Repassez plus tard!',
-                'status.noproducts.title': 'Aucun produit disponible',
-                'status.noproducts.desc': 'Aucun plat n\'est actuellement disponible.',
-                'status.error.title': 'Erreur de connexion',
-                'status.error.desc': 'Il y a eu un problème lors du chargement. Veuillez réessayer.',
-                'status.retry': 'Réessayer',
-                
-                // ADMIN
-                'admin.login': 'Connexion Admin Pietro',
-                'admin.subtitle': 'Vers l\'espace admin',
-                'admin.orders.title': 'Commandes',
-                'admin.orders.today': 'Aujourd\'hui',
-                'admin.orders.new': 'Nouveau',
-                'admin.orders.revenue': 'Chiffre d\'affaires',
-                'admin.orders.all': 'Toutes',
-                'admin.orders.preparation': 'En préparation',
-                'admin.orders.ready': 'Prêt',
-                'admin.orders.empty': 'Aucune commande',
-                'admin.orders.empty.desc': 'Les nouvelles commandes apparaîtront ici automatiquement',
-                
-                // BESTELLSTATUS
-                'order.status.new': 'Nouveau',
-                'order.status.preparation': 'En préparation',
-                'order.status.ready': 'Prêt',
-                'order.action.start': 'Préparer',
-                'order.action.finish': 'Terminé',
-                'order.action.notify': 'Notifier',
-                'order.action.call': 'Appeler le client',
-                'order.action.archive': 'Récupéré',
-                
-                // BENACHRICHTIGUNGEN
-                'notify.new.order': '🍕 Nouvelle commande reçue!',
-                'notify.order.preparation': 'Votre commande est en cours de préparation',
-                'notify.order.ready': 'Votre commande est prête à être récupérée!',
-                'notify.order.call': 'Veuillez récupérer votre commande - elle est prête depuis un moment!',
-                'notify.customer.notified': 'Client notifié: {message}',
-                'notify.sound.on': 'Son ACTIVÉ',
-                'notify.sound.off': 'Son DÉSACTIVÉ',
+                'edit': 'Modifier',
+                'add': 'Ajouter',
+                'close': 'Fermer',
+                'confirm': 'Confirmer',
+                'back': 'Retour'
             },
             
             it: {
-                // ALLGEMEIN
+                // Admin Login
+                'admin.login.title': 'Accesso Admin - Pizza&Pasta D\'amico',
+                'admin.login.subtitle': 'Pizza&Pasta D\'amico',
+                'admin.login.email': 'E-mail',
+                'admin.login.password': 'Password',
+                'admin.login.button': 'Accedi',
+                'admin.login.error.generic': 'Accesso fallito. Riprova.',
+                'admin.login.error.email': 'Indirizzo e-mail non valido',
+                'admin.login.error.notfound': 'Utente non trovato',
+                'admin.login.error.password': 'Password errata',
+                'admin.login.error.toomany': 'Troppi tentativi. Riprova più tardi.',
+                
+                // Admin Navigation
+                'admin.nav.dashboard': 'Dashboard',
+                'admin.nav.orders': 'Ordini',
+                'admin.nav.products': 'Prodotti',
+                'admin.nav.logout': 'Esci',
+                
+                // Admin Dashboard
+                'admin.dashboard.title': 'Dashboard Admin - Pizza&Pasta D\'amico',
+                'admin.dashboard.welcome': 'Benvenuto nella dashboard',
+                'admin.dashboard.subtitle': 'Sistema di gestione Pizza&Pasta D\'amico',
+                
+                // Statistiche
+                'admin.stats.ordersToday': 'Ordini oggi',
+                'admin.stats.pending': 'Ordini in attesa',
+                'admin.stats.revenue': 'Fatturato odierno (CHF)',
+                'admin.stats.waitTime': 'Tempo di attesa attuale (Min)',
+                
+                // Allgemein
                 'loading': 'Caricamento...',
                 'error': 'Errore',
                 'success': 'Successo',
-                'close': 'Chiudi',
-                'cancel': 'Annulla',
-                'confirm': 'Conferma',
-                'yes': 'Sì',
-                'no': 'No',
                 'save': 'Salva',
-                'edit': 'Modifica',
+                'cancel': 'Annulla',
                 'delete': 'Elimina',
-                'back': 'Indietro',
-                'next': 'Avanti',
-                'refresh': 'Aggiorna',
-                
-                // KUNDENSEITE
-                'site.title': 'Pizza&Pasta D\'amico - Autentica cucina italiana',
-                'site.subtitle': 'Autentica cucina italiana',
-                'site.location': 'Food truck • Da asporto',
-                'loading.title': 'Pizza&Pasta D\'amico',
-                'loading.subtitle': 'Caricamento del delizioso menu...',
-                'status.open': 'Aperto',
-                'status.closed': 'Chiuso',
-                'waittime.current': 'Tempo di attesa attuale: {time} minuti',
-                'waittime.estimate': '{time} Min',
-                
-                // PRODUKTE & BESTELLUNG
-                'products.title': 'Le nostre specialità',
-                'cart.title': 'Il tuo ordine',
-                'cart.total': 'Totale generale',
-                'cart.empty': 'Seleziona un prodotto',
-                'order.button': 'Ordina ({count} articoli)',
-                'order.note': 'Richieste speciali',
-                'order.note.placeholder': 'es. extra piccante, senza cipolle...',
-                'order.processing': 'Ordine in elaborazione...',
-                'order.success': '✅ Ordine #{id} ricevuto! Tempo di attesa stimato: {time} Min',
-                'order.error': 'Errore nell\'ordine. Si prega di riprovare.',
-                'order.track.title': 'Vuoi tracciare il tuo ordine?',
-                
-                // STATUS NACHRICHTEN
-                'status.closed.title': 'Food truck chiuso',
-                'status.closed.desc': 'Siamo attualmente chiusi. Torna più tardi!',
-                'status.noproducts.title': 'Nessun prodotto disponibile',
-                'status.noproducts.desc': 'Nessun piatto è attualmente disponibile.',
-                'status.error.title': 'Errore di connessione',
-                'status.error.desc': 'Si è verificato un problema durante il caricamento. Si prega di riprovare.',
-                'status.retry': 'Riprova',
-                
-                // ADMIN
-                'admin.login': 'Accesso Admin Pietro',
-                'admin.subtitle': 'All\'area admin',
-                'admin.orders.title': 'Ordini',
-                'admin.orders.today': 'Oggi',
-                'admin.orders.new': 'Nuovo',
-                'admin.orders.revenue': 'Fatturato',
-                'admin.orders.all': 'Tutti',
-                'admin.orders.preparation': 'In preparazione',
-                'admin.orders.ready': 'Pronto',
-                'admin.orders.empty': 'Nessun ordine',
-                'admin.orders.empty.desc': 'I nuovi ordini appariranno qui automaticamente',
-                
-                // BESTELLSTATUS
-                'order.status.new': 'Nuovo',
-                'order.status.preparation': 'In preparazione',
-                'order.status.ready': 'Pronto',
-                'order.action.start': 'Prepara',
-                'order.action.finish': 'Finito',
-                'order.action.notify': 'Notifica',
-                'order.action.call': 'Chiama cliente',
-                'order.action.archive': 'Ritirato',
-                
-                // BENACHRICHTIGUNGEN
-                'notify.new.order': '🍕 Nuovo ordine ricevuto!',
-                'notify.order.preparation': 'Il tuo ordine è in preparazione',
-                'notify.order.ready': 'Il tuo ordine è pronto per il ritiro!',
-                'notify.order.call': 'Si prega di ritirare l\'ordine - è pronto da un po\'!',
-                'notify.customer.notified': 'Cliente notificato: {message}',
-                'notify.sound.on': 'Suono ATTIVO',
-                'notify.sound.off': 'Suono DISATTIVO',
+                'edit': 'Modifica',
+                'add': 'Aggiungi',
+                'close': 'Chiudi',
+                'confirm': 'Conferma',
+                'back': 'Indietro'
             },
             
             es: {
-                // ALLGEMEIN
+                // Admin Login
+                'admin.login.title': 'Inicio de sesión Admin - Pizza&Pasta D\'amico',
+                'admin.login.subtitle': 'Pizza&Pasta D\'amico',
+                'admin.login.email': 'Correo electrónico',
+                'admin.login.password': 'Contraseña',
+                'admin.login.button': 'Iniciar sesión',
+                'admin.login.error.generic': 'Error al iniciar sesión. Por favor, inténtalo de nuevo.',
+                'admin.login.error.email': 'Dirección de correo electrónico no válida',
+                'admin.login.error.notfound': 'Usuario no encontrado',
+                'admin.login.error.password': 'Contraseña incorrecta',
+                'admin.login.error.toomany': 'Demasiados intentos. Por favor, inténtalo más tarde.',
+                
+                // Admin Navigation
+                'admin.nav.dashboard': 'Panel',
+                'admin.nav.orders': 'Pedidos',
+                'admin.nav.products': 'Productos',
+                'admin.nav.logout': 'Cerrar sesión',
+                
+                // Admin Dashboard
+                'admin.dashboard.title': 'Panel Admin - Pizza&Pasta D\'amico',
+                'admin.dashboard.welcome': 'Bienvenido al panel',
+                'admin.dashboard.subtitle': 'Sistema de gestión Pizza&Pasta D\'amico',
+                
+                // Estadísticas
+                'admin.stats.ordersToday': 'Pedidos hoy',
+                'admin.stats.pending': 'Pedidos pendientes',
+                'admin.stats.revenue': 'Ingresos de hoy (CHF)',
+                'admin.stats.waitTime': 'Tiempo de espera actual (Min)',
+                
+                // General
                 'loading': 'Cargando...',
                 'error': 'Error',
                 'success': 'Éxito',
-                'close': 'Cerrar',
-                'cancel': 'Cancelar',
-                'confirm': 'Confirmar',
-                'yes': 'Sí',
-                'no': 'No',
                 'save': 'Guardar',
-                'edit': 'Editar',
+                'cancel': 'Cancelar',
                 'delete': 'Eliminar',
-                'back': 'Atrás',
-                'next': 'Siguiente',
-                'refresh': 'Actualizar',
-                
-                // KUNDENSEITE
-                'site.title': 'Pizza&Pasta D\'amico - Auténtica cocina italiana',
-                'site.subtitle': 'Auténtica cocina italiana',
-                'site.location': 'Food truck • Para llevar',
-                'loading.title': 'Pizza&Pasta D\'amico',
-                'loading.subtitle': 'Cargando el delicioso menú...',
-                'status.open': 'Abierto',
-                'status.closed': 'Cerrado',
-                'waittime.current': 'Tiempo de espera actual: {time} minutos',
-                'waittime.estimate': '{time} Min',
-                
-                // PRODUKTE & BESTELLUNG
-                'products.title': 'Nuestras especialidades',
-                'cart.title': 'Tu pedido',
-                'cart.total': 'Total general',
-                'cart.empty': 'Seleccionar un producto',
-                'order.button': 'Pedir ({count} artículos)',
-                'order.note': 'Deseos especiales',
-                'order.note.placeholder': 'ej. extra picante, sin cebollas...',
-                'order.processing': 'Procesando pedido...',
-                'order.success': '✅ ¡Pedido #{id} recibido! Tiempo de espera estimado: {time} Min',
-                'order.error': 'Error en el pedido. Por favor, inténtelo de nuevo.',
-                'order.track.title': '¿Quiere rastrear su pedido?',
-                
-                // STATUS NACHRICHTEN
-                'status.closed.title': 'Food truck cerrado',
-                'status.closed.desc': 'Actualmente estamos cerrados. ¡Vuelve más tarde!',
-                'status.noproducts.title': 'No hay productos disponibles',
-                'status.noproducts.desc': 'No hay platos disponibles actualmente.',
-                'status.error.title': 'Error de conexión',
-                'status.error.desc': 'Hubo un problema al cargar. Por favor, inténtelo de nuevo.',
-                'status.retry': 'Reintentar',
-                
-                // ADMIN
-                'admin.login': 'Acceso Admin Pietro',
-                'admin.subtitle': 'Al área de administración',
-                'admin.orders.title': 'Pedidos',
-                'admin.orders.today': 'Hoy',
-                'admin.orders.new': 'Nuevo',
-                'admin.orders.revenue': 'Ingresos',
-                'admin.orders.all': 'Todos',
-                'admin.orders.preparation': 'En preparación',
-                'admin.orders.ready': 'Listo',
-                'admin.orders.empty': 'Sin pedidos',
-                'admin.orders.empty.desc': 'Los nuevos pedidos aparecerán aquí automáticamente',
-                
-                // BESTELLSTATUS
-                'order.status.new': 'Nuevo',
-                'order.status.preparation': 'En preparación',
-                'order.status.ready': 'Listo',
-                'order.action.start': 'Preparar',
-                'order.action.finish': 'Terminado',
-                'order.action.notify': 'Notificar',
-                'order.action.call': 'Llamar cliente',
-                'order.action.archive': 'Recogido',
-                
-                // BENACHRICHTIGUNGEN
-                'notify.new.order': '🍕 ¡Nuevo pedido recibido!',
-                'notify.order.preparation': 'Tu pedido se está preparando',
-                'notify.order.ready': '¡Tu pedido está listo para recoger!',
-                'notify.order.call': 'Por favor recoja su pedido - ¡ha estado listo por un tiempo!',
-                'notify.customer.notified': 'Cliente notificado: {message}',
-                'notify.sound.on': 'Sonido ACTIVADO',
-                'notify.sound.off': 'Sonido DESACTIVADO',
+                'edit': 'Editar',
+                'add': 'Añadir',
+                'close': 'Cerrar',
+                'confirm': 'Confirmar',
+                'back': 'Atrás'
             },
             
             en: {
-                // ALLGEMEIN
+                // Admin Login
+                'admin.login.title': 'Admin Login - Pizza&Pasta D\'amico',
+                'admin.login.subtitle': 'Pizza&Pasta D\'amico',
+                'admin.login.email': 'Email',
+                'admin.login.password': 'Password',
+                'admin.login.button': 'Sign In',
+                'admin.login.error.generic': 'Login failed. Please try again.',
+                'admin.login.error.email': 'Invalid email address',
+                'admin.login.error.notfound': 'User not found',
+                'admin.login.error.password': 'Incorrect password',
+                'admin.login.error.toomany': 'Too many attempts. Please try again later.',
+                
+                // Admin Navigation
+                'admin.nav.dashboard': 'Dashboard',
+                'admin.nav.orders': 'Orders',
+                'admin.nav.products': 'Products',
+                'admin.nav.logout': 'Logout',
+                
+                // Admin Dashboard
+                'admin.dashboard.title': 'Admin Dashboard - Pizza&Pasta D\'amico',
+                'admin.dashboard.welcome': 'Welcome to Dashboard',
+                'admin.dashboard.subtitle': 'Pizza&Pasta D\'amico Management System',
+                
+                // Statistics
+                'admin.stats.ordersToday': 'Orders Today',
+                'admin.stats.pending': 'Pending Orders',
+                'admin.stats.revenue': 'Today\'s Revenue (CHF)',
+                'admin.stats.waitTime': 'Current Wait Time (Min)',
+                
+                // General
                 'loading': 'Loading...',
                 'error': 'Error',
                 'success': 'Success',
-                'close': 'Close',
-                'cancel': 'Cancel',
-                'confirm': 'Confirm',
-                'yes': 'Yes',
-                'no': 'No',
                 'save': 'Save',
-                'edit': 'Edit',
+                'cancel': 'Cancel',
                 'delete': 'Delete',
-                'back': 'Back',
-                'next': 'Next',
-                'refresh': 'Refresh',
-                
-                // KUNDENSEITE
-                'site.title': 'Pizza&Pasta D\'amico - Authentic Italian Cuisine',
-                'site.subtitle': 'Authentic Italian Cuisine',
-                'site.location': 'Food truck • Takeaway',
-                'loading.title': 'Pizza&Pasta D\'amico',
-                'loading.subtitle': 'Loading delicious menu...',
-                'status.open': 'Open',
-                'status.closed': 'Closed',
-                'waittime.current': 'Current wait time: {time} minutes',
-                'waittime.estimate': '{time} Min',
-                
-                // PRODUKTE & BESTELLUNG
-                'products.title': 'Our Specialties',
-                'cart.title': 'Your Order',
-                'cart.total': 'Total',
-                'cart.empty': 'Select a product',
-                'order.button': 'Order ({count} items)',
-                'order.note': 'Special requests',
-                'order.note.placeholder': 'e.g. extra spicy, no onions...',
-                'order.processing': 'Processing order...',
-                'order.success': '✅ Order #{id} received! Estimated wait time: {time} Min',
-                'order.error': 'Error with order. Please try again.',
-                'order.track.title': 'Would you like to track your order?',
-                
-                // STATUS NACHRICHTEN
-                'status.closed.title': 'Food truck closed',
-                'status.closed.desc': 'We are currently closed. Come back later!',
-                'status.noproducts.title': 'No products available',
-                'status.noproducts.desc': 'No dishes are currently available.',
-                'status.error.title': 'Connection error',
-                'status.error.desc': 'There was a problem loading. Please try again.',
-                'status.retry': 'Try again',
-                
-                // ADMIN
-                'admin.login': 'Pietro Admin Login',
-                'admin.subtitle': 'To admin login',
-                'admin.orders.title': 'Orders',
-                'admin.orders.today': 'Today',
-                'admin.orders.new': 'New',
-                'admin.orders.revenue': 'Revenue',
-                'admin.orders.all': 'All',
-                'admin.orders.preparation': 'In preparation',
-                'admin.orders.ready': 'Ready',
-                'admin.orders.empty': 'No orders',
-                'admin.orders.empty.desc': 'New orders will appear here automatically',
-                
-                // BESTELLSTATUS
-                'order.status.new': 'New',
-                'order.status.preparation': 'In preparation', 
-                'order.status.ready': 'Ready',
-                'order.action.start': 'Start',
-                'order.action.finish': 'Finish',
-                'order.action.notify': 'Notify',
-                'order.action.call': 'Call customer',
-                'order.action.archive': 'Picked up',
-                
-                // BENACHRICHTIGUNGEN
-                'notify.new.order': '🍕 New order received!',
-                'notify.order.preparation': 'Your order is now being prepared',
-                'notify.order.ready': 'Your order is ready for pickup!',
-                'notify.order.call': 'Please pick up your order - it has been ready for a while!',
-                'notify.customer.notified': 'Customer notified: {message}',
-                'notify.sound.on': 'Sound ON',
-                'notify.sound.off': 'Sound OFF',
-
-                // DEUTSCHE ÜBERSETZUNGEN (de):
-// Admin Login
-'admin.login.title': 'Admin Login - Pizza&Pasta D\'amico',
-'admin.login.email': 'E-Mail',
-'admin.login.password': 'Passwort',
-'admin.login.button': 'Anmelden',
-'admin.login.error.generic': 'Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.',
-'admin.login.error.email': 'Ungültige E-Mail-Adresse',
-'admin.login.error.notfound': 'Benutzer nicht gefunden',
-'admin.login.error.password': 'Falsches Passwort',
-'admin.login.error.toomany': 'Zu viele Versuche. Bitte später erneut versuchen.',
-
-// Admin Navigation
-'admin.nav.dashboard': 'Dashboard',
-'admin.nav.orders': 'Bestellungen',
-'admin.nav.products': 'Produkte',
-'admin.nav.logout': 'Logout',
-
-// Admin Dashboard
-'admin.dashboard.title': 'Admin Dashboard - Pizza&Pasta D\'amico',
-'admin.dashboard.welcome': 'Willkommen im Dashboard',
-'admin.dashboard.subtitle': 'Pizza&Pasta D\'amico Verwaltungssystem',
-
-// Statistiken
-'admin.stats.ordersToday': 'Bestellungen heute',
-'admin.stats.pending': 'Wartende Bestellungen',
-'admin.stats.revenue': 'Heutiger Umsatz (CHF)',
-'admin.stats.waitTime': 'Aktuelle Wartezeit (Min)',
-
-// Quick Actions
-'admin.quickActions.title': 'Schnellzugriff',
-'admin.quickActions.orders': 'Bestellungen',
-'admin.quickActions.products': 'Produkte',
-'admin.quickActions.export': 'Daten exportieren',
-'admin.quickActions.reports': 'Berichte',
-
-// Einstellungen
-'admin.settings.title': 'Einstellungen',
-'admin.settings.restaurantStatus': 'Restaurant Status',
-'admin.settings.restaurantDesc': 'Schalte den Foodtruck online/offline',
-'admin.settings.waitTime': 'Wartezeit',
-'admin.settings.waitTimeDesc': 'Aktuelle geschätzte Wartezeit für Kunden',
-'admin.settings.notifications': 'Sound-Benachrichtigungen',
-'admin.settings.notificationsDesc': 'Ton bei neuen Bestellungen',
-
-// Recent Orders
-'admin.recentOrders.title': 'Letzte Bestellungen',
-'admin.recentOrders.viewAll': 'Alle anzeigen',
-
-// System Messages
-'admin.restaurant.opened': 'Restaurant ist jetzt geöffnet',
-'admin.restaurant.closed': 'Restaurant ist jetzt geschlossen',
-'admin.waitTime.set': 'Wartezeit auf {time} Minuten gesetzt',
-'admin.logout.confirm': 'Wirklich ausloggen?',
-'admin.feature.comingSoon': 'Diese Funktion wird in Version 2.0 verfügbar sein',
-
-// Order Management
-'admin.orders.title': 'Bestellverwaltung',
-'admin.orders.filters.all': 'Alle',
-'admin.orders.filters.new': 'Neu',
-'admin.orders.filters.preparing': 'In Zubereitung',
-'admin.orders.filters.ready': 'Fertig',
-'admin.orders.refresh': 'Aktualisieren',
-'admin.orders.soundToggle': 'Sound {status}',
-'admin.orders.customer': 'Kunde',
-'admin.orders.items': 'Artikel',
-'admin.orders.total': 'Gesamt',
-'admin.orders.actions': 'Aktionen',
-'admin.orders.startPreparation': 'Zubereitung starten',
-'admin.orders.markReady': 'Als fertig markieren',
-'admin.orders.notifyCustomer': 'Kunde benachrichtigen',
-'admin.orders.callCustomer': 'Kunde rufen',
-'admin.orders.archive': 'Als abgeholt markieren',
-'admin.orders.confirmArchive': 'Bestellung als abgeholt markieren und archivieren?',
-
-// Product Management
-'admin.products.title': 'Produktverwaltung',
-'admin.products.addNew': 'Neues Produkt',
-'admin.products.categories': 'Kategorien verwalten',
-'admin.products.addCategory': 'Neue Kategorie hinzufügen',
-'admin.products.deleteCategory': 'Kategorie "{name}" wirklich löschen?',
-'admin.products.editProduct': 'Produkt bearbeiten',
-'admin.products.newProduct': 'Neues Produkt',
-'admin.products.name': 'Produktname',
-'admin.products.category': 'Kategorie',
-'admin.products.price': 'Preis (CHF)',
-'admin.products.description': 'Beschreibung',
-'admin.products.image': 'Produktbild',
-'admin.products.uploadImage': 'Bild hochladen',
-'admin.products.generateAI': 'KI-Bild generieren',
-'admin.products.available': 'Produkt ist verfügbar',
-'admin.products.save': 'Speichern',
-'admin.products.delete': 'Löschen',
-'admin.products.confirmDelete': 'Produkt wirklich löschen?',
-'admin.products.noProducts': 'Keine Produkte in dieser Kategorie',
-
-// FRANZÖSISCHE ÜBERSETZUNGEN (fr):
-// Admin Login
-'admin.login.title': 'Connexion Admin - Pizza&Pasta D\'amico',
-'admin.login.email': 'E-mail',
-'admin.login.password': 'Mot de passe',
-'admin.login.button': 'Se connecter',
-'admin.login.error.generic': 'Échec de la connexion. Veuillez réessayer.',
-'admin.login.error.email': 'Adresse e-mail invalide',
-'admin.login.error.notfound': 'Utilisateur non trouvé',
-'admin.login.error.password': 'Mot de passe incorrect',
-'admin.login.error.toomany': 'Trop de tentatives. Veuillez réessayer plus tard.',
-
-// Admin Navigation
-'admin.nav.dashboard': 'Tableau de bord',
-'admin.nav.orders': 'Commandes',
-'admin.nav.products': 'Produits',
-'admin.nav.logout': 'Déconnexion',
-
-// ... (weitere Übersetzungen für FR, IT, ES, EN analog zu DE)
+                'edit': 'Edit',
+                'add': 'Add',
+                'close': 'Close',
+                'confirm': 'Confirm',
+                'back': 'Back'
             }
         };
     }
 
     // Sprachauswahl-UI erstellen
     createLanguageSelector() {
+        // Entferne existierenden Selector falls vorhanden
+        const existing = document.querySelector('.language-selector');
+        if (existing) {
+            existing.remove();
+        }
+
         const selector = document.createElement('div');
         selector.className = 'language-selector';
         selector.innerHTML = `
@@ -607,6 +300,112 @@ class MultiLanguage {
         `;
         
         document.body.appendChild(selector);
+        
+        // CSS für Language Selector
+        if (!document.getElementById('ml-styles')) {
+            const style = document.createElement('style');
+            style.id = 'ml-styles';
+            style.textContent = `
+                .language-selector {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 1000;
+                }
+                
+                .lang-dropdown {
+                    position: relative;
+                }
+                
+                .lang-btn {
+                    background: white;
+                    border: 2px solid #e0e0e0;
+                    padding: 8px 16px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-weight: 500;
+                    transition: all 0.3s ease;
+                    font-size: 14px;
+                }
+                
+                .lang-btn:hover {
+                    border-color: #d32f2f;
+                    background: #f5f5f5;
+                }
+                
+                .lang-btn i {
+                    font-size: 10px;
+                    transition: transform 0.3s ease;
+                }
+                
+                .lang-menu {
+                    position: absolute;
+                    top: 100%;
+                    right: 0;
+                    background: white;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 8px;
+                    margin-top: 5px;
+                    display: none;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                    min-width: 150px;
+                }
+                
+                .lang-menu.show {
+                    display: block;
+                    animation: fadeIn 0.3s ease;
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                
+                .lang-option {
+                    padding: 10px 16px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 14px;
+                }
+                
+                .lang-option:hover {
+                    background: #f5f5f5;
+                }
+                
+                .lang-option.active {
+                    background: #d32f2f;
+                    color: white;
+                }
+                
+                /* Dark mode for login page */
+                body.dark-bg .lang-btn {
+                    background: rgba(255, 255, 255, 0.1);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    color: white;
+                }
+                
+                body.dark-bg .lang-menu {
+                    background: rgba(30, 30, 40, 0.95);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                }
+                
+                body.dark-bg .lang-option {
+                    color: white;
+                }
+                
+                body.dark-bg .lang-option:hover {
+                    background: rgba(59, 130, 246, 0.2);
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
         this.setupLanguageEvents();
     }
 
@@ -615,15 +414,19 @@ class MultiLanguage {
         const langBtn = document.getElementById('langBtn');
         const langMenu = document.getElementById('langMenu');
         
+        if (!langBtn || !langMenu) return;
+        
         // Dropdown Toggle
         langBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             langMenu.classList.toggle('show');
+            langBtn.querySelector('i').style.transform = langMenu.classList.contains('show') ? 'rotate(180deg)' : '';
         });
         
         // Außerhalb klicken schließt Dropdown
         document.addEventListener('click', () => {
             langMenu.classList.remove('show');
+            langBtn.querySelector('i').style.transform = '';
         });
         
         // Sprachauswahl
@@ -644,10 +447,13 @@ class MultiLanguage {
         localStorage.setItem('selectedLanguage', langCode);
         
         // UI aktualisieren
-        document.getElementById('langBtn').innerHTML = `
-            ${this.getLanguageFlag(langCode)} ${langCode.toUpperCase()}
-            <i class="fas fa-chevron-down"></i>
-        `;
+        const langBtn = document.getElementById('langBtn');
+        if (langBtn) {
+            langBtn.innerHTML = `
+                ${this.getLanguageFlag(langCode)} ${langCode.toUpperCase()}
+                <i class="fas fa-chevron-down"></i>
+            `;
+        }
         
         // Active-Status aktualisieren
         document.querySelectorAll('.lang-option').forEach(option => {
@@ -659,8 +465,6 @@ class MultiLanguage {
         
         // HTML lang-Attribut setzen
         document.documentElement.lang = langCode;
-        
-        console.log(`Sprache gewechselt zu: ${langCode.toUpperCase()}`);
     }
 
     // Übersetzungen auf der Seite anwenden
@@ -670,37 +474,43 @@ class MultiLanguage {
             const key = element.getAttribute('data-i18n');
             const translation = this.t(key);
             
-            if (element.tagName === 'INPUT' && element.type === 'text') {
-                element.placeholder = translation;
-            } else if (element.tagName === 'INPUT' && element.type === 'button') {
-                element.value = translation;
+            if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                if (element.placeholder) {
+                    element.placeholder = translation;
+                }
+            } else if (element.tagName === 'TITLE') {
+                document.title = translation;
             } else {
                 element.textContent = translation;
             }
         });
         
-        // Title und Meta-Tags aktualisieren
-        const title = this.t('site.title');
-        if (title !== 'site.title') {
-            document.title = title;
+        // Title aktualisieren wenn vorhanden
+        const titleKey = document.querySelector('title')?.getAttribute('data-i18n');
+        if (titleKey) {
+            document.title = this.t(titleKey);
         }
     }
 
-    // Übersetzung abrufen mit Platzhalter-Unterstützung
+    // Übersetzung abrufen
     t(key, params = {}) {
-        const translation = this.translations[this.currentLang]?.[key] || key;
+        let translation = this.translations[this.currentLang]?.[key] || 
+                         this.translations['de']?.[key] || 
+                         key;
         
         // Platzhalter ersetzen
-        return translation.replace(/{(\w+)}/g, (match, param) => {
-            return params[param] || match;
+        Object.keys(params).forEach(param => {
+            translation = translation.replace(new RegExp(`{${param}}`, 'g'), params[param]);
         });
+        
+        return translation;
     }
 
     // Sprach-Flags
     getLanguageFlag(langCode) {
         const flags = {
             'de': '🇩🇪',
-            'fr': '🇫🇷', 
+            'fr': '🇫🇷',
             'it': '🇮🇹',
             'es': '🇪🇸',
             'en': '🇬🇧'
@@ -713,21 +523,11 @@ class MultiLanguage {
         const names = {
             'de': 'Deutsch',
             'fr': 'Français',
-            'it': 'Italiano', 
+            'it': 'Italiano',
             'es': 'Español',
             'en': 'English'
         };
         return names[langCode] || langCode.toUpperCase();
-    }
-
-    // Aktuell ausgewählte Sprache
-    getCurrentLanguage() {
-        return this.currentLang;
-    }
-
-    // Unterstützte Sprachen
-    getSupportedLanguages() {
-        return this.supportedLangs;
     }
 }
 
@@ -735,4 +535,9 @@ class MultiLanguage {
 window.ml = new MultiLanguage();
 
 // Hilfsfunktion für einfachere Verwendung
-window.t = (key, params) => window.ml.t(key, params);
+window.t = (key, params) => window.ml ? window.ml.t(key, params) : key;
+
+// Check ob Seite dunklen Hintergrund hat (für Login)
+if (document.body.style.background && document.body.style.background.includes('gradient')) {
+    document.body.classList.add('dark-bg');
+}

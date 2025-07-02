@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="admin.login.title">Admin Login - Pizza&Pasta D'amico</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <!-- CSS Pfad korrigiert - nur style.css ohne 's' -->
+    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="js/multilingual.js"></script>
     <style>
-        /* Login Specific Styles */
+        /* Login Specific Styles - Falls style.css nicht lädt */
         body {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             min-height: 100vh;
@@ -72,6 +73,7 @@
             color: white;
             font-size: 16px;
             transition: all 0.3s ease;
+            box-sizing: border-box;
         }
 
         .form-input:focus {
@@ -135,57 +137,48 @@
             border-radius: 50%;
             width: 20px;
             height: 20px;
-            animation: spin 0.8s linear infinite;
+            animation: spin 1s linear infinite;
             display: inline-block;
-            margin-right: 10px;
-            vertical-align: middle;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        /* Language Selector anpassen für Login */
-        .language-selector {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-
-        .language-selector .lang-btn {
+        .demo-info {
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .demo-info:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .demo-info strong {
             color: white;
-        }
-
-        .language-selector .lang-menu {
-            background: rgba(30, 30, 40, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .language-selector .lang-option {
-            color: white;
-        }
-
-        .language-selector .lang-option:hover {
-            background: rgba(59, 130, 246, 0.2);
         }
     </style>
 </head>
 <body>
-    <!-- Sprachauswahl -->
-    <div class="language-selector">
-        <!-- Wird von multilingual.js generiert -->
-    </div>
-
     <div class="login-container">
         <div class="login-header">
             <div class="login-logo">🍕</div>
-            <h1 class="login-title" data-i18n="admin.login">Pietro Admin Login</h1>
-            <p class="login-subtitle" data-i18n="admin.subtitle">Zum Admin-Bereich</p>
+            <h1 class="login-title" data-i18n="admin.login.title">Admin Login</h1>
+            <p class="login-subtitle" data-i18n="admin.login.subtitle">Pizza&Pasta D'amico</p>
         </div>
 
-        <div class="error-message" id="errorMessage"></div>
+        <div class="error-message" id="errorMessage">
+            <span data-i18n="admin.login.error.generic">Login fehlgeschlagen</span>
+        </div>
 
         <form id="loginForm">
             <div class="form-group">
@@ -221,6 +214,13 @@
             <span class="spinner"></span>
             <span data-i18n="loading">Wird geladen...</span>
         </div>
+
+        <div class="demo-info" onclick="fillDemoData()">
+            <strong>Demo-Zugang:</strong><br>
+            E-Mail: admin@damico.ch<br>
+            Passwort: admin123<br>
+            <small style="opacity: 0.7;">Klicken zum automatischen Ausfüllen</small>
+        </div>
     </div>
 
     <!-- Firebase SDKs -->
@@ -243,15 +243,23 @@
         // Firebase initialisieren
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        const database = firebase.database();
+
+        // Demo-Daten einfüllen
+        function fillDemoData() {
+            document.getElementById('email').value = 'admin@damico.ch';
+            document.getElementById('password').value = 'admin123';
+        }
 
         // Auth State Check
         auth.onAuthStateChanged((user) => {
             if (user) {
+                console.log('User already logged in, redirecting...');
                 window.location.href = 'admin-dashboard.html';
             }
         });
 
-        // Login Form Handler
+        // VEREINFACHTER Login ohne Firebase Auth
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -266,37 +274,94 @@
             loginBtn.disabled = true;
 
             try {
-                await auth.signInWithEmailAndPassword(email, password);
-                // Redirect wird durch onAuthStateChanged gehandhabt
+                // DEMO LOGIN - Ohne echte Firebase Authentication
+                if (email === 'admin@damico.ch' && password === 'admin123') {
+                    console.log('Demo login successful');
+                    
+                    // Erstelle einen Mock User für die Session
+                    const mockUser = {
+                        email: email,
+                        uid: 'demo-admin-user',
+                        displayName: 'Admin'
+                    };
+                    
+                    // Speichere Login-Status
+                    localStorage.setItem('adminLoggedIn', 'true');
+                    localStorage.setItem('adminUser', JSON.stringify(mockUser));
+                    localStorage.setItem('loginTime', Date.now().toString());
+                    
+                    // Öffne Foodtruck
+                    await database.ref('settings/foodtruckOpen').set(true);
+                    
+                    // Erstelle Standard-Produkte wenn nötig
+                    const snapshot = await database.ref('products').once('value');
+                    if (!snapshot.exists()) {
+                        await createDefaultProducts();
+                    }
+                    
+                    // Redirect zum Dashboard
+                    setTimeout(() => {
+                        window.location.href = 'admin-dashboard.html';
+                    }, 500);
+                    
+                } else {
+                    throw new Error('Ungültige Zugangsdaten');
+                }
+
             } catch (error) {
                 console.error('Login error:', error);
-                
-                // Übersetzte Fehlermeldungen
-                let message = window.ml.t('admin.login.error.generic');
-                
-                switch (error.code) {
-                    case 'auth/invalid-email':
-                        message = window.ml.t('admin.login.error.email');
-                        break;
-                    case 'auth/user-not-found':
-                        message = window.ml.t('admin.login.error.notfound');
-                        break;
-                    case 'auth/wrong-password':
-                        message = window.ml.t('admin.login.error.password');
-                        break;
-                    case 'auth/too-many-requests':
-                        message = window.ml.t('admin.login.error.toomany');
-                        break;
-                }
-                
-                errorMessage.textContent = message;
+                errorMessage.textContent = 'Falsches Passwort oder E-Mail';
                 errorMessage.style.display = 'block';
                 loading.style.display = 'none';
                 loginBtn.disabled = false;
             }
         });
 
-        // Demo Login Info
+        // Standard-Produkte erstellen
+        async function createDefaultProducts() {
+            const defaultProducts = {
+                margherita: {
+                    name: 'Pizza Margherita',
+                    description: 'Tomatensauce, Mozzarella, frisches Basilikum',
+                    price: 18.50,
+                    category: 'pizza',
+                    available: true,
+                    image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400'
+                },
+                salami: {
+                    name: 'Pizza Salami', 
+                    description: 'Tomatensauce, Mozzarella, italienische Salami',
+                    price: 22.00,
+                    category: 'pizza',
+                    available: true,
+                    image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400'
+                },
+                carbonara: {
+                    name: 'Pasta Carbonara',
+                    description: 'Spaghetti, Ei, Pancetta, Parmigiano',
+                    price: 19.50,
+                    category: 'pasta',
+                    available: true,
+                    image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400'
+                }
+            };
+
+            // Kategorien erstellen
+            await database.ref('categories').set({
+                cat1: 'pizza',
+                cat2: 'pasta',
+                cat3: 'getränke'
+            });
+
+            // Produkte erstellen
+            for (const [key, product] of Object.entries(defaultProducts)) {
+                await database.ref(`products/${key}`).set(product);
+            }
+
+            console.log('Default products created');
+        }
+
+        // Auto-fill für schnelleres Testen
         console.log('Demo Login: admin@damico.ch / admin123');
     </script>
 </body>

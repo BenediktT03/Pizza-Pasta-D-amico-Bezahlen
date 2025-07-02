@@ -466,6 +466,122 @@ class MultiLanguage {
                 'notify.customer.notified': 'Customer notified: {message}',
                 'notify.sound.on': 'Sound ON',
                 'notify.sound.off': 'Sound OFF',
+
+                // DEUTSCHE ÜBERSETZUNGEN (de):
+// Admin Login
+'admin.login.title': 'Admin Login - Pizza&Pasta D\'amico',
+'admin.login.email': 'E-Mail',
+'admin.login.password': 'Passwort',
+'admin.login.button': 'Anmelden',
+'admin.login.error.generic': 'Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.',
+'admin.login.error.email': 'Ungültige E-Mail-Adresse',
+'admin.login.error.notfound': 'Benutzer nicht gefunden',
+'admin.login.error.password': 'Falsches Passwort',
+'admin.login.error.toomany': 'Zu viele Versuche. Bitte später erneut versuchen.',
+
+// Admin Navigation
+'admin.nav.dashboard': 'Dashboard',
+'admin.nav.orders': 'Bestellungen',
+'admin.nav.products': 'Produkte',
+'admin.nav.logout': 'Logout',
+
+// Admin Dashboard
+'admin.dashboard.title': 'Admin Dashboard - Pizza&Pasta D\'amico',
+'admin.dashboard.welcome': 'Willkommen im Dashboard',
+'admin.dashboard.subtitle': 'Pizza&Pasta D\'amico Verwaltungssystem',
+
+// Statistiken
+'admin.stats.ordersToday': 'Bestellungen heute',
+'admin.stats.pending': 'Wartende Bestellungen',
+'admin.stats.revenue': 'Heutiger Umsatz (CHF)',
+'admin.stats.waitTime': 'Aktuelle Wartezeit (Min)',
+
+// Quick Actions
+'admin.quickActions.title': 'Schnellzugriff',
+'admin.quickActions.orders': 'Bestellungen',
+'admin.quickActions.products': 'Produkte',
+'admin.quickActions.export': 'Daten exportieren',
+'admin.quickActions.reports': 'Berichte',
+
+// Einstellungen
+'admin.settings.title': 'Einstellungen',
+'admin.settings.restaurantStatus': 'Restaurant Status',
+'admin.settings.restaurantDesc': 'Schalte den Foodtruck online/offline',
+'admin.settings.waitTime': 'Wartezeit',
+'admin.settings.waitTimeDesc': 'Aktuelle geschätzte Wartezeit für Kunden',
+'admin.settings.notifications': 'Sound-Benachrichtigungen',
+'admin.settings.notificationsDesc': 'Ton bei neuen Bestellungen',
+
+// Recent Orders
+'admin.recentOrders.title': 'Letzte Bestellungen',
+'admin.recentOrders.viewAll': 'Alle anzeigen',
+
+// System Messages
+'admin.restaurant.opened': 'Restaurant ist jetzt geöffnet',
+'admin.restaurant.closed': 'Restaurant ist jetzt geschlossen',
+'admin.waitTime.set': 'Wartezeit auf {time} Minuten gesetzt',
+'admin.logout.confirm': 'Wirklich ausloggen?',
+'admin.feature.comingSoon': 'Diese Funktion wird in Version 2.0 verfügbar sein',
+
+// Order Management
+'admin.orders.title': 'Bestellverwaltung',
+'admin.orders.filters.all': 'Alle',
+'admin.orders.filters.new': 'Neu',
+'admin.orders.filters.preparing': 'In Zubereitung',
+'admin.orders.filters.ready': 'Fertig',
+'admin.orders.refresh': 'Aktualisieren',
+'admin.orders.soundToggle': 'Sound {status}',
+'admin.orders.customer': 'Kunde',
+'admin.orders.items': 'Artikel',
+'admin.orders.total': 'Gesamt',
+'admin.orders.actions': 'Aktionen',
+'admin.orders.startPreparation': 'Zubereitung starten',
+'admin.orders.markReady': 'Als fertig markieren',
+'admin.orders.notifyCustomer': 'Kunde benachrichtigen',
+'admin.orders.callCustomer': 'Kunde rufen',
+'admin.orders.archive': 'Als abgeholt markieren',
+'admin.orders.confirmArchive': 'Bestellung als abgeholt markieren und archivieren?',
+
+// Product Management
+'admin.products.title': 'Produktverwaltung',
+'admin.products.addNew': 'Neues Produkt',
+'admin.products.categories': 'Kategorien verwalten',
+'admin.products.addCategory': 'Neue Kategorie hinzufügen',
+'admin.products.deleteCategory': 'Kategorie "{name}" wirklich löschen?',
+'admin.products.editProduct': 'Produkt bearbeiten',
+'admin.products.newProduct': 'Neues Produkt',
+'admin.products.name': 'Produktname',
+'admin.products.category': 'Kategorie',
+'admin.products.price': 'Preis (CHF)',
+'admin.products.description': 'Beschreibung',
+'admin.products.image': 'Produktbild',
+'admin.products.uploadImage': 'Bild hochladen',
+'admin.products.generateAI': 'KI-Bild generieren',
+'admin.products.available': 'Produkt ist verfügbar',
+'admin.products.save': 'Speichern',
+'admin.products.delete': 'Löschen',
+'admin.products.confirmDelete': 'Produkt wirklich löschen?',
+'admin.products.noProducts': 'Keine Produkte in dieser Kategorie',
+
+// FRANZÖSISCHE ÜBERSETZUNGEN (fr):
+// Admin Login
+'admin.login.title': 'Connexion Admin - Pizza&Pasta D\'amico',
+'admin.login.email': 'E-mail',
+'admin.login.password': 'Mot de passe',
+'admin.login.button': 'Se connecter',
+'admin.login.error.generic': 'Échec de la connexion. Veuillez réessayer.',
+'admin.login.error.email': 'Adresse e-mail invalide',
+'admin.login.error.notfound': 'Utilisateur non trouvé',
+'admin.login.error.password': 'Mot de passe incorrect',
+'admin.login.error.toomany': 'Trop de tentatives. Veuillez réessayer plus tard.',
+
+// Admin Navigation
+'admin.nav.dashboard': 'Tableau de bord',
+'admin.nav.orders': 'Commandes',
+'admin.nav.products': 'Produits',
+'admin.nav.logout': 'Déconnexion',
+
+// ... (weitere Übersetzungen für FR, IT, ES, EN analog zu DE)
             }
         };
     }

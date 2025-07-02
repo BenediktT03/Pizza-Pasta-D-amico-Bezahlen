@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bestellverwaltung - Pizza&Pasta D'amico Admin</title>
+    <title data-i18n="admin.orders.title">Bestellverwaltung - Pizza&Pasta D'amico Admin</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="js/multilingual.js"></script>
     <style>
         /* Orders Page Specific Styles */
         .orders-container {
@@ -345,6 +346,11 @@
     </style>
 </head>
 <body>
+    <!-- Sprachauswahl -->
+    <div class="language-selector">
+        <!-- Wird von multilingual.js generiert -->
+    </div>
+
     <!-- Navigation -->
     <nav class="admin-nav">
         <div class="nav-container">
@@ -358,16 +364,16 @@
             <div class="nav-links" id="navLinks">
                 <a href="admin-dashboard.html" class="nav-link" id="nav-dashboard">
                     <span class="nav-icon">📊</span>
-                    Dashboard
+                    <span data-i18n="admin.nav.dashboard">Dashboard</span>
                 </a>
                 <a href="admin-orders.html" class="nav-link active" id="nav-orders">
                     <span class="nav-icon">📋</span>
-                    Bestellungen
+                    <span data-i18n="admin.nav.orders">Bestellungen</span>
                     <span class="notification-badge" id="orderCount" style="display: none;">0</span>
                 </a>
                 <a href="admin-products.html" class="nav-link" id="nav-products">
                     <span class="nav-icon">🍽️</span>
-                    Produkte
+                    <span data-i18n="admin.nav.products">Produkte</span>
                 </a>
             </div>
             
@@ -378,7 +384,8 @@
                 </div>
                 <div class="user-dropdown" id="userDropdown">
                     <a href="#" onclick="logout()">
-                        <span class="nav-icon">🚪</span> Logout
+                        <span class="nav-icon">🚪</span> 
+                        <span data-i18n="admin.nav.logout">Logout</span>
                     </a>
                 </div>
             </div>
@@ -388,35 +395,35 @@
     <div class="orders-container">
         <!-- Page Header -->
         <div class="orders-header">
-            <h1 class="page-title">Bestellverwaltung</h1>
+            <h1 class="page-title" data-i18n="admin.orders.title">Bestellverwaltung</h1>
         </div>
 
         <!-- Statistics -->
         <div class="stats-bar">
             <div class="stat-box">
                 <div class="stat-value" id="totalOrders">0</div>
-                <div class="stat-label">Bestellungen heute</div>
+                <div class="stat-label" data-i18n="admin.stats.ordersToday">Bestellungen heute</div>
             </div>
             <div class="stat-box">
                 <div class="stat-value" id="newOrders">0</div>
-                <div class="stat-label">Neue Bestellungen</div>
+                <div class="stat-label" data-i18n="admin.orders.new">Neue Bestellungen</div>
             </div>
             <div class="stat-box">
                 <div class="stat-value" id="todayRevenue">CHF 0.00</div>
-                <div class="stat-label">Heutiger Umsatz</div>
+                <div class="stat-label" data-i18n="admin.stats.revenue">Heutiger Umsatz</div>
             </div>
         </div>
 
         <!-- Filter Controls -->
         <div class="filter-controls">
-            <button class="filter-btn active" data-filter="all">Alle</button>
-            <button class="filter-btn" data-filter="neu">Neu</button>
-            <button class="filter-btn" data-filter="zubereitung">In Zubereitung</button>
-            <button class="filter-btn" data-filter="fertig">Fertig</button>
+            <button class="filter-btn active" data-filter="all" data-i18n="admin.orders.filters.all">Alle</button>
+            <button class="filter-btn" data-filter="neu" data-i18n="order.status.new">Neu</button>
+            <button class="filter-btn" data-filter="zubereitung" data-i18n="order.status.preparation">In Zubereitung</button>
+            <button class="filter-btn" data-filter="fertig" data-i18n="order.status.ready">Fertig</button>
             
             <button class="sound-toggle" id="soundToggle">
                 <i class="fas fa-volume-up"></i>
-                Sound aktiviert
+                <span data-i18n="notify.sound.on">Sound aktiviert</span>
             </button>
         </div>
 
@@ -434,7 +441,13 @@
     <script>
         // Firebase Konfiguration
         const firebaseConfig = {
-            // Füge hier deine Firebase-Konfiguration ein
+            apiKey: "AIzaSyBiVdp67AZmZnGpM8OlZXBGKJKhF4iDlsE",
+            authDomain: "pizzapastadamico.firebaseapp.com",
+            databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pizzapastadamico",
+            storageBucket: "pizzapastadamico.appspot.com",
+            messagingSenderId: "168976461234",
+            appId: "1:168976461234:web:abc123def456ghi789"
         };
 
         // Firebase initialisieren
@@ -473,7 +486,7 @@
                 // Sound bei neuer Bestellung
                 if (currentCount > lastOrderCount && lastOrderCount > 0 && soundEnabled) {
                     playNotificationSound();
-                    showNotification('Neue Bestellung eingegangen!', 'info');
+                    showNotification(window.ml.t('notify.new.order'), 'info');
                 }
                 
                 lastOrderCount = currentCount;
@@ -499,10 +512,13 @@
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-inbox"></i>
-                        <h3>Keine Bestellungen</h3>
-                        <p>Es gibt keine ${currentFilter === 'all' ? '' : getStatusText(currentFilter)} Bestellungen</p>
+                        <h3 data-i18n="admin.orders.empty">Keine Bestellungen</h3>
+                        <p data-i18n="admin.orders.empty.desc">Es gibt keine ${currentFilter === 'all' ? '' : getStatusText(currentFilter)} Bestellungen</p>
                     </div>
                 `;
+                
+                // Übersetzungen anwenden
+                window.ml.applyTranslations();
                 return;
             }
             
@@ -510,6 +526,9 @@
             ordersList.sort(([,a], [,b]) => (b.timestamp || 0) - (a.timestamp || 0));
             
             container.innerHTML = ordersList.map(([id, order]) => createOrderCard(id, order)).join('');
+            
+            // Übersetzungen anwenden
+            window.ml.applyTranslations();
         }
 
         // Bestellkarte erstellen
@@ -544,7 +563,7 @@
                     </div>
                     
                     <div class="order-total">
-                        <span class="total-label">Gesamt:</span>
+                        <span class="total-label" data-i18n="admin.orders.total">Gesamt:</span>
                         <span class="total-amount">CHF ${(order.total || 0).toFixed(2)}</span>
                     </div>
                     
@@ -558,7 +577,7 @@
         // Bestellpositionen rendern
         function renderOrderItems(items) {
             if (!items || items.length === 0) {
-                return '<div class="order-item">Keine Artikel</div>';
+                return '<div class="order-item" data-i18n="admin.orders.noItems">Keine Artikel</div>';
             }
             
             return items.map(item => `
@@ -581,30 +600,30 @@
                 case 'neu':
                     return `
                         <button class="action-btn primary" onclick="updateOrderStatus('${orderId}', 'zubereitung')">
-                            <i class="fas fa-fire"></i> Zubereitung starten
+                            <i class="fas fa-fire"></i> <span data-i18n="admin.orders.startPreparation">Zubereitung starten</span>
                         </button>
                         <button class="action-btn warning" onclick="notifyCustomer('${orderId}', 'prepare')">
-                            <i class="fas fa-bell"></i> Kunde informieren
+                            <i class="fas fa-bell"></i> <span data-i18n="admin.orders.notifyCustomer">Kunde informieren</span>
                         </button>
                     `;
                 
                 case 'zubereitung':
                     return `
                         <button class="action-btn success" onclick="updateOrderStatus('${orderId}', 'fertig')">
-                            <i class="fas fa-check"></i> Fertig melden
+                            <i class="fas fa-check"></i> <span data-i18n="admin.orders.markReady">Fertig melden</span>
                         </button>
                         <button class="action-btn warning" onclick="notifyCustomer('${orderId}', 'ready')">
-                            <i class="fas fa-bell"></i> Abholung
+                            <i class="fas fa-bell"></i> <span data-i18n="order.action.notify">Abholung</span>
                         </button>
                     `;
                 
                 case 'fertig':
                     return `
                         <button class="action-btn success" onclick="archiveOrder('${orderId}')">
-                            <i class="fas fa-archive"></i> Abgeholt
+                            <i class="fas fa-archive"></i> <span data-i18n="order.action.archive">Abgeholt</span>
                         </button>
                         <button class="action-btn danger" onclick="notifyCustomer('${orderId}', 'urgent')">
-                            <i class="fas fa-bullhorn"></i> Dringend rufen
+                            <i class="fas fa-bullhorn"></i> <span data-i18n="admin.orders.callCustomer">Dringend rufen</span>
                         </button>
                     `;
                 
@@ -636,29 +655,30 @@
                     [`${newStatus}At`]: firebase.database.ServerValue.TIMESTAMP
                 });
                 
-                showNotification(`Bestellung auf "${getStatusText(newStatus)}" gesetzt`, 'success');
+                const statusText = window.ml.t(`order.status.${newStatus}`);
+                showNotification(window.ml.t('admin.orders.statusUpdated', { status: statusText }), 'success');
                 
                 // Bei "fertig" automatisch Push-Notification senden
                 if (newStatus === 'fertig') {
                     await database.ref(`notifications/${orderId}`).set({
                         type: 'ready',
                         timestamp: firebase.database.ServerValue.TIMESTAMP,
-                        message: 'Ihre Bestellung ist fertig!',
+                        message: window.ml.t('notify.order.ready'),
                         sound: true
                     });
                 }
             } catch (error) {
                 console.error('Fehler:', error);
-                showNotification('Fehler beim Aktualisieren', 'error');
+                showNotification(window.ml.t('error'), 'error');
             }
         }
 
         // Kunde benachrichtigen
         async function notifyCustomer(orderId, type) {
             const messages = {
-                prepare: 'Ihre Bestellung wird jetzt zubereitet',
-                ready: 'Ihre Bestellung ist fertig zur Abholung!',
-                urgent: 'DRINGEND: Bitte holen Sie Ihre Bestellung ab!'
+                prepare: window.ml.t('notify.order.preparation'),
+                ready: window.ml.t('notify.order.ready'),
+                urgent: window.ml.t('notify.order.call')
             };
             
             const playSound = type !== 'prepare';
@@ -671,7 +691,8 @@
                     sound: playSound
                 });
                 
-                showNotification('Kunde wurde benachrichtigt' + (playSound ? ' (mit Ton)' : ''), 'success');
+                const notifyMessage = window.ml.t('notify.customer.notified', { message: messages[type] });
+                showNotification(notifyMessage, 'success');
                 
                 // SMS senden wenn Telefonnummer vorhanden
                 if (orders[orderId]?.phone && window.SMSNotificationService) {
@@ -682,13 +703,13 @@
                 }
             } catch (error) {
                 console.error('Fehler:', error);
-                showNotification('Fehler beim Benachrichtigen', 'error');
+                showNotification(window.ml.t('error'), 'error');
             }
         }
 
         // Bestellung archivieren
         async function archiveOrder(orderId) {
-            if (!confirm('Bestellung als abgeholt markieren und archivieren?')) return;
+            if (!confirm(window.ml.t('admin.orders.confirmArchive'))) return;
             
             try {
                 const orderData = orders[orderId];
@@ -703,10 +724,10 @@
                 // Aus aktiven Bestellungen löschen
                 await database.ref(`orders/${orderId}`).remove();
                 
-                showNotification('Bestellung archiviert', 'success');
+                showNotification(window.ml.t('admin.orders.archived'), 'success');
             } catch (error) {
                 console.error('Fehler:', error);
-                showNotification('Fehler beim Archivieren', 'error');
+                showNotification(window.ml.t('error'), 'error');
             }
         }
 
@@ -764,7 +785,8 @@
             localStorage.setItem('orderSoundEnabled', soundEnabled);
             updateSoundButton();
             
-            showNotification(`Sound ${soundEnabled ? 'aktiviert' : 'deaktiviert'}`, 'info');
+            const statusKey = soundEnabled ? 'notify.sound.on' : 'notify.sound.off';
+            showNotification(window.ml.t(statusKey), 'info');
         }
 
         function updateSoundButton() {
@@ -772,7 +794,7 @@
             btn.classList.toggle('disabled', !soundEnabled);
             btn.innerHTML = `
                 <i class="fas fa-volume-${soundEnabled ? 'up' : 'mute'}"></i>
-                Sound ${soundEnabled ? 'aktiviert' : 'deaktiviert'}
+                <span data-i18n="${soundEnabled ? 'notify.sound.on' : 'notify.sound.off'}">${window.ml.t(soundEnabled ? 'notify.sound.on' : 'notify.sound.off')}</span>
             `;
         }
 
@@ -780,18 +802,13 @@
         function playNotificationSound() {
             if (!soundEnabled) return;
             
-            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBDGH0fPTgjMGHm7A7+OZURE...');
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBDGH0fPTgjMGHm7A7+OZURE...');
             audio.play().catch(e => console.log('Sound play failed:', e));
         }
 
         // Status Text
         function getStatusText(status) {
-            const texts = {
-                'neu': 'Neue',
-                'zubereitung': 'In Zubereitung',
-                'fertig': 'Fertig'
-            };
-            return texts[status] || status;
+            return window.ml.t(`order.status.${status}`);
         }
 
         // Benachrichtigungen
@@ -834,7 +851,7 @@
         }
 
         function logout() {
-            if (confirm('Wirklich ausloggen?')) {
+            if (confirm(window.ml.t('admin.logout.confirm'))) {
                 auth.signOut().then(() => {
                     window.location.href = 'admin.html';
                 });

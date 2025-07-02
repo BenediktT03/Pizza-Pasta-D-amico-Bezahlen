@@ -3,434 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pizza&Pasta D'Amico - Admin Panel</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title data-i18n="admin.login.title">Admin Login - Pizza&Pasta D'amico</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="js/multilingual.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* Login Specific Styles */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f6fa;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             min-height: 100vh;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #2c3e50, #3498db);
-            color: white;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: center;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
-        .header h1 {
-            font-size: 1.8rem;
+        .login-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
-        .stats {
-            display: flex;
-            gap: 30px;
-            font-size: 0.9rem;
-        }
-
-        .stat-item {
+        .login-header {
             text-align: center;
+            margin-bottom: 40px;
         }
 
-        .stat-number {
-            font-size: 1.5rem;
-            font-weight: bold;
+        .login-logo {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .login-title {
+            font-size: 2rem;
+            color: white;
+            margin: 0 0 10px 0;
+            font-weight: 700;
+        }
+
+        .login-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
             display: block;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 8px;
+            font-weight: 500;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .controls {
-            background: white;
-            padding: 20px;
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .control-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .filter-btn {
-            padding: 8px 16px;
-            border: 2px solid #ddd;
-            background: white;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-        }
-
-        .filter-btn:hover {
-            border-color: #3498db;
-        }
-
-        .filter-btn.active {
-            background: #3498db;
             color: white;
-            border-color: #3498db;
+            font-size: 16px;
+            transition: all 0.3s ease;
         }
 
-        .sound-toggle {
-            padding: 10px 20px;
-            background: #27ae60;
+        .form-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
             border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .sound-toggle.disabled {
-            background: #95a5a6;
-        }
-
-        .orders-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
-        }
-
-        .order-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            border-left: 5px solid #3498db;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .order-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-        }
-
-        .order-card.status-neu {
-            border-left-color: #e74c3c;
-            background: linear-gradient(135deg, #fff, #fff5f5);
-        }
-
-        .order-card.status-zubereitung {
-            border-left-color: #f39c12;
-            background: linear-gradient(135deg, #fff, #fffaf0);
-        }
-
-        .order-card.status-fertig {
-            border-left-color: #27ae60;
-            background: linear-gradient(135deg, #fff, #f0fff4);
-        }
-
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .order-id {
-            font-weight: bold;
-            color: #2c3e50;
-            font-size: 1.1rem;
-        }
-
-        .order-time {
-            font-size: 0.85rem;
-            color: #7f8c8d;
-        }
-
-        .time-elapsed {
-            font-size: 0.8rem;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-weight: bold;
-        }
-
-        .time-elapsed.warning {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .time-elapsed.danger {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .order-details {
-            margin-bottom: 15px;
-        }
-
-        .pizza-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #ecf0f1;
-        }
-
-        .pizza-item:last-child {
-            border-bottom: none;
-        }
-
-        .pizza-name {
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .pizza-price {
-            font-weight: bold;
-            color: #27ae60;
-        }
-
-        .order-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
-        }
-
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #34495e;
-        }
-
-        .info-icon {
-            width: 20px;
-            text-align: center;
-            color: #7f8c8d;
-        }
-
-        .order-note {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-style: italic;
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
-        .order-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .action-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            flex: 1;
-            min-width: 100px;
-        }
-
-        .btn-zubereitung {
-            background: #f39c12;
-            color: white;
-        }
-
-        .btn-zubereitung:hover {
-            background: #e67e22;
-        }
-
-        .btn-fertig {
-            background: #27ae60;
-            color: white;
-        }
-
-        .btn-fertig:hover {
-            background: #2ecc71;
-        }
-
-        .btn-archiv {
-            background: #95a5a6;
-            color: white;
-        }
-
-        .btn-archiv:hover {
-            background: #7f8c8d;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #7f8c8d;
-        }
-
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            color: #bdc3c7;
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #27ae60;
-            color: white;
-            padding: 15px 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 1000;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.error {
-            background: #e74c3c;
-        }
-
-        .total-amount {
-            text-align: right;
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #27ae60;
-            border-top: 2px solid #ecf0f1;
-            padding-top: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
             margin-top: 10px;
         }
 
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-
-            .stats {
-                gap: 20px;
-            }
-
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .control-group {
-                justify-content: center;
-            }
-
-            .orders-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .order-info {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-
-            .order-actions {
-                flex-direction: column;
-            }
+        .login-btn:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
         }
 
-        .pulse {
-            animation: pulse 2s infinite;
+        .login-btn:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        @keyframes pulse {
-            0% { box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3); }
-            50% { box-shadow: 0 8px 25px rgba(231, 76, 60, 0.6); }
-            100% { box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3); }
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Language Selector anpassen für Login */
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .language-selector .lang-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .language-selector .lang-menu {
+            background: rgba(30, 30, 40, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .language-selector .lang-option {
+            color: white;
+        }
+
+        .language-selector .lang-option:hover {
+            background: rgba(59, 130, 246, 0.2);
         }
     </style>
 </head>
 <body>
-    
-    <div class="header">
-        <div class="header-content">
-            <h1><i class="fas fa-pizza-slice"></i> Pizza Bella - Admin Panel</h1>
-            <div class="stats">
-                <div class="stat-item">
-                    <span class="stat-number" id="totalOrders">0</span>
-                    <span>Gesamt heute</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number" id="newOrders">0</span>
-                    <span>Neue</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number" id="totalRevenue">CHF 0</span>
-                    <span>Umsatz heute</span>
-                </div>
+    <!-- Sprachauswahl -->
+    <div class="language-selector">
+        <!-- Wird von multilingual.js generiert -->
+    </div>
+
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-logo">🍕</div>
+            <h1 class="login-title" data-i18n="admin.login">Pietro Admin Login</h1>
+            <p class="login-subtitle" data-i18n="admin.subtitle">Zum Admin-Bereich</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label class="form-label" for="email" data-i18n="admin.login.email">E-Mail</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    class="form-input" 
+                    placeholder="admin@damico.ch"
+                    required
+                    autocomplete="email"
+                >
             </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password" data-i18n="admin.login.password">Passwort</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    class="form-input" 
+                    placeholder="••••••••"
+                    required
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                <span data-i18n="admin.login.button">Anmelden</span>
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <span class="spinner"></span>
+            <span data-i18n="loading">Wird geladen...</span>
         </div>
     </div>
 
-    <div class="container">
-        <div class="controls">
-            <div class="control-group">
-                <span><i class="fas fa-filter"></i> Filter:</span>
-                <button class="filter-btn active" data-filter="all">Alle</button>
-                <button class="filter-btn" data-filter="neu">Neu</button>
-                <button class="filter-btn" data-filter="zubereitung">In Zubereitung</button>
-                <button class="filter-btn" data-filter="fertig">Fertig</button>
-            </div>
-            <div class="control-group">
-                <button class="sound-toggle" id="soundToggle">
-                    <i class="fas fa-volume-up"></i> Sound AN
-                </button>
-            </div>
-        </div>
-
-        <div class="orders-grid" id="ordersGrid">
-            <div class="empty-state">
-                <i class="fas fa-clock"></i>
-                <h3>Keine Bestellungen</h3>
-                <p>Neue Bestellungen werden hier automatisch angezeigt</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="notification" id="notification">
-        <i class="fas fa-bell"></i> Neue Bestellung eingegangen!
-    </div>
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
     <script>
-        // Firebase Configuration (HIER DEINE ECHTEN WERTE EINFÜGEN!)
- const firebaseConfig = {
+        // Firebase Konfiguration
+        const firebaseConfig = {
             apiKey: "AIzaSyBiVdp67AZmZnGpM8OlZXBGKJKhF4iDlsE",
             authDomain: "pizzapastadamico.firebaseapp.com",
             databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
@@ -442,274 +242,62 @@
 
         // Firebase initialisieren
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const auth = firebase.auth();
 
-        // App State
-        let orders = {};
-        let currentFilter = 'all';
-        let soundEnabled = true;
-        let lastOrderCount = 0;
-
-        // Sound für neue Bestellungen
-        function playNotificationSound() {
-            if (!soundEnabled) return;
-            
-            // Einfacher Beep-Sound mit Web Audio API
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-            oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
-            oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
-            
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.3);
-        }
-
-        // Notification anzeigen
-        function showNotification(message, isError = false) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = `notification show ${isError ? 'error' : ''}`;
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 4000);
-        }
-
-        // Zeit seit Bestellung formatieren
-        function formatTimeElapsed(timestamp) {
-            const now = new Date();
-            const orderTime = new Date(timestamp);
-            const diffMinutes = Math.floor((now - orderTime) / (1000 * 60));
-            
-            let className = '';
-            let text = '';
-            
-            if (diffMinutes < 1) {
-                text = 'Gerade eben';
-            } else if (diffMinutes < 60) {
-                text = `${diffMinutes} Min`;
-                if (diffMinutes > 15) className = 'warning';
-                if (diffMinutes > 30) className = 'danger';
-            } else {
-                const hours = Math.floor(diffMinutes / 60);
-                const minutes = diffMinutes % 60;
-                text = `${hours}h ${minutes}m`;
-                className = 'danger';
+        // Auth State Check
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                window.location.href = 'admin-dashboard.html';
             }
+        });
+
+        // Login Form Handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            return { text, className };
-        }
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            const loading = document.getElementById('loading');
+            const loginBtn = document.getElementById('loginBtn');
 
-        // Bestellung HTML erstellen
-        function createOrderHTML(orderId, orderData) {
-            const timeElapsed = formatTimeElapsed(orderData.timestamp);
-            const orderTime = new Date(orderData.timestamp).toLocaleTimeString('de-CH', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            errorMessage.style.display = 'none';
+            loading.style.display = 'block';
+            loginBtn.disabled = true;
 
-            const paymentIcon = {
-                'stripe': 'fab fa-stripe',
-                'twint': 'fas fa-mobile-alt',
-                'cash': 'fas fa-money-bill-wave'
-            };
-
-            const paymentText = {
-                'stripe': 'Kreditkarte/Digital',
-                'twint': 'TWINT',
-                'cash': 'Barzahlung'
-            };
-
-            let actionsHTML = '';
-            if (orderData.status === 'neu') {
-                actionsHTML = `
-                    <button class="action-btn btn-zubereitung" onclick="updateOrderStatus('${orderId}', 'zubereitung')">
-                        <i class="fas fa-fire"></i> In Zubereitung
-                    </button>
-                    <button class="action-btn btn-fertig" onclick="updateOrderStatus('${orderId}', 'fertig')">
-                        <i class="fas fa-check"></i> Fertig
-                    </button>
-                `;
-            } else if (orderData.status === 'zubereitung') {
-                actionsHTML = `
-                    <button class="action-btn btn-fertig" onclick="updateOrderStatus('${orderId}', 'fertig')">
-                        <i class="fas fa-check"></i> Fertig
-                    </button>
-                `;
-            } else if (orderData.status === 'fertig') {
-                actionsHTML = `
-                    <button class="action-btn btn-archiv" onclick="archiveOrder('${orderId}')">
-                        <i class="fas fa-archive"></i> Archivieren
-                    </button>
-                `;
-            }
-
-            return `
-                <div class="order-card status-${orderData.status} ${orderData.status === 'neu' ? 'pulse' : ''}" data-status="${orderData.status}">
-                    <div class="order-header">
-                        <div class="order-id">#${orderData.id}</div>
-                        <div class="order-time">
-                            ${orderTime}<br>
-                            <span class="time-elapsed ${timeElapsed.className}">${timeElapsed.text}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="order-details">
-                        <div class="pizza-item">
-                            <span class="pizza-name">${orderData.pizza.name}</span>
-                            <span class="pizza-price">CHF ${orderData.pizza.price.toFixed(2)}</span>
-                        </div>
-                        <div class="total-amount">
-                            Total: CHF ${orderData.total.toFixed(2)}
-                        </div>
-                    </div>
-
-                    <div class="order-info">
-                        <div class="info-item">
-                            <i class="info-icon fas fa-map-marker-alt"></i>
-                            <span>${orderData.table === 'takeaway' ? 'Takeaway' : `Tisch ${orderData.table}`}</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="info-icon ${paymentIcon[orderData.paymentMethod]}"></i>
-                            <span>${paymentText[orderData.paymentMethod]}</span>
-                        </div>
-                    </div>
-
-                    ${orderData.note ? `<div class="order-note">
-                        <i class="fas fa-comment"></i> ${orderData.note}
-                    </div>` : ''}
-
-                    <div class="order-actions">
-                        ${actionsHTML}
-                    </div>
-                </div>
-            `;
-        }
-
-        // Bestellungen anzeigen
-        function renderOrders() {
-            const grid = document.getElementById('ordersGrid');
-            const filteredOrders = Object.entries(orders).filter(([id, order]) => {
-                if (currentFilter === 'all') return true;
-                return order.status === currentFilter;
-            });
-
-            if (filteredOrders.length === 0) {
-                grid.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-${currentFilter === 'all' ? 'clock' : 'filter'}"></i>
-                        <h3>${currentFilter === 'all' ? 'Keine Bestellungen' : `Keine ${currentFilter} Bestellungen`}</h3>
-                        <p>${currentFilter === 'all' ? 'Neue Bestellungen werden hier automatisch angezeigt' : 'Wählen Sie einen anderen Filter'}</p>
-                    </div>
-                `;
-                return;
-            }
-
-            // Nach Timestamp sortieren (neueste zuerst)
-            filteredOrders.sort(([,a], [,b]) => new Date(b.timestamp) - new Date(a.timestamp));
-
-            grid.innerHTML = filteredOrders
-                .map(([id, order]) => createOrderHTML(id, order))
-                .join('');
-        }
-
-        // Statistiken aktualisieren
-        function updateStats() {
-            const today = new Date().toDateString();
-            const todayOrders = Object.values(orders).filter(order => 
-                new Date(order.timestamp).toDateString() === today
-            );
-
-            const newOrders = todayOrders.filter(order => order.status === 'neu');
-            const totalRevenue = todayOrders.reduce((sum, order) => sum + order.total, 0);
-
-            document.getElementById('totalOrders').textContent = todayOrders.length;
-            document.getElementById('newOrders').textContent = newOrders.length;
-            document.getElementById('totalRevenue').textContent = `CHF ${totalRevenue.toFixed(2)}`;
-        }
-
-        // Bestellstatus aktualisieren
-        async function updateOrderStatus(orderId, newStatus) {
             try {
-                await database.ref(`orders/${orderId}/status`).set(newStatus);
-                showNotification(`Bestellung #${orders[orderId].id} → ${newStatus}`);
+                await auth.signInWithEmailAndPassword(email, password);
+                // Redirect wird durch onAuthStateChanged gehandhabt
             } catch (error) {
-                console.error('Fehler beim Aktualisieren:', error);
-                showNotification('Fehler beim Aktualisieren der Bestellung', true);
+                console.error('Login error:', error);
+                
+                // Übersetzte Fehlermeldungen
+                let message = window.ml.t('admin.login.error.generic');
+                
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        message = window.ml.t('admin.login.error.email');
+                        break;
+                    case 'auth/user-not-found':
+                        message = window.ml.t('admin.login.error.notfound');
+                        break;
+                    case 'auth/wrong-password':
+                        message = window.ml.t('admin.login.error.password');
+                        break;
+                    case 'auth/too-many-requests':
+                        message = window.ml.t('admin.login.error.toomany');
+                        break;
+                }
+                
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+                loading.style.display = 'none';
+                loginBtn.disabled = false;
             }
-        }
-
-        // Bestellung archivieren
-        async function archiveOrder(orderId) {
-            if (!confirm('Bestellung wirklich archivieren?')) return;
-            
-            try {
-                const orderData = orders[orderId];
-                await database.ref(`archive/${orderId}`).set({
-                    ...orderData,
-                    archivedAt: new Date().toISOString()
-                });
-                await database.ref(`orders/${orderId}`).remove();
-                showNotification(`Bestellung #${orderData.id} archiviert`);
-            } catch (error) {
-                console.error('Fehler beim Archivieren:', error);
-                showNotification('Fehler beim Archivieren der Bestellung', true);
-            }
-        }
-
-        // Filter Event Listeners
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentFilter = btn.dataset.filter;
-                renderOrders();
-            });
         });
 
-        // Sound Toggle
-        document.getElementById('soundToggle').addEventListener('click', (e) => {
-            soundEnabled = !soundEnabled;
-            e.target.innerHTML = soundEnabled 
-                ? '<i class="fas fa-volume-up"></i> Sound AN'
-                : '<i class="fas fa-volume-mute"></i> Sound AUS';
-            e.target.classList.toggle('disabled', !soundEnabled);
-        });
-
-        // Firebase Realtime Listener
-        database.ref('orders').on('value', (snapshot) => {
-            const newOrders = snapshot.val() || {};
-            const newOrderCount = Object.keys(newOrders).length;
-            
-            // Neue Bestellung erkannt
-            if (newOrderCount > lastOrderCount && lastOrderCount > 0) {
-                playNotificationSound();
-                showNotification('Neue Bestellung eingegangen!');
-            }
-            
-            orders = newOrders;
-            lastOrderCount = newOrderCount;
-            renderOrders();
-            updateStats();
-        });
-
-        // Zeiten regelmäßig aktualisieren
-        setInterval(() => {
-            if (Object.keys(orders).length > 0) {
-                renderOrders();
-            }
-        }, 30000); // Alle 30 Sekunden
-
-        console.log('Admin Panel gestartet - Warte auf Bestellungen...');
+        // Demo Login Info
+        console.log('Demo Login: admin@damico.ch / admin123');
     </script>
 </body>
 </html>

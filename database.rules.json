@@ -1,6 +1,80 @@
 {
   "rules": {
-    ".read": true,
-    ".write": true
+    
+    "products": {
+      ".read": true,
+      ".write": "auth != null || root.child('admins').child(auth.uid).exists()"
+    },
+    
+
+    "categories": {
+      ".read": true,
+      ".write": "auth != null || root.child('admins').child(auth.uid).exists()"
+    },
+    
+  
+    "orders": {
+      ".read": true,
+      ".write": true,
+      "$orderId": {
+        ".validate": "newData.hasChildren(['customerName', 'items', 'total', 'timestamp', 'status'])",
+        "status": {
+          ".validate": "newData.val() === 'pending' || newData.val() === 'preparing' || newData.val() === 'ready' || newData.val() === 'completed' || newData.val() === 'cancelled'"
+        }
+      }
+    },
+    
+ 
+    "archive": {
+      ".read": "auth != null || root.child('admins').child(auth.uid).exists()",
+      ".write": "auth != null || root.child('admins').child(auth.uid).exists()"
+    },
+
+    "temp-orders": {
+      ".read": true,
+      ".write": true,
+      "$orderId": {
+        ".validate": "newData.hasChildren(['items', 'total'])"
+      }
+    },
+    
+ 
+    "settings": {
+      ".read": true,
+      ".write": "auth != null || root.child('admins').child(auth.uid).exists()",
+      "waitTime": {
+        ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 120"
+      },
+      "isOpen": {
+        ".validate": "newData.isBoolean()"
+      }
+    },
+    
+
+    "whatsapp-logs": {
+      ".read": "auth != null || root.child('admins').child(auth.uid).exists()",
+      ".write": "auth != null || root.child('admins').child(auth.uid).exists()"
+    },
+    
+  
+    "whatsapp-optouts": {
+      ".read": "auth != null || root.child('admins').child(auth.uid).exists()",
+      ".write": true
+    },
+    
+
+    "admins": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).exists()",
+      ".write": false
+    },
+
+    "demo": {
+      ".read": true,
+      ".write": false
+    },
+    
+ 
+    ".read": false,
+    ".write": false
   }
 }

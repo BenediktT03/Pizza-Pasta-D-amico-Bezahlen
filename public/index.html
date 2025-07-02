@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlowBite Pro - Online Bestellen</title>
+    <title>Eatech - Online Bestellen</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#2563eb">
     <link href="css/style.css" rel="stylesheet">
+    <link href="css/weather-integration.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="js/multilingual.js"></script>
+    <script src="js/offline-sync.js"></script>
+    <script src="js/whatsapp-integration.js"></script>
+    <script src="js/weather-integration.js"></script>
 </head>
 <body>
     <!-- Pizza Loader -->
@@ -49,6 +53,11 @@
                 <span data-i18n="waitTime.minutes">Minuten</span>
             </div>
 
+            <!-- Weather Display -->
+            <div id="weatherDisplay">
+                <!-- Wird von weather-integration.js gefüllt -->
+            </div>
+
             <!-- Status Badges -->
             <div class="status-badges">
                 <span class="status-badge active" id="openStatus">
@@ -70,79 +79,48 @@
                 </p>
             </div>
 
-            <!-- Category Tabs -->
-            <div class="category-tabs" id="categoryTabs">
-                <button class="category-tab active" onclick="filterByCategory('all')">
-                    <i class="fas fa-th"></i>
-                    <span data-i18n="category.all">Alle</span>
-                </button>
-                <button class="category-tab" onclick="filterByCategory('pizza')">
+            <!-- Product Grid -->
+            <div class="product-grid" id="productGrid">
+                <!-- Products will be loaded here -->
+                <div class="no-products">
                     <i class="fas fa-pizza-slice"></i>
-                    <span data-i18n="category.pizza">Pizza</span>
-                </button>
-                <button class="category-tab" onclick="filterByCategory('pasta')">
-                    <i class="fas fa-utensils"></i>
-                    <span data-i18n="category.pasta">Pasta</span>
-                </button>
-                <button class="category-tab" onclick="filterByCategory('drinks')">
-                    <i class="fas fa-glass-martini"></i>
-                    <span data-i18n="category.drinks">Getränke</span>
-                </button>
-                <button class="category-tab" onclick="filterByCategory('desserts')">
-                    <i class="fas fa-ice-cream"></i>
-                    <span data-i18n="category.desserts">Desserts</span>
-                </button>
-            </div>
-
-            <!-- Products Grid -->
-            <div class="products-grid" id="productsContainer">
-                <!-- Wird dynamisch gefüllt -->
-            </div>
-
-            <!-- Admin Link -->
-            <div class="footer-admin">
-                <a href="admin.html" class="admin-link">
-                    <i class="fas fa-user-shield"></i>
-                    <span data-i18n="footer.adminLogin">Admin</span>
-                </a>
+                    <p data-i18n="products.loading">Produkte werden geladen...</p>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Floating Cart -->
-    <div class="floating-cart" id="floatingCart" style="display: none;">
-        <h3 class="cart-title">
+        <!-- Cart Sidebar -->
+        <div class="cart-sidebar" id="cartSidebar">
+            <div class="cart-header">
+                <h3 data-i18n="cart.title">Warenkorb</h3>
+                <button class="close-cart" onclick="toggleCart()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="cart-items" id="cartItems">
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p data-i18n="cart.empty">Ihr Warenkorb ist leer</p>
+                </div>
+            </div>
+            
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span data-i18n="cart.total">Gesamt:</span>
+                    <span id="cartTotal">CHF 0.00</span>
+                </div>
+                <button class="checkout-btn" onclick="showCheckoutModal()" disabled>
+                    <i class="fas fa-credit-card"></i>
+                    <span data-i18n="cart.checkout">Zur Kasse</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Cart Toggle -->
+        <button class="mobile-cart-toggle" onclick="toggleCart()">
             <i class="fas fa-shopping-cart"></i>
-            <span data-i18n="cart.title">Warenkorb</span>
-        </h3>
-        
-        <div id="cartEmpty" class="empty-cart">
-            <i class="fas fa-shopping-basket"></i>
-            <p data-i18n="cart.empty">Ihr Warenkorb ist leer</p>
-        </div>
-        
-        <div id="cartItems" class="cart-items" style="display: none;">
-            <!-- Wird dynamisch gefüllt -->
-        </div>
-        
-        <div id="cartTotals" class="cart-totals" style="display: none;">
-            <div class="cart-total-row">
-                <span data-i18n="cart.subtotal">Zwischensumme:</span>
-                <span id="subtotal">CHF 0.00</span>
-            </div>
-            <div class="cart-total-row final">
-                <span data-i18n="cart.total">Gesamtbetrag:</span>
-                <span id="total">CHF 0.00</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Floating Checkout Button -->
-    <div class="floating-checkout" id="floatingCheckout" style="display: none;">
-        <button class="checkout-btn" onclick="showCheckout()">
-            <i class="fas fa-shopping-bag"></i>
-            <span data-i18n="cart.checkout">Zur Kasse</span>
-            <span class="cart-count" id="checkoutCartCount">0</span>
+            <span class="cart-count" id="cartCount">0</span>
         </button>
     </div>
 
@@ -150,103 +128,57 @@
     <div class="modal" id="checkoutModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 data-i18n="checkout.title">Bestellung abschließen</h3>
-                <button class="modal-close" onclick="closeCheckout()">×</button>
+                <h2 data-i18n="checkout.title">Bestellung abschließen</h2>
+                <button class="modal-close" onclick="closeCheckoutModal()">&times;</button>
             </div>
-            <form id="checkoutForm" onsubmit="processCheckout(event)">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label class="form-label" data-i18n="checkout.name">Name *</label>
-                        <input type="text" id="customerName" class="form-input" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" data-i18n="checkout.phone">Telefon *</label>
-                        <input type="tel" id="customerPhone" class="form-input" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" data-i18n="checkout.email">E-Mail (optional)</label>
-                        <input type="email" id="customerEmail" class="form-input">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" data-i18n="checkout.notes">Bemerkungen</label>
-                        <textarea id="orderNotes" class="form-textarea" rows="3"></textarea>
-                    </div>
-                </div>
-                
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeCheckout()">
-                        <span data-i18n="checkout.cancel">Abbrechen</span>
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-check"></i>
-                        <span data-i18n="checkout.confirm">Bestellung aufgeben</span>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Payment Modal -->
-    <div class="modal" id="paymentModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 data-i18n="payment.title">Zahlungsmethode wählen</h3>
-                <button class="modal-close" onclick="closePayment()">×</button>
-            </div>
+            
             <div class="modal-body">
-                <div class="payment-options">
-                    <button class="payment-option" onclick="selectPayment('card')">
-                        <i class="fas fa-credit-card"></i>
-                        <span data-i18n="payment.card">Kartenzahlung</span>
-                        <small data-i18n="payment.cardDesc">Visa, Mastercard, etc.</small>
-                    </button>
-                    
-                    <button class="payment-option" onclick="selectPayment('cash')">
-                        <i class="fas fa-money-bill-wave"></i>
-                        <span data-i18n="payment.cash">Barzahlung</span>
-                        <small data-i18n="payment.cashDesc">Bei Abholung bezahlen</small>
-                    </button>
-                    
-                    <button class="payment-option disabled">
-                        <i class="fas fa-mobile-alt"></i>
-                        <span data-i18n="payment.twint">TWINT</span>
-                        <small data-i18n="payment.comingSoon">Bald verfügbar</small>
-                        <span class="coming-soon-badge">Coming Soon</span>
-                    </button>
-                </div>
-                
-                <div class="order-summary">
-                    <h4 data-i18n="payment.summary">Bestellübersicht</h4>
-                    <div id="paymentSummary"></div>
-                    <div class="order-total">
-                        <span data-i18n="payment.total">Gesamtbetrag:</span>
-                        <span id="paymentTotal">CHF 0.00</span>
+                <form id="checkoutForm" onsubmit="submitOrder(event)">
+                    <div class="form-group">
+                        <label for="customerName" data-i18n="checkout.name">Name</label>
+                        <input type="text" id="customerName" required>
                     </div>
-                </div>
+                    
+                    <div class="form-group" id="phoneInputContainer">
+                        <!-- WhatsApp Integration wird hier eingefügt -->
+                    </div>
+                    
+                    <div class="payment-options">
+                        <h3 data-i18n="checkout.paymentMethod">Zahlungsmethode</h3>
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="card" checked>
+                            <span class="payment-label">
+                                <i class="fas fa-credit-card"></i>
+                                <span data-i18n="payment.card">Kartenzahlung</span>
+                            </span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="cash">
+                            <span class="payment-label">
+                                <i class="fas fa-money-bill"></i>
+                                <span data-i18n="payment.cash">Barzahlung</span>
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="submit-order-btn">
+                        <i class="fas fa-check"></i>
+                        <span data-i18n="checkout.submit">Kostenpflichtig bestellen</span>
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- Notification -->
-    <div class="notification" id="notification">
-        <div class="notification-content">
-            <i class="fas fa-check-circle"></i>
-            <span id="notificationMessage"></span>
-        </div>
-    </div>
-
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     
     <!-- Stripe -->
     <script src="https://js.stripe.com/v3/"></script>
 
     <script>
-        // Firebase Konfiguration
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyD3OCMvc4Iup58Ao0BiFNuvA0fnJokzYS8",
             authDomain: "pizzapastadamico.firebaseapp.com",
@@ -257,417 +189,903 @@
             appId: "1:83240541532:web:11e3277850bf89a5b8b599",
             measurementId: "G-6H2J5K88J7"
         };
-
-        // Firebase initialisieren
+        
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Stripe initialisieren
-        const stripe = Stripe('YOUR_STRIPE_PUBLIC_KEY');
-
-        // Globale Variablen
-        let cart = [];
+        // Global Variables
+        let cartItems = [];
         let products = [];
-        let currentCategory = 'all';
         let isOpen = true;
         let currentWaitTime = 5;
+        let selectedPaymentMethod = 'card';
+        let currentLanguage = 'de';
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('Service Worker registered'))
+                .catch(err => console.error('Service Worker registration failed:', err));
+        }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            // Hide loader after delay
+            loadCartFromLocalStorage();
+            loadProducts();
+            loadSettings();
+            checkPendingOrders();
+            
+            // WhatsApp Phone Input
+            if (window.whatsApp) {
+                window.whatsApp.createPhoneInput('phoneInputContainer', {
+                    showTestButton: false
+                });
+            }
+            
+            // Hide loader
             setTimeout(() => {
                 document.getElementById('pizzaLoader').style.display = 'none';
             }, 1500);
-
-            // Load multilingual
-            if (window.ml) {
-                window.ml.init();
-            }
-
-            // Load products
-            loadProducts();
-            
-            // Listen to settings
-            listenToSettings();
-            
-            // Load cart from localStorage
-            const savedCart = localStorage.getItem('cart');
-            if (savedCart) {
-                cart = JSON.parse(savedCart);
-                updateCart();
-            }
         });
+
+        // Check for pending offline orders
+        async function checkPendingOrders() {
+            if (window.offlineSync && window.offlineSync.stats.queued > 0) {
+                showPendingOrdersNotification();
+            }
+        }
 
         // Load Products
         function loadProducts() {
-            database.ref('products').on('value', (snapshot) => {
-                products = [];
-                
-                snapshot.forEach((child) => {
-                    const product = { id: child.key, ...child.val() };
-                    if (product.available !== false) {
-                        products.push(product);
-                    }
-                });
-                
-                // Create demo products if empty
-                if (products.length === 0) {
-                    createDemoProducts();
-                } else {
+            database.ref('products').on('value', snapshot => {
+                const data = snapshot.val();
+                if (data) {
+                    products = Object.entries(data).map(([id, product]) => ({
+                        id,
+                        ...product
+                    }));
                     displayProducts();
+                } else {
+                    // Create demo products if empty
+                    createDemoProducts();
                 }
+            });
+        }
+
+        // Load Settings
+        function loadSettings() {
+            // Wait time
+            database.ref('settings/waitTime').on('value', snapshot => {
+                currentWaitTime = snapshot.val() || 5;
+                document.getElementById('currentWaitTime').textContent = currentWaitTime;
+            });
+            
+            // Open status
+            database.ref('settings/isOpen').on('value', snapshot => {
+                isOpen = snapshot.val() !== false;
+                updateOpenStatus();
             });
         }
 
         // Display Products
         function displayProducts() {
-            const container = document.getElementById('productsContainer');
-            let filteredProducts = products;
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
             
-            if (currentCategory !== 'all') {
-                filteredProducts = products.filter(p => p.category === currentCategory);
-            }
+            const categories = [...new Set(products.map(p => p.category))];
             
-            if (filteredProducts.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-pizza-slice"></i>
-                        <p data-i18n="products.none">Keine Produkte in dieser Kategorie</p>
-                    </div>
-                `;
+            categories.forEach(category => {
+                const categorySection = document.createElement('div');
+                categorySection.className = 'category-section';
+                
+                const categoryHeader = document.createElement('h2');
+                categoryHeader.className = 'category-title';
+                categoryHeader.innerHTML = `<i class="fas fa-utensils"></i> ${category}`;
+                categorySection.appendChild(categoryHeader);
+                
+                const categoryProducts = document.createElement('div');
+                categoryProducts.className = 'category-products';
+                
+                products
+                    .filter(p => p.category === category && p.visible !== false)
+                    .forEach(product => {
+                        const productCard = createProductCard(product);
+                        categoryProducts.appendChild(productCard);
+                    });
+                
+                categorySection.appendChild(categoryProducts);
+                grid.appendChild(categorySection);
+            });
+        }
+
+        // Create Product Card
+        function createProductCard(product) {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            
+            card.innerHTML = `
+                <div class="product-image">${product.emoji || '🍕'}</div>
+                <h3 class="product-name">${product.name}</h3>
+                <p class="product-description">${product.description || ''}</p>
+                <div class="product-footer">
+                    <span class="product-price">CHF ${product.price.toFixed(2)}</span>
+                    <button class="add-to-cart-btn" onclick="addToCart('${product.id}')">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Cart Functions
+        function addToCart(productId) {
+            if (!isOpen) {
+                showNotification('Restaurant ist geschlossen', 'error');
                 return;
             }
             
-            container.innerHTML = filteredProducts.map(product => `
-                <div class="product-card">
-                    <div class="product-emoji">${product.emoji || getCategoryEmoji(product.category)}</div>
-                    <div class="product-details">
-                        <h3 class="product-name">${product.name}</h3>
-                        ${product.description ? `<p class="product-description">${product.description}</p>` : ''}
-                        <div class="product-footer">
-                            <span class="product-price">CHF ${product.price.toFixed(2)}</span>
-                            <div class="quantity-controls">
-                                ${getQuantityControls(product.id)}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Get Quantity Controls
-        function getQuantityControls(productId) {
-            const cartItem = cart.find(item => item.id === productId);
-            const quantity = cartItem ? cartItem.quantity : 0;
-            
-            if (quantity === 0) {
-                return `
-                    <button class="quantity-btn add" onclick="addToCart('${productId}')">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                `;
-            }
-            
-            return `
-                <button class="quantity-btn" onclick="updateQuantity('${productId}', ${quantity - 1})">
-                    <i class="fas fa-minus"></i>
-                </button>
-                <span class="quantity-display">${quantity}</span>
-                <button class="quantity-btn" onclick="updateQuantity('${productId}', ${quantity + 1})">
-                    <i class="fas fa-plus"></i>
-                </button>
-            `;
-        }
-
-        // Add to Cart
-        function addToCart(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
             
-            cart.push({
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                quantity: 1
-            });
+            const existingItem = cartItems.find(item => item.id === productId);
             
-            updateCart();
-            displayProducts();
-            showNotification(`${product.name} wurde zum Warenkorb hinzugefügt`);
-        }
-
-        // Update Quantity
-        function updateQuantity(productId, newQuantity) {
-            if (newQuantity <= 0) {
-                cart = cart.filter(item => item.id !== productId);
+            if (existingItem) {
+                existingItem.quantity++;
             } else {
-                const item = cart.find(item => item.id === productId);
-                if (item) {
-                    item.quantity = newQuantity;
-                }
+                cartItems.push({
+                    ...product,
+                    quantity: 1
+                });
             }
             
             updateCart();
-            displayProducts();
+            saveCartToLocalStorage();
+            showNotification(`${product.name} zum Warenkorb hinzugefügt`, 'success');
         }
 
-        // Update Cart
-        function updateCart() {
-            const cartItems = document.getElementById('cartItems');
-            const cartEmpty = document.getElementById('cartEmpty');
-            const cartTotals = document.getElementById('cartTotals');
-            const floatingCart = document.getElementById('floatingCart');
-            const floatingCheckout = document.getElementById('floatingCheckout');
-            const checkoutCount = document.getElementById('checkoutCartCount');
+        function removeFromCart(productId) {
+            const index = cartItems.findIndex(item => item.id === productId);
+            if (index > -1) {
+                cartItems.splice(index, 1);
+                updateCart();
+                saveCartToLocalStorage();
+            }
+        }
+
+        function updateQuantity(productId, change) {
+            const item = cartItems.find(item => item.id === productId);
+            if (!item) return;
             
-            if (cart.length === 0) {
-                cartItems.style.display = 'none';
-                cartTotals.style.display = 'none';
-                cartEmpty.style.display = 'block';
-                floatingCart.style.display = 'none';
-                floatingCheckout.style.display = 'none';
+            item.quantity += change;
+            
+            if (item.quantity <= 0) {
+                removeFromCart(productId);
             } else {
-                cartEmpty.style.display = 'none';
-                cartItems.style.display = 'block';
-                cartTotals.style.display = 'block';
-                floatingCart.style.display = 'block';
-                floatingCheckout.style.display = 'block';
-                
-                // Update cart count
-                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-                checkoutCount.textContent = totalItems;
-                
-                // Display cart items
-                cartItems.innerHTML = cart.map(item => `
+                updateCart();
+                saveCartToLocalStorage();
+            }
+        }
+
+        function updateCart() {
+            const cartItemsDiv = document.getElementById('cartItems');
+            const cartCount = document.getElementById('cartCount');
+            const cartTotal = document.getElementById('cartTotal');
+            const checkoutBtn = document.querySelector('.checkout-btn');
+            
+            if (cartItems.length === 0) {
+                cartItemsDiv.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <p data-i18n="cart.empty">Ihr Warenkorb ist leer</p>
+                    </div>
+                `;
+                checkoutBtn.disabled = true;
+            } else {
+                cartItemsDiv.innerHTML = cartItems.map(item => `
                     <div class="cart-item">
                         <div class="cart-item-info">
-                            <div class="cart-item-name">${item.name}</div>
-                            <div class="cart-item-quantity">${item.quantity}x CHF ${item.price.toFixed(2)}</div>
+                            <h4>${item.name}</h4>
+                            <p>CHF ${item.price.toFixed(2)}</p>
                         </div>
-                        <div class="cart-item-price">CHF ${(item.price * item.quantity).toFixed(2)}</div>
+                        <div class="cart-item-controls">
+                            <button onclick="updateQuantity('${item.id}', -1)">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="quantity">${item.quantity}</span>
+                            <button onclick="updateQuantity('${item.id}', 1)">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button onclick="removeFromCart('${item.id}')" class="remove-btn">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
                 `).join('');
-                
-                // Calculate totals
-                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                document.getElementById('subtotal').textContent = `CHF ${total.toFixed(2)}`;
-                document.getElementById('total').textContent = `CHF ${total.toFixed(2)}`;
+                checkoutBtn.disabled = false;
             }
             
-            // Save cart
-            localStorage.setItem('cart', JSON.stringify(cart));
+            const total = calculateTotal();
+            cartTotal.textContent = `CHF ${total.toFixed(2)}`;
+            cartCount.textContent = cartItems.reduce((sum, item) => sum + item.quantity, 0);
         }
 
-        // Filter by Category
-        function filterByCategory(category) {
-            currentCategory = category;
+        function calculateTotal() {
+            return cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        }
+
+        function saveCartToLocalStorage() {
+            localStorage.setItem('cart', JSON.stringify(cartItems));
+        }
+
+        function loadCartFromLocalStorage() {
+            const saved = localStorage.getItem('cart');
+            if (saved) {
+                cartItems = JSON.parse(saved);
+                updateCart();
+            }
+        }
+
+        // UI Functions
+        function toggleCart() {
+            const sidebar = document.getElementById('cartSidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        function showCheckoutModal() {
+            if (!isOpen) {
+                showNotification('Restaurant ist geschlossen', 'error');
+                return;
+            }
+            document.getElementById('checkoutModal').style.display = 'flex';
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkoutModal').style.display = 'none';
+        }
+
+        function updateOpenStatus() {
+            const openStatus = document.getElementById('openStatus');
+            const closedStatus = document.getElementById('closedStatus');
+            const closedNotice = document.getElementById('closedNotice');
+            const waitTimeBanner = document.getElementById('waitTimeBanner');
             
-            // Update tab states
-            document.querySelectorAll('.category-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            event.target.closest('.category-tab').classList.add('active');
+            if (isOpen) {
+                openStatus.style.display = 'inline-flex';
+                closedStatus.style.display = 'none';
+                closedNotice.style.display = 'none';
+                waitTimeBanner.style.display = 'flex';
+            } else {
+                openStatus.style.display = 'none';
+                closedStatus.style.display = 'inline-flex';
+                closedNotice.style.display = 'block';
+                waitTimeBanner.style.display = 'none';
+            }
+        }
+
+        // Calculate Wait Time with Weather
+        function calculateWaitTime() {
+            const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+            let baseTime = currentWaitTime;
             
-            displayProducts();
-        }
-
-        // Listen to Settings
-        function listenToSettings() {
-            // Restaurant status
-            database.ref('settings/isOpen').on('value', (snapshot) => {
-                isOpen = snapshot.val() !== false;
-                
-                const openStatus = document.getElementById('openStatus');
-                const closedStatus = document.getElementById('closedStatus');
-                const closedNotice = document.getElementById('closedNotice');
-                const categoryTabs = document.getElementById('categoryTabs');
-                const productsContainer = document.getElementById('productsContainer');
-                const cartSection = document.getElementById('cartSection');
-                
-                if (isOpen) {
-                    openStatus.style.display = '';
-                    closedStatus.style.display = 'none';
-                    closedNotice.style.display = 'none';
-                    categoryTabs.style.display = '';
-                    productsContainer.style.display = '';
-                    cartSection.style.display = '';
-                } else {
-                    openStatus.style.display = 'none';
-                    closedStatus.style.display = '';
-                    closedNotice.style.display = 'block';
-                    categoryTabs.style.display = 'none';
-                    productsContainer.style.display = 'none';
-                    cartSection.style.display = 'none';
-                }
-            });
+            if (totalItems <= 5) {
+                // Base time
+            } else if (totalItems <= 11) {
+                baseTime = currentWaitTime + 5;
+            } else {
+                baseTime = currentWaitTime + 10;
+            }
             
-            // Wait time
-            database.ref('settings/waitTime').on('value', (snapshot) => {
-                currentWaitTime = snapshot.val() || 5;
-                document.getElementById('currentWaitTime').textContent = currentWaitTime;
-            });
+            // Weather multiplier anwenden
+            if (window.weatherIntegration && window.weatherIntegration.weatherMultiplier) {
+                baseTime = Math.round(baseTime * window.weatherIntegration.weatherMultiplier);
+            }
+            
+            return baseTime;
         }
 
-        // Checkout Functions
-        function showCheckout() {
-            if (!isOpen || cart.length === 0) return;
-            document.getElementById('checkoutModal').classList.add('active');
-        }
-
-        function closeCheckout() {
-            document.getElementById('checkoutModal').classList.remove('active');
-        }
-
-        function processCheckout(event) {
+        // Order Submission with Offline Support
+        async function submitOrder(event) {
             event.preventDefault();
             
-            const customerData = {
-                name: document.getElementById('customerName').value,
-                phone: document.getElementById('customerPhone').value,
-                email: document.getElementById('customerEmail').value,
-                notes: document.getElementById('orderNotes').value
-            };
-            
-            // Save customer data temporarily
-            sessionStorage.setItem('customerData', JSON.stringify(customerData));
-            
-            // Close checkout and show payment
-            closeCheckout();
-            showPayment();
-        }
-
-        function showPayment() {
-            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            
-            // Update payment summary
-            document.getElementById('paymentSummary').innerHTML = cart.map(item => `
-                <div class="payment-item">
-                    <span>${item.quantity}x ${item.name}</span>
-                    <span>CHF ${(item.price * item.quantity).toFixed(2)}</span>
-                </div>
-            `).join('');
-            
-            document.getElementById('paymentTotal').textContent = `CHF ${total.toFixed(2)}`;
-            document.getElementById('paymentModal').classList.add('active');
-        }
-
-        function closePayment() {
-            document.getElementById('paymentModal').classList.remove('active');
-        }
-
-        function selectPayment(method) {
-            const customerData = JSON.parse(sessionStorage.getItem('customerData'));
-            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            
-            if (method === 'card') {
-                processCardPayment(customerData, total);
-            } else if (method === 'cash') {
-                processCashPayment(customerData, total);
+            try {
+                const orderData = {
+                    items: cartItems,
+                    total: calculateTotal(),
+                    customerName: document.getElementById('customerName').value,
+                    phoneNumber: document.getElementById('phoneNumber').value,
+                    orderNumber: generateOrderNumber(),
+                    timestamp: Date.now(),
+                    status: 'pending',
+                    paymentMethod: document.querySelector('input[name="payment"]:checked').value,
+                    language: currentLanguage || 'de',
+                    estimatedWaitTime: calculateWaitTime()
+                };
+                
+                // WhatsApp Consent
+                const whatsappConsent = document.getElementById('whatsappConsent');
+                if (whatsappConsent && whatsappConsent.checked) {
+                    orderData.whatsappConsent = true;
+                    const countryCode = document.getElementById('countryCode').value;
+                    orderData.phoneNumber = countryCode + orderData.phoneNumber.replace(/\s/g, '');
+                }
+                
+                // Check if online
+                if (navigator.onLine && window.firebase) {
+                    // Online: Normal Firebase submission
+                    try {
+                        const orderRef = await database.ref('orders').push(orderData);
+                        orderData.id = orderRef.key;
+                        
+                        // Success - redirect to payment/success
+                        if (orderData.paymentMethod === 'card') {
+                            // Stripe checkout
+                            await processStripePayment(orderData);
+                        } else {
+                            // Cash payment - direct to success
+                            window.location.href = `success.html?order=${orderData.id}`;
+                        }
+                    } catch (error) {
+                        console.error('Firebase error, falling back to offline:', error);
+                        await handleOfflineOrder(orderData);
+                    }
+                } else {
+                    // Offline: Queue for later
+                    await handleOfflineOrder(orderData);
+                }
+                
+            } catch (error) {
+                console.error('Order submission error:', error);
+                showNotification('Bestellung fehlgeschlagen. Bitte versuchen Sie es erneut.', 'error');
             }
         }
 
-        async function processCardPayment(customerData, total) {
-            showNotification('Weiterleitung zur Zahlung...', 'info');
-            
-            // Create order in Firebase
-            const orderData = {
-                ...customerData,
-                items: cart,
-                total: total,
-                paymentMethod: 'card',
-                status: 'neu',
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                waitTime: calculateWaitTime()
-            };
-            
-            const orderRef = await database.ref('orders').push(orderData);
-            
-            // Here would be Stripe integration
-            // For demo, simulate success
-            setTimeout(() => {
-                window.location.href = `success.html?order=${orderRef.key}`;
-            }, 1000);
+        // Handle offline order
+        async function handleOfflineOrder(orderData) {
+            if (window.offlineSync) {
+                // Queue the order
+                const localId = await window.offlineSync.queueOrder(orderData);
+                
+                // Show offline success message
+                showOfflineSuccessModal(orderData, localId);
+            } else {
+                throw new Error('Offline sync not available');
+            }
         }
 
-        async function processCashPayment(customerData, total) {
-            showNotification('Bestellung wird verarbeitet...', 'info');
+        // Stripe Payment
+        async function processStripePayment(orderData) {
+            // Store order temporarily
+            await database.ref('temp-orders').child(orderData.id).set(orderData);
             
-            // Create order in Firebase
-            const orderData = {
-                ...customerData,
-                items: cart,
-                total: total,
-                paymentMethod: 'cash',
-                status: 'neu',
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                waitTime: calculateWaitTime()
-            };
+            // Create Stripe session
+            const stripe = Stripe('pk_test_51Rg6MY4I9wcGYX9JUBunT1Yh6kr776piJvLCk3Ln6ovyk0RGBQ0icKbbEYvOUInOIZGKdbvfsCPLZ14JDoOlrPeV00SJRbRsDo');
             
-            const orderRef = await database.ref('orders').push(orderData);
+            const lineItems = orderData.items.map(item => ({
+                price_data: {
+                    currency: 'chf',
+                    product_data: {
+                        name: item.name,
+                        description: `${item.quantity}x ${item.name}`
+                    },
+                    unit_amount: Math.round(item.price * 100)
+                },
+                quantity: item.quantity
+            }));
             
-            // Clear cart and redirect
-            localStorage.removeItem('cart');
-            window.location.href = `success.html?order=${orderRef.key}`;
+            // In production, this would call your backend
+            // For now, we'll simulate with a direct redirect
+            window.location.href = `success.html?order=${orderData.id}&payment=processing`;
         }
 
-        // Utility Functions
-        function calculateWaitTime() {
-            const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-            if (itemCount < 6) return 5;
-            if (itemCount <= 11) return 10;
-            return Math.min(15 + Math.floor((itemCount - 11) / 3) * 5, 30);
+        // Helper Functions
+        function generateOrderNumber() {
+            return Math.floor(100000 + Math.random() * 900000);
         }
 
-        function getCategoryEmoji(category) {
-            const emojis = {
-                pizza: '🍕',
-                pasta: '🍝',
-                drinks: '🥤',
-                desserts: '🍰'
-            };
-            return emojis[category] || '🍽️';
-        }
-
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            const messageEl = document.getElementById('notificationMessage');
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
             
-            messageEl.textContent = message;
-            notification.className = `notification ${type} show`;
+            document.body.appendChild(notification);
             
+            setTimeout(() => notification.classList.add('show'), 10);
             setTimeout(() => {
                 notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
             }, 3000);
+        }
+
+        // Offline Success Modal
+        function showOfflineSuccessModal(orderData, localId) {
+            const modal = document.createElement('div');
+            modal.className = 'offline-success-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="offline-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h2>Bestellung gespeichert!</h2>
+                    <p>Ihre Bestellung wurde offline gespeichert und wird automatisch übertragen, sobald Sie wieder online sind.</p>
+                    
+                    <div class="order-details">
+                        <div class="detail-row">
+                            <span>Bestellnummer:</span>
+                            <strong>#${orderData.orderNumber}</strong>
+                        </div>
+                        <div class="detail-row">
+                            <span>Gesamt:</span>
+                            <strong>CHF ${orderData.total.toFixed(2)}</strong>
+                        </div>
+                        <div class="detail-row">
+                            <span>Status:</span>
+                            <span class="offline-badge">
+                                <i class="fas fa-clock"></i> Wartet auf Synchronisation
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="offline-info">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Speichern Sie diese Bestellnummer. Sie erhalten eine Benachrichtigung, sobald Ihre Bestellung übertragen wurde.</p>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button onclick="location.reload()" class="btn-primary">
+                            Neue Bestellung
+                        </button>
+                        <button onclick="this.closest('.offline-success-modal').remove()" class="btn-secondary">
+                            Schließen
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Clear cart
+            cartItems = [];
+            updateCart();
+            saveCartToLocalStorage();
+        }
+
+        // Show pending orders notification
+        function showPendingOrdersNotification() {
+            const notification = document.createElement('div');
+            notification.className = 'pending-orders-notification';
+            notification.innerHTML = `
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Sie haben ${window.offlineSync.stats.queued} ungesendete Bestellung(en)</span>
+                <button onclick="showPendingOrdersModal()">Anzeigen</button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 100);
+        }
+
+        // Show pending orders modal
+        async function showPendingOrdersModal() {
+            const orders = await window.offlineSync.getOfflineOrders();
+            
+            const modal = document.createElement('div');
+            modal.className = 'pending-orders-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h2><i class="fas fa-clock"></i> Ungesendete Bestellungen</h2>
+                    <div class="pending-orders-list">
+                        ${orders.map(order => `
+                            <div class="pending-order">
+                                <div class="order-header">
+                                    <span class="order-number">#${order.orderNumber}</span>
+                                    <span class="order-time">${new Date(order.timestamp).toLocaleString()}</span>
+                                </div>
+                                <div class="order-details">
+                                    <span>CHF ${order.total.toFixed(2)}</span>
+                                    <span class="sync-status">
+                                        <i class="fas fa-sync"></i> Wartet auf Sync
+                                    </span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="modal-actions">
+                        <button onclick="window.offlineSync.syncQueue()" class="btn-primary" ${!navigator.onLine ? 'disabled' : ''}>
+                            <i class="fas fa-sync"></i> Jetzt synchronisieren
+                        </button>
+                        <button onclick="this.closest('.pending-orders-modal').remove()" class="btn-secondary">
+                            Schließen
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
         }
 
         // Create Demo Products
         function createDemoProducts() {
             const demoProducts = [
-                { name: 'Pizza Margherita', category: 'pizza', price: 18.50, emoji: '🍕', description: 'Tomaten, Mozzarella, Basilikum' },
-                { name: 'Pizza Salami', category: 'pizza', price: 21.00, emoji: '🍕', description: 'Tomaten, Mozzarella, Salami' },
-                { name: 'Pasta Carbonara', category: 'pasta', price: 19.50, emoji: '🍝', description: 'Speck, Ei, Parmesan' },
-                { name: 'Pasta Arrabbiata', category: 'pasta', price: 17.00, emoji: '🍝', description: 'Tomaten, Knoblauch, Chili' },
-                { name: 'Coca Cola', category: 'drinks', price: 4.50, emoji: '🥤', description: '0.5L' },
-                { name: 'Wasser', category: 'drinks', price: 3.50, emoji: '💧', description: '0.5L' },
-                { name: 'Tiramisu', category: 'desserts', price: 8.50, emoji: '🍰', description: 'Hausgemacht' },
-                { name: 'Panna Cotta', category: 'desserts', price: 7.50, emoji: '🍮', description: 'Mit Beerensauce' }
+                { name: 'Pizza Margherita', price: 18.50, category: 'Pizza', emoji: '🍕', description: 'Tomaten, Mozzarella, Basilikum' },
+                { name: 'Pizza Salami', price: 21.00, category: 'Pizza', emoji: '🍕', description: 'Tomaten, Mozzarella, Salami' },
+                { name: 'Pizza Hawaii', price: 22.50, category: 'Pizza', emoji: '🍕', description: 'Tomaten, Mozzarella, Schinken, Ananas' },
+                { name: 'Spaghetti Carbonara', price: 19.50, category: 'Pasta', emoji: '🍝', description: 'Speck, Ei, Parmesan' },
+                { name: 'Penne Arrabbiata', price: 17.50, category: 'Pasta', emoji: '🍝', description: 'Tomatensauce, Knoblauch, Chili' },
+                { name: 'Tiramisu', price: 8.50, category: 'Dessert', emoji: '🍰', description: 'Mascarpone, Kaffee, Kakao' },
+                { name: 'Coca Cola', price: 4.50, category: 'Getränke', emoji: '🥤', description: '0.5L' },
+                { name: 'Mineralwasser', price: 3.50, category: 'Getränke', emoji: '💧', description: '0.5L' }
             ];
             
             demoProducts.forEach(product => {
                 database.ref('products').push(product);
             });
         }
-    </script>
-    
-    <!-- Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('Service Worker registered'))
-                    .catch(err => console.error('Service Worker registration failed:', err));
-            });
+
+        // Modal close on outside click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
         }
     </script>
+
+    <!-- Additional Styles for new features -->
+    <style>
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(17, 24, 39, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 2000;
+            max-width: 400px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .notification.error {
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .notification i {
+            font-size: 20px;
+        }
+
+        .notification.success i { color: #22c55e; }
+        .notification.error i { color: #ef4444; }
+
+        /* Offline Success Modal */
+        .offline-success-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+        }
+
+        .offline-success-modal .modal-content {
+            background: #1f2937;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .offline-icon {
+            font-size: 64px;
+            color: #f59e0b;
+            margin-bottom: 24px;
+        }
+
+        .offline-success-modal h2 {
+            color: #e5e7eb;
+            margin-bottom: 16px;
+        }
+
+        .offline-success-modal p {
+            color: #9ca3af;
+            margin-bottom: 24px;
+        }
+
+        .order-details {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            color: #e5e7eb;
+        }
+
+        .offline-badge {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 14px;
+        }
+
+        .offline-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .offline-info i {
+            color: #3b82f6;
+            margin-right: 8px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+        }
+
+        /* Pending Orders Notification */
+        .pending-orders-notification {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .pending-orders-notification.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .pending-orders-notification i {
+            color: #f59e0b;
+        }
+
+        .pending-orders-notification span {
+            color: #e5e7eb;
+            font-size: 14px;
+        }
+
+        .pending-orders-notification button {
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* Pending Orders Modal */
+        .pending-orders-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+        }
+
+        .pending-orders-modal .modal-content {
+            background: #1f2937;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .pending-orders-modal h2 {
+            color: #e5e7eb;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pending-orders-list {
+            margin-bottom: 24px;
+        }
+
+        .pending-order {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .pending-order .order-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .pending-order .order-number {
+            font-weight: bold;
+            color: #3b82f6;
+        }
+
+        .pending-order .order-time {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .pending-order .order-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sync-status {
+            font-size: 14px;
+            color: #f59e0b;
+        }
+
+        .sync-status i {
+            margin-right: 4px;
+        }
+
+        /* WhatsApp Phone Input Styles */
+        .whatsapp-phone-input {
+            margin-bottom: 20px;
+        }
+
+        .phone-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .phone-input-group select {
+            width: 120px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #e5e7eb;
+        }
+
+        .phone-input-group input {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #e5e7eb;
+        }
+
+        .whatsapp-consent {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #9ca3af;
+            cursor: pointer;
+        }
+
+        .whatsapp-consent input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .whatsapp-consent i {
+            color: #25D366;
+            font-size: 20px;
+        }
+
+        /* Button Styles */
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e5e7eb;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .notification {
+                right: 10px;
+                left: 10px;
+                max-width: calc(100vw - 20px);
+            }
+            
+            .offline-success-modal .modal-content,
+            .pending-orders-modal .modal-content {
+                padding: 24px;
+            }
+            
+            .offline-icon {
+                font-size: 48px;
+            }
+            
+            .modal-actions {
+                flex-direction: column;
+            }
+            
+            .pending-orders-notification {
+                right: 10px;
+                left: 10px;
+                transform: translateY(-100px);
+            }
+            
+            .pending-orders-notification.show {
+                transform: translateY(0);
+            }
+        }
+    </style>
 </body>
 </html>

@@ -1219,41 +1219,261 @@ h4 { font-size: 1.25rem; }
 .gap-2 { gap: 1rem; }
 .gap-3 { gap: 1.5rem; }
 
-.category-tabs {
+/* Consistent Button Styling for All Filters/Categories */
+.category-tabs,
+.filter-controls,
+.wait-time-controls {
     display: flex;
     gap: 10px;
-    margin: 30px 0;
-    overflow-x: auto;
-    padding-bottom: 10px;
-    -webkit-overflow-scrolling: touch;
+    margin: 20px 0;
+    flex-wrap: wrap;
 }
 
-.category-tab {
+.category-tab,
+.filter-btn,
+.wait-time-btn {
     background: transparent;
     border: 2px solid rgba(255, 255, 255, 0.1);
     padding: 10px 20px;
     border-radius: 25px;
     cursor: pointer;
     transition: all 0.3s ease;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 8px;
     color: var(--text-secondary);
     font-weight: 500;
     font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
 }
 
-.category-tab:hover {
+/* Consistent Button Styling for All Filters/Categories */
+.category-tabs,
+.filter-controls,
+.wait-time-controls {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.category-tab,
+.filter-btn,
+.wait-time-btn {
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.category-tab:hover,
+.filter-btn:hover,
+.wait-time-btn:hover {
     background: rgba(255, 255, 255, 0.05);
     border-color: rgba(255, 255, 255, 0.2);
     color: var(--text-primary);
     transform: translateY(-1px);
 }
 
-.category-tab.active {
+.category-tab.active,
+.filter-btn.active,
+.wait-time-btn.active {
     background: rgba(59, 130, 246, 0.15);
     border-color: var(--accent-blue);
     color: var(--accent-blue);
     font-weight: 600;
+}
+
+/* Special styling for wait time buttons */
+.wait-time-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
+}
+
+.wait-time-btn {
+    flex-direction: column;
+    padding: 15px 10px;
+    text-align: center;
+    border-radius: 12px;
+}
+
+.wait-time-btn i {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.wait-time-btn span {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.wait-time-btn small {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Consistent Button Styling for All Filters/Categories */
+.category-tabs,
+.filter-controls,
+.wait-time-controls {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.category-tab,
+.filter-btn,
+.wait-time-btn {
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.category-tab:hover,
+.filter-btn:hover,
+.wait-time-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+}
+
+.category-tab.active,
+.filter-btn.active,
+.wait-time-btn.active {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+    font-weight: 600;
+}
+
+/* Special styling for wait time buttons */
+.wait-time-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
+}
+
+.wait-time-btn {
+    flex-direction: column;
+    padding: 15px 10px;
+    text-align: center;
+    border-radius: 12px;
+}
+
+.wait-time-btn i {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.wait-time-btn span {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.wait-time-btn small {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Consistent Button Styling for All Filters/Categories */
+.category-tabs,
+.filter-controls,
+.wait-time-controls {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.category-tab,
+.filter-btn,
+.wait-time-btn {
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.category-tab:hover,
+.filter-btn:hover,
+.wait-time-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+}
+
+.category-tab.active,
+.filter-btn.active,
+.wait-time-btn.active {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+    font-weight: 600;
+}
+
+/* Special styling for wait time buttons */
+.wait-time-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
+}
+
+.wait-time-btn {
+    flex-direction: column;
+    padding: 15px 10px;
+    text-align: center;
+    border-radius: 12px;
+}
+
+.wait-time-btn i {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.wait-time-btn span {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.wait-time-btn small {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
 }

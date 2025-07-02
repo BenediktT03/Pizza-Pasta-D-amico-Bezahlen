@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="admin.dashboard.title">Admin Dashboard - Pizza&Pasta D'amico</title>
     <link href="css/style.css" rel="stylesheet">
+    <link href="css/admin-style.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="js/multilingual.js"></script>
 </head>
@@ -235,15 +236,14 @@
     <script>
         // Firebase Konfiguration
         const firebaseConfig = {
-  apiKey: "AIzaSyD3OCMvc4Iup58Ao0BiFNuvA0fnJokzYS8",
-  authDomain: "pizzapastadamico.firebaseapp.com",
-  databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "pizzapastadamico",
-  storageBucket: "pizzapastadamico.firebasestorage.app",
-  messagingSenderId: "83240541532",
-  appId: "1:83240541532:web:11e3277850bf89a5b8b599",
-  measurementId: "G-6H2J5K88J7"
-};
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
 
         // Firebase initialisieren
         firebase.initializeApp(firebaseConfig);
@@ -339,19 +339,52 @@
                     return;
                 }
                 
-                container.innerHTML = orders.reverse().map(order => `
-                    <div class="order-preview" onclick="window.location.href='admin-orders.html'">
-                        <div class="order-preview-header">
-                            <span class="order-preview-id">#${order.id.slice(-6)}</span>
-                            <span class="order-preview-time">${new Date(order.timestamp).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' })}</span>
+                container.innerHTML = orders.reverse().map(order => {
+                    const time = new Date(order.timestamp).toLocaleTimeString('de-CH', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    // Build items list
+                    let itemsList = '';
+                    if (order.items && order.items.length > 0) {
+                        itemsList = order.items.map(item => `
+                            <div class="order-item-line">
+                                <span>
+                                    <span class="order-item-quantity">${item.quantity}x</span>
+                                    ${item.name}
+                                </span>
+                            </div>
+                        `).join('');
+                    }
+                    
+                    return `
+                        <div class="order-preview" onclick="window.location.href='admin-orders.html'">
+                            <div class="order-preview-header">
+                                <span class="order-preview-id">#${order.id.slice(-6)}</span>
+                                <span class="order-preview-time">${time}</span>
+                            </div>
+                            <div class="order-preview-customer">
+                                <i class="fas fa-user"></i>
+                                ${order.customerName || 'Gast'}
+                            </div>
+                            ${itemsList ? `
+                                <div class="order-preview-items">
+                                    ${itemsList}
+                                </div>
+                            ` : ''}
+                            ${order.notes ? `
+                                <div class="order-notes">
+                                    <i class="fas fa-comment"></i>
+                                    ${order.notes}
+                                </div>
+                            ` : ''}
+                            <span class="order-preview-status status-${order.status || 'neu'}">
+                                ${getStatusText(order.status || 'neu')}
+                            </span>
                         </div>
-                        <div class="order-preview-info">
-                            <span class="order-preview-customer">${order.customerName || 'Gast'}</span>
-                            <span class="order-preview-total">CHF ${(order.total || 0).toFixed(2)}</span>
-                        </div>
-                        <span class="order-status ${order.status || 'neu'}">${getStatusText(order.status || 'neu')}</span>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             });
         }
 

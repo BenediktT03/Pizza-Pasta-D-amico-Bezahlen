@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="admin.products.title">Produktverwaltung - Pizza&Pasta D'amico</title>
     <link href="css/style.css" rel="stylesheet">
+    <link href="css/admin-style.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="js/multilingual.js"></script>
 </head>
@@ -58,7 +59,6 @@
         <!-- Action Bar -->
         <div class="action-bar">
             <div class="search-box">
-                <i class="fas fa-search"></i>
                 <input type="text" id="searchInput" placeholder="Produkt suchen..." class="form-input" onkeyup="searchProducts()">
             </div>
             <button class="btn btn-primary" onclick="showAddProduct()">
@@ -68,26 +68,32 @@
         </div>
 
         <!-- Category Tabs -->
-        <div class="category-tabs">
-            <button class="category-tab active" onclick="filterByCategory('all')">
-                <i class="fas fa-th"></i>
-                <span data-i18n="admin.products.all">Alle</span>
-            </button>
-            <button class="category-tab" onclick="filterByCategory('pizza')">
-                <i class="fas fa-pizza-slice"></i>
-                <span data-i18n="category.pizza">Pizza</span>
-            </button>
-            <button class="category-tab" onclick="filterByCategory('pasta')">
-                <i class="fas fa-utensils"></i>
-                <span data-i18n="category.pasta">Pasta</span>
-            </button>
-            <button class="category-tab" onclick="filterByCategory('drinks')">
-                <i class="fas fa-glass-martini"></i>
-                <span data-i18n="category.drinks">Getränke</span>
-            </button>
-            <button class="category-tab" onclick="filterByCategory('desserts')">
-                <i class="fas fa-ice-cream"></i>
-                <span data-i18n="category.desserts">Desserts</span>
+        <div class="category-management">
+            <div class="category-tabs">
+                <button class="category-tab active" onclick="filterByCategory('all')">
+                    <i class="fas fa-th"></i>
+                    <span data-i18n="admin.products.all">Alle</span>
+                </button>
+                <button class="category-tab" onclick="filterByCategory('pizza')">
+                    <i class="fas fa-pizza-slice"></i>
+                    <span data-i18n="category.pizza">Pizza</span>
+                </button>
+                <button class="category-tab" onclick="filterByCategory('pasta')">
+                    <i class="fas fa-utensils"></i>
+                    <span data-i18n="category.pasta">Pasta</span>
+                </button>
+                <button class="category-tab" onclick="filterByCategory('drinks')">
+                    <i class="fas fa-glass-martini"></i>
+                    <span data-i18n="category.drinks">Getränke</span>
+                </button>
+                <button class="category-tab" onclick="filterByCategory('desserts')">
+                    <i class="fas fa-ice-cream"></i>
+                    <span data-i18n="category.desserts">Desserts</span>
+                </button>
+            </div>
+            <button class="add-category-btn" onclick="showAddCategory()">
+                <i class="fas fa-plus"></i>
+                <span>Kategorie</span>
             </button>
         </div>
 
@@ -190,6 +196,37 @@
         </div>
     </div>
 
+    <!-- Category Modal -->
+    <div class="modal" id="categoryModal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3 data-i18n="admin.category.title">Neue Kategorie</h3>
+                <button class="modal-close" onclick="closeCategoryModal()">×</button>
+            </div>
+            <form id="categoryForm" onsubmit="saveCategory(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Name</label>
+                        <input type="text" id="categoryName" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Icon/Emoji</label>
+                        <input type="text" id="categoryIcon" class="form-input" placeholder="z.B. 🍕">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeCategoryModal()">
+                        <span data-i18n="admin.cancel">Abbrechen</span>
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        <span data-i18n="admin.save">Speichern</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Notification -->
     <div class="notification" id="notification">
         <div class="notification-content">
@@ -205,16 +242,15 @@
 
     <script>
         // Firebase Konfiguration
-      const firebaseConfig = {
-  apiKey: "AIzaSyD3OCMvc4Iup58Ao0BiFNuvA0fnJokzYS8",
-  authDomain: "pizzapastadamico.firebaseapp.com",
-  databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "pizzapastadamico",
-  storageBucket: "pizzapastadamico.firebasestorage.app",
-  messagingSenderId: "83240541532",
-  appId: "1:83240541532:web:11e3277850bf89a5b8b599",
-  measurementId: "G-6H2J5K88J7"
-};
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
 
         // Firebase initialisieren
         firebase.initializeApp(firebaseConfig);
@@ -313,10 +349,10 @@
                         ${!product.available ? '<span class="unavailable-badge">Nicht verfügbar</span>' : ''}
                     </div>
                     <div class="product-actions">
-                        <button class="btn-icon" onclick="editProduct('${product.id}')" title="Bearbeiten">
+                        <button class="btn-icon edit" onclick="editProduct('${product.id}')" title="Bearbeiten">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn-icon" onclick="toggleAvailability('${product.id}', ${product.available})" title="Verfügbarkeit">
+                        <button class="btn-icon visibility" onclick="toggleAvailability('${product.id}', ${product.available})" title="Verfügbarkeit">
                             <i class="fas fa-${product.available ? 'eye' : 'eye-slash'}"></i>
                         </button>
                         <button class="btn-icon danger" onclick="deleteProduct('${product.id}')" title="Löschen">
@@ -456,6 +492,22 @@
 
         function toggleMobileMenu() {
             document.getElementById('navLinks').classList.toggle('active');
+        }
+
+        function showAddCategory() {
+            document.getElementById('categoryModal').classList.add('active');
+        }
+
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').classList.remove('active');
+            document.getElementById('categoryForm').reset();
+        }
+
+        function saveCategory(event) {
+            event.preventDefault();
+            // Hier würde die Kategorie-Speicherlogik kommen
+            showNotification('Kategorie-Verwaltung noch in Entwicklung', 'info');
+            closeCategoryModal();
         }
 
         function logout() {

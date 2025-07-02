@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pizza&Pasta D'amico - Online Bestellen</title>
+    <title>FlowBite Pro - Online Bestellen</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2563eb">
     <link href="css/style.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="js/multilingual.js"></script>
@@ -31,6 +33,10 @@
                 <i class="fas fa-map-marker-alt"></i>
                 <span data-i18n="header.location">Foodtruck am Marktplatz</span>
             </div>
+            <a href="login.html" class="header-login">
+                <i class="fas fa-user"></i>
+                <span data-i18n="header.login">Anmelden</span>
+            </a>
         </div>
 
         <!-- Content -->
@@ -52,10 +58,6 @@
                 <span class="status-badge" id="closedStatus" style="display: none;">
                     <i class="fas fa-door-closed"></i>
                     <span data-i18n="status.closed">Geschlossen</span>
-                </span>
-                <span class="status-badge">
-                    <i class="fas fa-truck"></i>
-                    <span data-i18n="status.delivery">Nur Abholung</span>
                 </span>
             </div>
 
@@ -97,39 +99,51 @@
                 <!-- Wird dynamisch gefüllt -->
             </div>
 
-            <!-- Cart -->
-            <div class="cart-section" id="cartSection">
-                <h2 class="cart-title">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span data-i18n="cart.title">Warenkorb</span>
-                </h2>
-                
-                <div id="cartEmpty" class="empty-cart">
-                    <i class="fas fa-shopping-basket"></i>
-                    <p data-i18n="cart.empty">Ihr Warenkorb ist leer</p>
-                </div>
-                
-                <div id="cartItems" class="cart-items" style="display: none;">
-                    <!-- Wird dynamisch gefüllt -->
-                </div>
-                
-                <div id="cartTotals" class="cart-totals" style="display: none;">
-                    <div class="cart-total-row">
-                        <span data-i18n="cart.subtotal">Zwischensumme:</span>
-                        <span id="subtotal">CHF 0.00</span>
-                    </div>
-                    <div class="cart-total-row final">
-                        <span data-i18n="cart.total">Gesamtbetrag:</span>
-                        <span id="total">CHF 0.00</span>
-                    </div>
-                </div>
-                
-                <button class="order-btn" id="orderButton" onclick="showCheckout()" disabled>
-                    <i class="fas fa-credit-card"></i>
-                    <span data-i18n="cart.checkout">Zur Kasse</span>
-                </button>
+            <!-- Admin Link -->
+            <div class="footer-admin">
+                <a href="admin.html" class="admin-link">
+                    <i class="fas fa-user-shield"></i>
+                    <span data-i18n="footer.adminLogin">Admin</span>
+                </a>
             </div>
         </div>
+    </div>
+
+    <!-- Floating Cart -->
+    <div class="floating-cart" id="floatingCart" style="display: none;">
+        <h3 class="cart-title">
+            <i class="fas fa-shopping-cart"></i>
+            <span data-i18n="cart.title">Warenkorb</span>
+        </h3>
+        
+        <div id="cartEmpty" class="empty-cart">
+            <i class="fas fa-shopping-basket"></i>
+            <p data-i18n="cart.empty">Ihr Warenkorb ist leer</p>
+        </div>
+        
+        <div id="cartItems" class="cart-items" style="display: none;">
+            <!-- Wird dynamisch gefüllt -->
+        </div>
+        
+        <div id="cartTotals" class="cart-totals" style="display: none;">
+            <div class="cart-total-row">
+                <span data-i18n="cart.subtotal">Zwischensumme:</span>
+                <span id="subtotal">CHF 0.00</span>
+            </div>
+            <div class="cart-total-row final">
+                <span data-i18n="cart.total">Gesamtbetrag:</span>
+                <span id="total">CHF 0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Checkout Button -->
+    <div class="floating-checkout" id="floatingCheckout" style="display: none;">
+        <button class="checkout-btn" onclick="showCheckout()">
+            <i class="fas fa-shopping-bag"></i>
+            <span data-i18n="cart.checkout">Zur Kasse</span>
+            <span class="cart-count" id="checkoutCartCount">0</span>
+        </button>
     </div>
 
     <!-- Checkout Modal -->
@@ -234,15 +248,15 @@
     <script>
         // Firebase Konfiguration
         const firebaseConfig = {
-  apiKey: "AIzaSyD3OCMvc4Iup58Ao0BiFNuvA0fnJokzYS8",
-  authDomain: "pizzapastadamico.firebaseapp.com",
-  databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "pizzapastadamico",
-  storageBucket: "pizzapastadamico.firebasestorage.app",
-  messagingSenderId: "83240541532",
-  appId: "1:83240541532:web:11e3277850bf89a5b8b599",
-  measurementId: "G-6H2J5K88J7"
-};
+            apiKey: "AIzaSyD3OCMvc4Iup58Ao0BiFNuvA0fnJokzYS8",
+            authDomain: "pizzapastadamico.firebaseapp.com",
+            databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pizzapastadamico",
+            storageBucket: "pizzapastadamico.firebasestorage.app",
+            messagingSenderId: "83240541532",
+            appId: "1:83240541532:web:11e3277850bf89a5b8b599",
+            measurementId: "G-6H2J5K88J7"
+        };
 
         // Firebase initialisieren
         firebase.initializeApp(firebaseConfig);
@@ -402,18 +416,26 @@
             const cartItems = document.getElementById('cartItems');
             const cartEmpty = document.getElementById('cartEmpty');
             const cartTotals = document.getElementById('cartTotals');
-            const orderButton = document.getElementById('orderButton');
+            const floatingCart = document.getElementById('floatingCart');
+            const floatingCheckout = document.getElementById('floatingCheckout');
+            const checkoutCount = document.getElementById('checkoutCartCount');
             
             if (cart.length === 0) {
                 cartItems.style.display = 'none';
                 cartTotals.style.display = 'none';
                 cartEmpty.style.display = 'block';
-                orderButton.disabled = true;
+                floatingCart.style.display = 'none';
+                floatingCheckout.style.display = 'none';
             } else {
                 cartEmpty.style.display = 'none';
                 cartItems.style.display = 'block';
                 cartTotals.style.display = 'block';
-                orderButton.disabled = false;
+                floatingCart.style.display = 'block';
+                floatingCheckout.style.display = 'block';
+                
+                // Update cart count
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                checkoutCount.textContent = totalItems;
                 
                 // Display cart items
                 cartItems.innerHTML = cart.map(item => `
@@ -633,6 +655,17 @@
             
             demoProducts.forEach(product => {
                 database.ref('products').push(product);
+            });
+        }
+    </script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.error('Service Worker registration failed:', err));
             });
         }
     </script>

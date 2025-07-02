@@ -209,15 +209,15 @@
 
     <!-- Scripts -->
     <script>
-        // Firebase Configuration
+        // Firebase Configuration - EATECH
         const firebaseConfig = {
-  apiKey: "AIzaSyDFBlgWE81iHnACVwOmaU0jL7FV0l_tRmU",
-  authDomain: "eatech-foodtruck.firebaseapp.com",
-  databaseURL: "https://eatech-foodtruck-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "eatech-foodtruck",
-  storageBucket: "eatech-foodtruck.firebasestorage.app",
-  messagingSenderId: "261222802445",
-  appId: "1:261222802445:web:edde22580422fbced22144",
+            apiKey: "AIzaSyDFBlgWE81iHnACVwOmaU0jL7FV0l_tRmU",
+            authDomain: "eatech-foodtruck.firebaseapp.com",
+            databaseURL: "https://eatech-foodtruck-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "eatech-foodtruck",
+            storageBucket: "eatech-foodtruck.firebasestorage.app",
+            messagingSenderId: "261222802445",
+            appId: "1:261222802445:web:edde22580422fbced22144"
         };
         
         firebase.initializeApp(firebaseConfig);
@@ -273,7 +273,7 @@
         
         // Load menu design
         function loadMenuDesign() {
-            database.ref('menuDesign').once('value', (snapshot) => {
+            database.ref('tenants/demo/menuDesign').once('value', (snapshot) => {
                 menuDesign = snapshot.val();
                 if (menuDesign) {
                     applyMenuDesign();
@@ -337,11 +337,29 @@
             document.getElementById('loadingSpinner').style.display = 'flex';
             
             Promise.all([
-                database.ref('products').once('value'),
-                database.ref('menuDesign').once('value')
+                database.ref('tenants/demo/products').once('value'),
+                database.ref('tenants/demo/menuDesign').once('value')
             ]).then(([productsSnapshot, designSnapshot]) => {
                 const productsData = productsSnapshot.val() || {};
                 const designData = designSnapshot.val();
+                
+                // Wenn keine Produkte, zeige Test-Produkte
+                if (Object.keys(productsData).length === 0) {
+                    productsData['test1'] = {
+                        name: 'Classic Burger',
+                        price: 16.50,
+                        category: 'Burger',
+                        description: 'Saftiger Beef-Patty mit Salat, Tomaten und Haussa',
+                        available: true
+                    };
+                    productsData['test2'] = {
+                        name: 'Pizza Margherita',
+                        price: 18.00,
+                        category: 'Pizza',
+                        description: 'Klassisch mit Tomaten, Mozzarella und Basilikum',
+                        available: true
+                    };
+                }
                 
                 products = Object.entries(productsData).map(([id, product]) => ({
                     id,
@@ -357,6 +375,10 @@
                 }
                 
                 document.getElementById('loadingSpinner').style.display = 'none';
+            }).catch(error => {
+                console.error('Error loading products:', error);
+                document.getElementById('loadingSpinner').style.display = 'none';
+                showToast('Fehler beim Laden der Produkte', 'error');
             });
         }
         
@@ -712,7 +734,7 @@
                 };
                 
                 // Save order to Firebase
-                await database.ref('orders').push(orderData);
+                await database.ref('tenants/demo/orders').push(orderData);
                 
                 // Clear cart
                 cart = [];
@@ -750,7 +772,7 @@
         
         // Load wait time
         function loadWaitTime() {
-            database.ref('settings/estimatedWaitTime').on('value', (snapshot) => {
+            database.ref('tenants/demo/settings/payment/defaultWaitTime').on('value', (snapshot) => {
                 const waitTime = snapshot.val() || 15;
                 document.getElementById('currentWaitTime').textContent = waitTime;
             });

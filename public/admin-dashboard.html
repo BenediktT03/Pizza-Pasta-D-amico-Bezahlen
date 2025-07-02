@@ -321,15 +321,15 @@
 
     <!-- Scripts -->
     <script>
-        // Firebase Configuration
+        // Firebase Configuration - EATECH
         const firebaseConfig = {
-  apiKey: "AIzaSyDFBlgWE81iHnACVwOmaU0jL7FV0l_tRmU",
-  authDomain: "eatech-foodtruck.firebaseapp.com",
-  databaseURL: "https://eatech-foodtruck-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "eatech-foodtruck",
-  storageBucket: "eatech-foodtruck.firebasestorage.app",
-  messagingSenderId: "261222802445",
-  appId: "1:261222802445:web:edde22580422fbced22144",
+            apiKey: "AIzaSyDFBlgWE81iHnACVwOmaU0jL7FV0l_tRmU",
+            authDomain: "eatech-foodtruck.firebaseapp.com",
+            databaseURL: "https://eatech-foodtruck-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "eatech-foodtruck",
+            storageBucket: "eatech-foodtruck.firebasestorage.app",
+            messagingSenderId: "261222802445",
+            appId: "1:261222802445:web:edde22580422fbced22144"
         };
         
         firebase.initializeApp(firebaseConfig);
@@ -375,7 +375,7 @@
             const today = new Date().toISOString().split('T')[0];
             
             // Load today's orders
-            database.ref('orders').orderByChild('date').startAt(today).on('value', (snapshot) => {
+            database.ref('tenants/demo/orders').orderByChild('date').startAt(today).on('value', (snapshot) => {
                 const orders = snapshot.val() || {};
                 const todayOrdersArray = Object.values(orders).filter(order => 
                     order.date && order.date.startsWith(today)
@@ -401,7 +401,7 @@
             });
             
             // Load average wait time
-            database.ref('settings/estimatedWaitTime').on('value', (snapshot) => {
+            database.ref('tenants/demo/settings/payment/defaultWaitTime').on('value', (snapshot) => {
                 const waitTime = snapshot.val() || 15;
                 document.getElementById('avgWaitTime').textContent = waitTime;
             });
@@ -500,7 +500,7 @@
         
         // Load Popular Items
         function loadPopularItems() {
-            database.ref('products').once('value', (snapshot) => {
+            database.ref('tenants/demo/products').once('value', (snapshot) => {
                 const products = snapshot.val() || {};
                 const productsArray = Object.entries(products).map(([id, product]) => ({
                     id,
@@ -625,16 +625,16 @@
         function updateWaitTime() {
             const newTime = prompt('Neue Wartezeit in Minuten:', '15');
             if (newTime && !isNaN(newTime)) {
-                database.ref('settings/estimatedWaitTime').set(parseInt(newTime));
+                database.ref('tenants/demo/settings/payment/defaultWaitTime').set(parseInt(newTime));
                 alert(`Wartezeit auf ${newTime} Minuten aktualisiert`);
             }
         }
         
         // Toggle shop status
         function toggleShop() {
-            database.ref('settings/shopOpen').once('value', (snapshot) => {
+            database.ref('tenants/demo/settings/shopOpen').once('value', (snapshot) => {
                 const isOpen = snapshot.val() !== false;
-                database.ref('settings/shopOpen').set(!isOpen);
+                database.ref('tenants/demo/settings/shopOpen').set(!isOpen);
                 alert(`Shop ist jetzt ${!isOpen ? 'geöffnet' : 'geschlossen'}`);
             });
         }

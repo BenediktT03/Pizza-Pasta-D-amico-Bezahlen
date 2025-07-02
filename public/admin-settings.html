@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eatech - Einstellungen</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin-style.css">
+    <link rel="stylesheet" href="css/settings.css">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <!-- Admin Navigation -->
+    <nav class="admin-nav">
+        <div class="nav-brand">
+            <i class="fas fa-pizza-slice"></i>
+            <span>Eatech Admin</span>
+        </div>
+        <div class="nav-links">
+            <a href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="admin-orders.html"><i class="fas fa-receipt"></i> Bestellungen</a>
+            <a href="admin-products.html"><i class="fas fa-box"></i> Produkte</a>
+            <a href="admin-menu-designer.html"><i class="fas fa-palette"></i> Menu Designer</a>
+            <a href="admin-settings.html" class="active"><i class="fas fa-cog"></i> Einstellungen</a>
+            <a href="admin-cms.html"><i class="fas fa-edit"></i> CMS</a>
+            <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </nav>
+
+    <!-- Settings Container -->
+    <div class="settings-container">
+        <div class="settings-header">
+            <h1><i class="fas fa-cog"></i> System-Einstellungen</h1>
+            <button class="btn-save" onclick="saveAllSettings()">
+                <i class="fas fa-save"></i> Alle Änderungen speichern
+            </button>
+        </div>
+
+        <!-- Settings Tabs -->
+        <div class="settings-tabs">
+            <button class="tab-btn active" onclick="switchTab('business')">
+                <i class="fas fa-store"></i> Geschäftsdaten
+            </button>
+            <button class="tab-btn" onclick="switchTab('payment')">
+                <i class="fas fa-credit-card"></i> Zahlungen
+            </button>
+            <button class="tab-btn" onclick="switchTab('design')">
+                <i class="fas fa-paint-brush"></i> Design
+            </button>
+            <button class="tab-btn" onclick="switchTab('communication')">
+                <i class="fas fa-bell"></i> Kommunikation
+            </button>
+            <button class="tab-btn" onclick="switchTab('features')">
+                <i class="fas fa-puzzle-piece"></i> Features
+            </button>
+            <button class="tab-btn" onclick="switchTab('locations')">
+                <i class="fas fa-map-marker-alt"></i> Standorte
+            </button>
+        </div>
+
+        <!-- Settings Content -->
+        <div class="settings-content">
+            
+            <!-- Business Tab -->
+            <div id="business-tab" class="tab-content active">
+                <h2>Geschäftsinformationen</h2>
+                
+                <div class="settings-section">
+                    <h3>Grunddaten</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Firmenname *</label>
+                            <input type="text" id="businessName" placeholder="Mein Foodtruck">
+                        </div>
+                        <div class="form-group">
+                            <label>Slogan</label>
+                            <input type="text" id="businessSlogan" placeholder="Die besten Burger der Stadt">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Logo</label>
+                        <div class="logo-upload">
+                            <div class="current-logo" id="currentLogo">
+                                <i class="fas fa-image"></i>
+                                <p>Kein Logo hochgeladen</p>
+                            </div>
+                            <div class="upload-actions">
+                                <input type="file" id="logoUpload" accept="image/*" style="display: none;">
+                                <button onclick="document.getElementById('logoUpload').click()" class="btn-secondary">
+                                    <i class="fas fa-upload"></i> Logo hochladen
+                                </button>
+                                <small>Empfohlen: 500x500px, PNG oder JPG</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" id="businessEmail" placeholder="info@mein-foodtruck.ch">
+                        </div>
+                        <div class="form-group">
+                            <label>Telefon *</label>
+                            <input type="tel" id="businessPhone" placeholder="+41 79 123 45 67">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Öffnungszeiten</h3>
+                    <div class="opening-hours">
+                        <div class="day-schedule">
+                            <label>
+                                <input type="checkbox" id="monday-open" checked>
+                                <span>Montag</span>
+                            </label>
+                            <input type="time" id="monday-from" value="11:00">
+                            <span>bis</span>
+                            <input type="time" id="monday-to" value="20:00">
+                        </div>
+                        <div class="day-schedule">
+                            <label>
+                                <input type="checkbox" id="tuesday-open" checked>
+                                <span>Dienstag</span>
+                            </label>
+                            <input type="time" id="tuesday-from" value="11:00">
+                            <span>bis</span>
+                            <input type="time" id="tuesday-to" value="20:00">
+                        </div>
+                        <div class="day-schedule">
+                            <label>
+                                <input type="checkbox" id="wednesday-open" checked>
+                                <span>Mittwoch</span>
+                            </label>
+                            <input type="time" id="wednesday-from" value="11:00">
+                            <span>bis</span>
+                            <input type="time" id="wednesday-to" value="20:00">
+                        </div>
+                        <div class="day-schedule">
+                            <label>
+                                <input type="checkbox" id="thursday-open" checked>
+                                <span>Donnerstag</span>
+                            </label>
+                            <input type="time" id="thursday-from" value="11:00">
+                            <span>bis</span>
+                            <input type="time" id="thursday-to" value="20:00">
+                        </div>
+                        <div class="day-schedule">
+                            <label>
+                                <input type="checkbox" id="friday-open" checked>
+                                <span>Freitag</span>
+                            </label>
+                            <input type="time" id="friday-from" value="11:00">
+                            <span>bis</span>
+                            <input type="time" id="friday-to" value="22:00">
+                        </div>
+                        <div class="day-schedule">
+                            <label>
+                                <input type="checkbox" id="saturday-open" checked>
+                                <span>Samstag</span>
+                            </label>
+                            <input type="time" id="saturday-from" value="11:00">
+                            <span>bis</span>
+                            <input type="time" id="saturday-to" value="22:00">
+                        </div>
+                        <div class="day-schedule">
+                            <label>
+                                <input type="checkbox" id="sunday-open">
+                                <span>Sonntag</span>
+                            </label>
+                            <input type="time" id="sunday-from" value="11:00" disabled>
+                            <span>bis</span>
+                            <input type="time" id="sunday-to" value="20:00" disabled>
+                        </div>
+                    </div>
+                    
+                    <div class="pause-mode-toggle">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pauseMode">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">Pause-Modus aktivieren (vorübergehend geschlossen)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Social Media</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label><i class="fab fa-facebook"></i> Facebook</label>
+                            <input type="url" id="socialFacebook" placeholder="https://facebook.com/mein-foodtruck">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fab fa-instagram"></i> Instagram</label>
+                            <input type="url" id="socialInstagram" placeholder="https://instagram.com/mein-foodtruck">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fab fa-tiktok"></i> TikTok</label>
+                            <input type="url" id="socialTiktok" placeholder="https://tiktok.com/@mein-foodtruck">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Tab -->
+            <div id="payment-tab" class="tab-content">
+                <h2>Zahlungseinstellungen</h2>
+                
+                <div class="settings-section">
+                    <h3>Stripe Integration</h3>
+                    <div class="payment-provider">
+                        <div class="provider-header">
+                            <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/stripe.svg" alt="Stripe" class="provider-logo">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="stripeEnabled">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Aktiviert</span>
+                            </label>
+                        </div>
+                        <div class="provider-settings">
+                            <div class="form-group">
+                                <label>Publishable Key</label>
+                                <input type="text" id="stripePublishableKey" placeholder="pk_live_...">
+                                <small>Öffentlicher Schlüssel für Frontend</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Secret Key</label>
+                                <input type="password" id="stripeSecretKey" placeholder="sk_live_...">
+                                <small>Geheimer Schlüssel - wird verschlüsselt gespeichert</small>
+                            </div>
+                            <a href="https://dashboard.stripe.com/apikeys" target="_blank" class="help-link">
+                                <i class="fas fa-external-link-alt"></i> Stripe Dashboard öffnen
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>TWINT Integration</h3>
+                    <div class="payment-provider">
+                        <div class="provider-header">
+                            <img src="https://www.twint.ch/content/uploads/2019/04/twint-logo.svg" alt="TWINT" class="provider-logo">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="twintEnabled">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Aktiviert</span>
+                            </label>
+                        </div>
+                        <div class="provider-settings">
+                            <div class="form-group">
+                                <label>Merchant ID</label>
+                                <input type="text" id="twintMerchantId" placeholder="Ihre TWINT Merchant ID">
+                            </div>
+                            <div class="form-group">
+                                <label>Store ID</label>
+                                <input type="text" id="twintStoreId" placeholder="Ihre TWINT Store ID">
+                            </div>
+                            <div class="form-group">
+                                <label>Terminal ID</label>
+                                <input type="text" id="twintTerminalId" placeholder="Ihre TWINT Terminal ID">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Bestelleinstellungen</h3>
+                    <div class="form-group">
+                        <label>Mindestbestellwert (CHF)</label>
+                        <input type="number" id="minOrderAmount" min="0" step="0.5" value="15">
+                        <small>0 = Kein Mindestbestellwert</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Standardwartezeit (Minuten)</label>
+                        <input type="number" id="defaultWaitTime" min="5" max="120" value="15">
+                        <small>Zeit pro Bestellung - wird kumulativ berechnet</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Design Tab -->
+            <div id="design-tab" class="tab-content">
+                <h2>Design & Aussehen</h2>
+                
+                <div class="settings-section">
+                    <h3>Theme auswählen</h3>
+                    <div class="theme-selector">
+                        <div class="theme-option active" onclick="selectTheme('dark-elegant')">
+                            <div class="theme-preview dark-elegant">
+                                <div class="preview-header"></div>
+                                <div class="preview-content">
+                                    <div class="preview-card"></div>
+                                    <div class="preview-card"></div>
+                                </div>
+                            </div>
+                            <h4>Dark Elegant</h4>
+                            <p>Professionell & Modern</p>
+                        </div>
+                        
+                        <div class="theme-option" onclick="selectTheme('bright-fresh')">
+                            <div class="theme-preview bright-fresh">
+                                <div class="preview-header"></div>
+                                <div class="preview-content">
+                                    <div class="preview-card"></div>
+                                    <div class="preview-card"></div>
+                                </div>
+                            </div>
+                            <h4>Bright Fresh</h4>
+                            <p>Hell & Einladend</p>
+                        </div>
+                        
+                        <div class="theme-option" onclick="selectTheme('colorful-fun')">
+                            <div class="theme-preview colorful-fun">
+                                <div class="preview-header"></div>
+                                <div class="preview-content">
+                                    <div class="preview-card"></div>
+                                    <div class="preview-card"></div>
+                                </div>
+                            </div>
+                            <h4>Colorful Fun</h4>
+                            <p>Bunt & Verspielt</p>
+                        </div>
+                        
+                        <div class="theme-option" onclick="selectTheme('minimal-clean')">
+                            <div class="theme-preview minimal-clean">
+                                <div class="preview-header"></div>
+                                <div class="preview-content">
+                                    <div class="preview-card"></div>
+                                    <div class="preview-card"></div>
+                                </div>
+                            </div>
+                            <h4>Minimal Clean</h4>
+                            <p>Reduziert & Klar</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Farbanpassungen</h3>
+                    <div class="color-settings">
+                        <div class="color-group">
+                            <label>Primärfarbe</label>
+                            <div class="color-input-wrapper">
+                                <input type="color" id="primaryColor" value="#ff6b6b">
+                                <input type="text" id="primaryColorHex" value="#ff6b6b" placeholder="#ff6b6b">
+                            </div>
+                        </div>
+                        <div class="color-group">
+                            <label>Sekundärfarbe</label>
+                            <div class="color-input-wrapper">
+                                <input type="color" id="secondaryColor" value="#4ecdc4">
+                                <input type="text" id="secondaryColorHex" value="#4ecdc4" placeholder="#4ecdc4">
+                            </div>
+                        </div>
+                        <div class="color-group">
+                            <label>Hintergrundfarbe</label>
+                            <div class="color-input-wrapper">
+                                <input type="color" id="backgroundColor" value="#1a1a1a">
+                                <input type="text" id="backgroundColorHex" value="#1a1a1a" placeholder="#1a1a1a">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Schriftarten</h3>
+                    <div class="form-group">
+                        <label>Hauptschriftart</label>
+                        <select id="primaryFont">
+                            <option value="Inter">Inter (Modern)</option>
+                            <option value="Roboto">Roboto (Google)</option>
+                            <option value="Open Sans">Open Sans (Klassisch)</option>
+                            <option value="Playfair Display">Playfair Display (Elegant)</option>
+                            <option value="Montserrat">Montserrat (Stylisch)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Admin Theme</label>
+                        <select id="adminTheme">
+                            <option value="dark">Dark Mode</option>
+                            <option value="light">Light Mode</option>
+                            <option value="auto">Automatisch (System)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Communication Tab -->
+            <div id="communication-tab" class="tab-content">
+                <h2>Kommunikation & Benachrichtigungen</h2>
+                
+                <div class="settings-section">
+                    <h3>WhatsApp Business API</h3>
+                    <div class="form-group">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="whatsappEnabled">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">WhatsApp-Benachrichtigungen aktivieren</span>
+                        </label>
+                    </div>
+                    <div class="whatsapp-settings">
+                        <div class="form-group">
+                            <label>Business Telefonnummer</label>
+                            <input type="tel" id="whatsappNumber" placeholder="+41 79 123 45 67">
+                        </div>
+                        <div class="form-group">
+                            <label>API Token</label>
+                            <input type="password" id="whatsappToken" placeholder="Ihr WhatsApp Business API Token">
+                        </div>
+                        <a href="https://business.whatsapp.com/" target="_blank" class="help-link">
+                            <i class="fas fa-external-link-alt"></i> WhatsApp Business einrichten
+                        </a>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>SMS Integration</h3>
+                    <div class="form-group">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="smsEnabled">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">SMS-Benachrichtigungen aktivieren</span>
+                        </label>
+                    </div>
+                    <div class="sms-settings">
+                        <div class="form-group">
+                            <label>SMS Provider</label>
+                            <select id="smsProvider">
+                                <option value="twilio">Twilio</option>
+                                <option value="nexmo">Nexmo/Vonage</option>
+                                <option value="clicksend">ClickSend</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Account SID / API Key</label>
+                            <input type="text" id="smsApiKey" placeholder="Ihr API Key">
+                        </div>
+                        <div class="form-group">
+                            <label>Auth Token / Secret</label>
+                            <input type="password" id="smsApiSecret" placeholder="Ihr API Secret">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Email-Einstellungen</h3>
+                    <div class="form-group">
+                        <label>Absender-Email</label>
+                        <input type="email" id="emailFrom" placeholder="bestellungen@mein-foodtruck.ch">
+                    </div>
+                    <div class="form-group">
+                        <label>Antwort-Email</label>
+                        <input type="email" id="emailReplyTo" placeholder="info@mein-foodtruck.ch">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Tab -->
+            <div id="features-tab" class="tab-content">
+                <h2>Zusätzliche Features</h2>
+                
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <i class="fas fa-microphone"></i>
+                            <h3>Voice Commands</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="voiceEnabled" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <p>Sprachsteuerung mit "Eatech" Wake Word für die Küche</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <i class="fas fa-cloud-sun"></i>
+                            <h3>Wetter-Integration</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="weatherEnabled">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <p>Automatische Wartezeit-Anpassung basierend auf Wetter</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <i class="fas fa-wifi"></i>
+                            <h3>Offline-Modus</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="offlineEnabled" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <p>Bestellungen auch ohne Internet annehmen</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <i class="fas fa-robot"></i>
+                            <h3>AI Bildersuche</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="aiImagesEnabled" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <p>Automatische Bildersuche für neue Produkte</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <i class="fas fa-qrcode"></i>
+                            <h3>QR-Code Tischbestellung</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="qrTableEnabled">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <p>QR-Codes für Tische mit automatischer Zuordnung</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Analytics Dashboard</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="analyticsEnabled" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <p>Detaillierte Verkaufsstatistiken und Berichte</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Locations Tab -->
+            <div id="locations-tab" class="tab-content">
+                <h2>Standorte & Tour-Planung</h2>
+                
+                <div class="settings-section">
+                    <div class="section-header">
+                        <h3>Aktuelle Standorte</h3>
+                        <button class="btn-primary" onclick="addNewLocation()">
+                            <i class="fas fa-plus"></i> Neuer Standort
+                        </button>
+                    </div>
+                    
+                    <div id="locationsList" class="locations-list">
+                        <!-- Locations werden hier dynamisch geladen -->
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Tour-Kalender</h3>
+                    <div class="calendar-widget" id="tourCalendar">
+                        <!-- Kalender wird hier geladen -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location Modal -->
+    <div id="locationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Standort bearbeiten</h2>
+                <button onclick="closeLocationModal()" class="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Standortname *</label>
+                    <input type="text" id="locationName" placeholder="z.B. Hauptbahnhof">
+                </div>
+                <div class="form-group">
+                    <label>Adresse *</label>
+                    <input type="text" id="locationAddress" placeholder="Bahnhofplatz 1, 8001 Zürich">
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Wochentag</label>
+                        <select id="locationDay">
+                            <option value="monday">Montag</option>
+                            <option value="tuesday">Dienstag</option>
+                            <option value="wednesday">Mittwoch</option>
+                            <option value="thursday">Donnerstag</option>
+                            <option value="friday">Freitag</option>
+                            <option value="saturday">Samstag</option>
+                            <option value="sunday">Sonntag</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Zeit von</label>
+                        <input type="time" id="locationTimeFrom" value="11:00">
+                    </div>
+                    <div class="form-group">
+                        <label>Zeit bis</label>
+                        <input type="time" id="locationTimeTo" value="20:00">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Zusatzinfo</label>
+                    <textarea id="locationInfo" rows="3" placeholder="z.B. Beim Brunnen, gegenüber Coop"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeLocationModal()" class="btn-secondary">Abbrechen</button>
+                <button onclick="saveLocation()" class="btn-primary">Speichern</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+  apiKey: "AIzaSyDFBlgWE81iHnACVwOmaU0jL7FV0l_tRmU",
+  authDomain: "eatech-foodtruck.firebaseapp.com",
+  databaseURL: "https://eatech-foodtruck-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "eatech-foodtruck",
+  storageBucket: "eatech-foodtruck.firebasestorage.app",
+  messagingSenderId: "261222802445",
+  appId: "1:261222802445:web:edde22580422fbced22144",
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const storage = firebase.storage();
+        const auth = firebase.auth();
+    </script>
+    <script src="js/settings.js"></script>
+</body>
+</html>

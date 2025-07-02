@@ -1,711 +1,588 @@
-// ============================================================================
-// EATECH - MENU DESIGNER
-// Version: 1.0.0
-// Description: Drag & Drop Speisekarten-Designer mit Live-Preview
-// Features: Kategorien, Produkte, Preise, Sichtbarkeit, Sortierung
-// ============================================================================
+// Menu Designer JavaScript
+let currentMenuDesign = {
+    categories: [],
+    styling: {
+        primaryColor: '#ff6b6b',
+        bgColor: '#1a1a1a',
+        textColor: '#ffffff',
+        columns: 2,
+        cardStyle: 'modern',
+        fontFamily: 'Inter',
+        animations: true,
+        hoverEffects: true,
+        shadows: true,
+        showPrices: true,
+        showImages: true,
+        showDescriptions: true
+    }
+};
 
-class MenuDesigner {
-    constructor() {
-        this.products = [];
-        this.categories = [];
-        this.draggedItem = null;
-        this.hasChanges = false;
-        this.currentView = 'grid'; // grid or list
-        
-        // Auto-save timer
-        this.autoSaveInterval = null;
-        this.autoSaveDelay = 30000; // 30 seconds
-        
-        this.init();
-    }
-    
-    // Initialize
-    init() {
-        this.loadProducts();
-        this.loadCategories();
-        this.setupEventListeners();
-        this.startAutoSave();
-        
-        // Show notification
-        this.showNotification('Speisekarten-Designer geladen', 'success');
-    }
-    
-    // Load products from Firebase
-    async loadProducts() {
-        firebase.database().ref('products').on('value', snapshot => {
-            const data = snapshot.val() || {};
-            this.products = Object.entries(data).map(([id, product]) => ({
-                id,
-                ...product,
-                visible: product.visible !== false,
-                position: product.position || 999
-            }));
-            
-            // Sort by position
-            this.products.sort((a, b) => a.position - b.position);
-            
-            this.renderProducts();
-            this.updateStats();
-        });
-    }
-    
-    // Load categories
-    async loadCategories() {
-        firebase.database().ref('categories').on('value', snapshot => {
-            const data = snapshot.val() || {};
-            this.categories = Object.entries(data).map(([id, category]) => ({
-                id,
-                ...category,
-                position: category.position || 999
-            }));
-            
-            // Sort by position
-            this.categories.sort((a, b) => a.position - b.position);
-            
-            // If no categories, create defaults
-            if (this.categories.length === 0) {
-                this.createDefaultCategories();
-            }
-            
-            this.renderCategories();
-        });
-    }
-    
-    // Create default categories
-    async createDefaultCategories() {
-        const defaults = [
-            { name: 'Pizza', emoji: '🍕', position: 1 },
-            { name: 'Pasta', emoji: '🍝', position: 2 },
-            { name: 'Salate', emoji: '🥗', position: 3 },
-            { name: 'Desserts', emoji: '🍰', position: 4 },
-            { name: 'Getränke', emoji: '🥤', position: 5 }
-        ];
-        
-        for (const category of defaults) {
-            await firebase.database().ref('categories').push(category);
+let availableProducts = [];
+let sortableInstances = [];
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    checkAuth();
+    loadProducts();
+    loadCurrentDesign();
+    initializeStyleControls();
+    setupEventListeners();
+});
+
+// Check authentication
+function checkAuth() {
+    auth.onAuthStateChanged(user => {
+        if (!user) {
+            window.location.href = 'login.html';
         }
-    }
-    
-    // Setup event listeners
-    setupEventListeners() {
-        // View toggle
-        document.querySelectorAll('[data-view]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                this.currentView = e.target.dataset.view;
-                this.renderProducts();
-                
-                // Update active state
-                document.querySelectorAll('[data-view]').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-            });
-        });
+    });
+}
+
+// Load all products from database
+function loadProducts() {
+    database.ref('products').on('value', (snapshot) => {
+        availableProducts = [];
+        const data = snapshot.val();
         
-        // Search
-        const searchInput = document.getElementById('productSearch');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                this.filterProducts(e.target.value);
-            });
-        }
-        
-        // Add product button
-        const addBtn = document.getElementById('addProductBtn');
-        if (addBtn) {
-            addBtn.addEventListener('click', () => this.showProductModal());
-        }
-        
-        // Save changes button
-        const saveBtn = document.getElementById('saveChangesBtn');
-        if (saveBtn) {
-            saveBtn.addEventListener('click', () => this.saveAllChanges());
-        }
-        
-        // Category filter
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('category-filter')) {
-                this.filterByCategory(e.target.dataset.category);
-                
-                // Update active state
-                document.querySelectorAll('.category-filter').forEach(btn => {
-                    btn.classList.remove('active');
+        if (data) {
+            Object.entries(data).forEach(([id, product]) => {
+                availableProducts.push({
+                    id: id,
+                    ...product
                 });
-                e.target.classList.add('active');
-            }
-        });
-    }
-    
-    // Render products
-    renderProducts() {
-        const container = document.getElementById('productsContainer');
-        if (!container) return;
-        
-        container.innerHTML = '';
-        container.className = `products-container ${this.currentView}-view`;
-        
-        // Group by category
-        const grouped = this.groupByCategory();
-        
-        Object.entries(grouped).forEach(([category, products]) => {
-            const section = document.createElement('div');
-            section.className = 'category-section';
-            section.dataset.category = category;
-            
-            // Category header
-            const header = document.createElement('div');
-            header.className = 'category-header';
-            header.innerHTML = `
-                <h3>${this.getCategoryEmoji(category)} ${category}</h3>
-                <span class="product-count">${products.length} Produkte</span>
-            `;
-            section.appendChild(header);
-            
-            // Products grid/list
-            const productsContainer = document.createElement('div');
-            productsContainer.className = `products-${this.currentView}`;
-            productsContainer.dataset.category = category;
-            
-            products.forEach((product, index) => {
-                const productEl = this.createProductElement(product, index);
-                productsContainer.appendChild(productEl);
             });
-            
-            section.appendChild(productsContainer);
-            container.appendChild(section);
-        });
-        
-        // Make sortable
-        this.makeSortable();
-    }
-    
-    // Create product element
-    createProductElement(product, index) {
-        const div = document.createElement('div');
-        div.className = `product-item ${!product.visible ? 'hidden' : ''}`;
-        div.dataset.productId = product.id;
-        div.dataset.position = index;
-        div.draggable = true;
-        
-        if (this.currentView === 'grid') {
-            div.innerHTML = `
-                <div class="drag-handle">
-                    <i class="fas fa-grip-vertical"></i>
-                </div>
-                <div class="product-emoji">${product.emoji || '🍕'}</div>
-                <h4 class="product-name">${product.name}</h4>
-                <p class="product-price">CHF ${product.price.toFixed(2)}</p>
-                <div class="product-actions">
-                    <button class="btn-icon" onclick="menuDesigner.toggleVisibility('${product.id}')" title="${product.visible ? 'Ausblenden' : 'Einblenden'}">
-                        <i class="fas fa-eye${!product.visible ? '-slash' : ''}"></i>
-                    </button>
-                    <button class="btn-icon" onclick="menuDesigner.editProduct('${product.id}')" title="Bearbeiten">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn-icon danger" onclick="menuDesigner.deleteProduct('${product.id}')" title="Löschen">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `;
-        } else {
-            div.innerHTML = `
-                <div class="drag-handle">
-                    <i class="fas fa-grip-vertical"></i>
-                </div>
-                <div class="product-info">
-                    <div class="product-main">
-                        <span class="product-emoji">${product.emoji || '🍕'}</span>
-                        <h4 class="product-name">${product.name}</h4>
-                        <p class="product-description">${product.description || 'Keine Beschreibung'}</p>
-                    </div>
-                    <div class="product-meta">
-                        <span class="product-price">CHF ${product.price.toFixed(2)}</span>
-                        <span class="product-category">${product.category}</span>
-                    </div>
-                </div>
-                <div class="product-actions">
-                    <button class="btn-icon" onclick="menuDesigner.toggleVisibility('${product.id}')" title="${product.visible ? 'Ausblenden' : 'Einblenden'}">
-                        <i class="fas fa-eye${!product.visible ? '-slash' : ''}"></i>
-                    </button>
-                    <button class="btn-icon" onclick="menuDesigner.editProduct('${product.id}')" title="Bearbeiten">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn-icon danger" onclick="menuDesigner.deleteProduct('${product.id}')" title="Löschen">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `;
         }
         
-        // Drag events
-        div.addEventListener('dragstart', (e) => this.handleDragStart(e));
-        div.addEventListener('dragover', (e) => this.handleDragOver(e));
-        div.addEventListener('drop', (e) => this.handleDrop(e));
-        div.addEventListener('dragend', (e) => this.handleDragEnd(e));
-        
-        return div;
-    }
+        renderAvailableProducts();
+    });
+}
+
+// Render available products in sidebar
+function renderAvailableProducts() {
+    const container = document.getElementById('availableProducts');
+    const searchTerm = document.getElementById('productSearch').value.toLowerCase();
     
-    // Make sortable with drag & drop
-    makeSortable() {
-        // Already handled in createProductElement
-    }
+    const filteredProducts = availableProducts.filter(product => 
+        product.name.toLowerCase().includes(searchTerm) ||
+        (product.description && product.description.toLowerCase().includes(searchTerm))
+    );
     
-    // Drag & Drop handlers
-    handleDragStart(e) {
-        this.draggedItem = e.target;
-        e.target.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/html', e.target.innerHTML);
-    }
-    
-    handleDragOver(e) {
-        if (e.preventDefault) {
-            e.preventDefault();
-        }
-        
-        e.dataTransfer.dropEffect = 'move';
-        
-        const target = e.target.closest('.product-item');
-        if (target && target !== this.draggedItem) {
-            const rect = target.getBoundingClientRect();
-            const midpoint = rect.y + rect.height / 2;
-            
-            if (e.clientY < midpoint) {
-                target.classList.add('drag-over-top');
-                target.classList.remove('drag-over-bottom');
-            } else {
-                target.classList.add('drag-over-bottom');
-                target.classList.remove('drag-over-top');
-            }
-        }
-        
-        return false;
-    }
-    
-    handleDrop(e) {
-        if (e.stopPropagation) {
-            e.stopPropagation();
-        }
-        
-        const target = e.target.closest('.product-item');
-        if (target && this.draggedItem !== target) {
-            const parent = target.parentNode;
-            const allItems = [...parent.querySelectorAll('.product-item')];
-            const draggedIndex = allItems.indexOf(this.draggedItem);
-            const targetIndex = allItems.indexOf(target);
-            
-            if (draggedIndex < targetIndex) {
-                parent.insertBefore(this.draggedItem, target.nextSibling);
-            } else {
-                parent.insertBefore(this.draggedItem, target);
-            }
-            
-            this.updatePositions();
-            this.hasChanges = true;
-            this.updateSaveButton();
-        }
-        
-        return false;
-    }
-    
-    handleDragEnd(e) {
-        e.target.classList.remove('dragging');
-        
-        document.querySelectorAll('.product-item').forEach(item => {
-            item.classList.remove('drag-over-top', 'drag-over-bottom');
-        });
-    }
-    
-    // Update positions after drag
-    updatePositions() {
-        const containers = document.querySelectorAll('.products-grid, .products-list');
-        
-        containers.forEach(container => {
-            const items = container.querySelectorAll('.product-item');
-            items.forEach((item, index) => {
-                const productId = item.dataset.productId;
-                const product = this.products.find(p => p.id === productId);
-                if (product) {
-                    product.position = index;
-                }
-            });
-        });
-    }
-    
-    // Toggle product visibility
-    toggleVisibility(productId) {
-        const product = this.products.find(p => p.id === productId);
-        if (product) {
-            product.visible = !product.visible;
-            this.hasChanges = true;
-            this.updateSaveButton();
-            
-            // Update UI
-            const element = document.querySelector(`[data-product-id="${productId}"]`);
-            if (element) {
-                element.classList.toggle('hidden');
-                const icon = element.querySelector('.fa-eye, .fa-eye-slash');
-                if (icon) {
-                    icon.className = product.visible ? 'fas fa-eye' : 'fas fa-eye-slash';
-                }
-            }
-        }
-    }
-    
-    // Edit product
-    editProduct(productId) {
-        const product = this.products.find(p => p.id === productId);
-        if (product) {
-            this.showProductModal(product);
-        }
-    }
-    
-    // Delete product
-    async deleteProduct(productId) {
-        if (!confirm('Produkt wirklich löschen?')) return;
-        
-        try {
-            await firebase.database().ref(`products/${productId}`).remove();
-            this.showNotification('Produkt gelöscht', 'success');
-        } catch (error) {
-            console.error('Delete error:', error);
-            this.showNotification('Fehler beim Löschen', 'error');
-        }
-    }
-    
-    // Show product modal
-    showProductModal(product = null) {
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.innerHTML = `
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>${product ? 'Produkt bearbeiten' : 'Neues Produkt'}</h2>
-                    <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
-                </div>
-                
-                <form id="productForm" onsubmit="menuDesigner.saveProduct(event, ${product ? `'${product.id}'` : null})">
-                    <div class="form-group">
-                        <label>Name *</label>
-                        <input type="text" name="name" value="${product?.name || ''}" required>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Kategorie *</label>
-                            <select name="category" required>
-                                ${this.categories.map(cat => `
-                                    <option value="${cat.name}" ${product?.category === cat.name ? 'selected' : ''}>
-                                        ${cat.emoji} ${cat.name}
-                                    </option>
-                                `).join('')}
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Preis (CHF) *</label>
-                            <input type="number" name="price" value="${product?.price || ''}" step="0.50" min="0" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Beschreibung</label>
-                        <textarea name="description" rows="3">${product?.description || ''}</textarea>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Emoji</label>
-                            <input type="text" name="emoji" value="${product?.emoji || '🍕'}" maxlength="2">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" name="visible" ${product?.visible !== false ? 'checked' : ''}>
-                                Sichtbar im Menü
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Allergene</label>
-                        <input type="text" name="allergens" value="${product?.allergens || ''}" placeholder="z.B. Gluten, Laktose">
-                    </div>
-                    
-                    <div class="modal-actions">
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-save"></i> Speichern
-                        </button>
-                        <button type="button" class="btn-secondary" onclick="this.closest('.modal').remove()">
-                            Abbrechen
-                        </button>
-                    </div>
-                </form>
+    container.innerHTML = filteredProducts.map(product => `
+        <div class="product-item" draggable="true" data-product-id="${product.id}">
+            ${product.image ? `<img src="${product.image}" alt="${product.name}">` : '<div class="no-image"><i class="fas fa-image"></i></div>'}
+            <div class="product-info">
+                <h4>${product.name}</h4>
+                <span class="price">CHF ${product.price.toFixed(2)}</span>
             </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        // Focus first input
-        modal.querySelector('input[name="name"]').focus();
-    }
+        </div>
+    `).join('');
     
-    // Save product
-    async saveProduct(event, productId = null) {
-        event.preventDefault();
-        
-        const form = event.target;
-        const formData = new FormData(form);
-        
-        const productData = {
-            name: formData.get('name'),
-            category: formData.get('category'),
-            price: parseFloat(formData.get('price')),
-            description: formData.get('description'),
-            emoji: formData.get('emoji') || '🍕',
-            visible: formData.get('visible') === 'on',
-            allergens: formData.get('allergens'),
-            updatedAt: firebase.database.ServerValue.TIMESTAMP
-        };
-        
-        try {
-            if (productId) {
-                // Update existing
-                await firebase.database().ref(`products/${productId}`).update(productData);
-                this.showNotification('Produkt aktualisiert', 'success');
-            } else {
-                // Create new
-                productData.position = this.products.length;
-                productData.createdAt = firebase.database.ServerValue.TIMESTAMP;
-                await firebase.database().ref('products').push(productData);
-                this.showNotification('Produkt erstellt', 'success');
-            }
-            
-            // Close modal
-            form.closest('.modal').remove();
-        } catch (error) {
-            console.error('Save error:', error);
-            this.showNotification('Fehler beim Speichern', 'error');
-        }
-    }
-    
-    // Save all changes
-    async saveAllChanges() {
-        if (!this.hasChanges) {
-            this.showNotification('Keine Änderungen zum Speichern', 'info');
-            return;
-        }
-        
-        try {
-            // Update all product positions and visibility
-            const updates = {};
-            
-            this.products.forEach(product => {
-                updates[`products/${product.id}/position`] = product.position;
-                updates[`products/${product.id}/visible`] = product.visible;
-            });
-            
-            await firebase.database().ref().update(updates);
-            
-            this.hasChanges = false;
-            this.updateSaveButton();
-            this.showNotification('Alle Änderungen gespeichert', 'success');
-        } catch (error) {
-            console.error('Save error:', error);
-            this.showNotification('Fehler beim Speichern', 'error');
-        }
-    }
-    
-    // Filter products
-    filterProducts(searchTerm) {
-        const term = searchTerm.toLowerCase();
-        
-        document.querySelectorAll('.product-item').forEach(item => {
-            const name = item.querySelector('.product-name').textContent.toLowerCase();
-            const visible = name.includes(term);
-            item.style.display = visible ? '' : 'none';
-        });
-        
-        // Hide empty categories
-        document.querySelectorAll('.category-section').forEach(section => {
-            const hasVisible = section.querySelectorAll('.product-item:not([style*="display: none"])').length > 0;
-            section.style.display = hasVisible ? '' : 'none';
-        });
-    }
-    
-    // Filter by category
-    filterByCategory(category) {
-        if (category === 'all') {
-            document.querySelectorAll('.category-section').forEach(section => {
-                section.style.display = '';
-            });
+    // Add drag event listeners
+    container.querySelectorAll('.product-item').forEach(item => {
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragend', handleDragEnd);
+    });
+}
+
+// Load current menu design from database
+function loadCurrentDesign() {
+    database.ref('menuDesign').once('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            currentMenuDesign = data;
+            applyDesignSettings();
+            renderCategories();
         } else {
-            document.querySelectorAll('.category-section').forEach(section => {
-                section.style.display = section.dataset.category === category ? '' : 'none';
-            });
+            // Create default categories if none exist
+            createDefaultCategories();
         }
+    });
+}
+
+// Create default categories
+function createDefaultCategories() {
+    currentMenuDesign.categories = [
+        {
+            id: 'cat_1',
+            name: 'Vorspeisen',
+            icon: 'fa-utensils',
+            products: [],
+            order: 0
+        },
+        {
+            id: 'cat_2',
+            name: 'Hauptgerichte',
+            icon: 'fa-pizza-slice',
+            products: [],
+            order: 1
+        },
+        {
+            id: 'cat_3',
+            name: 'Desserts',
+            icon: 'fa-ice-cream',
+            products: [],
+            order: 2
+        },
+        {
+            id: 'cat_4',
+            name: 'Getränke',
+            icon: 'fa-glass-water',
+            products: [],
+            order: 3
+        }
+    ];
+    renderCategories();
+}
+
+// Apply design settings to controls
+function applyDesignSettings() {
+    const { styling } = currentMenuDesign;
+    
+    document.getElementById('primaryColor').value = styling.primaryColor;
+    document.getElementById('bgColor').value = styling.bgColor;
+    document.getElementById('textColor').value = styling.textColor;
+    document.getElementById('columnsPerCategory').value = styling.columns;
+    document.getElementById('cardStyle').value = styling.cardStyle;
+    document.getElementById('fontFamily').value = styling.fontFamily;
+    document.getElementById('enableAnimations').checked = styling.animations;
+    document.getElementById('enableHoverEffects').checked = styling.hoverEffects;
+    document.getElementById('enableShadows').checked = styling.shadows;
+    document.getElementById('showPrices').checked = styling.showPrices;
+    document.getElementById('showImages').checked = styling.showImages;
+    document.getElementById('showDescriptions').checked = styling.showDescriptions;
+}
+
+// Render categories in the designer canvas
+function renderCategories() {
+    const container = document.getElementById('menuCategories');
+    
+    // Sort categories by order
+    const sortedCategories = [...currentMenuDesign.categories].sort((a, b) => a.order - b.order);
+    
+    container.innerHTML = sortedCategories.map(category => `
+        <div class="category-section" data-category-id="${category.id}">
+            <div class="category-header">
+                <div class="category-title">
+                    <i class="fas ${category.icon}"></i>
+                    <input type="text" value="${category.name}" onchange="updateCategoryName('${category.id}', this.value)">
+                </div>
+                <div class="category-actions">
+                    <button onclick="moveCategory('${category.id}', 'up')" title="Nach oben">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <button onclick="moveCategory('${category.id}', 'down')" title="Nach unten">
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                    <button onclick="deleteCategory('${category.id}')" title="Löschen" class="delete-btn">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="category-products" id="products_${category.id}" style="grid-template-columns: repeat(${currentMenuDesign.styling.columns}, 1fr);">
+                ${renderCategoryProducts(category)}
+            </div>
+        </div>
+    `).join('');
+    
+    // Initialize Sortable for each category
+    initializeSortable();
+}
+
+// Render products within a category
+function renderCategoryProducts(category) {
+    if (!category.products || category.products.length === 0) {
+        return '<div class="empty-category">Produkte hierher ziehen</div>';
     }
     
-    // Render categories
-    renderCategories() {
-        const container = document.getElementById('categoriesContainer');
-        if (!container) return;
+    return category.products.map(productId => {
+        const product = availableProducts.find(p => p.id === productId);
+        if (!product) return '';
         
-        container.innerHTML = `
-            <button class="category-filter active" data-category="all">
-                <i class="fas fa-th"></i> Alle
-            </button>
-            ${this.categories.map(cat => `
-                <button class="category-filter" data-category="${cat.name}">
-                    ${cat.emoji} ${cat.name}
+        return `
+            <div class="menu-product-card ${currentMenuDesign.styling.cardStyle}" data-product-id="${product.id}">
+                ${currentMenuDesign.styling.showImages && product.image ? 
+                    `<img src="${product.image}" alt="${product.name}">` : ''}
+                <div class="product-content">
+                    <h4>${product.name}</h4>
+                    ${currentMenuDesign.styling.showDescriptions && product.description ? 
+                        `<p>${product.description}</p>` : ''}
+                    ${currentMenuDesign.styling.showPrices ? 
+                        `<span class="price">CHF ${product.price.toFixed(2)}</span>` : ''}
+                </div>
+                <button onclick="removeProductFromCategory('${category.id}', '${product.id}')" class="remove-product">
+                    <i class="fas fa-times"></i>
                 </button>
-            `).join('')}
-            <button class="category-filter" onclick="menuDesigner.showCategoryModal()">
-                <i class="fas fa-plus"></i> Kategorie
-            </button>
-        `;
-    }
-    
-    // Show category modal
-    showCategoryModal() {
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.innerHTML = `
-            <div class="modal-content small">
-                <div class="modal-header">
-                    <h2>Neue Kategorie</h2>
-                    <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
-                </div>
-                
-                <form onsubmit="menuDesigner.saveCategory(event)">
-                    <div class="form-group">
-                        <label>Name *</label>
-                        <input type="text" name="name" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Emoji</label>
-                        <input type="text" name="emoji" value="🍴" maxlength="2">
-                    </div>
-                    
-                    <div class="modal-actions">
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-save"></i> Speichern
-                        </button>
-                        <button type="button" class="btn-secondary" onclick="this.closest('.modal').remove()">
-                            Abbrechen
-                        </button>
-                    </div>
-                </form>
             </div>
         `;
-        
-        document.body.appendChild(modal);
-        modal.querySelector('input[name="name"]').focus();
-    }
+    }).join('');
+}
+
+// Initialize Sortable.js for drag & drop
+function initializeSortable() {
+    // Destroy existing instances
+    sortableInstances.forEach(instance => instance.destroy());
+    sortableInstances = [];
     
-    // Save category
-    async saveCategory(event) {
-        event.preventDefault();
+    // Create new instances for each category
+    document.querySelectorAll('.category-products').forEach(container => {
+        const categoryId = container.id.replace('products_', '');
         
-        const form = event.target;
-        const formData = new FormData(form);
-        
-        const categoryData = {
-            name: formData.get('name'),
-            emoji: formData.get('emoji') || '🍴',
-            position: this.categories.length
-        };
-        
-        try {
-            await firebase.database().ref('categories').push(categoryData);
-            this.showNotification('Kategorie erstellt', 'success');
-            form.closest('.modal').remove();
-        } catch (error) {
-            console.error('Save error:', error);
-            this.showNotification('Fehler beim Speichern', 'error');
-        }
-    }
-    
-    // Group products by category
-    groupByCategory() {
-        const grouped = {};
-        
-        this.products.forEach(product => {
-            const category = product.category || 'Uncategorized';
-            if (!grouped[category]) {
-                grouped[category] = [];
+        const sortable = Sortable.create(container, {
+            group: 'products',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            dragClass: 'sortable-drag',
+            handle: '.menu-product-card',
+            
+            onAdd: function(evt) {
+                const productId = evt.item.dataset.productId;
+                const toCategoryId = categoryId;
+                
+                // Add product to category
+                const category = currentMenuDesign.categories.find(c => c.id === toCategoryId);
+                if (category && !category.products.includes(productId)) {
+                    category.products.push(productId);
+                    renderCategories();
+                }
+            },
+            
+            onUpdate: function(evt) {
+                // Update product order within category
+                const category = currentMenuDesign.categories.find(c => c.id === categoryId);
+                if (category) {
+                    const newOrder = [];
+                    container.querySelectorAll('.menu-product-card').forEach(card => {
+                        newOrder.push(card.dataset.productId);
+                    });
+                    category.products = newOrder;
+                }
             }
-            grouped[category].push(product);
         });
         
-        return grouped;
+        sortableInstances.push(sortable);
+    });
+}
+
+// Drag & Drop handlers for sidebar products
+function handleDragStart(e) {
+    e.dataTransfer.effectAllowed = 'copy';
+    e.dataTransfer.setData('productId', e.target.dataset.productId);
+    e.target.classList.add('dragging');
+}
+
+function handleDragEnd(e) {
+    e.target.classList.remove('dragging');
+}
+
+// Category management functions
+function addNewCategory() {
+    const name = document.getElementById('newCategoryName').value.trim();
+    const icon = document.getElementById('newCategoryIcon').value.trim() || 'fa-folder';
+    
+    if (!name) {
+        showToast('Bitte einen Kategorienamen eingeben', 'error');
+        return;
     }
     
-    // Get category emoji
-    getCategoryEmoji(categoryName) {
-        const category = this.categories.find(c => c.name === categoryName);
-        return category?.emoji || '🍴';
-    }
+    const newCategory = {
+        id: 'cat_' + Date.now(),
+        name: name,
+        icon: icon,
+        products: [],
+        order: currentMenuDesign.categories.length
+    };
     
-    // Update stats
-    updateStats() {
-        const total = this.products.length;
-        const visible = this.products.filter(p => p.visible).length;
-        const hidden = total - visible;
-        
-        document.getElementById('totalProducts').textContent = total;
-        document.getElementById('visibleProducts').textContent = visible;
-        document.getElementById('hiddenProducts').textContent = hidden;
-    }
+    currentMenuDesign.categories.push(newCategory);
+    renderCategories();
     
-    // Update save button
-    updateSaveButton() {
-        const btn = document.getElementById('saveChangesBtn');
-        if (btn) {
-            btn.disabled = !this.hasChanges;
-            btn.innerHTML = this.hasChanges 
-                ? '<i class="fas fa-save"></i> Änderungen speichern' 
-                : '<i class="fas fa-check"></i> Alles gespeichert';
-        }
-    }
+    // Clear inputs
+    document.getElementById('newCategoryName').value = '';
+    document.getElementById('newCategoryIcon').value = '';
     
-    // Auto save
-    startAutoSave() {
-        this.autoSaveInterval = setInterval(() => {
-            if (this.hasChanges) {
-                this.saveAllChanges();
-            }
-        }, this.autoSaveDelay);
-    }
-    
-    // Show notification
-    showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `designer-notification ${type}`;
-        notification.innerHTML = `
-            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-            <span>${message}</span>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => notification.classList.add('show'), 10);
-        setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
+    showToast('Kategorie hinzugefügt', 'success');
+}
+
+function updateCategoryName(categoryId, newName) {
+    const category = currentMenuDesign.categories.find(c => c.id === categoryId);
+    if (category) {
+        category.name = newName;
     }
 }
 
-// Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    if (window.location.pathname.includes('admin-products') || window.location.pathname.includes('menu-designer')) {
-        window.menuDesigner = new MenuDesigner();
+function moveCategory(categoryId, direction) {
+    const index = currentMenuDesign.categories.findIndex(c => c.id === categoryId);
+    
+    if (direction === 'up' && index > 0) {
+        // Swap with previous category
+        [currentMenuDesign.categories[index], currentMenuDesign.categories[index - 1]] = 
+        [currentMenuDesign.categories[index - 1], currentMenuDesign.categories[index]];
+        
+        // Update order values
+        currentMenuDesign.categories[index].order = index;
+        currentMenuDesign.categories[index - 1].order = index - 1;
+    } else if (direction === 'down' && index < currentMenuDesign.categories.length - 1) {
+        // Swap with next category
+        [currentMenuDesign.categories[index], currentMenuDesign.categories[index + 1]] = 
+        [currentMenuDesign.categories[index + 1], currentMenuDesign.categories[index]];
+        
+        // Update order values
+        currentMenuDesign.categories[index].order = index;
+        currentMenuDesign.categories[index + 1].order = index + 1;
     }
-});
+    
+    renderCategories();
+}
 
-// Export for modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = MenuDesigner;
+function deleteCategory(categoryId) {
+    if (confirm('Diese Kategorie wirklich löschen?')) {
+        currentMenuDesign.categories = currentMenuDesign.categories.filter(c => c.id !== categoryId);
+        
+        // Update order values
+        currentMenuDesign.categories.forEach((cat, index) => {
+            cat.order = index;
+        });
+        
+        renderCategories();
+        showToast('Kategorie gelöscht', 'success');
+    }
+}
+
+function removeProductFromCategory(categoryId, productId) {
+    const category = currentMenuDesign.categories.find(c => c.id === categoryId);
+    if (category) {
+        category.products = category.products.filter(p => p !== productId);
+        renderCategories();
+    }
+}
+
+// Initialize style controls
+function initializeStyleControls() {
+    // Color controls
+    document.getElementById('primaryColor').addEventListener('change', updateStyling);
+    document.getElementById('bgColor').addEventListener('change', updateStyling);
+    document.getElementById('textColor').addEventListener('change', updateStyling);
+    
+    // Layout controls
+    document.getElementById('columnsPerCategory').addEventListener('change', updateStyling);
+    document.getElementById('cardStyle').addEventListener('change', updateStyling);
+    document.getElementById('fontFamily').addEventListener('change', updateStyling);
+    
+    // Effect controls
+    document.getElementById('enableAnimations').addEventListener('change', updateStyling);
+    document.getElementById('enableHoverEffects').addEventListener('change', updateStyling);
+    document.getElementById('enableShadows').addEventListener('change', updateStyling);
+    
+    // Display controls
+    document.getElementById('showPrices').addEventListener('change', updateStyling);
+    document.getElementById('showImages').addEventListener('change', updateStyling);
+    document.getElementById('showDescriptions').addEventListener('change', updateStyling);
+}
+
+// Update styling
+function updateStyling() {
+    currentMenuDesign.styling = {
+        primaryColor: document.getElementById('primaryColor').value,
+        bgColor: document.getElementById('bgColor').value,
+        textColor: document.getElementById('textColor').value,
+        columns: document.getElementById('columnsPerCategory').value,
+        cardStyle: document.getElementById('cardStyle').value,
+        fontFamily: document.getElementById('fontFamily').value,
+        animations: document.getElementById('enableAnimations').checked,
+        hoverEffects: document.getElementById('enableHoverEffects').checked,
+        shadows: document.getElementById('enableShadows').checked,
+        showPrices: document.getElementById('showPrices').checked,
+        showImages: document.getElementById('showImages').checked,
+        showDescriptions: document.getElementById('showDescriptions').checked
+    };
+    
+    renderCategories();
+}
+
+// Save menu design to database
+function saveMenuDesign() {
+    database.ref('menuDesign').set(currentMenuDesign)
+        .then(() => {
+            showToast('Design erfolgreich gespeichert!', 'success');
+            
+            // Also update the categories in the main products section
+            updateProductCategories();
+        })
+        .catch(error => {
+            showToast('Fehler beim Speichern: ' + error.message, 'error');
+        });
+}
+
+// Update product categories in the main database
+function updateProductCategories() {
+    const categoriesMap = {};
+    
+    currentMenuDesign.categories.forEach(category => {
+        category.products.forEach(productId => {
+            categoriesMap[productId] = category.name;
+        });
+    });
+    
+    // Update each product's category
+    Object.entries(categoriesMap).forEach(([productId, categoryName]) => {
+        database.ref(`products/${productId}/category`).set(categoryName);
+    });
+}
+
+// Preview functions
+function previewMenu() {
+    const modal = document.getElementById('previewModal');
+    modal.style.display = 'flex';
+    
+    renderPreview();
+}
+
+function closePreview() {
+    document.getElementById('previewModal').style.display = 'none';
+}
+
+function setPreviewDevice(device) {
+    const frame = document.getElementById('previewFrame');
+    frame.className = 'preview-frame ' + device;
+    
+    // Update active button
+    document.querySelectorAll('.preview-device-selector button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.closest('button').classList.add('active');
+}
+
+function renderPreview() {
+    const frame = document.getElementById('previewFrame');
+    const { styling } = currentMenuDesign;
+    
+    // Apply custom styles
+    const customStyles = `
+        <style>
+            .preview-menu {
+                background-color: ${styling.bgColor};
+                color: ${styling.textColor};
+                font-family: ${styling.fontFamily}, sans-serif;
+                padding: 20px;
+                min-height: 100vh;
+            }
+            .preview-category h2 {
+                color: ${styling.primaryColor};
+            }
+            .preview-products {
+                display: grid;
+                grid-template-columns: repeat(${styling.columns}, 1fr);
+                gap: 20px;
+            }
+            .preview-product-card {
+                background: rgba(255,255,255,0.05);
+                border-radius: 12px;
+                padding: 15px;
+                ${styling.shadows ? 'box-shadow: 0 4px 6px rgba(0,0,0,0.1);' : ''}
+                ${styling.hoverEffects ? 'transition: transform 0.3s ease;' : ''}
+            }
+            ${styling.hoverEffects ? '.preview-product-card:hover { transform: translateY(-5px); }' : ''}
+            .preview-product-card img {
+                width: 100%;
+                height: 150px;
+                object-fit: cover;
+                border-radius: 8px;
+                margin-bottom: 10px;
+            }
+            .preview-price {
+                color: ${styling.primaryColor};
+                font-weight: bold;
+                font-size: 1.2em;
+            }
+            @media (max-width: 768px) {
+                .preview-products {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    `;
+    
+    const menuHTML = currentMenuDesign.categories.map(category => {
+        if (!category.products || category.products.length === 0) return '';
+        
+        return `
+            <div class="preview-category">
+                <h2><i class="fas ${category.icon}"></i> ${category.name}</h2>
+                <div class="preview-products">
+                    ${category.products.map(productId => {
+                        const product = availableProducts.find(p => p.id === productId);
+                        if (!product) return '';
+                        
+                        return `
+                            <div class="preview-product-card">
+                                ${styling.showImages && product.image ? 
+                                    `<img src="${product.image}" alt="${product.name}">` : ''}
+                                <h3>${product.name}</h3>
+                                ${styling.showDescriptions && product.description ? 
+                                    `<p>${product.description}</p>` : ''}
+                                ${styling.showPrices ? 
+                                    `<div class="preview-price">CHF ${product.price.toFixed(2)}</div>` : ''}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    frame.innerHTML = customStyles + '<div class="preview-menu">' + menuHTML + '</div>';
+}
+
+// Setup event listeners
+function setupEventListeners() {
+    // Product search
+    document.getElementById('productSearch').addEventListener('input', renderAvailableProducts);
+    
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        if (confirm('Wirklich ausloggen?')) {
+            auth.signOut();
+        }
+    });
+    
+    // Close preview on ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closePreview();
+        }
+    });
+    
+    // Make category products droppable
+    document.addEventListener('dragover', (e) => {
+        if (e.target.closest('.category-products')) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        }
+    });
+    
+    document.addEventListener('drop', (e) => {
+        const categoryProducts = e.target.closest('.category-products');
+        if (categoryProducts) {
+            e.preventDefault();
+            const productId = e.dataTransfer.getData('productId');
+            const categoryId = categoryProducts.id.replace('products_', '');
+            
+            const category = currentMenuDesign.categories.find(c => c.id === categoryId);
+            if (category && productId && !category.products.includes(productId)) {
+                category.products.push(productId);
+                renderCategories();
+            }
+        }
+    });
+}
+
+// Toast notification
+function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast ${type} show`;
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
 }

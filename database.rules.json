@@ -1,80 +1,45 @@
 {
   "rules": {
-    
-    "products": {
-      ".read": true,
-      ".write": "auth != null || root.child('admins').child(auth.uid).exists()"
-    },
-    
-
-    "categories": {
-      ".read": true,
-      ".write": "auth != null || root.child('admins').child(auth.uid).exists()"
-    },
-    
-  
-    "orders": {
-      ".read": true,
-      ".write": true,
-      "$orderId": {
-        ".validate": "newData.hasChildren(['customerName', 'items', 'total', 'timestamp', 'status'])",
-        "status": {
-          ".validate": "newData.val() === 'pending' || newData.val() === 'preparing' || newData.val() === 'ready' || newData.val() === 'completed' || newData.val() === 'cancelled'"
+    "tenants": {
+      "$tenantId": {
+        ".read": "auth != null && (auth.uid == $tenantId || root.child('tenants').child($tenantId).child('users').child(auth.uid).exists())",
+        ".write": "auth != null && (auth.uid == $tenantId || root.child('tenants').child($tenantId).child('users').child(auth.uid).child('role').val() == 'admin')",
+        
+        "settings": {
+          ".read": true,
+          "payment": {
+            "stripe": {
+              "secretKey": {
+                ".read": "auth != null && auth.uid == $tenantId"
+              }
+            }
+          }
+        },
+        
+        "products": {
+          ".read": true,
+          ".indexOn": ["category", "available", "position"]
+        },
+        
+        "orders": {
+          ".read": "auth != null && (auth.uid == $tenantId || root.child('tenants').child($tenantId).child('users').child(auth.uid).exists())",
+          ".write": true,
+          ".indexOn": ["status", "timestamp", "date"]
+        },
+        
+        "content": {
+          ".read": true
+        },
+        
+        "offers": {
+          ".read": true
         }
       }
     },
     
- 
-    "archive": {
-      ".read": "auth != null || root.child('admins').child(auth.uid).exists()",
-      ".write": "auth != null || root.child('admins').child(auth.uid).exists()"
-    },
-
-    "temp-orders": {
-      ".read": true,
-      ".write": true,
-      "$orderId": {
-        ".validate": "newData.hasChildren(['items', 'total'])"
-      }
-    },
-    
- 
-    "settings": {
-      ".read": true,
-      ".write": "auth != null || root.child('admins').child(auth.uid).exists()",
-      "waitTime": {
-        ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 120"
-      },
-      "isOpen": {
-        ".validate": "newData.isBoolean()"
-      }
-    },
-    
-
-    "whatsapp-logs": {
-      ".read": "auth != null || root.child('admins').child(auth.uid).exists()",
-      ".write": "auth != null || root.child('admins').child(auth.uid).exists()"
-    },
-    
-  
-    "whatsapp-optouts": {
-      ".read": "auth != null || root.child('admins').child(auth.uid).exists()",
-      ".write": true
-    },
-    
-
-    "admins": {
-      ".read": "auth != null && root.child('admins').child(auth.uid).exists()",
-      ".write": false
-    },
-
-    "demo": {
+    "public": {
       ".read": true,
       ".write": false
-    },
-    
- 
-    ".read": false,
-    ".write": false
+    }
   }
 }

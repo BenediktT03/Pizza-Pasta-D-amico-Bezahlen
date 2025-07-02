@@ -3,358 +3,617 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eatech - Online Bestellen</title>
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#2563eb">
-    <link href="css/style.css" rel="stylesheet">
-    <link href="css/weather-integration.css" rel="stylesheet">
+    <title>Eatech - Bestellen Sie Ihr Essen</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1a1a1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="js/multilingual.js"></script>
-    <script src="js/offline-sync.js"></script>
-    <script src="js/whatsapp-integration.js"></script>
-    <script src="js/weather-integration.js"></script>
-</head>
-<body>
-    <!-- Pizza Loader -->
-    <div class="pizza-loader" id="pizzaLoader">
-        <div class="spinning-pizza">🍕</div>
-        <div class="loading-text">Pizza&Pasta D'amico</div>
-        <div class="loading-subtext" data-i18n="loading">Menü wird geladen...</div>
-    </div>
-
-    <!-- Language Selector -->
-    <div class="language-selector">
-        <!-- Wird von multilingual.js generiert -->
-    </div>
-
-    <!-- Container -->
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>🍕 Pizza&Pasta D'amico</h1>
-            <p class="subtitle" data-i18n="header.subtitle">Authentisch italienisch seit 1985</p>
-            <div class="location-info">
-                <i class="fas fa-map-marker-alt"></i>
-                <span data-i18n="header.location">Foodtruck am Marktplatz</span>
-            </div>
-            <a href="login.html" class="header-login">
-                <i class="fas fa-user"></i>
-                <span data-i18n="header.login">Anmelden</span>
-            </a>
-        </div>
-
-        <!-- Content -->
-        <div class="content">
-            <!-- Wait Time Banner -->
-            <div class="wait-time-banner" id="waitTimeBanner">
-                <i class="fas fa-clock"></i>
-                <span data-i18n="waitTime.current">Aktuelle Wartezeit:</span>
-                <strong id="currentWaitTime">5</strong>
-                <span data-i18n="waitTime.minutes">Minuten</span>
-            </div>
-
-            <!-- Weather Display -->
-            <div id="weatherDisplay">
-                <!-- Wird von weather-integration.js gefüllt -->
-            </div>
-
-            <!-- Status Badges -->
-            <div class="status-badges">
-                <span class="status-badge active" id="openStatus">
-                    <i class="fas fa-door-open"></i>
-                    <span data-i18n="status.open">Geöffnet</span>
-                </span>
-                <span class="status-badge" id="closedStatus" style="display: none;">
-                    <i class="fas fa-door-closed"></i>
-                    <span data-i18n="status.closed">Geschlossen</span>
-                </span>
-            </div>
-
-            <!-- Closed Notice -->
-            <div class="closed-notice" id="closedNotice" style="display: none;">
-                <div class="status-emoji">😴</div>
-                <h2 class="status-title" data-i18n="closed.title">Momentan geschlossen</h2>
-                <p class="status-description" data-i18n="closed.message">
-                    Wir sind gerade nicht verfügbar. Bitte versuchen Sie es später erneut.
-                </p>
-            </div>
-
-            <!-- Product Grid -->
-            <div class="product-grid" id="productGrid">
-                <!-- Products will be loaded here -->
-                <div class="no-products">
-                    <i class="fas fa-pizza-slice"></i>
-                    <p data-i18n="products.loading">Produkte werden geladen...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Cart Sidebar -->
-        <div class="cart-sidebar" id="cartSidebar">
-            <div class="cart-header">
-                <h3 data-i18n="cart.title">Warenkorb</h3>
-                <button class="close-cart" onclick="toggleCart()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="cart-items" id="cartItems">
-                <div class="empty-cart">
-                    <i class="fas fa-shopping-cart"></i>
-                    <p data-i18n="cart.empty">Ihr Warenkorb ist leer</p>
-                </div>
-            </div>
-            
-            <div class="cart-footer">
-                <div class="cart-total">
-                    <span data-i18n="cart.total">Gesamt:</span>
-                    <span id="cartTotal">CHF 0.00</span>
-                </div>
-                <button class="checkout-btn" onclick="showCheckoutModal()" disabled>
-                    <i class="fas fa-credit-card"></i>
-                    <span data-i18n="cart.checkout">Zur Kasse</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Mobile Cart Toggle -->
-        <button class="mobile-cart-toggle" onclick="toggleCart()">
-            <i class="fas fa-shopping-cart"></i>
-            <span class="cart-count" id="cartCount">0</span>
-        </button>
-    </div>
-
-    <!-- Checkout Modal -->
-    <div class="modal" id="checkoutModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 data-i18n="checkout.title">Bestellung abschließen</h2>
-                <button class="modal-close" onclick="closeCheckoutModal()">&times;</button>
-            </div>
-            
-            <div class="modal-body">
-                <form id="checkoutForm" onsubmit="submitOrder(event)">
-                    <div class="form-group">
-                        <label for="customerName" data-i18n="checkout.name">Name</label>
-                        <input type="text" id="customerName" required>
-                    </div>
-                    
-                    <div class="form-group" id="phoneInputContainer">
-                        <!-- WhatsApp Integration wird hier eingefügt -->
-                    </div>
-                    
-                    <div class="payment-options">
-                        <h3 data-i18n="checkout.paymentMethod">Zahlungsmethode</h3>
-                        <label class="payment-option">
-                            <input type="radio" name="payment" value="card" checked>
-                            <span class="payment-label">
-                                <i class="fas fa-credit-card"></i>
-                                <span data-i18n="payment.card">Kartenzahlung</span>
-                            </span>
-                        </label>
-                        <label class="payment-option">
-                            <input type="radio" name="payment" value="cash">
-                            <span class="payment-label">
-                                <i class="fas fa-money-bill"></i>
-                                <span data-i18n="payment.cash">Barzahlung</span>
-                            </span>
-                        </label>
-                    </div>
-                    
-                    <button type="submit" class="submit-order-btn">
-                        <i class="fas fa-check"></i>
-                        <span data-i18n="checkout.submit">Kostenpflichtig bestellen</span>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
+    
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     
     <!-- Stripe -->
     <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-pizza-slice"></i>
+                <span>Eatech</span>
+            </div>
+            <div class="header-info">
+                <div class="wait-time" id="waitTimeDisplay">
+                    <i class="fas fa-clock"></i>
+                    <span>Wartezeit: <strong id="currentWaitTime">15</strong> Min</span>
+                </div>
+                <div class="cart-icon" onclick="toggleCart()">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
 
+    <!-- Weather Impact Banner -->
+    <div id="weatherBanner" class="weather-banner" style="display: none;">
+        <i class="fas fa-cloud-rain"></i>
+        <span id="weatherMessage"></span>
+    </div>
+
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <button onclick="setLanguage('de')" class="lang-btn active" data-lang="de">🇩🇪 DE</button>
+        <button onclick="setLanguage('en')" class="lang-btn" data-lang="en">🇬🇧 EN</button>
+        <button onclick="setLanguage('it')" class="lang-btn" data-lang="it">🇮🇹 IT</button>
+        <button onclick="setLanguage('fr')" class="lang-btn" data-lang="fr">🇫🇷 FR</button>
+        <button onclick="setLanguage('es')" class="lang-btn" data-lang="es">🇪🇸 ES</button>
+        <button onclick="setLanguage('tr')" class="lang-btn" data-lang="tr">🇹🇷 TR</button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Suche nach Gerichten..." onkeyup="searchProducts()">
+        <i class="fas fa-search"></i>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="category-filter" id="categoryFilter">
+        <!-- Categories will be loaded here -->
+    </div>
+
+    <!-- Products Grid -->
+    <main class="products-container">
+        <div id="productsGrid" class="products-grid">
+            <!-- Products will be loaded here -->
+        </div>
+        
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Lade Speisekarte...</p>
+        </div>
+    </main>
+
+    <!-- Shopping Cart Sidebar -->
+    <div id="cartSidebar" class="cart-sidebar">
+        <div class="cart-header">
+            <h2><i class="fas fa-shopping-cart"></i> Warenkorb</h2>
+            <button onclick="toggleCart()" class="close-cart">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <!-- Cart items will be loaded here -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Gesamt:</span>
+                <span class="total-amount">CHF <span id="cartTotal">0.00</span></span>
+            </div>
+            <button onclick="proceedToCheckout()" class="checkout-btn" id="checkoutBtn" disabled>
+                <i class="fas fa-credit-card"></i> Zur Kasse
+            </button>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Bestellung abschließen</h2>
+                <button onclick="closeCheckout()" class="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="checkoutForm">
+                    <div class="form-group">
+                        <label>Name *</label>
+                        <input type="text" id="customerName" required placeholder="Ihr Name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Telefonnummer (für Updates)</label>
+                        <div class="phone-input-group">
+                            <select id="countryCode" class="country-select">
+                                <option value="+41">🇨🇭 +41</option>
+                                <option value="+49">🇩🇪 +49</option>
+                                <option value="+43">🇦🇹 +43</option>
+                                <option value="+39">🇮🇹 +39</option>
+                                <option value="+33">🇫🇷 +33</option>
+                                <option value="+34">🇪🇸 +34</option>
+                                <option value="+90">🇹🇷 +90</option>
+                            </select>
+                            <input type="tel" id="customerPhone" placeholder="79 123 45 67">
+                        </div>
+                        <div class="whatsapp-opt-in">
+                            <label>
+                                <input type="checkbox" id="whatsappOptIn">
+                                <span>WhatsApp-Updates erhalten</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Bemerkungen</label>
+                        <textarea id="orderNotes" rows="3" placeholder="Spezielle Wünsche, Allergien, etc."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Abholzeit</label>
+                        <div class="pickup-time">
+                            <input type="radio" name="pickupTime" value="asap" id="asap" checked>
+                            <label for="asap">So schnell wie möglich</label>
+                            
+                            <input type="radio" name="pickupTime" value="scheduled" id="scheduled">
+                            <label for="scheduled">Vorbestellen für:</label>
+                            
+                            <input type="time" id="scheduledTime" disabled>
+                        </div>
+                    </div>
+                    
+                    <div class="order-summary">
+                        <h3>Bestellübersicht</h3>
+                        <div id="orderSummary"></div>
+                        <div class="summary-total">
+                            <span>Gesamtbetrag:</span>
+                            <span class="total-amount">CHF <span id="summaryTotal">0.00</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-section">
+                        <h3>Zahlung</h3>
+                        <div id="card-element" class="stripe-card-element"></div>
+                        <div id="card-errors" class="error-message"></div>
+                    </div>
+                    
+                    <button type="submit" class="submit-order-btn" id="submitOrderBtn">
+                        <i class="fas fa-check-circle"></i> Bestellung aufgeben
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content product-modal">
+            <button onclick="closeProductModal()" class="close-modal">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="productModalContent">
+                <!-- Product details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Offline Indicator -->
+    <div id="offlineIndicator" class="offline-indicator">
+        <i class="fas fa-wifi-slash"></i>
+        <span>Offline - Bestellungen werden synchronisiert</span>
+    </div>
+
+    <!-- Scripts -->
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyD3OCMvc4Iup58Ao0BiFNuvA0fnJokzYS8",
-            authDomain: "pizzapastadamico.firebaseapp.com",
-            databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "pizzapastadamico",
-            storageBucket: "pizzapastadamico.firebasestorage.app",
-            messagingSenderId: "83240541532",
-            appId: "1:83240541532:web:11e3277850bf89a5b8b599",
-            measurementId: "G-6H2J5K88J7"
+  apiKey: "AIzaSyDFBlgWE81iHnACVwOmaU0jL7FV0l_tRmU",
+  authDomain: "eatech-foodtruck.firebaseapp.com",
+  databaseURL: "https://eatech-foodtruck-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "eatech-foodtruck",
+  storageBucket: "eatech-foodtruck.firebasestorage.app",
+  messagingSenderId: "261222802445",
+  appId: "1:261222802445:web:edde22580422fbced22144",
         };
         
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-
-        // Global Variables
-        let cartItems = [];
-        let products = [];
-        let isOpen = true;
-        let currentWaitTime = 5;
-        let selectedPaymentMethod = 'card';
-        let currentLanguage = 'de';
-
-        // Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
-                .then(reg => console.log('Service Worker registered'))
-                .catch(err => console.error('Service Worker registration failed:', err));
-        }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            loadCartFromLocalStorage();
-            loadProducts();
-            loadSettings();
-            checkPendingOrders();
-            
-            // WhatsApp Phone Input
-            if (window.whatsApp) {
-                window.whatsApp.createPhoneInput('phoneInputContainer', {
-                    showTestButton: false
-                });
+        
+        // Stripe Configuration
+        const stripe = Stripe('pk_test_51Rg6MY4I9wcGYX9JUBunT1Yh6kr776piJvLCk3Ln6ovyk0RGBQ0icKbbEYvOUInOIZGKdbvfsCPLZ14JDoOlrPeV00SJRbRsDo');
+        const elements = stripe.elements();
+        const cardElement = elements.create('card', {
+            style: {
+                base: {
+                    color: '#ffffff',
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: '16px',
+                    '::placeholder': {
+                        color: '#aab7c4'
+                    }
+                },
+                invalid: {
+                    color: '#ff6b6b',
+                    iconColor: '#ff6b6b'
+                }
             }
-            
-            // Hide loader
-            setTimeout(() => {
-                document.getElementById('pizzaLoader').style.display = 'none';
-            }, 1500);
         });
-
-        // Check for pending offline orders
-        async function checkPendingOrders() {
-            if (window.offlineSync && window.offlineSync.stats.queued > 0) {
-                showPendingOrdersNotification();
+        
+        // Global variables
+        let products = [];
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let currentLanguage = localStorage.getItem('language') || 'de';
+        let menuDesign = null;
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProducts();
+            loadMenuDesign();
+            updateCart();
+            setupEventListeners();
+            checkOnlineStatus();
+            loadWaitTime();
+            checkWeatherImpact();
+            
+            // Setup Stripe
+            cardElement.mount('#card-element');
+            cardElement.on('change', handleCardChange);
+            
+            // Register Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.error('Service Worker registration failed:', err));
             }
-        }
-
-        // Load Products
-        function loadProducts() {
-            database.ref('products').on('value', snapshot => {
-                const data = snapshot.val();
-                if (data) {
-                    products = Object.entries(data).map(([id, product]) => ({
-                        id,
-                        ...product
-                    }));
-                    displayProducts();
-                } else {
-                    // Create demo products if empty
-                    createDemoProducts();
+        });
+        
+        // Load menu design
+        function loadMenuDesign() {
+            database.ref('menuDesign').once('value', (snapshot) => {
+                menuDesign = snapshot.val();
+                if (menuDesign) {
+                    applyMenuDesign();
                 }
             });
         }
-
-        // Load Settings
-        function loadSettings() {
-            // Wait time
-            database.ref('settings/waitTime').on('value', snapshot => {
-                currentWaitTime = snapshot.val() || 5;
-                document.getElementById('currentWaitTime').textContent = currentWaitTime;
-            });
+        
+        // Apply menu design
+        function applyMenuDesign() {
+            if (!menuDesign || !menuDesign.styling) return;
             
-            // Open status
-            database.ref('settings/isOpen').on('value', snapshot => {
-                isOpen = snapshot.val() !== false;
-                updateOpenStatus();
+            const { styling } = menuDesign;
+            
+            // Apply custom styles
+            const style = document.createElement('style');
+            style.innerHTML = `
+                :root {
+                    --primary-color: ${styling.primaryColor};
+                    --bg-color: ${styling.bgColor};
+                    --text-color: ${styling.textColor};
+                }
+                
+                body {
+                    background-color: ${styling.bgColor};
+                    color: ${styling.textColor};
+                    font-family: ${styling.fontFamily}, sans-serif;
+                }
+                
+                .products-grid {
+                    grid-template-columns: repeat(auto-fill, minmax(${
+                        styling.columns == 1 ? '100%' : 
+                        styling.columns == 2 ? '45%' : 
+                        styling.columns == 3 ? '30%' : '22%'
+                    }, 1fr));
+                }
+                
+                ${!styling.animations ? `
+                    * {
+                        animation: none !important;
+                        transition: none !important;
+                    }
+                ` : ''}
+                
+                ${!styling.hoverEffects ? `
+                    .product-card:hover {
+                        transform: none !important;
+                    }
+                ` : ''}
+                
+                ${!styling.shadows ? `
+                    .product-card {
+                        box-shadow: none !important;
+                    }
+                ` : ''}
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Load products with menu design categories
+        function loadProducts() {
+            document.getElementById('loadingSpinner').style.display = 'flex';
+            
+            Promise.all([
+                database.ref('products').once('value'),
+                database.ref('menuDesign').once('value')
+            ]).then(([productsSnapshot, designSnapshot]) => {
+                const productsData = productsSnapshot.val() || {};
+                const designData = designSnapshot.val();
+                
+                products = Object.entries(productsData).map(([id, product]) => ({
+                    id,
+                    ...product
+                }));
+                
+                if (designData && designData.categories) {
+                    // Use menu designer categories
+                    renderProductsByDesign(designData);
+                } else {
+                    // Fallback to default rendering
+                    renderProducts();
+                }
+                
+                document.getElementById('loadingSpinner').style.display = 'none';
             });
         }
-
-        // Display Products
-        function displayProducts() {
-            const grid = document.getElementById('productGrid');
-            grid.innerHTML = '';
+        
+        // Render products based on menu design
+        function renderProductsByDesign(design) {
+            const container = document.getElementById('productsGrid');
+            const { categories, styling } = design;
             
-            const categories = [...new Set(products.map(p => p.category))];
+            // Clear existing content
+            container.innerHTML = '';
             
-            categories.forEach(category => {
+            // Sort categories by order
+            const sortedCategories = [...categories].sort((a, b) => a.order - b.order);
+            
+            sortedCategories.forEach(category => {
+                if (!category.products || category.products.length === 0) return;
+                
+                // Create category section
                 const categorySection = document.createElement('div');
                 categorySection.className = 'category-section';
+                categorySection.innerHTML = `
+                    <h2 class="category-title">
+                        <i class="fas ${category.icon}"></i> ${category.name}
+                    </h2>
+                    <div class="category-products">
+                        ${category.products.map(productId => {
+                            const product = products.find(p => p.id === productId);
+                            if (!product || !product.available) return '';
+                            
+                            return createProductCard(product, styling);
+                        }).join('')}
+                    </div>
+                `;
                 
-                const categoryHeader = document.createElement('h2');
-                categoryHeader.className = 'category-title';
-                categoryHeader.innerHTML = `<i class="fas fa-utensils"></i> ${category}`;
-                categorySection.appendChild(categoryHeader);
-                
-                const categoryProducts = document.createElement('div');
-                categoryProducts.className = 'category-products';
-                
-                products
-                    .filter(p => p.category === category && p.visible !== false)
-                    .forEach(product => {
-                        const productCard = createProductCard(product);
-                        categoryProducts.appendChild(productCard);
-                    });
-                
-                categorySection.appendChild(categoryProducts);
-                grid.appendChild(categorySection);
+                container.appendChild(categorySection);
             });
-        }
-
-        // Create Product Card
-        function createProductCard(product) {
-            const card = document.createElement('div');
-            card.className = 'product-card';
             
-            card.innerHTML = `
-                <div class="product-image">${product.emoji || '🍕'}</div>
-                <h3 class="product-name">${product.name}</h3>
-                <p class="product-description">${product.description || ''}</p>
-                <div class="product-footer">
-                    <span class="product-price">CHF ${product.price.toFixed(2)}</span>
-                    <button class="add-to-cart-btn" onclick="addToCart('${product.id}')">
+            // Update category filter
+            updateCategoryFilter(sortedCategories);
+        }
+        
+        // Create product card
+        function createProductCard(product, styling) {
+            const showImages = styling?.showImages !== false;
+            const showDescriptions = styling?.showDescriptions !== false;
+            const showPrices = styling?.showPrices !== false;
+            const cardStyle = styling?.cardStyle || 'modern';
+            
+            return `
+                <div class="product-card ${cardStyle}" onclick="showProductDetails('${product.id}')">
+                    ${showImages && product.image ? 
+                        `<img src="${product.image}" alt="${product.name}" class="product-image">` : ''}
+                    <div class="product-info">
+                        <h3 class="product-name">${product.name}</h3>
+                        ${showDescriptions && product.description ? 
+                            `<p class="product-description">${product.description}</p>` : ''}
+                        ${showPrices ? 
+                            `<div class="product-price">CHF ${product.price.toFixed(2)}</div>` : ''}
+                    </div>
+                    <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart('${product.id}')">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
             `;
-            
-            return card;
         }
-
-        // Cart Functions
-        function addToCart(productId) {
-            if (!isOpen) {
-                showNotification('Restaurant ist geschlossen', 'error');
-                return;
-            }
+        
+        // Fallback render products
+        function renderProducts() {
+            const container = document.getElementById('productsGrid');
+            const availableProducts = products.filter(p => p.available !== false);
             
+            container.innerHTML = availableProducts.map(product => 
+                createProductCard(product, { showImages: true, showDescriptions: true, showPrices: true })
+            ).join('');
+            
+            // Update category filter
+            const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+            updateCategoryFilter(categories.map(cat => ({ name: cat, icon: 'fa-tag' })));
+        }
+        
+        // Update category filter
+        function updateCategoryFilter(categories) {
+            const filterContainer = document.getElementById('categoryFilter');
+            
+            filterContainer.innerHTML = `
+                <button class="category-btn active" onclick="filterByCategory('all')">
+                    <i class="fas fa-th"></i> Alle
+                </button>
+                ${categories.map(cat => `
+                    <button class="category-btn" onclick="filterByCategory('${cat.name}')">
+                        <i class="fas ${cat.icon || 'fa-tag'}"></i> ${cat.name}
+                    </button>
+                `).join('')}
+            `;
+        }
+        
+        // Show product details
+        function showProductDetails(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
             
-            const existingItem = cartItems.find(item => item.id === productId);
+            const modal = document.getElementById('productModal');
+            const content = document.getElementById('productModalContent');
+            
+            content.innerHTML = `
+                <div class="product-detail">
+                    ${product.image ? `<img src="${product.image}" alt="${product.name}">` : ''}
+                    <div class="product-detail-info">
+                        <h2>${product.name}</h2>
+                        ${product.description ? `<p class="description">${product.description}</p>` : ''}
+                        ${product.ingredients ? `
+                            <div class="ingredients">
+                                <h4>Zutaten:</h4>
+                                <p>${product.ingredients}</p>
+                            </div>
+                        ` : ''}
+                        ${product.allergens ? `
+                            <div class="allergens">
+                                <h4>Allergene:</h4>
+                                <p>${product.allergens}</p>
+                            </div>
+                        ` : ''}
+                        <div class="product-detail-footer">
+                            <span class="price">CHF ${product.price.toFixed(2)}</span>
+                            <button onclick="addToCart('${product.id}'); closeProductModal();" class="add-btn">
+                                <i class="fas fa-cart-plus"></i> In den Warenkorb
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+        
+        // Close product modal
+        function closeProductModal() {
+            document.getElementById('productModal').style.display = 'none';
+        }
+        
+        // Search products
+        function searchProducts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const productCards = document.querySelectorAll('.product-card');
+            
+            productCards.forEach(card => {
+                const productName = card.querySelector('.product-name').textContent.toLowerCase();
+                const productDesc = card.querySelector('.product-description')?.textContent.toLowerCase() || '';
+                
+                if (productName.includes(searchTerm) || productDesc.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
+        // Filter by category
+        function filterByCategory(category) {
+            // Update active button
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Filter products
+            if (category === 'all') {
+                document.querySelectorAll('.category-section').forEach(section => {
+                    section.style.display = 'block';
+                });
+            } else {
+                document.querySelectorAll('.category-section').forEach(section => {
+                    const title = section.querySelector('.category-title').textContent.trim();
+                    if (title.includes(category)) {
+                        section.style.display = 'block';
+                    } else {
+                        section.style.display = 'none';
+                    }
+                });
+            }
+        }
+        
+        // Add to cart
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            const existingItem = cart.find(item => item.id === productId);
             
             if (existingItem) {
                 existingItem.quantity++;
             } else {
-                cartItems.push({
-                    ...product,
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
                     quantity: 1
                 });
             }
             
             updateCart();
-            saveCartToLocalStorage();
-            showNotification(`${product.name} zum Warenkorb hinzugefügt`, 'success');
+            showToast(`${product.name} wurde zum Warenkorb hinzugefügt`);
+            
+            // Animate cart icon
+            const cartIcon = document.querySelector('.cart-icon');
+            cartIcon.classList.add('bounce');
+            setTimeout(() => cartIcon.classList.remove('bounce'), 600);
         }
-
-        function removeFromCart(productId) {
-            const index = cartItems.findIndex(item => item.id === productId);
-            if (index > -1) {
-                cartItems.splice(index, 1);
-                updateCart();
-                saveCartToLocalStorage();
+        
+        // Update cart
+        function updateCart() {
+            // Save to localStorage
+            localStorage.setItem('cart', JSON.stringify(cart));
+            
+            // Update cart count
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartCount').textContent = totalItems;
+            
+            // Update cart items display
+            const cartItemsContainer = document.getElementById('cartItems');
+            
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<p class="empty-cart">Ihr Warenkorb ist leer</p>';
+                document.getElementById('checkoutBtn').disabled = true;
+            } else {
+                cartItemsContainer.innerHTML = cart.map(item => `
+                    <div class="cart-item">
+                        <div class="item-info">
+                            <h4>${item.name}</h4>
+                            <span class="item-price">CHF ${item.price.toFixed(2)}</span>
+                        </div>
+                        <div class="item-quantity">
+                            <button onclick="updateQuantity('${item.id}', -1)" class="qty-btn">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span>${item.quantity}</span>
+                            <button onclick="updateQuantity('${item.id}', 1)" class="qty-btn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <button onclick="removeFromCart('${item.id}')" class="remove-btn">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `).join('');
+                
+                document.getElementById('checkoutBtn').disabled = false;
             }
+            
+            // Update total
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            document.getElementById('cartTotal').textContent = total.toFixed(2);
         }
-
+        
+        // Update quantity
         function updateQuantity(productId, change) {
-            const item = cartItems.find(item => item.id === productId);
+            const item = cart.find(item => item.id === productId);
             if (!item) return;
             
             item.quantity += change;
@@ -363,729 +622,199 @@
                 removeFromCart(productId);
             } else {
                 updateCart();
-                saveCartToLocalStorage();
             }
         }
-
-        function updateCart() {
-            const cartItemsDiv = document.getElementById('cartItems');
-            const cartCount = document.getElementById('cartCount');
-            const cartTotal = document.getElementById('cartTotal');
-            const checkoutBtn = document.querySelector('.checkout-btn');
-            
-            if (cartItems.length === 0) {
-                cartItemsDiv.innerHTML = `
-                    <div class="empty-cart">
-                        <i class="fas fa-shopping-cart"></i>
-                        <p data-i18n="cart.empty">Ihr Warenkorb ist leer</p>
-                    </div>
-                `;
-                checkoutBtn.disabled = true;
-            } else {
-                cartItemsDiv.innerHTML = cartItems.map(item => `
-                    <div class="cart-item">
-                        <div class="cart-item-info">
-                            <h4>${item.name}</h4>
-                            <p>CHF ${item.price.toFixed(2)}</p>
-                        </div>
-                        <div class="cart-item-controls">
-                            <button onclick="updateQuantity('${item.id}', -1)">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <span class="quantity">${item.quantity}</span>
-                            <button onclick="updateQuantity('${item.id}', 1)">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <button onclick="removeFromCart('${item.id}')" class="remove-btn">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-                checkoutBtn.disabled = false;
-            }
-            
-            const total = calculateTotal();
-            cartTotal.textContent = `CHF ${total.toFixed(2)}`;
-            cartCount.textContent = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+        
+        // Remove from cart
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            updateCart();
         }
-
-        function calculateTotal() {
-            return cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        }
-
-        function saveCartToLocalStorage() {
-            localStorage.setItem('cart', JSON.stringify(cartItems));
-        }
-
-        function loadCartFromLocalStorage() {
-            const saved = localStorage.getItem('cart');
-            if (saved) {
-                cartItems = JSON.parse(saved);
-                updateCart();
-            }
-        }
-
-        // UI Functions
+        
+        // Toggle cart
         function toggleCart() {
             const sidebar = document.getElementById('cartSidebar');
             sidebar.classList.toggle('open');
         }
-
-        function showCheckoutModal() {
-            if (!isOpen) {
-                showNotification('Restaurant ist geschlossen', 'error');
-                return;
-            }
+        
+        // Proceed to checkout
+        function proceedToCheckout() {
+            if (cart.length === 0) return;
+            
             document.getElementById('checkoutModal').style.display = 'flex';
+            updateOrderSummary();
         }
-
-        function closeCheckoutModal() {
+        
+        // Close checkout
+        function closeCheckout() {
             document.getElementById('checkoutModal').style.display = 'none';
         }
-
-        function updateOpenStatus() {
-            const openStatus = document.getElementById('openStatus');
-            const closedStatus = document.getElementById('closedStatus');
-            const closedNotice = document.getElementById('closedNotice');
-            const waitTimeBanner = document.getElementById('waitTimeBanner');
+        
+        // Update order summary
+        function updateOrderSummary() {
+            const summary = document.getElementById('orderSummary');
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             
-            if (isOpen) {
-                openStatus.style.display = 'inline-flex';
-                closedStatus.style.display = 'none';
-                closedNotice.style.display = 'none';
-                waitTimeBanner.style.display = 'flex';
+            summary.innerHTML = cart.map(item => `
+                <div class="summary-item">
+                    <span>${item.quantity}x ${item.name}</span>
+                    <span>CHF ${(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+            `).join('');
+            
+            document.getElementById('summaryTotal').textContent = total.toFixed(2);
+        }
+        
+        // Handle card change
+        function handleCardChange(event) {
+            const displayError = document.getElementById('card-errors');
+            if (event.error) {
+                displayError.textContent = event.error.message;
             } else {
-                openStatus.style.display = 'none';
-                closedStatus.style.display = 'inline-flex';
-                closedNotice.style.display = 'block';
-                waitTimeBanner.style.display = 'none';
+                displayError.textContent = '';
             }
         }
-
-        // Calculate Wait Time with Weather
-        function calculateWaitTime() {
-            const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-            let baseTime = currentWaitTime;
+        
+        // Submit order
+        document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            if (totalItems <= 5) {
-                // Base time
-            } else if (totalItems <= 11) {
-                baseTime = currentWaitTime + 5;
-            } else {
-                baseTime = currentWaitTime + 10;
-            }
-            
-            // Weather multiplier anwenden
-            if (window.weatherIntegration && window.weatherIntegration.weatherMultiplier) {
-                baseTime = Math.round(baseTime * window.weatherIntegration.weatherMultiplier);
-            }
-            
-            return baseTime;
-        }
-
-        // Order Submission with Offline Support
-        async function submitOrder(event) {
-            event.preventDefault();
+            const submitBtn = document.getElementById('submitOrderBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verarbeite...';
             
             try {
+                // Create payment method
+                const { paymentMethod, error } = await stripe.createPaymentMethod({
+                    type: 'card',
+                    card: cardElement,
+                });
+                
+                if (error) {
+                    throw new Error(error.message);
+                }
+                
+                // Prepare order data
                 const orderData = {
-                    items: cartItems,
-                    total: calculateTotal(),
+                    orderNumber: Date.now().toString().slice(-6),
                     customerName: document.getElementById('customerName').value,
-                    phoneNumber: document.getElementById('phoneNumber').value,
-                    orderNumber: generateOrderNumber(),
-                    timestamp: Date.now(),
+                    customerPhone: document.getElementById('countryCode').value + document.getElementById('customerPhone').value,
+                    whatsappOptIn: document.getElementById('whatsappOptIn').checked,
+                    notes: document.getElementById('orderNotes').value,
+                    pickupTime: document.querySelector('input[name="pickupTime"]:checked').value,
+                    scheduledTime: document.getElementById('scheduledTime').value,
+                    items: cart,
+                    total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                    paymentMethodId: paymentMethod.id,
                     status: 'pending',
-                    paymentMethod: document.querySelector('input[name="payment"]:checked').value,
-                    language: currentLanguage || 'de',
-                    estimatedWaitTime: calculateWaitTime()
+                    timestamp: new Date().toISOString(),
+                    date: new Date().toISOString().split('T')[0]
                 };
                 
-                // WhatsApp Consent
-                const whatsappConsent = document.getElementById('whatsappConsent');
-                if (whatsappConsent && whatsappConsent.checked) {
-                    orderData.whatsappConsent = true;
-                    const countryCode = document.getElementById('countryCode').value;
-                    orderData.phoneNumber = countryCode + orderData.phoneNumber.replace(/\s/g, '');
-                }
+                // Save order to Firebase
+                await database.ref('orders').push(orderData);
                 
-                // Check if online
-                if (navigator.onLine && window.firebase) {
-                    // Online: Normal Firebase submission
-                    try {
-                        const orderRef = await database.ref('orders').push(orderData);
-                        orderData.id = orderRef.key;
-                        
-                        // Success - redirect to payment/success
-                        if (orderData.paymentMethod === 'card') {
-                            // Stripe checkout
-                            await processStripePayment(orderData);
-                        } else {
-                            // Cash payment - direct to success
-                            window.location.href = `success.html?order=${orderData.id}`;
-                        }
-                    } catch (error) {
-                        console.error('Firebase error, falling back to offline:', error);
-                        await handleOfflineOrder(orderData);
-                    }
-                } else {
-                    // Offline: Queue for later
-                    await handleOfflineOrder(orderData);
-                }
+                // Clear cart
+                cart = [];
+                updateCart();
+                
+                // Close modal and redirect
+                closeCheckout();
+                window.location.href = `success.html?order=${orderData.orderNumber}`;
                 
             } catch (error) {
-                console.error('Order submission error:', error);
-                showNotification('Bestellung fehlgeschlagen. Bitte versuchen Sie es erneut.', 'error');
+                showToast(error.message, 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Bestellung aufgeben';
             }
-        }
-
-        // Handle offline order
-        async function handleOfflineOrder(orderData) {
-            if (window.offlineSync) {
-                // Queue the order
-                const localId = await window.offlineSync.queueOrder(orderData);
-                
-                // Show offline success message
-                showOfflineSuccessModal(orderData, localId);
-            } else {
-                throw new Error('Offline sync not available');
-            }
-        }
-
-        // Stripe Payment
-        async function processStripePayment(orderData) {
-            // Store order temporarily
-            await database.ref('temp-orders').child(orderData.id).set(orderData);
+        });
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Pickup time toggle
+            document.getElementById('scheduled').addEventListener('change', (e) => {
+                document.getElementById('scheduledTime').disabled = !e.target.checked;
+            });
             
-            // Create Stripe session
-            const stripe = Stripe('pk_test_51Rg6MY4I9wcGYX9JUBunT1Yh6kr776piJvLCk3Ln6ovyk0RGBQ0icKbbEYvOUInOIZGKdbvfsCPLZ14JDoOlrPeV00SJRbRsDo');
+            document.getElementById('asap').addEventListener('change', (e) => {
+                document.getElementById('scheduledTime').disabled = e.target.checked;
+            });
             
-            const lineItems = orderData.items.map(item => ({
-                price_data: {
-                    currency: 'chf',
-                    product_data: {
-                        name: item.name,
-                        description: `${item.quantity}x ${item.name}`
-                    },
-                    unit_amount: Math.round(item.price * 100)
-                },
-                quantity: item.quantity
-            }));
-            
-            // In production, this would call your backend
-            // For now, we'll simulate with a direct redirect
-            window.location.href = `success.html?order=${orderData.id}&payment=processing`;
-        }
-
-        // Helper Functions
-        function generateOrderNumber() {
-            return Math.floor(100000 + Math.random() * 900000);
-        }
-
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-                <span>${message}</span>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => notification.classList.add('show'), 10);
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
-
-        // Offline Success Modal
-        function showOfflineSuccessModal(orderData, localId) {
-            const modal = document.createElement('div');
-            modal.className = 'offline-success-modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="offline-icon">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                    </div>
-                    <h2>Bestellung gespeichert!</h2>
-                    <p>Ihre Bestellung wurde offline gespeichert und wird automatisch übertragen, sobald Sie wieder online sind.</p>
-                    
-                    <div class="order-details">
-                        <div class="detail-row">
-                            <span>Bestellnummer:</span>
-                            <strong>#${orderData.orderNumber}</strong>
-                        </div>
-                        <div class="detail-row">
-                            <span>Gesamt:</span>
-                            <strong>CHF ${orderData.total.toFixed(2)}</strong>
-                        </div>
-                        <div class="detail-row">
-                            <span>Status:</span>
-                            <span class="offline-badge">
-                                <i class="fas fa-clock"></i> Wartet auf Synchronisation
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="offline-info">
-                        <i class="fas fa-info-circle"></i>
-                        <p>Speichern Sie diese Bestellnummer. Sie erhalten eine Benachrichtigung, sobald Ihre Bestellung übertragen wurde.</p>
-                    </div>
-                    
-                    <div class="modal-actions">
-                        <button onclick="location.reload()" class="btn-primary">
-                            Neue Bestellung
-                        </button>
-                        <button onclick="this.closest('.offline-success-modal').remove()" class="btn-secondary">
-                            Schließen
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            
-            // Clear cart
-            cartItems = [];
-            updateCart();
-            saveCartToLocalStorage();
-        }
-
-        // Show pending orders notification
-        function showPendingOrdersNotification() {
-            const notification = document.createElement('div');
-            notification.className = 'pending-orders-notification';
-            notification.innerHTML = `
-                <i class="fas fa-exclamation-circle"></i>
-                <span>Sie haben ${window.offlineSync.stats.queued} ungesendete Bestellung(en)</span>
-                <button onclick="showPendingOrdersModal()">Anzeigen</button>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => notification.classList.add('show'), 100);
-        }
-
-        // Show pending orders modal
-        async function showPendingOrdersModal() {
-            const orders = await window.offlineSync.getOfflineOrders();
-            
-            const modal = document.createElement('div');
-            modal.className = 'pending-orders-modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h2><i class="fas fa-clock"></i> Ungesendete Bestellungen</h2>
-                    <div class="pending-orders-list">
-                        ${orders.map(order => `
-                            <div class="pending-order">
-                                <div class="order-header">
-                                    <span class="order-number">#${order.orderNumber}</span>
-                                    <span class="order-time">${new Date(order.timestamp).toLocaleString()}</span>
-                                </div>
-                                <div class="order-details">
-                                    <span>CHF ${order.total.toFixed(2)}</span>
-                                    <span class="sync-status">
-                                        <i class="fas fa-sync"></i> Wartet auf Sync
-                                    </span>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="modal-actions">
-                        <button onclick="window.offlineSync.syncQueue()" class="btn-primary" ${!navigator.onLine ? 'disabled' : ''}>
-                            <i class="fas fa-sync"></i> Jetzt synchronisieren
-                        </button>
-                        <button onclick="this.closest('.pending-orders-modal').remove()" class="btn-secondary">
-                            Schließen
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-        }
-
-        // Create Demo Products
-        function createDemoProducts() {
-            const demoProducts = [
-                { name: 'Pizza Margherita', price: 18.50, category: 'Pizza', emoji: '🍕', description: 'Tomaten, Mozzarella, Basilikum' },
-                { name: 'Pizza Salami', price: 21.00, category: 'Pizza', emoji: '🍕', description: 'Tomaten, Mozzarella, Salami' },
-                { name: 'Pizza Hawaii', price: 22.50, category: 'Pizza', emoji: '🍕', description: 'Tomaten, Mozzarella, Schinken, Ananas' },
-                { name: 'Spaghetti Carbonara', price: 19.50, category: 'Pasta', emoji: '🍝', description: 'Speck, Ei, Parmesan' },
-                { name: 'Penne Arrabbiata', price: 17.50, category: 'Pasta', emoji: '🍝', description: 'Tomatensauce, Knoblauch, Chili' },
-                { name: 'Tiramisu', price: 8.50, category: 'Dessert', emoji: '🍰', description: 'Mascarpone, Kaffee, Kakao' },
-                { name: 'Coca Cola', price: 4.50, category: 'Getränke', emoji: '🥤', description: '0.5L' },
-                { name: 'Mineralwasser', price: 3.50, category: 'Getränke', emoji: '💧', description: '0.5L' }
-            ];
-            
-            demoProducts.forEach(product => {
-                database.ref('products').push(product);
+            // Close modals on outside click
+            window.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    e.target.style.display = 'none';
+                }
             });
         }
-
-        // Modal close on outside click
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
+        
+        // Load wait time
+        function loadWaitTime() {
+            database.ref('settings/estimatedWaitTime').on('value', (snapshot) => {
+                const waitTime = snapshot.val() || 15;
+                document.getElementById('currentWaitTime').textContent = waitTime;
+            });
+        }
+        
+        // Check weather impact
+        function checkWeatherImpact() {
+            const weatherData = localStorage.getItem('currentWeatherData');
+            if (weatherData) {
+                const weather = JSON.parse(weatherData);
+                if (weather.waitTimeImpact > 0) {
+                    document.getElementById('weatherBanner').style.display = 'flex';
+                    document.getElementById('weatherMessage').textContent = 
+                        `Wetterbedingt ${weather.waitTimeImpact}% längere Wartezeit`;
+                }
             }
+        }
+        
+        // Check online status
+        function checkOnlineStatus() {
+            function updateOnlineStatus() {
+                const indicator = document.getElementById('offlineIndicator');
+                if (!navigator.onLine) {
+                    indicator.style.display = 'flex';
+                } else {
+                    indicator.style.display = 'none';
+                }
+            }
+            
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+            updateOnlineStatus();
+        }
+        
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Set language
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('language', lang);
+            
+            // Update active button
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+            
+            // Here you would translate the UI
+            // For now, just show a message
+            showToast(`Sprache geändert zu ${lang.toUpperCase()}`);
         }
     </script>
-
-    <!-- Additional Styles for new features -->
-    <style>
-        /* Notification Styles */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(17, 24, 39, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 12px;
-            padding: 16px 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            z-index: 2000;
-            max-width: 400px;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.success {
-            border: 1px solid rgba(34, 197, 94, 0.3);
-        }
-
-        .notification.error {
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .notification i {
-            font-size: 20px;
-        }
-
-        .notification.success i { color: #22c55e; }
-        .notification.error i { color: #ef4444; }
-
-        /* Offline Success Modal */
-        .offline-success-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            padding: 20px;
-        }
-
-        .offline-success-modal .modal-content {
-            background: #1f2937;
-            border-radius: 16px;
-            padding: 32px;
-            max-width: 500px;
-            width: 100%;
-            text-align: center;
-        }
-
-        .offline-icon {
-            font-size: 64px;
-            color: #f59e0b;
-            margin-bottom: 24px;
-        }
-
-        .offline-success-modal h2 {
-            color: #e5e7eb;
-            margin-bottom: 16px;
-        }
-
-        .offline-success-modal p {
-            color: #9ca3af;
-            margin-bottom: 24px;
-        }
-
-        .order-details {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 24px;
-        }
-
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            color: #e5e7eb;
-        }
-
-        .offline-badge {
-            background: rgba(245, 158, 11, 0.2);
-            color: #f59e0b;
-            padding: 4px 12px;
-            border-radius: 100px;
-            font-size: 14px;
-        }
-
-        .offline-info {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 24px;
-            text-align: left;
-        }
-
-        .offline-info i {
-            color: #3b82f6;
-            margin-right: 8px;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .modal-actions button {
-            flex: 1;
-        }
-
-        /* Pending Orders Notification */
-        .pending-orders-notification {
-            position: fixed;
-            top: 70px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            border-radius: 8px;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            z-index: 1000;
-            transition: transform 0.3s ease;
-        }
-
-        .pending-orders-notification.show {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .pending-orders-notification i {
-            color: #f59e0b;
-        }
-
-        .pending-orders-notification span {
-            color: #e5e7eb;
-            font-size: 14px;
-        }
-
-        .pending-orders-notification button {
-            background: rgba(245, 158, 11, 0.2);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            color: #f59e0b;
-            padding: 4px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        /* Pending Orders Modal */
-        .pending-orders-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            padding: 20px;
-        }
-
-        .pending-orders-modal .modal-content {
-            background: #1f2937;
-            border-radius: 16px;
-            padding: 32px;
-            max-width: 600px;
-            width: 100%;
-        }
-
-        .pending-orders-modal h2 {
-            color: #e5e7eb;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .pending-orders-list {
-            margin-bottom: 24px;
-        }
-
-        .pending-order {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
-        }
-
-        .pending-order .order-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-
-        .pending-order .order-number {
-            font-weight: bold;
-            color: #3b82f6;
-        }
-
-        .pending-order .order-time {
-            font-size: 12px;
-            color: #9ca3af;
-        }
-
-        .pending-order .order-details {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .sync-status {
-            font-size: 14px;
-            color: #f59e0b;
-        }
-
-        .sync-status i {
-            margin-right: 4px;
-        }
-
-        /* WhatsApp Phone Input Styles */
-        .whatsapp-phone-input {
-            margin-bottom: 20px;
-        }
-
-        .phone-input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .phone-input-group select {
-            width: 120px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: #e5e7eb;
-        }
-
-        .phone-input-group input {
-            flex: 1;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: #e5e7eb;
-        }
-
-        .whatsapp-consent {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #9ca3af;
-            cursor: pointer;
-        }
-
-        .whatsapp-consent input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-        }
-
-        .whatsapp-consent i {
-            color: #25D366;
-            font-size: 20px;
-        }
-
-        /* Button Styles */
-        .btn-primary {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            background: #2563eb;
-            transform: translateY(-2px);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: #e5e7eb;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .notification {
-                right: 10px;
-                left: 10px;
-                max-width: calc(100vw - 20px);
-            }
-            
-            .offline-success-modal .modal-content,
-            .pending-orders-modal .modal-content {
-                padding: 24px;
-            }
-            
-            .offline-icon {
-                font-size: 48px;
-            }
-            
-            .modal-actions {
-                flex-direction: column;
-            }
-            
-            .pending-orders-notification {
-                right: 10px;
-                left: 10px;
-                transform: translateY(-100px);
-            }
-            
-            .pending-orders-notification.show {
-                transform: translateY(0);
-            }
-        }
-    </style>
+    
+    <!-- Additional Scripts -->
+    <script src="js/multilingual.js"></script>
+    <script src="js/offline-sync.js"></script>
+    <script src="js/whatsapp-integration.js"></script>
 </body>
 </html>

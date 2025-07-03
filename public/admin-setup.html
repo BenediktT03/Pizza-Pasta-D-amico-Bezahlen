@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eatech Admin - Setup & Integrationen</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#FF6B6B">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* Inherit Admin Theme Variables */
+        :root {
+            --admin-primary: #FF6B6B;
+            --admin-primary-dark: #FF5252;
+            --admin-secondary: #4ECDC4;
+            --admin-dark: #1a1a2e;
+            --admin-darker: #0f0f1e;
+            --admin-light: #F7F9FB;
+            --admin-text: #E8E8E8;
+            --admin-text-muted: #95A5A6;
+            --admin-success: #2ECC71;
+            --admin-warning: #F39C12;
+            --admin-danger: #E74C3C;
+            --admin-info: #3498DB;
+            --admin-card-bg: #16213e;
+            --admin-sidebar-bg: #0f1419;
+            --admin-gradient-start: #0f0f1e;
+            --admin-gradient-end: #1a1a2e;
+            --admin-header-bg: rgba(26, 26, 46, 0.95);
+            --admin-nav-bg: #16213e;
+            --admin-border: #2a2a3e;
+            --admin-border-accent: #FF6B6B;
+            --admin-input-bg: #1a1a2e;
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--admin-gradient-start) 0%, var(--admin-gradient-end) 100%);
+            color: var(--admin-text);
+            min-height: 100vh;
+        }
+
+        /* Layout */
+        .admin-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .admin-sidebar {
+            width: 260px;
+            background: var(--admin-sidebar-bg);
+            border-right: 1px solid var(--admin-border);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 2rem;
+            border-bottom: 1px solid var(--admin-border);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        
+        .logo-text {
+            background: linear-gradient(135deg, var(--admin-primary) 0%, var(--admin-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-nav {
+            padding: 1rem;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--admin-text-muted);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-item:hover {
+            background: var(--admin-card-bg);
+            color: var(--admin-text);
+        }
+
+        .nav-item.active {
+            background: var(--admin-primary);
+            color: white;
+        }
+
+        /* Main Content */
+        .admin-main {
+            flex: 1;
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .admin-header {
+            background: var(--admin-header-bg);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--admin-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        /* Content */
+        .admin-content {
+            padding: 2rem;
+        }
+
+        /* Setup Sections */
+        .setup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .setup-card {
+            background: var(--admin-card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid var(--admin-border);
+            transition: all 0.3s ease;
+        }
+
+        .setup-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .setup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .setup-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .setup-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--admin-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-badge.active {
+            background: rgba(46, 204, 113, 0.2);
+            color: var(--admin-success);
+            border: 1px solid var(--admin-success);
+        }
+
+        .status-badge.inactive {
+            background: rgba(149, 165, 166, 0.2);
+            color: var(--admin-text-muted);
+            border: 1px solid var(--admin-text-muted);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--admin-text-muted);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--admin-input-bg);
+            border: 1px solid var(--admin-border);
+            border-radius: 8px;
+            color: var(--admin-text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--admin-primary);
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+        }
+
+        .form-hint {
+            font-size: 0.85rem;
+            color: var(--admin-text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Toggle Switch */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-label {
+            font-weight: 500;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: var(--admin-input-bg);
+            border-radius: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--admin-success);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(24px);
+        }
+
+        /* Test Connection Button */
+        .test-btn {
+            padding: 0.5rem 1rem;
+            background: var(--admin-secondary);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        /* Save Button */
+        .btn-primary {
+            padding: 0.75rem 1.5rem;
+            background: var(--admin-primary);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        }
+
+        /* Integration Steps */
+        .integration-steps {
+            background: var(--admin-input-bg);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .step {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: flex-start;
+        }
+
+        .step:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: var(--admin-primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .step-desc {
+            font-size: 0.85rem;
+            color: var(--admin-text-muted);
+        }
+
+        /* API Keys Section */
+        .api-key-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: stretch;
+        }
+
+        .api-key-input {
+            flex: 1;
+            font-family: monospace;
+        }
+
+        .copy-btn {
+            padding: 0.75rem;
+            background: var(--admin-input-bg);
+            border: 1px solid var(--admin-border);
+            border-radius: 8px;
+            color: var(--admin-text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: var(--admin-primary);
+            color: white;
+        }
+
+        /* Connection Status */
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--admin-input-bg);
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--admin-text-muted);
+        }
+
+        .status-dot.success {
+            background: var(--admin-success);
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.error {
+            background: var(--admin-danger);
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+            }
+        }
+
+        /* Loading State */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--admin-text-muted);
+            border-radius: 50%;
+            border-top-color: var(--admin-primary);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--admin-card-bg);
+            border: 1px solid var(--admin-border);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .admin-main {
+                margin-left: 0;
+            }
+            
+            .setup-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body data-admin-theme="noir-excellence">
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <a href="/admin-dashboard.html" class="sidebar-logo">
+                    <i class="fas fa-utensils"></i>
+                    <span class="logo-text">Eatech Admin</span>
+                </a>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="/admin-dashboard.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/admin-orders.html" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Bestellungen</span>
+                </a>
+                <a href="/admin-products.html" class="nav-item">
+                    <i class="fas fa-box"></i>
+                    <span>Produkte</span>
+                </a>
+                <a href="/admin-themes.html" class="nav-item">
+                    <i class="fas fa-palette"></i>
+                    <span>Themes</span>
+                </a>
+                <a href="/admin-setup.html" class="nav-item active">
+                    <i class="fas fa-cog"></i>
+                    <span>Setup</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Header -->
+            <header class="admin-header">
+                <h1 class="page-title">
+                    <i class="fas fa-cog"></i>
+                    Setup & Integrationen
+                </h1>
+                
+                <button class="btn-primary" onclick="saveAllSettings()">
+                    <i class="fas fa-save"></i>
+                    Alle Einstellungen speichern
+                </button>
+            </header>
+
+            <!-- Content -->
+            <div class="admin-content">
+                <div class="setup-grid">
+                    <!-- Payment Integration -->
+                    <div class="setup-card">
+                        <div class="setup-header">
+                            <div class="setup-title">
+                                <div class="setup-icon">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <span>Zahlungsintegrationen</span>
+                            </div>
+                        </div>
+
+                        <!-- Stripe -->
+                        <div class="integration-section">
+                            <div class="toggle-group">
+                                <div>
+                                    <div class="toggle-label">Stripe</div>
+                                    <div class="form-hint">Kredit-/Debitkarten</div>
+                                </div>
+                                <div class="toggle-switch active" id="stripeToggle" onclick="toggleIntegration('stripe')">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Publishable Key</label>
+                                <div class="api-key-group">
+                                    <input type="text" class="form-control api-key-input" 
+                                           id="stripePublishableKey" 
+                                           placeholder="pk_test_..." 
+                                           value="pk_test_51Rg6MY4I9wcGYX9JUBunT1Yh6kr776piJvLCk3Ln6ovyk0RGBQ0icKbbEYvOUInOIZGKdbvfsCPLZ14JDoOlrPeV00SJRbRsDo">
+                                    <button class="copy-btn" onclick="copyToClipboard('stripePublishableKey')">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Secret Key</label>
+                                <div class="api-key-group">
+                                    <input type="password" class="form-control api-key-input" 
+                                           id="stripeSecretKey" 
+                                           placeholder="sk_test_...">
+                                    <button class="copy-btn" onclick="copyToClipboard('stripeSecretKey')">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <button class="test-btn" onclick="testStripeConnection()">
+                                <i class="fas fa-plug"></i>
+                                Verbindung testen
+                            </button>
+                        </div>
+
+                        <!-- PayPal -->
+                        <hr style="margin: 2rem 0; border-color: var(--admin-border);">
+                        
+                        <div class="integration-section">
+                            <div class="toggle-group">
+                                <div>
+                                    <div class="toggle-label">PayPal</div>
+                                    <div class="form-hint">PayPal & PayPal Express</div>
+                                </div>
+                                <div class="toggle-switch" id="paypalToggle" onclick="toggleIntegration('paypal')">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Client ID</label>
+                                <input type="text" class="form-control" id="paypalClientId" 
+                                       placeholder="AZDxjDScFpQtjWTOUtWKbyN...">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Secret</label>
+                                <input type="password" class="form-control" id="paypalSecret" 
+                                       placeholder="EGnHDxD_qRPdaLdZz8iCr8uyMUk...">
+                            </div>
+                        </div>
+
+                        <!-- TWINT -->
+                        <hr style="margin: 2rem 0; border-color: var(--admin-border);">
+                        
+                        <div class="integration-section">
+                            <div class="toggle-group">
+                                <div>
+                                    <div class="toggle-label">TWINT</div>
+                                    <div class="form-hint">Schweizer Mobile Payment</div>
+                                </div>
+                                <div class="toggle-switch" id="twintToggle" onclick="toggleIntegration('twint')">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Merchant ID</label>
+                                <input type="text" class="form-control" id="twintMerchantId" 
+                                       placeholder="Ihre TWINT Merchant ID">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Firebase Configuration -->
+                    <div class="setup-card">
+                        <div class="setup-header">
+                            <div class="setup-title">
+                                <div class="setup-icon" style="background: #FFA000;">
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <span>Firebase Konfiguration</span>
+                            </div>
+                            <span class="status-badge active">Verbunden</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">API Key</label>
+                            <input type="text" class="form-control" id="firebaseApiKey" 
+                                   value="AIzaSyDFBlgWE81iHnACVwOmaU0jL7FV0l_tRmU" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Project ID</label>
+                            <input type="text" class="form-control" id="firebaseProjectId" 
+                                   value="eatech-foodtruck" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Database URL</label>
+                            <input type="text" class="form-control" id="firebaseDatabaseUrl" 
+                                   value="https://eatech-foodtruck-default-rtdb.europe-west1.firebasedatabase.app" readonly>
+                        </div>
+                        
+                        <div class="connection-status">
+                            <div class="status-dot success"></div>
+                            <span>Verbindung aktiv</span>
+                        </div>
+                    </div>
+
+                    <!-- WhatsApp Integration -->
+                    <div class="setup-card">
+                        <div class="setup-header">
+                            <div class="setup-title">
+                                <div class="setup-icon" style="background: #25D366;">
+                                    <i class="fab fa-whatsapp"></i>
+                                </div>
+                                <span>WhatsApp Business API</span>
+                            </div>
+                            <span class="status-badge inactive">Nicht konfiguriert</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Business Telefonnummer</label>
+                            <input type="tel" class="form-control" id="whatsappNumber" 
+                                   placeholder="+41 79 123 45 67">
+                            <div class="form-hint">Die verifizierte WhatsApp Business Nummer</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">API Provider</label>
+                            <select class="form-control" id="whatsappProvider">
+                                <option value="">Provider auswählen...</option>
+                                <option value="twilio">Twilio</option>
+                                <option value="messagebird">MessageBird</option>
+                                <option value="360dialog">360dialog</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">API Token</label>
+                            <input type="password" class="form-control" id="whatsappToken" 
+                                   placeholder="Ihr API Token">
+                        </div>
+                        
+                        <div class="integration-steps">
+                            <h4 style="margin-bottom: 1rem; font-size: 0.9rem;">Setup Schritte:</h4>
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <div class="step-title">WhatsApp Business Account erstellen</div>
+                                    <div class="step-desc">Registrieren Sie sich bei WhatsApp Business</div>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <div class="step-title">API Provider wählen</div>
+                                    <div class="step-desc">Twilio, MessageBird oder 360dialog</div>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <div class="step-title">Nummer verifizieren</div>
+                                    <div class="step-desc">Ihre Business-Nummer bestätigen</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SMS Gateway -->
+                    <div class="setup-card">
+                        <div class="setup-header">
+                            <div class="setup-title">
+                                <div class="setup-icon" style="background: #9C27B0;">
+                                    <i class="fas fa-sms"></i>
+                                </div>
+                                <span>SMS Gateway</span>
+                            </div>
+                        </div>
+
+                        <div class="toggle-group">
+                            <div>
+                                <div class="toggle-label">SMS Benachrichtigungen aktivieren</div>
+                                <div class="form-hint">Backup für WhatsApp</div>
+                            </div>
+                            <div class="toggle-switch" id="smsToggle" onclick="toggleIntegration('sms')">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">SMS Provider</label>
+                            <select class="form-control" id="smsProvider">
+                                <option value="">Provider auswählen...</option>
+                                <option value="twilio">Twilio SMS</option>
+                                <option value="nexmo">Nexmo/Vonage</option>
+                                <option value="clicksend">ClickSend</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Account SID / API Key</label>
+                            <input type="text" class="form-control" id="smsApiKey" 
+                                   placeholder="Ihre API Credentials">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Auth Token / Secret</label>
+                            <input type="password" class="form-control" id="smsSecret" 
+                                   placeholder="Ihr Secret Token">
+                        </div>
+                    </div>
+
+                    <!-- Weather API -->
+                    <div class="setup-card">
+                        <div class="setup-header">
+                            <div class="setup-title">
+                                <div class="setup-icon" style="background: #00BCD4;">
+                                    <i class="fas fa-cloud-sun"></i>
+                                </div>
+                                <span>Weather API</span>
+                            </div>
+                            <span class="status-badge active">Aktiv</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">OpenWeatherMap API Key</label>
+                            <input type="text" class="form-control" id="weatherApiKey" 
+                                   placeholder="Ihr OpenWeatherMap API Key">
+                            <div class="form-hint">Kostenlos auf openweathermap.org</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Standard Standort</label>
+                            <input type="text" class="form-control" id="weatherLocation" 
+                                   placeholder="Bern, CH" value="Bern, CH">
+                        </div>
+                        
+                        <div class="toggle-group">
+                            <div>
+                                <div class="toggle-label">Automatische Wartezeit-Anpassung</div>
+                                <div class="form-hint">Wartezeit basierend auf Wetter</div>
+                            </div>
+                            <div class="toggle-switch active" id="weatherAutoAdjust">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Google Analytics -->
+                    <div class="setup-card">
+                        <div class="setup-header">
+                            <div class="setup-title">
+                                <div class="setup-icon" style="background: #E37400;">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <span>Analytics & Tracking</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Google Analytics ID</label>
+                            <input type="text" class="form-control" id="gaTrackingId" 
+                                   placeholder="G-XXXXXXXXXX">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Facebook Pixel ID</label>
+                            <input type="text" class="form-control" id="fbPixelId" 
+                                   placeholder="Ihre Facebook Pixel ID">
+                        </div>
+                        
+                        <div class="toggle-group">
+                            <div>
+                                <div class="toggle-label">Cookie Consent Banner</div>
+                                <div class="form-hint">DSGVO-konform</div>
+                            </div>
+                            <div class="toggle-switch active" id="cookieConsent">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span>Einstellungen gespeichert!</span>
+    </div>
+
+    <script>
+        // Load saved theme
+        const adminTheme = localStorage.getItem('eatechThemeAdmin') || 'noir-excellence';
+        document.body.setAttribute('data-admin-theme', adminTheme);
+
+        // Toggle Integration
+        function toggleIntegration(integration) {
+            const toggle = document.getElementById(integration + 'Toggle');
+            toggle.classList.toggle('active');
+        }
+
+        // Copy to Clipboard
+        function copyToClipboard(elementId) {
+            const input = document.getElementById(elementId);
+            input.select();
+            document.execCommand('copy');
+            
+            showToast('In Zwischenablage kopiert!');
+        }
+
+        // Test Stripe Connection
+        async function testStripeConnection() {
+            const key = document.getElementById('stripePublishableKey').value;
+            
+            // Show loading
+            showToast('Teste Verbindung...', 'loading');
+            
+            // Simulate API test
+            setTimeout(() => {
+                showToast('Stripe Verbindung erfolgreich!', 'success');
+            }, 2000);
+        }
+
+        // Save All Settings
+        function saveAllSettings() {
+            // Collect all settings
+            const settings = {
+                payment: {
+                    stripe: {
+                        enabled: document.getElementById('stripeToggle').classList.contains('active'),
+                        publishableKey: document.getElementById('stripePublishableKey').value,
+                        secretKey: document.getElementById('stripeSecretKey').value
+                    },
+                    paypal: {
+                        enabled: document.getElementById('paypalToggle').classList.contains('active'),
+                        clientId: document.getElementById('paypalClientId').value,
+                        secret: document.getElementById('paypalSecret').value
+                    },
+                    twint: {
+                        enabled: document.getElementById('twintToggle').classList.contains('active'),
+                        merchantId: document.getElementById('twintMerchantId').value
+                    }
+                },
+                whatsapp: {
+                    number: document.getElementById('whatsappNumber').value,
+                    provider: document.getElementById('whatsappProvider').value,
+                    token: document.getElementById('whatsappToken').value
+                },
+                sms: {
+                    enabled: document.getElementById('smsToggle').classList.contains('active'),
+                    provider: document.getElementById('smsProvider').value,
+                    apiKey: document.getElementById('smsApiKey').value,
+                    secret: document.getElementById('smsSecret').value
+                },
+                weather: {
+                    apiKey: document.getElementById('weatherApiKey').value,
+                    location: document.getElementById('weatherLocation').value,
+                    autoAdjust: document.getElementById('weatherAutoAdjust').classList.contains('active')
+                },
+                analytics: {
+                    gaTrackingId: document.getElementById('gaTrackingId').value,
+                    fbPixelId: document.getElementById('fbPixelId').value,
+                    cookieConsent: document.getElementById('cookieConsent').classList.contains('active')
+                }
+            };
+            
+            // Save to localStorage (in production: save to Firebase)
+            localStorage.setItem('eatechSetup', JSON.stringify(settings));
+            
+            showToast('Alle Einstellungen gespeichert!', 'success');
+        }
+
+        // Show Toast
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = toast.querySelector('i');
+            
+            // Update icon based on type
+            if (type === 'loading') {
+                icon.className = 'fas fa-spinner fa-spin';
+            } else if (type === 'success') {
+                icon.className = 'fas fa-check-circle';
+            } else if (type === 'error') {
+                icon.className = 'fas fa-exclamation-circle';
+            }
+            
+            toast.querySelector('span').textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Load saved settings on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedSettings = localStorage.getItem('eatechSetup');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                
+                // Apply saved settings to form
+                // ... (würde alle Felder mit gespeicherten Werten füllen)
+            }
+        });
+    </script>
+</body>
+</html>

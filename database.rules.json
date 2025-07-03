@@ -1,45 +1,28 @@
 {
   "rules": {
-    "tenants": {
-      "$tenantId": {
-        ".read": "auth != null && (auth.uid == $tenantId || root.child('tenants').child($tenantId).child('users').child(auth.uid).exists())",
-        ".write": "auth != null && (auth.uid == $tenantId || root.child('tenants').child($tenantId).child('users').child(auth.uid).child('role').val() == 'admin')",
-        
-        "settings": {
-          ".read": true,
-          "payment": {
-            "stripe": {
-              "secretKey": {
-                ".read": "auth != null && auth.uid == $tenantId"
-              }
-            }
-          }
-        },
-        
-        "products": {
-          ".read": true,
-          ".indexOn": ["category", "available", "position"]
-        },
-        
-        "orders": {
-          ".read": "auth != null && (auth.uid == $tenantId || root.child('tenants').child($tenantId).child('users').child(auth.uid).exists())",
-          ".write": true,
-          ".indexOn": ["status", "timestamp", "date"]
-        },
-        
-        "content": {
-          ".read": true
-        },
-        
-        "offers": {
-          ".read": true
-        }
+    ".read": true,
+    ".write": false,
+    "orders": {
+      ".write": true,
+      ".read": true
+    },
+    "categories": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "products": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "restaurant": {
+      "status": {
+        ".read": true,
+        ".write": "auth != null"
       }
     },
-    
-    "public": {
-      ".read": true,
-      ".write": false
+    "temp-orders": {
+      ".write": true,
+      ".read": true
     }
   }
 }

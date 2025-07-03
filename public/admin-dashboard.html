@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eatech Admin Dashboard</title>
+    <meta name="theme-color" content="#ff6b6b">
+    <title>Eatech Admin Dashboard - Premium Control Center</title>
     
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
@@ -26,274 +27,466 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
-<body>
-    <!-- Admin Navigation -->
-    <nav class="admin-nav">
-        <div class="nav-brand">
-            <i class="fas fa-pizza-slice"></i>
-            <span>Eatech Admin</span>
+<body class="admin-body">
+    <!-- Premium Admin Navigation -->
+    <nav class="admin-nav premium">
+        <div class="nav-background">
+            <div class="nav-gradient"></div>
+            <div class="nav-pattern"></div>
         </div>
-        <div class="nav-links">
-            <a href="admin-dashboard.html" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-            <a href="admin-orders.html"><i class="fas fa-receipt"></i> Bestellungen</a>
-            <a href="admin-products.html"><i class="fas fa-box"></i> Produkte</a>
-            <a href="menu-designer.html"><i class="fas fa-palette"></i> Menu Designer</a>
-            <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        
+        <div class="nav-content">
+            <div class="nav-brand">
+                <div class="brand-logo">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="brand-info">
+                    <span class="brand-name">Eatech</span>
+                    <span class="brand-role">Admin Center</span>
+                </div>
+            </div>
+            
+            <div class="nav-links">
+                <a href="admin-dashboard.html" class="nav-link active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                    <span class="nav-indicator"></span>
+                </a>
+                <a href="admin-orders.html" class="nav-link">
+                    <i class="fas fa-receipt"></i>
+                    <span>Bestellungen</span>
+                    <span class="order-badge" id="pendingOrdersBadge">0</span>
+                </a>
+                <a href="admin-products.html" class="nav-link">
+                    <i class="fas fa-box"></i>
+                    <span>Produkte</span>
+                </a>
+                <a href="admin-menu-designer.html" class="nav-link">
+                    <i class="fas fa-palette"></i>
+                    <span>Menu Designer</span>
+                </a>
+                <a href="admin-settings.html" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Einstellungen</span>
+                </a>
+                <a href="admin-cms.html" class="nav-link">
+                    <i class="fas fa-edit"></i>
+                    <span>CMS</span>
+                </a>
+            </div>
+            
+            <div class="nav-footer">
+                <div class="admin-profile">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="profile-info">
+                        <span class="profile-name" id="adminName">Admin</span>
+                        <span class="profile-status">Online</span>
+                    </div>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
         </div>
     </nav>
 
     <!-- Dashboard Content -->
-    <div class="admin-container">
-        <div class="dashboard-header">
-            <h1>Dashboard Übersicht</h1>
+    <div class="admin-container premium">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header animated">
+            <div class="header-main">
+                <h1 class="dashboard-title">
+                    <span class="greeting" id="greeting">Guten Tag</span>
+                    <span class="subtitle">Hier ist Ihre Übersicht</span>
+                </h1>
+                <div class="header-date">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+            
             <div class="header-actions">
-                <button class="btn-refresh" onclick="refreshDashboard()">
-                    <i class="fas fa-sync-alt"></i> Aktualisieren
+                <button class="action-btn" onclick="refreshDashboard()">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>Aktualisieren</span>
                 </button>
-                <span class="last-update">Zuletzt aktualisiert: <span id="lastUpdate">-</span></span>
+                <div class="last-update">
+                    <i class="fas fa-clock"></i>
+                    <span>Update: <span id="lastUpdate">jetzt</span></span>
+                </div>
             </div>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">
+        <!-- Key Metrics Grid -->
+        <div class="metrics-grid">
+            <!-- Today's Orders -->
+            <div class="metric-card orders">
+                <div class="metric-background">
                     <i class="fas fa-shopping-cart"></i>
                 </div>
-                <div class="stat-content">
-                    <h3>Heutige Bestellungen</h3>
-                    <p class="stat-value" id="todayOrders">0</p>
-                    <span class="stat-change positive">+12% vs. gestern</span>
+                <div class="metric-content">
+                    <div class="metric-header">
+                        <h3>Heutige Bestellungen</h3>
+                        <div class="metric-trend positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>12%</span>
+                        </div>
+                    </div>
+                    <div class="metric-value" id="todayOrders">0</div>
+                    <div class="metric-footer">
+                        <span class="metric-label">vs. gestern:</span>
+                        <span class="metric-comparison" id="yesterdayOrders">0</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-euro-sign"></i>
-                </div>
-                <div class="stat-content">
-                    <h3>Heutiger Umsatz</h3>
-                    <p class="stat-value">CHF <span id="todayRevenue">0</span></p>
-                    <span class="stat-change positive">+8% vs. gestern</span>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon">
+            <!-- Pending Orders -->
+            <div class="metric-card pending">
+                <div class="metric-background">
                     <i class="fas fa-clock"></i>
                 </div>
-                <div class="stat-content">
-                    <h3>Ø Wartezeit</h3>
-                    <p class="stat-value"><span id="avgWaitTime">15</span> Min</p>
-                    <span class="stat-change neutral">Gleichbleibend</span>
+                <div class="metric-content">
+                    <div class="metric-header">
+                        <h3>Wartende Bestellungen</h3>
+                        <div class="metric-status">
+                            <span class="pulse-dot"></span>
+                            Live
+                        </div>
+                    </div>
+                    <div class="metric-value" id="pendingOrders">0</div>
+                    <div class="metric-footer">
+                        <div class="metric-progress">
+                            <div class="progress-bar" id="pendingProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-fire"></i>
+            <!-- Today's Revenue -->
+            <div class="metric-card revenue">
+                <div class="metric-background">
+                    <i class="fas fa-coins"></i>
                 </div>
-                <div class="stat-content">
-                    <h3>Aktive Bestellungen</h3>
-                    <p class="stat-value" id="activeOrders">0</p>
-                    <span class="stat-change">In Bearbeitung</span>
+                <div class="metric-content">
+                    <div class="metric-header">
+                        <h3>Tagesumsatz</h3>
+                        <div class="metric-trend positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>18%</span>
+                        </div>
+                    </div>
+                    <div class="metric-value">
+                        CHF <span id="todayRevenue">0.00</span>
+                    </div>
+                    <div class="metric-footer">
+                        <span class="metric-label">Ziel:</span>
+                        <span class="metric-comparison">CHF 2,500</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Average Wait Time -->
+            <div class="metric-card wait-time">
+                <div class="metric-background">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-header">
+                        <h3>Ø Wartezeit</h3>
+                        <div class="metric-status good">
+                            <i class="fas fa-check-circle"></i>
+                            Optimal
+                        </div>
+                    </div>
+                    <div class="metric-value" id="avgWaitTime">5 Min</div>
+                    <div class="metric-footer">
+                        <span class="metric-label">Aktuell:</span>
+                        <span class="metric-comparison" id="currentWaitTime">5 Min</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Main Dashboard Content -->
-        <div class="dashboard-main">
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid">
             <!-- Left Column -->
-            <div class="dashboard-left">
-                <!-- Revenue Chart -->
-                <div class="dashboard-card">
+            <div class="dashboard-column">
+                <!-- Restaurant Control -->
+                <div class="dashboard-card control-panel">
                     <div class="card-header">
-                        <h3><i class="fas fa-chart-line"></i> Umsatzentwicklung</h3>
-                        <select id="chartPeriod" onchange="updateRevenueChart()">
-                            <option value="week">Diese Woche</option>
-                            <option value="month">Diesen Monat</option>
-                            <option value="year">Dieses Jahr</option>
-                        </select>
+                        <h2>
+                            <i class="fas fa-sliders-h"></i>
+                            Restaurant Kontrolle
+                        </h2>
+                        <div class="card-actions">
+                            <button class="icon-btn" onclick="openSettings()">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <canvas id="revenueChart"></canvas>
-                    </div>
-                </div>
+                    
+                    <div class="card-content">
+                        <!-- Status Toggle -->
+                        <div class="control-item">
+                            <div class="control-label">
+                                <i class="fas fa-power-off"></i>
+                                <span>Restaurant Status</span>
+                            </div>
+                            <label class="toggle-switch large">
+                                <input type="checkbox" id="restaurantToggle" checked>
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-labels">
+                                    <span class="on">Geöffnet</span>
+                                    <span class="off">Geschlossen</span>
+                                </span>
+                            </label>
+                        </div>
 
-                <!-- Popular Items -->
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-star"></i> Beliebte Produkte</h3>
-                        <span class="badge">Top 5</span>
-                    </div>
-                    <div class="card-body">
-                        <div id="popularItems" class="popular-items">
-                            <!-- Wird dynamisch geladen -->
+                        <!-- Wait Time Control -->
+                        <div class="control-item">
+                            <div class="control-label">
+                                <i class="fas fa-clock"></i>
+                                <span>Wartezeit-Modus</span>
+                            </div>
+                            <div class="wait-time-selector">
+                                <button class="time-option active" data-time="5">
+                                    <i class="fas fa-bolt"></i>
+                                    <span>Normal</span>
+                                    <small>5 Min</small>
+                                </button>
+                                <button class="time-option" data-time="10">
+                                    <i class="fas fa-users"></i>
+                                    <span>Beschäftigt</span>
+                                    <small>10 Min</small>
+                                </button>
+                                <button class="time-option" data-time="15">
+                                    <i class="fas fa-fire"></i>
+                                    <span>Sehr voll</span>
+                                    <small>15 Min</small>
+                                </button>
+                                <button class="time-option custom" onclick="setCustomWaitTime()">
+                                    <i class="fas fa-edit"></i>
+                                    <span>Custom</span>
+                                    <small id="customTimeValue">-</small>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Message -->
+                        <div class="control-item">
+                            <div class="control-label">
+                                <i class="fas fa-bullhorn"></i>
+                                <span>Schnellnachricht</span>
+                            </div>
+                            <div class="quick-message">
+                                <input type="text" id="quickMessage" placeholder="z.B. Heute 20% auf alle Pizzas!">
+                                <button class="send-btn" onclick="sendQuickMessage()">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Weather Integration -->
-                <div class="dashboard-card">
+                <!-- Live Orders -->
+                <div class="dashboard-card live-orders">
                     <div class="card-header">
-                        <h3><i class="fas fa-cloud-sun"></i> Wetter & Wartezeit</h3>
-                        <button class="btn-small" onclick="openWeatherSettings()">
-                            <i class="fas fa-cog"></i>
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div id="weatherWidget" class="weather-widget">
-                            <!-- Weather widget wird geladen -->
+                        <h2>
+                            <i class="fas fa-fire"></i>
+                            Aktive Bestellungen
+                            <span class="live-indicator">
+                                <span class="pulse-dot"></span>
+                                LIVE
+                            </span>
+                        </h2>
+                        <div class="card-actions">
+                            <button class="icon-btn" onclick="toggleOrderSound()">
+                                <i class="fas fa-volume-up" id="soundIcon"></i>
+                            </button>
                         </div>
-                        <div id="weatherMap" style="height: 200px; margin-top: 15px; border-radius: 8px;"></div>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div class="orders-container" id="activeOrdersContainer">
+                            <!-- Bestellungen werden hier dynamisch eingefügt -->
+                            <div class="empty-state">
+                                <i class="fas fa-coffee"></i>
+                                <p>Keine aktiven Bestellungen</p>
+                                <small>Neue Bestellungen erscheinen hier automatisch</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Right Column -->
-            <div class="dashboard-right">
-                <!-- Real-time Orders -->
-                <div class="dashboard-card">
+            <div class="dashboard-column">
+                <!-- Eatech Voice Control -->
+                <div class="dashboard-card voice-control">
                     <div class="card-header">
-                        <h3><i class="fas fa-bell"></i> Aktuelle Bestellungen</h3>
-                        <div class="live-indicator">
-                            <span class="pulse"></span> Live
-                        </div>
+                        <h2>
+                            <i class="fas fa-microphone"></i>
+                            Eatech Voice Control
+                        </h2>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="voiceToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
                     </div>
-                    <div class="card-body">
-                        <div id="realtimeOrders" class="realtime-orders">
-                            <!-- Wird dynamisch geladen -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Voice Commands Status -->
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-microphone"></i> Eatech Voice</h3>
-                        <div class="voice-toggle">
-                            <label class="switch">
-                                <input type="checkbox" id="voiceToggle" onchange="toggleVoiceCommands()">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div id="voiceStatus" class="voice-status">
+                    
+                    <div class="card-content">
+                        <div class="voice-status" id="voiceStatus">
                             <div class="voice-indicator" id="voiceIndicator">
-                                <i class="fas fa-microphone-slash"></i>
-                                <span>Voice inaktiv</span>
+                                <div class="voice-waves">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                                <i class="fas fa-microphone"></i>
                             </div>
-                            <div class="voice-language">
-                                <label>Sprache:</label>
-                                <select id="voiceLanguage" onchange="updateVoiceLanguage()">
-                                    <option value="de-DE">Deutsch</option>
-                                    <option value="en-US">English</option>
-                                    <option value="it-IT">Italiano</option>
-                                    <option value="fr-FR">Français</option>
-                                    <option value="es-ES">Español</option>
-                                    <option value="tr-TR">Türkçe</option>
-                                </select>
+                            <div class="voice-info">
+                                <p class="voice-state">Voice Control inaktiv</p>
+                                <p class="voice-command" id="voiceCommand">Sage "Eatech" zum Aktivieren</p>
                             </div>
-                            <div class="voice-commands-list">
-                                <p><strong>Verfügbare Befehle:</strong></p>
-                                <ul>
-                                    <li>"Eatech, Bestellung [Nr] fertig"</li>
-                                    <li>"Eatech, zeige Bestellungen"</li>
-                                    <li>"Eatech, Wartezeit [Min] Minuten"</li>
-                                    <li>"Eatech, Hilfe"</li>
-                                </ul>
+                        </div>
+                        
+                        <div class="voice-commands-list">
+                            <h4>Verfügbare Befehle:</h4>
+                            <ul>
+                                <li><i class="fas fa-check"></i> "Eatech, Bestellung [Nummer] fertig"</li>
+                                <li><i class="fas fa-clock"></i> "Eatech, Wartezeit [Minuten] Minuten"</li>
+                                <li><i class="fas fa-list"></i> "Eatech, zeige Bestellungen"</li>
+                                <li><i class="fas fa-power-off"></i> "Eatech, Restaurant schließen"</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weather Integration -->
+                <div class="dashboard-card weather-widget" id="weatherWidget">
+                    <div class="card-header">
+                        <h2>
+                            <i class="fas fa-cloud-sun"></i>
+                            Wetter-Impact
+                        </h2>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="weatherToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div class="weather-display" id="weatherDisplay">
+                            <div class="weather-loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Wetterdaten werden geladen...</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Quick Actions -->
-                <div class="dashboard-card">
+                <!-- Revenue Chart -->
+                <div class="dashboard-card chart-card">
                     <div class="card-header">
-                        <h3><i class="fas fa-bolt"></i> Schnellaktionen</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="quick-actions">
-                            <button onclick="window.location.href='admin-products.html'" class="quick-action-btn">
-                                <i class="fas fa-plus-circle"></i>
-                                <span>Neues Produkt</span>
-                            </button>
-                            <button onclick="exportTodayOrders()" class="quick-action-btn">
-                                <i class="fas fa-download"></i>
-                                <span>Export Heute</span>
-                            </button>
-                            <button onclick="updateWaitTime()" class="quick-action-btn">
-                                <i class="fas fa-clock"></i>
-                                <span>Wartezeit ändern</span>
-                            </button>
-                            <button onclick="toggleShop()" class="quick-action-btn">
-                                <i class="fas fa-store"></i>
-                                <span>Shop Status</span>
-                            </button>
+                        <h2>
+                            <i class="fas fa-chart-line"></i>
+                            Umsatz Heute
+                        </h2>
+                        <div class="chart-legend">
+                            <span class="legend-item current">
+                                <span class="legend-dot"></span>
+                                Heute
+                            </span>
+                            <span class="legend-item average">
+                                <span class="legend-dot"></span>
+                                Durchschnitt
+                            </span>
                         </div>
                     </div>
-                </div>
-
-                <!-- System Status -->
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-server"></i> System Status</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="system-status">
-                            <div class="status-item">
-                                <span>Firebase</span>
-                                <span class="status-indicator online"></span>
-                            </div>
-                            <div class="status-item">
-                                <span>Stripe Payments</span>
-                                <span class="status-indicator online"></span>
-                            </div>
-                            <div class="status-item">
-                                <span>WhatsApp API</span>
-                                <span class="status-indicator" id="whatsappStatus"></span>
-                            </div>
-                            <div class="status-item">
-                                <span>Offline Sync</span>
-                                <span class="status-indicator" id="offlineStatus"></span>
-                            </div>
-                            <div class="status-item">
-                                <span>Weather API</span>
-                                <span class="status-indicator" id="weatherApiStatus"></span>
-                            </div>
-                        </div>
+                    
+                    <div class="card-content">
+                        <canvas id="revenueChart" height="200"></canvas>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions-bar">
+            <h3>Schnellzugriff</h3>
+            <div class="quick-actions-grid">
+                <button class="quick-action" onclick="window.location.href='admin-orders.html'">
+                    <div class="action-icon">
+                        <i class="fas fa-list-alt"></i>
+                    </div>
+                    <span>Alle Bestellungen</span>
+                </button>
+                <button class="quick-action" onclick="window.location.href='admin-products.html'">
+                    <div class="action-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <span>Produkt hinzufügen</span>
+                </button>
+                <button class="quick-action" onclick="openReports()">
+                    <div class="action-icon">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <span>Berichte</span>
+                </button>
+                <button class="quick-action" onclick="openWhatsAppManager()">
+                    <div class="action-icon">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <span>WhatsApp</span>
+                </button>
+                <button class="quick-action" onclick="openInventory()">
+                    <div class="action-icon">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <span>Inventar</span>
+                </button>
+                <button class="quick-action" onclick="openAnalytics()">
+                    <div class="action-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <span>Analytics</span>
+                </button>
+            </div>
+        </div>
     </div>
 
-    <!-- Voice Command Feedback Component -->
-    <div id="voiceFeedback" class="voice-feedback hidden">
+    <!-- Voice Feedback Component -->
+    <div class="voice-feedback" id="voiceFeedback" style="display: none;">
         <div class="voice-animation">
             <div class="voice-wave"></div>
             <div class="voice-wave"></div>
             <div class="voice-wave"></div>
         </div>
-        <p class="voice-text">Höre zu...</p>
+        <span class="voice-text" id="voiceFeedbackText">Ich höre zu...</span>
     </div>
 
     <!-- Weather Settings Modal -->
-    <div id="weatherSettingsModal" class="modal">
-        <div class="modal-content">
+    <div class="modal" id="weatherSettingsModal" style="display: none;">
+        <div class="modal-backdrop" onclick="closeWeatherSettings()"></div>
+        <div class="modal-content weather-settings">
             <div class="modal-header">
-                <h2>Wetter-Integration Einstellungen</h2>
-                <button onclick="closeWeatherSettings()" class="close-btn">×</button>
+                <h3>
+                    <i class="fas fa-cloud-sun"></i>
+                    Wetter-Einstellungen
+                </h3>
+                <button class="modal-close" onclick="closeWeatherSettings()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-body">
                 <div class="settings-section">
-                    <label>OpenWeatherMap API Key:</label>
-                    <input type="text" id="weatherApiKey" placeholder="Dein API Key">
-                    <small>Kostenlos auf openweathermap.org</small>
+                    <label>OpenWeatherMap API Key</label>
+                    <input type="text" id="weatherApiKey" placeholder="Ihr API Key">
                 </div>
                 <div class="settings-section">
-                    <label>Standort:</label>
+                    <label>Standort</label>
                     <input type="text" id="weatherLocation" placeholder="z.B. Zürich">
                 </div>
                 <div class="settings-section">
@@ -320,6 +513,8 @@
     </div>
 
     <!-- Scripts -->
+    <script src="js/voice-commands.js"></script>
+    <script src="js/weather-integration.js"></script>
     <script>
         // Firebase Configuration - EATECH
         const firebaseConfig = {
@@ -339,6 +534,13 @@
         // Global variables
         let revenueChart;
         let voiceCommandsActive = false;
+        let soundEnabled = true;
+        let activeOrders = [];
+        let todayStats = {
+            orders: 0,
+            revenue: 0,
+            pending: 0
+        };
         
         // Check authentication
         auth.onAuthStateChanged(user => {
@@ -351,79 +553,257 @@
         
         // Initialize Dashboard
         function initializeDashboard() {
-            loadDashboardData();
-            initializeRevenueChart();
-            startRealtimeUpdates();
-            checkSystemStatus();
-            updateLastUpdate();
+            updateDateTime();
+            setInterval(updateDateTime, 60000);
             
-            // Initialize Voice Commands if enabled
-            const voiceEnabled = localStorage.getItem('voiceCommandsEnabled') === 'true';
-            if (voiceEnabled) {
-                document.getElementById('voiceToggle').checked = true;
-                toggleVoiceCommands();
+            loadDashboardData();
+            setupRealtimeListeners();
+            initializeChart();
+            
+            // Initialize integrations
+            if (window.voiceCommands) {
+                window.voiceCommands.init();
             }
             
-            // Auto-refresh every 30 seconds
-            setInterval(() => {
-                refreshDashboard();
-            }, 30000);
+            if (window.weatherIntegration) {
+                window.weatherIntegration.init();
+            }
+            
+            // Setup event listeners
+            setupEventListeners();
+        }
+        
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('currentDate').textContent = 
+                now.toLocaleDateString('de-CH', options);
+            
+            // Update greeting
+            const hour = now.getHours();
+            let greeting = 'Guten Tag';
+            if (hour < 12) greeting = 'Guten Morgen';
+            else if (hour < 18) greeting = 'Guten Nachmittag';
+            else greeting = 'Guten Abend';
+            
+            document.getElementById('greeting').textContent = greeting;
+            
+            // Update last update time
+            document.getElementById('lastUpdate').textContent = 
+                now.toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' });
         }
         
         // Load dashboard data
-        function loadDashboardData() {
-            const today = new Date().toISOString().split('T')[0];
+        async function loadDashboardData() {
+            const now = new Date();
+            const todayStart = new Date(now.setHours(0, 0, 0, 0)).getTime();
             
-            // Load today's orders
-            database.ref('tenants/demo/orders').orderByChild('date').startAt(today).on('value', (snapshot) => {
-                const orders = snapshot.val() || {};
-                const todayOrdersArray = Object.values(orders).filter(order => 
-                    order.date && order.date.startsWith(today)
-                );
-                
-                // Update stats
-                document.getElementById('todayOrders').textContent = todayOrdersArray.length;
-                
-                // Calculate revenue
-                const revenue = todayOrdersArray.reduce((sum, order) => {
-                    return sum + (order.total || 0);
-                }, 0);
-                document.getElementById('todayRevenue').textContent = revenue.toFixed(2);
-                
-                // Active orders
-                const activeOrders = todayOrdersArray.filter(order => 
-                    order.status === 'pending' || order.status === 'preparing'
-                ).length;
-                document.getElementById('activeOrders').textContent = activeOrders;
-                
-                // Update realtime orders
-                updateRealtimeOrders(todayOrdersArray);
-            });
+            // Load orders
+            const ordersSnapshot = await database.ref('orders')
+                .orderByChild('timestamp')
+                .startAt(todayStart)
+                .once('value');
             
-            // Load average wait time
-            database.ref('tenants/demo/settings/payment/defaultWaitTime').on('value', (snapshot) => {
-                const waitTime = snapshot.val() || 15;
-                document.getElementById('avgWaitTime').textContent = waitTime;
-            });
+            const orders = ordersSnapshot.val() || {};
+            processOrdersData(orders);
             
-            // Load popular items
-            loadPopularItems();
+            // Load restaurant status
+            const statusSnapshot = await database.ref('restaurant/status').once('value');
+            const status = statusSnapshot.val() || {};
+            updateRestaurantStatus(status);
         }
         
-        // Initialize Revenue Chart
-        function initializeRevenueChart() {
+        // Process orders data
+        function processOrdersData(orders) {
+            todayStats = {
+                orders: 0,
+                revenue: 0,
+                pending: 0
+            };
+            
+            activeOrders = [];
+            
+            Object.entries(orders).forEach(([id, order]) => {
+                todayStats.orders++;
+                todayStats.revenue += order.total || 0;
+                
+                if (order.status === 'new' || order.status === 'preparing') {
+                    todayStats.pending++;
+                    activeOrders.push({ id, ...order });
+                }
+            });
+            
+            // Update UI
+            document.getElementById('todayOrders').textContent = todayStats.orders;
+            document.getElementById('todayRevenue').textContent = todayStats.revenue.toFixed(2);
+            document.getElementById('pendingOrders').textContent = todayStats.pending;
+            document.getElementById('pendingOrdersBadge').textContent = todayStats.pending;
+            
+            // Update progress bar
+            const progress = Math.min((todayStats.pending / 10) * 100, 100);
+            document.getElementById('pendingProgress').style.width = `${progress}%`;
+            
+            // Render active orders
+            renderActiveOrders();
+        }
+        
+        // Render active orders
+        function renderActiveOrders() {
+            const container = document.getElementById('activeOrdersContainer');
+            
+            if (activeOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-coffee"></i>
+                        <p>Keine aktiven Bestellungen</p>
+                        <small>Neue Bestellungen erscheinen hier automatisch</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = activeOrders.map(order => `
+                <div class="order-card ${order.status}" data-order-id="${order.id}">
+                    <div class="order-header">
+                        <div class="order-id">#${order.id}</div>
+                        <div class="order-time">${formatTime(order.timestamp)}</div>
+                    </div>
+                    
+                    <div class="order-customer">
+                        <i class="fas fa-user"></i>
+                        <span>${order.customer.name}</span>
+                        ${order.customer.whatsapp ? '<i class="fab fa-whatsapp"></i>' : ''}
+                    </div>
+                    
+                    <div class="order-items">
+                        ${order.items.map(item => `
+                            <div class="order-item">
+                                <span>${item.quantity}x ${item.name}</span>
+                                <span>CHF ${(item.price * item.quantity).toFixed(2)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="order-footer">
+                        <div class="order-total">
+                            <strong>Total: CHF ${order.total.toFixed(2)}</strong>
+                        </div>
+                        <div class="order-actions">
+                            ${order.status === 'new' ? `
+                                <button class="btn-action prepare" onclick="updateOrderStatus('${order.id}', 'preparing')">
+                                    <i class="fas fa-fire"></i>
+                                    Zubereiten
+                                </button>
+                            ` : `
+                                <button class="btn-action ready" onclick="updateOrderStatus('${order.id}', 'ready')">
+                                    <i class="fas fa-check"></i>
+                                    Fertig
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Update restaurant status
+        function updateRestaurantStatus(status) {
+            const toggle = document.getElementById('restaurantToggle');
+            toggle.checked = status.isOpen !== false;
+            
+            // Update wait time
+            const waitTime = status.waitTime || 5;
+            document.querySelectorAll('.time-option').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.dataset.time) === waitTime) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            document.getElementById('currentWaitTime').textContent = `${waitTime} Min`;
+            document.getElementById('avgWaitTime').textContent = `${waitTime} Min`;
+        }
+        
+        // Setup realtime listeners
+        function setupRealtimeListeners() {
+            // Orders listener
+            database.ref('orders').on('child_added', (snapshot) => {
+                const order = snapshot.val();
+                if (order.timestamp > Date.now() - 86400000) { // Today only
+                    handleNewOrder(snapshot.key, order);
+                }
+            });
+            
+            database.ref('orders').on('child_changed', (snapshot) => {
+                const order = snapshot.val();
+                handleOrderUpdate(snapshot.key, order);
+            });
+            
+            // Status listener
+            database.ref('restaurant/status').on('value', (snapshot) => {
+                updateRestaurantStatus(snapshot.val() || {});
+            });
+        }
+        
+        // Handle new order
+        function handleNewOrder(orderId, order) {
+            // Play sound
+            if (soundEnabled) {
+                playNotificationSound();
+            }
+            
+            // Show notification
+            showNotification('Neue Bestellung', `Bestellung #${orderId} eingegangen`);
+            
+            // Reload data
+            loadDashboardData();
+        }
+        
+        // Handle order update
+        function handleOrderUpdate(orderId, order) {
+            // Update specific order card
+            const card = document.querySelector(`[data-order-id="${orderId}"]`);
+            if (card) {
+                if (order.status === 'ready' || order.status === 'completed') {
+                    card.remove();
+                    todayStats.pending--;
+                    document.getElementById('pendingOrders').textContent = todayStats.pending;
+                    document.getElementById('pendingOrdersBadge').textContent = todayStats.pending;
+                } else {
+                    // Reload to update card
+                    loadDashboardData();
+                }
+            }
+        }
+        
+        // Initialize chart
+        function initializeChart() {
             const ctx = document.getElementById('revenueChart').getContext('2d');
+            
             revenueChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: [],
+                    labels: ['11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'],
                     datasets: [{
-                        label: 'Umsatz (CHF)',
-                        data: [],
+                        label: 'Heute',
+                        data: generateHourlyData(),
                         borderColor: '#ff6b6b',
                         backgroundColor: 'rgba(255, 107, 107, 0.1)',
-                        borderWidth: 3,
-                        tension: 0.4
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Durchschnitt',
+                        data: [150, 280, 420, 380, 320, 280, 340, 420, 380, 220],
+                        borderColor: 'rgba(255, 255, 255, 0.3)',
+                        borderDash: [5, 5],
+                        tension: 0.4,
+                        fill: false
                     }]
                 },
                 options: {
@@ -438,293 +818,473 @@
                         y: {
                             beginAtZero: true,
                             grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
+                                color: 'rgba(255, 255, 255, 0.05)'
                             },
                             ticks: {
-                                color: 'rgba(255, 255, 255, 0.7)'
+                                color: 'rgba(255, 255, 255, 0.5)',
+                                callback: function(value) {
+                                    return 'CHF ' + value;
+                                }
                             }
                         },
                         x: {
                             grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
+                                color: 'rgba(255, 255, 255, 0.05)'
                             },
                             ticks: {
-                                color: 'rgba(255, 255, 255, 0.7)'
+                                color: 'rgba(255, 255, 255, 0.5)'
                             }
                         }
                     }
                 }
             });
+        }
+        
+        // Generate hourly data (mock for now)
+        function generateHourlyData() {
+            const data = [];
+            const currentHour = new Date().getHours();
             
-            updateRevenueChart();
-        }
-        
-        // Update Revenue Chart
-        function updateRevenueChart() {
-            const period = document.getElementById('chartPeriod').value;
-            const endDate = new Date();
-            let startDate = new Date();
-            let labels = [];
-            
-            switch(period) {
-                case 'week':
-                    startDate.setDate(endDate.getDate() - 7);
-                    for (let i = 6; i >= 0; i--) {
-                        const date = new Date();
-                        date.setDate(date.getDate() - i);
-                        labels.push(date.toLocaleDateString('de-CH', { weekday: 'short' }));
-                    }
-                    break;
-                case 'month':
-                    startDate.setMonth(endDate.getMonth() - 1);
-                    for (let i = 29; i >= 0; i--) {
-                        const date = new Date();
-                        date.setDate(date.getDate() - i);
-                        labels.push(date.getDate());
-                    }
-                    break;
-                case 'year':
-                    startDate.setFullYear(endDate.getFullYear() - 1);
-                    const months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-                    labels = months;
-                    break;
-            }
-            
-            // Simulate data for demo
-            const data = labels.map(() => Math.floor(Math.random() * 1000) + 500);
-            
-            revenueChart.data.labels = labels;
-            revenueChart.data.datasets[0].data = data;
-            revenueChart.update();
-        }
-        
-        // Load Popular Items
-        function loadPopularItems() {
-            database.ref('tenants/demo/products').once('value', (snapshot) => {
-                const products = snapshot.val() || {};
-                const productsArray = Object.entries(products).map(([id, product]) => ({
-                    id,
-                    ...product,
-                    orders: Math.floor(Math.random() * 50) + 10 // Simulated order count
-                }));
-                
-                // Sort by orders and get top 5
-                const topProducts = productsArray
-                    .sort((a, b) => b.orders - a.orders)
-                    .slice(0, 5);
-                
-                const container = document.getElementById('popularItems');
-                container.innerHTML = topProducts.map((product, index) => `
-                    <div class="popular-item">
-                        <span class="rank">${index + 1}</span>
-                        <div class="item-info">
-                            <h4>${product.name}</h4>
-                            <span class="item-orders">${product.orders} Bestellungen</span>
-                        </div>
-                        <span class="item-revenue">CHF ${(product.price * product.orders).toFixed(2)}</span>
-                    </div>
-                `).join('');
-            });
-        }
-        
-        // Update Realtime Orders
-        function updateRealtimeOrders(orders) {
-            const container = document.getElementById('realtimeOrders');
-            const recentOrders = orders
-                .filter(order => order.status === 'pending' || order.status === 'preparing')
-                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-                .slice(0, 5);
-            
-            if (recentOrders.length === 0) {
-                container.innerHTML = '<p class="no-orders">Keine aktiven Bestellungen</p>';
-                return;
-            }
-            
-            container.innerHTML = recentOrders.map(order => `
-                <div class="realtime-order-item status-${order.status}">
-                    <div class="order-header">
-                        <span class="order-number">#${order.orderNumber}</span>
-                        <span class="order-time">${getTimeDiff(order.timestamp)}</span>
-                    </div>
-                    <div class="order-details">
-                        <p class="customer-name">${order.customerName}</p>
-                        <p class="order-items">${order.items.length} Artikel • CHF ${order.total.toFixed(2)}</p>
-                    </div>
-                    <div class="order-status">
-                        <span class="status-badge ${order.status}">
-                            ${order.status === 'pending' ? 'Neu' : 'In Bearbeitung'}
-                        </span>
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        // Get time difference
-        function getTimeDiff(timestamp) {
-            const diff = Date.now() - new Date(timestamp).getTime();
-            const minutes = Math.floor(diff / 60000);
-            if (minutes < 1) return 'Gerade eben';
-            if (minutes === 1) return 'vor 1 Minute';
-            return `vor ${minutes} Minuten`;
-        }
-        
-        // Start realtime updates
-        function startRealtimeUpdates() {
-            // This would connect to Firebase realtime updates
-            // For now, we'll update every 5 seconds
-            setInterval(() => {
-                updateLastUpdate();
-            }, 5000);
-        }
-        
-        // Update last update time
-        function updateLastUpdate() {
-            const now = new Date();
-            document.getElementById('lastUpdate').textContent = 
-                now.toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' });
-        }
-        
-        // Check system status
-        function checkSystemStatus() {
-            // Check WhatsApp
-            const whatsappEnabled = localStorage.getItem('whatsappEnabled') === 'true';
-            document.getElementById('whatsappStatus').className = 
-                `status-indicator ${whatsappEnabled ? 'online' : 'offline'}`;
-            
-            // Check Offline Status
-            document.getElementById('offlineStatus').className = 
-                `status-indicator ${navigator.onLine ? 'online' : 'offline'}`;
-            
-            // Check Weather API
-            const weatherEnabled = localStorage.getItem('weatherEnabled') === 'true';
-            document.getElementById('weatherApiStatus').className = 
-                `status-indicator ${weatherEnabled ? 'online' : 'offline'}`;
-        }
-        
-        // Refresh Dashboard
-        function refreshDashboard() {
-            loadDashboardData();
-            updateRevenueChart();
-            checkSystemStatus();
-            updateLastUpdate();
-            
-            // Animate refresh button
-            const btn = document.querySelector('.btn-refresh i');
-            btn.classList.add('fa-spin');
-            setTimeout(() => {
-                btn.classList.remove('fa-spin');
-            }, 1000);
-        }
-        
-        // Export today's orders
-        function exportTodayOrders() {
-            alert('Export-Funktion wird implementiert...');
-        }
-        
-        // Update wait time
-        function updateWaitTime() {
-            const newTime = prompt('Neue Wartezeit in Minuten:', '15');
-            if (newTime && !isNaN(newTime)) {
-                database.ref('tenants/demo/settings/payment/defaultWaitTime').set(parseInt(newTime));
-                alert(`Wartezeit auf ${newTime} Minuten aktualisiert`);
-            }
-        }
-        
-        // Toggle shop status
-        function toggleShop() {
-            database.ref('tenants/demo/settings/shopOpen').once('value', (snapshot) => {
-                const isOpen = snapshot.val() !== false;
-                database.ref('tenants/demo/settings/shopOpen').set(!isOpen);
-                alert(`Shop ist jetzt ${!isOpen ? 'geöffnet' : 'geschlossen'}`);
-            });
-        }
-        
-        // Toggle Voice Commands
-        function toggleVoiceCommands() {
-            const enabled = document.getElementById('voiceToggle').checked;
-            
-            if (enabled) {
-                // Start voice commands
-                if (typeof initializeVoiceCommands === 'function') {
-                    initializeVoiceCommands();
-                    voiceCommandsActive = true;
-                    updateVoiceStatus(true);
-                    localStorage.setItem('voiceCommandsEnabled', 'true');
+            for (let i = 11; i <= 20; i++) {
+                if (i <= currentHour) {
+                    data.push(Math.floor(Math.random() * 300) + 100);
+                } else {
+                    data.push(0);
                 }
-            } else {
-                // Stop voice commands
-                if (typeof stopVoiceCommands === 'function') {
+            }
+            
+            return data;
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Restaurant toggle
+            document.getElementById('restaurantToggle').addEventListener('change', (e) => {
+                database.ref('restaurant/status/isOpen').set(e.target.checked);
+                showNotification(
+                    'Status aktualisiert',
+                    e.target.checked ? 'Restaurant ist jetzt geöffnet' : 'Restaurant ist jetzt geschlossen'
+                );
+            });
+            
+            // Wait time buttons
+            document.querySelectorAll('.time-option').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (!this.classList.contains('custom')) {
+                        const time = parseInt(this.dataset.time);
+                        setWaitTime(time);
+                    }
+                });
+            });
+            
+            // Voice toggle
+            document.getElementById('voiceToggle').addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    startVoiceCommands();
+                } else {
                     stopVoiceCommands();
-                    voiceCommandsActive = false;
-                    updateVoiceStatus(false);
-                    localStorage.setItem('voiceCommandsEnabled', 'false');
                 }
-            }
-        }
-        
-        // Update Voice Status Display
-        function updateVoiceStatus(active) {
-            const indicator = document.getElementById('voiceIndicator');
-            if (active) {
-                indicator.innerHTML = '<i class="fas fa-microphone"></i><span>Voice aktiv</span>';
-                indicator.classList.add('active');
-            } else {
-                indicator.innerHTML = '<i class="fas fa-microphone-slash"></i><span>Voice inaktiv</span>';
-                indicator.classList.remove('active');
-            }
-        }
-        
-        // Update Voice Language
-        function updateVoiceLanguage() {
-            const language = document.getElementById('voiceLanguage').value;
-            if (typeof setVoiceLanguage === 'function') {
-                setVoiceLanguage(language);
-            }
-        }
-        
-        // Weather Settings
-        function openWeatherSettings() {
-            document.getElementById('weatherSettingsModal').style.display = 'flex';
+            });
             
-            // Load current settings
-            const apiKey = localStorage.getItem('weatherApiKey') || '';
-            const location = localStorage.getItem('weatherLocation') || 'Zürich';
+            // Weather toggle
+            document.getElementById('weatherToggle').addEventListener('change', (e) => {
+                if (e.target.checked && window.weatherIntegration) {
+                    window.weatherIntegration.enable();
+                } else if (window.weatherIntegration) {
+                    window.weatherIntegration.disable();
+                }
+            });
             
-            document.getElementById('weatherApiKey').value = apiKey;
-            document.getElementById('weatherLocation').value = location;
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                auth.signOut().then(() => {
+                    window.location.href = 'login.html';
+                });
+            });
         }
         
+        // Update order status
+        async function updateOrderStatus(orderId, newStatus) {
+            await database.ref(`orders/${orderId}/status`).set(newStatus);
+            
+            if (newStatus === 'ready') {
+                // Send notification
+                const order = activeOrders.find(o => o.id === orderId);
+                if (order && order.customer.whatsapp) {
+                    // Trigger WhatsApp notification
+                    if (window.whatsappIntegration) {
+                        window.whatsappIntegration.sendOrderReady(orderId, order);
+                    }
+                }
+                
+                showNotification('Bestellung fertig', `Bestellung #${orderId} ist bereit zur Abholung`);
+            }
+        }
+        
+        // Set wait time
+        function setWaitTime(minutes) {
+            database.ref('restaurant/status/waitTime').set(minutes);
+            
+            document.querySelectorAll('.time-option').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.dataset.time) === minutes) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            showNotification('Wartezeit aktualisiert', `Neue Wartezeit: ${minutes} Minuten`);
+        }
+        
+        // Set custom wait time
+        function setCustomWaitTime() {
+            const time = prompt('Wartezeit in Minuten eingeben:', '20');
+            if (time && !isNaN(time)) {
+                const minutes = parseInt(time);
+                setWaitTime(minutes);
+                document.getElementById('customTimeValue').textContent = `${minutes} Min`;
+                document.querySelector('.time-option.custom').classList.add('active');
+            }
+        }
+        
+        // Send quick message
+        function sendQuickMessage() {
+            const message = document.getElementById('quickMessage').value.trim();
+            if (!message) return;
+            
+            database.ref('restaurant/quickMessage').set({
+                message: message,
+                timestamp: Date.now()
+            });
+            
+            document.getElementById('quickMessage').value = '';
+            showNotification('Nachricht gesendet', 'Die Nachricht wurde an alle Kunden gesendet');
+        }
+        
+        // Voice commands
+        function startVoiceCommands() {
+            if (window.voiceCommands) {
+                window.voiceCommands.start();
+                document.getElementById('voiceIndicator').classList.add('active');
+                document.querySelector('.voice-state').textContent = 'Voice Control aktiv';
+                document.getElementById('voiceCommand').textContent = 'Höre zu...';
+            }
+        }
+        
+        function stopVoiceCommands() {
+            if (window.voiceCommands) {
+                window.voiceCommands.stop();
+                document.getElementById('voiceIndicator').classList.remove('active');
+                document.querySelector('.voice-state').textContent = 'Voice Control inaktiv';
+                document.getElementById('voiceCommand').textContent = 'Sage "Eatech" zum Aktivieren';
+            }
+        }
+        
+        // Utility functions
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('de-CH', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+        
+        function playNotificationSound() {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn');
+            audio.play();
+        }
+        
+        function showNotification(title, message) {
+            // Browser notification
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(title, {
+                    body: message,
+                    icon: '/icons/icon-192x192.png'
+                });
+            }
+            
+            // In-app notification
+            const notification = document.createElement('div');
+            notification.className = 'dashboard-notification';
+            notification.innerHTML = `
+                <i class="fas fa-bell"></i>
+                <div>
+                    <strong>${title}</strong>
+                    <p>${message}</p>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+        
+        // Toggle order sound
+        function toggleOrderSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            icon.className = soundEnabled ? 'fas fa-volume-up' : 'fas fa-volume-mute';
+            localStorage.setItem('orderSoundEnabled', soundEnabled);
+        }
+        
+        // Quick action functions (placeholders)
+        function openReports() {
+            showNotification('Coming Soon', 'Berichte-Funktion wird bald verfügbar sein');
+        }
+        
+        function openWhatsAppManager() {
+            showNotification('Coming Soon', 'WhatsApp Manager wird bald verfügbar sein');
+        }
+        
+        function openInventory() {
+            showNotification('Coming Soon', 'Inventar-Verwaltung wird bald verfügbar sein');
+        }
+        
+        function openAnalytics() {
+            showNotification('Coming Soon', 'Analytics Dashboard wird bald verfügbar sein');
+        }
+        
+        function openSettings() {
+            window.location.href = 'admin-settings.html';
+        }
+        
+        function refreshDashboard() {
+            const btn = event.target.closest('button');
+            const icon = btn.querySelector('i');
+            icon.classList.add('fa-spin');
+            
+            loadDashboardData().then(() => {
+                setTimeout(() => {
+                    icon.classList.remove('fa-spin');
+                    updateDateTime();
+                }, 500);
+            });
+        }
+        
+        // Weather settings
         function closeWeatherSettings() {
             document.getElementById('weatherSettingsModal').style.display = 'none';
         }
         
         function saveWeatherSettings() {
-            const apiKey = document.getElementById('weatherApiKey').value;
-            const location = document.getElementById('weatherLocation').value;
-            
-            localStorage.setItem('weatherApiKey', apiKey);
-            localStorage.setItem('weatherLocation', location);
-            localStorage.setItem('weatherEnabled', 'true');
-            
+            // Save settings logic here
             closeWeatherSettings();
+            showNotification('Gespeichert', 'Wetter-Einstellungen wurden aktualisiert');
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', () => {
+            // Request notification permission
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
             
-            // Reload weather widget
-            if (typeof initializeWeather === 'function') {
-                initializeWeather();
+            // Load saved preferences
+            soundEnabled = localStorage.getItem('orderSoundEnabled') !== 'false';
+            document.getElementById('soundIcon').className = 
+                soundEnabled ? 'fas fa-volume-up' : 'fas fa-volume-mute';
+        });
+    </script>
+
+    <style>
+        /* Additional premium styles */
+        .dashboard-notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.95), rgba(255, 87, 87, 0.95));
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-width: 400px;
+        }
+        
+        .dashboard-notification.show {
+            transform: translateX(0);
+        }
+        
+        .dashboard-notification i {
+            font-size: 20px;
+        }
+        
+        .dashboard-notification strong {
+            display: block;
+            margin-bottom: 2px;
+        }
+        
+        .dashboard-notification p {
+            margin: 0;
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+        
+        /* Animated elements */
+        .animated {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
         
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            if (confirm('Wirklich ausloggen?')) {
-                auth.signOut();
+        .metric-card {
+            animation: fadeInScale 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        .metric-card:nth-child(1) { animation-delay: 0.1s; }
+        .metric-card:nth-child(2) { animation-delay: 0.2s; }
+        .metric-card:nth-child(3) { animation-delay: 0.3s; }
+        .metric-card:nth-child(4) { animation-delay: 0.4s; }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
             }
-        });
-    </script>
-    
-    <!-- Additional Scripts -->
-    <script src="js/voice-commands.js"></script>
-    <script src="js/weather-integration.js"></script>
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        /* Order cards animation */
+        .order-card {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Premium navigation enhancements */
+        .nav-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
+        
+        .nav-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, 
+                rgba(255, 107, 107, 0.1) 0%, 
+                rgba(255, 107, 107, 0.05) 50%, 
+                transparent 100%);
+        }
+        
+        .nav-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        
+        .nav-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Metric card backgrounds */
+        .metric-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-background {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            font-size: 80px;
+            opacity: 0.05;
+            transform: rotate(-15deg);
+        }
+        
+        .metric-card.orders .metric-background { color: #3b82f6; }
+        .metric-card.pending .metric-background { color: #f59e0b; }
+        .metric-card.revenue .metric-background { color: #10b981; }
+        .metric-card.wait-time .metric-background { color: #8b5cf6; }
+        
+        /* Premium toggle switch */
+        .toggle-switch.large {
+            width: 80px;
+            height: 36px;
+        }
+        
+        .toggle-switch.large .toggle-slider {
+            height: 36px;
+            border-radius: 18px;
+        }
+        
+        .toggle-switch.large .toggle-slider:before {
+            width: 28px;
+            height: 28px;
+            left: 4px;
+            bottom: 4px;
+        }
+        
+        .toggle-switch.large input:checked + .toggle-slider:before {
+            transform: translateX(44px);
+        }
+        
+        .toggle-labels {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+            pointer-events: none;
+        }
+        
+        .toggle-labels span {
+            font-size: 11px;
+            font-weight: 600;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+        
+        .toggle-switch input:checked ~ .toggle-labels .on {
+            opacity: 1;
+        }
+        
+        .toggle-switch input:not(:checked) ~ .toggle-labels .off {
+            opacity: 1;
+        }
+    </style>
 </body>
 </html>

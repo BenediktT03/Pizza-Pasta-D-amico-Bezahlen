@@ -8,232 +8,22 @@
     <meta name="theme-color" content="#FF6B6B">
     
     <style>
-        /* Theme System - Professionelle Restaurant-Farbkombinationen */
         :root {
-            /* Default Theme wird durch data-theme überschrieben */
-        }
-
-        /* Theme 1: NOIR EXCELLENCE - Das Original Schwarz-Rot */
-        [data-theme="noir-excellence"] {
-            --primary: #FF0000;
-            --primary-dark: #CC0000;
-            --secondary: #FFD700;
-            --dark: #0A0A0A;
-            --darker: #000000;
+            --primary: #FF6B6B;
+            --primary-dark: #FF5252;
+            --secondary: #4ECDC4;
+            --dark: #2C3E50;
+            --darker: #1a1a2e;
             --light: #F7F9FB;
-            --text: #FFFFFF;
-            --text-muted: #999999;
+            --text: #E8E8E8;
+            --text-muted: #95A5A6;
             --success: #2ECC71;
             --warning: #F39C12;
             --danger: #E74C3C;
-            --card-bg: #1a1a1a;
-            --sidebar-bg: #0f0f0f;
-            --gradient-start: #000000;
-            --gradient-end: #1a1a1a;
-            --header-bg: rgba(26, 26, 26, 0.95);
-            --nav-bg: #1a1a1a;
-            --border-accent: #FF0000;
+            --card-bg: #16213e;
+            --sidebar-bg: #0f1419;
         }
 
-        /* Theme 2: MIDNIGHT SAPPHIRE - Premium Blau */
-        [data-theme="midnight-sapphire"] {
-            --primary: #4169E1;
-            --primary-dark: #1E90FF;
-            --secondary: #FFD700;
-            --dark: #000033;
-            --darker: #000022;
-            --light: #F7F9FB;
-            --text: #FFFFFF;
-            --text-muted: #87CEEB;
-            --success: #2ECC71;
-            --warning: #F39C12;
-            --danger: #E74C3C;
-            --card-bg: #000044;
-            --sidebar-bg: #000033;
-            --gradient-start: #000022;
-            --gradient-end: #000044;
-            --header-bg: rgba(0, 0, 51, 0.95);
-            --nav-bg: #000044;
-            --border-accent: #4169E1;
-        }
-
-        /* Theme 3: EMERALD LUXE - Waldgrün Premium */
-        [data-theme="emerald-luxe"] {
-            --primary: #00C851;
-            --primary-dark: #007E33;
-            --secondary: #FFD700;
-            --dark: #0D2818;
-            --darker: #051A0F;
-            --light: #F7F9FB;
-            --text: #FFFFFF;
-            --text-muted: #81C784;
-            --success: #00C851;
-            --warning: #FFEB3B;
-            --danger: #E74C3C;
-            --card-bg: #0D2818;
-            --sidebar-bg: #051A0F;
-            --gradient-start: #051A0F;
-            --gradient-end: #0D2818;
-            --header-bg: rgba(13, 40, 24, 0.95);
-            --nav-bg: #0D2818;
-            --border-accent: #00C851;
-        }
-
-        /* Theme 4: MOCHA MOUSSE - Trend 2024/2025 */
-        [data-theme="mocha-mousse"] {
-            --primary: #A47864;
-            --primary-dark: #8B5A3C;
-            --secondary: #D2691E;
-            --dark: #2C1810;
-            --darker: #1A0F08;
-            --light: #FFF8F0;
-            --text: #FFFFFF;
-            --text-muted: #D2B48C;
-            --success: #8FBC8F;
-            --warning: #DAA520;
-            --danger: #DC143C;
-            --card-bg: #3E2723;
-            --sidebar-bg: #2C1810;
-            --gradient-start: #1A0F08;
-            --gradient-end: #3E2723;
-            --header-bg: rgba(62, 39, 35, 0.95);
-            --nav-bg: #3E2723;
-            --border-accent: #A47864;
-        }
-
-        /* Theme 5: GOLDEN HOUR - Warm Orange */
-        [data-theme="golden-hour"] {
-            --primary: #FF6B35;
-            --primary-dark: #E55100;
-            --secondary: #FFD700;
-            --dark: #1A0E00;
-            --darker: #0D0700;
-            --light: #FFF3E0;
-            --text: #FFFFFF;
-            --text-muted: #FFB380;
-            --success: #4CAF50;
-            --warning: #FFC107;
-            --danger: #F44336;
-            --card-bg: #331A00;
-            --sidebar-bg: #1A0E00;
-            --gradient-start: #0D0700;
-            --gradient-end: #331A00;
-            --header-bg: rgba(51, 26, 0, 0.95);
-            --nav-bg: #331A00;
-            --border-accent: #FF6B35;
-        }
-
-        /* Theme 6: TRUFFLE NOIR - Schwarz-Gold Luxus */
-        [data-theme="truffle-noir"] {
-            --primary: #D4AF37;
-            --primary-dark: #B8860B;
-            --secondary: #FFFFFF;
-            --dark: #0A0A0A;
-            --darker: #000000;
-            --light: #F5F5F5;
-            --text: #D4AF37;
-            --text-muted: #999999;
-            --success: #228B22;
-            --warning: #FFD700;
-            --danger: #DC143C;
-            --card-bg: #141414;
-            --sidebar-bg: #0A0A0A;
-            --gradient-start: #000000;
-            --gradient-end: #1A1A1A;
-            --header-bg: rgba(20, 20, 20, 0.95);
-            --nav-bg: #141414;
-            --border-accent: #D4AF37;
-        }
-
-        /* Theme 7: MEDITERRANEAN AZURE - Mittelmeer Blau */
-        [data-theme="mediterranean-azure"] {
-            --primary: #0080FF;
-            --primary-dark: #0066CC;
-            --secondary: #FFD700;
-            --dark: #001428;
-            --darker: #000A14;
-            --light: #E6F7FF;
-            --text: #FFFFFF;
-            --text-muted: #6BB6FF;
-            --success: #00FF88;
-            --warning: #FFD700;
-            --danger: #FF4444;
-            --card-bg: #002244;
-            --sidebar-bg: #001428;
-            --gradient-start: #000A14;
-            --gradient-end: #003366;
-            --header-bg: rgba(0, 34, 68, 0.95);
-            --nav-bg: #002244;
-            --border-accent: #0080FF;
-        }
-
-        /* Theme 8: SAKURA BLOSSOM - Japanisch Rosa */
-        [data-theme="sakura-blossom"] {
-            --primary: #FFB6C1;
-            --primary-dark: #FF69B4;
-            --secondary: #FFD700;
-            --dark: #2D1B1B;
-            --darker: #1A0F0F;
-            --light: #FFF0F5;
-            --text: #FFFFFF;
-            --text-muted: #FFCCCB;
-            --success: #98FB98;
-            --warning: #FFD700;
-            --danger: #DC143C;
-            --card-bg: #3D2525;
-            --sidebar-bg: #2D1B1B;
-            --gradient-start: #1A0F0F;
-            --gradient-end: #3D2525;
-            --header-bg: rgba(61, 37, 37, 0.95);
-            --nav-bg: #3D2525;
-            --border-accent: #FFB6C1;
-        }
-
-        /* Theme 9: ARCTIC FROST - Clean Weiß */
-        [data-theme="arctic-frost"] {
-            --primary: #2C3E50;
-            --primary-dark: #1A252F;
-            --secondary: #3498DB;
-            --dark: #FFFFFF;
-            --darker: #F8F9FA;
-            --light: #2C3E50;
-            --text: #2C3E50;
-            --text-muted: #7F8C8D;
-            --success: #27AE60;
-            --warning: #F39C12;
-            --danger: #E74C3C;
-            --card-bg: #FFFFFF;
-            --sidebar-bg: #F8F9FA;
-            --gradient-start: #FFFFFF;
-            --gradient-end: #ECF0F1;
-            --header-bg: rgba(255, 255, 255, 0.95);
-            --nav-bg: #FFFFFF;
-            --border-accent: #2C3E50;
-        }
-
-        /* Theme 10: VOLCANIC ASH - Grau Minimalistisch */
-        [data-theme="volcanic-ash"] {
-            --primary: #757575;
-            --primary-dark: #424242;
-            --secondary: #FF5722;
-            --dark: #212121;
-            --darker: #000000;
-            --light: #FAFAFA;
-            --text: #FFFFFF;
-            --text-muted: #BDBDBD;
-            --success: #4CAF50;
-            --warning: #FF9800;
-            --danger: #F44336;
-            --card-bg: #424242;
-            --sidebar-bg: #212121;
-            --gradient-start: #000000;
-            --gradient-end: #424242;
-            --header-bg: rgba(66, 66, 66, 0.95);
-            --nav-bg: #424242;
-            --border-accent: #757575;
-        }
-
-        /* Base Styles - EXAKT WIE ORIGINAL */
         * {
             margin: 0;
             padding: 0;
@@ -242,89 +32,23 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* Admin Theme Switcher (nur für Admin sichtbar) */
-        .admin-theme-panel {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--card-bg);
-            border: 2px solid var(--border-accent);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            z-index: 1000;
-            max-width: 300px;
-            display: none; /* Wird nur im Admin-Bereich angezeigt */
-        }
-
-        .admin-theme-panel.active {
-            display: block;
-        }
-
-        .admin-theme-panel h3 {
-            color: var(--primary);
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-        }
-
-        .theme-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .theme-option {
-            background: var(--darker);
-            border: 2px solid transparent;
-            padding: 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            font-size: 0.8rem;
-        }
-
-        .theme-option:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        .theme-option.active {
-            background: var(--primary);
-            color: var(--darker);
-            border-color: var(--primary);
-        }
-
-        .theme-preview {
-            width: 100%;
-            height: 30px;
-            border-radius: 5px;
-            margin-bottom: 5px;
-            display: flex;
-        }
-
-        .theme-preview span {
-            flex: 1;
-            height: 100%;
-        }
-
-        /* Header - MIT THEME ANPASSUNG */
+        /* Header */
         header {
-            background: var(--header-bg);
+            background: rgba(26, 26, 46, 0.95);
             backdrop-filter: blur(10px);
             padding: 1rem 0;
             box-shadow: 0 2px 20px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
             z-index: 100;
-            border-bottom: 2px solid var(--border-accent);
+            border-bottom: 2px solid var(--primary);
         }
 
         .header-content {
@@ -355,9 +79,9 @@
             font-size: 0.9rem;
         }
 
-        /* Navigation - MIT THEME ANPASSUNG */
+        /* Navigation */
         nav {
-            background: var(--nav-bg);
+            background: var(--card-bg);
             padding: 1rem 0;
             position: sticky;
             top: 73px;
@@ -406,7 +130,7 @@
             box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
         }
 
-        /* Main Layout - EXAKT WIE ORIGINAL */
+        /* Main Layout */
         .container {
             max-width: 1200px;
             margin: 2rem auto;
@@ -423,7 +147,7 @@
             flex: 1;
         }
 
-        /* Product Grid - EXAKT WIE ORIGINAL */
+        /* Product Grid */
         .products-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -439,7 +163,6 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             display: flex;
             flex-direction: column;
-            border: 1px solid var(--border-accent);
         }
 
         .product-card:hover {
@@ -464,7 +187,7 @@
             font-size: 1.2rem;
             font-weight: bold;
             margin-bottom: 0.5rem;
-            color: var(--text);
+            color: white;
         }
 
         .product-description {
@@ -487,7 +210,7 @@
             color: var(--primary);
         }
 
-        /* Quantity Controls - EXAKT WIE ORIGINAL */
+        /* Quantity Controls */
         .quantity-controls {
             display: flex;
             align-items: center;
@@ -526,10 +249,9 @@
             font-weight: bold;
             min-width: 30px;
             text-align: center;
-            color: var(--text);
         }
 
-        /* Cart Sidebar - Desktop Only - EXAKT WIE ORIGINAL */
+        /* Cart Sidebar - Desktop Only */
         .cart-sidebar {
             width: 350px;
             background: var(--card-bg);
@@ -538,7 +260,6 @@
             position: sticky;
             top: 150px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            border: 1px solid var(--border-accent);
         }
 
         .cart-header {
@@ -551,7 +272,7 @@
         }
 
         .cart-header h2 {
-            color: var(--text);
+            color: white;
             font-size: 1.3rem;
         }
 
@@ -609,7 +330,6 @@
         .cart-item-name {
             font-weight: bold;
             margin-bottom: 0.25rem;
-            color: var(--text);
         }
 
         .cart-item-quantity {
@@ -632,7 +352,6 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 0.5rem;
-            color: var(--text);
         }
 
         .cart-total-row.final {
@@ -660,19 +379,8 @@
             transform: translateY(-2px);
         }
 
-        /* Mobile Styles - EXAKT WIE ORIGINAL */
+        /* Mobile Styles */
         @media (max-width: 768px) {
-            .admin-theme-panel {
-                bottom: 100px;
-                right: 10px;
-                left: 10px;
-                max-width: none;
-            }
-
-            .theme-grid {
-                grid-template-columns: 1fr;
-            }
-
             main {
                 flex-direction: column;
             }
@@ -726,14 +434,14 @@
             }
         }
 
-        /* Desktop only - EXAKT WIE ORIGINAL */
+        /* Desktop only */
         @media (min-width: 769px) {
             .mobile-cart-btn {
                 display: none;
             }
         }
 
-        /* Modal Overlay - EXAKT WIE ORIGINAL */
+        /* Modal Overlay */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -753,7 +461,7 @@
             opacity: 1;
         }
 
-        /* Mobile Cart Modal - EXAKT WIE ORIGINAL */
+        /* Mobile Cart Modal */
         .mobile-cart-modal {
             position: fixed;
             bottom: 0;
@@ -782,10 +490,6 @@
             border-bottom: 2px solid var(--darker);
         }
 
-        .modal-header h2 {
-            color: var(--text);
-        }
-
         .close-modal {
             background: var(--darker);
             border: none;
@@ -800,7 +504,7 @@
             font-size: 1.2rem;
         }
 
-        /* Loading Animation - EXAKT WIE ORIGINAL */
+        /* Loading Animation */
         .loading {
             display: inline-block;
             width: 20px;
@@ -815,7 +519,7 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Notifications - EXAKT WIE ORIGINAL */
+        /* Notifications */
         .notification {
             position: fixed;
             bottom: 2rem;
@@ -835,113 +539,9 @@
             transform: translateX(-50%) translateY(0);
             opacity: 1;
         }
-
-        /* Special Theme Adjustments */
-        [data-theme="arctic-frost"] .category-btn.active,
-        [data-theme="arctic-frost"] .checkout-btn {
-            color: white;
-        }
-
-        [data-theme="truffle-noir"] .product-price {
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
-        }
-
-        [data-theme="sakura-blossom"] .product-card {
-            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(255, 182, 193, 0.1) 100%);
-        }
-
-        [data-theme="volcanic-ash"] .product-card:hover {
-            border-color: var(--secondary);
-        }
     </style>
 </head>
-<body data-theme="noir-excellence">
-    <!-- Admin Theme Panel (nur im Admin-Bereich sichtbar) -->
-    <div class="admin-theme-panel" id="adminThemePanel">
-        <h3>🎨 Restaurant Theme auswählen</h3>
-        <div class="theme-grid">
-            <div class="theme-option active" data-theme="noir-excellence" onclick="setTheme('noir-excellence')">
-                <div class="theme-preview">
-                    <span style="background: #FF0000"></span>
-                    <span style="background: #000000"></span>
-                </div>
-                <span>Noir Excellence</span>
-            </div>
-            
-            <div class="theme-option" data-theme="midnight-sapphire" onclick="setTheme('midnight-sapphire')">
-                <div class="theme-preview">
-                    <span style="background: #4169E1"></span>
-                    <span style="background: #000033"></span>
-                </div>
-                <span>Midnight Sapphire</span>
-            </div>
-            
-            <div class="theme-option" data-theme="emerald-luxe" onclick="setTheme('emerald-luxe')">
-                <div class="theme-preview">
-                    <span style="background: #00C851"></span>
-                    <span style="background: #0D2818"></span>
-                </div>
-                <span>Emerald Luxe</span>
-            </div>
-            
-            <div class="theme-option" data-theme="mocha-mousse" onclick="setTheme('mocha-mousse')">
-                <div class="theme-preview">
-                    <span style="background: #A47864"></span>
-                    <span style="background: #2C1810"></span>
-                </div>
-                <span>Mocha Mousse</span>
-            </div>
-            
-            <div class="theme-option" data-theme="golden-hour" onclick="setTheme('golden-hour')">
-                <div class="theme-preview">
-                    <span style="background: #FF6B35"></span>
-                    <span style="background: #1A0E00"></span>
-                </div>
-                <span>Golden Hour</span>
-            </div>
-            
-            <div class="theme-option" data-theme="truffle-noir" onclick="setTheme('truffle-noir')">
-                <div class="theme-preview">
-                    <span style="background: #D4AF37"></span>
-                    <span style="background: #000000"></span>
-                </div>
-                <span>Truffle Noir</span>
-            </div>
-            
-            <div class="theme-option" data-theme="mediterranean-azure" onclick="setTheme('mediterranean-azure')">
-                <div class="theme-preview">
-                    <span style="background: #0080FF"></span>
-                    <span style="background: #001428"></span>
-                </div>
-                <span>Mediterranean</span>
-            </div>
-            
-            <div class="theme-option" data-theme="sakura-blossom" onclick="setTheme('sakura-blossom')">
-                <div class="theme-preview">
-                    <span style="background: #FFB6C1"></span>
-                    <span style="background: #2D1B1B"></span>
-                </div>
-                <span>Sakura Blossom</span>
-            </div>
-            
-            <div class="theme-option" data-theme="arctic-frost" onclick="setTheme('arctic-frost')">
-                <div class="theme-preview">
-                    <span style="background: #2C3E50"></span>
-                    <span style="background: #FFFFFF"></span>
-                </div>
-                <span>Arctic Frost</span>
-            </div>
-            
-            <div class="theme-option" data-theme="volcanic-ash" onclick="setTheme('volcanic-ash')">
-                <div class="theme-preview">
-                    <span style="background: #757575"></span>
-                    <span style="background: #212121"></span>
-                </div>
-                <span>Volcanic Ash</span>
-            </div>
-        </div>
-    </div>
-
+<body>
     <!-- Header -->
     <header>
         <div class="header-content">
@@ -1085,65 +685,8 @@
         // Cart state
         let cart = [];
 
-        // Theme Management
-        function setTheme(themeName) {
-            document.body.setAttribute('data-theme', themeName);
-            
-            // Update active state
-            document.querySelectorAll('.theme-option').forEach(opt => {
-                opt.classList.remove('active');
-                if (opt.dataset.theme === themeName) {
-                    opt.classList.add('active');
-                }
-            });
-            
-            // Save to localStorage
-            localStorage.setItem('eatechTheme', themeName);
-            
-            // Update meta theme-color
-            updateMetaThemeColor(themeName);
-        }
-
-        // Update browser theme color
-        function updateMetaThemeColor(themeName) {
-            const themeColors = {
-                'noir-excellence': '#FF0000',
-                'midnight-sapphire': '#4169E1',
-                'emerald-luxe': '#00C851',
-                'mocha-mousse': '#A47864',
-                'golden-hour': '#FF6B35',
-                'truffle-noir': '#D4AF37',
-                'mediterranean-azure': '#0080FF',
-                'sakura-blossom': '#FFB6C1',
-                'arctic-frost': '#2C3E50',
-                'volcanic-ash': '#757575'
-            };
-            
-            const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-            if (metaThemeColor) {
-                metaThemeColor.content = themeColors[themeName] || '#FF6B6B';
-            }
-        }
-
-        // Check if admin (normally würde das vom Backend kommen)
-        function checkAdminStatus() {
-            // Hier würde normalerweise eine Prüfung stattfinden
-            // Für Demo: Theme Panel mit URL Parameter ?admin=true anzeigen
-            const urlParams = new URLSearchParams(window.location.search);
-            const isAdmin = urlParams.get('admin') === 'true';
-            
-            if (isAdmin) {
-                document.getElementById('adminThemePanel').classList.add('active');
-            }
-        }
-
-        // Load saved theme
-        const savedTheme = localStorage.getItem('eatechTheme') || 'noir-excellence';
-        setTheme(savedTheme);
-
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            checkAdminStatus();
             renderProducts('all');
             updateCart();
             

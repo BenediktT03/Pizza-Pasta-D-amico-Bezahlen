@@ -3,91 +3,315 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="admin.login.title">Admin Login - Pizza&Pasta D'amico</title>
-    <link href="css/style.css" rel="stylesheet">
-    <link href="css/admin-style.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="js/multilingual.js"></script>
+    <title>Eatech Admin - Login</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#FF6B6B">
+    
+    <style>
+        :root {
+            --primary: #FF6B6B;
+            --primary-dark: #FF5252;
+            --secondary: #4ECDC4;
+            --dark: #2C3E50;
+            --darker: #1a1a2e;
+            --light: #F7F9FB;
+            --text: #E8E8E8;
+            --text-muted: #95A5A6;
+            --success: #2ECC71;
+            --warning: #F39C12;
+            --danger: #E74C3C;
+            --card-bg: #16213e;
+            --sidebar-bg: #0f1419;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .login-container {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 400px;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--darker);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 107, 107, 0.05);
+        }
+
+        input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .password-toggle {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .remember-me input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .forgot-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: opacity 0.3s ease;
+        }
+
+        .forgot-link:hover {
+            opacity: 0.8;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .login-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+            display: none;
+        }
+
+        .demo-info {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .demo-info strong {
+            color: var(--primary);
+        }
+
+        /* Spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Language Selector -->
-    <div class="language-selector">
-        <!-- Wird von multilingual.js generiert -->
-    </div>
-
     <div class="login-container">
         <div class="login-header">
-            <div class="login-logo">🍕</div>
-            <h1 class="login-title">Pizza&Pasta D'amico</h1>
-            <p class="login-subtitle" data-i18n="admin.login.subtitle">Admin-Bereich</p>
+            <div class="logo">🍕</div>
+            <h1>Eatech Admin</h1>
+            <p class="subtitle">Melden Sie sich an, um fortzufahren</p>
         </div>
 
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
         <form id="loginForm" onsubmit="handleLogin(event)">
-            <div class="error-message" id="errorMessage">
-                <i class="fas fa-exclamation-circle"></i>
-                <span id="errorText" data-i18n="admin.login.error">Ungültige Anmeldedaten</span>
+            <div class="form-group">
+                <label for="username">E-Mail Adresse</label>
+                <input 
+                    type="email" 
+                    id="username" 
+                    name="username" 
+                    placeholder="admin@eatech.ch"
+                    required
+                    autocomplete="username"
+                >
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="username" data-i18n="admin.login.username">Benutzername</label>
-                <div class="input-icon">
-                    <i class="fas fa-user"></i>
-                    <input 
-                        type="text" 
-                        id="username" 
-                        class="form-input" 
-                        placeholder="admin@damico.ch"
-                        required
-                        autocomplete="username"
-                    >
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="password" data-i18n="admin.login.password">Passwort</label>
-                <div class="input-icon">
-                    <i class="fas fa-lock"></i>
+                <label for="password">Passwort</label>
+                <div class="password-toggle">
                     <input 
                         type="password" 
                         id="password" 
-                        class="form-input" 
+                        name="password" 
                         placeholder="••••••••"
                         required
                         autocomplete="current-password"
                     >
+                    <button type="button" class="toggle-password" onclick="togglePassword()">
+                        👁️
+                    </button>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-checkbox">
+            <div class="remember-forgot">
+                <label class="remember-me">
                     <input type="checkbox" id="rememberMe">
-                    <span data-i18n="admin.login.remember">Angemeldet bleiben</span>
+                    <span>Angemeldet bleiben</span>
                 </label>
+                <a href="#" class="forgot-link">Passwort vergessen?</a>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block" id="loginButton">
-                <i class="fas fa-sign-in-alt"></i>
-                <span data-i18n="admin.login.submit">Anmelden</span>
+            <button type="submit" class="login-btn" id="loginButton">
+                <span>Anmelden</span>
             </button>
         </form>
 
-        <div class="login-footer">
-            <p class="text-muted">
-                <i class="fas fa-info-circle"></i>
-                <span data-i18n="admin.login.info">Zugang nur für autorisiertes Personal</span>
-            </p>
+        <div class="demo-info">
+            <strong>Demo-Zugang:</strong><br>
+            E-Mail: admin@eatech.ch<br>
+            Passwort: admin123
         </div>
     </div>
 
     <script>
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load multilingual
-            if (window.ml) {
-                window.ml.init();
-            }
-
-            // Check if already logged in
+        // Check if already logged in
+        document.addEventListener('DOMContentLoaded', () => {
             const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
             const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
             const now = Date.now();
@@ -100,6 +324,20 @@
             document.getElementById('username').focus();
         });
 
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const button = document.querySelector('.toggle-password');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                button.textContent = '👁️';
+            }
+        }
+
         // Handle Login
         function handleLogin(event) {
             event.preventDefault();
@@ -109,18 +347,24 @@
             const rememberMe = document.getElementById('rememberMe').checked;
             const button = document.getElementById('loginButton');
             const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
             
             // Show loading state
             button.disabled = true;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Anmelden...</span>';
+            button.innerHTML = '<span class="spinner"></span> <span>Anmelden...</span>';
             
-            // Hide error message
+            // Hide messages
             errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
             
             // Simulate authentication (replace with real auth)
             setTimeout(() => {
                 // Demo credentials
-                if (username === 'admin@damico.ch' && password === 'admin123') {
+                if (username === 'admin@eatech.ch' && password === 'admin123') {
+                    // Show success
+                    successDiv.textContent = 'Anmeldung erfolgreich! Weiterleitung...';
+                    successDiv.style.display = 'block';
+                    
                     // Set login session
                     localStorage.setItem('adminLoggedIn', 'true');
                     localStorage.setItem('loginTime', Date.now().toString());
@@ -131,71 +375,38 @@
                     }
                     
                     // Redirect to dashboard
-                    window.location.href = 'admin-dashboard.html';
+                    setTimeout(() => {
+                        window.location.href = 'admin-dashboard.html';
+                    }, 1000);
                 } else {
                     // Show error
+                    errorDiv.textContent = 'Ungültige Anmeldedaten. Bitte versuchen Sie es erneut.';
                     errorDiv.style.display = 'block';
+                    
+                    // Reset button
                     button.disabled = false;
-                    button.innerHTML = '<i class="fas fa-sign-in-alt"></i> <span data-i18n="admin.login.submit">Anmelden</span>';
+                    button.innerHTML = '<span>Anmelden</span>';
                     
                     // Shake animation
-                    errorDiv.classList.add('shake');
+                    document.querySelector('.login-container').style.animation = 'shake 0.5s';
                     setTimeout(() => {
-                        errorDiv.classList.remove('shake');
+                        document.querySelector('.login-container').style.animation = '';
                     }, 500);
                 }
-            }, 1000);
+            }, 1500);
         }
+
+        // Shake animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
-
-    <style>
-        /* Login specific styles */
-        body {
-            background: var(--bg-primary);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .input-icon {
-            position: relative;
-        }
-
-        .input-icon i {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-        }
-
-        .input-icon .form-input {
-            padding-left: 44px;
-        }
-
-        .btn-block {
-            width: 100%;
-            margin-top: 24px;
-        }
-
-        .login-footer {
-            text-align: center;
-            margin-top: 24px;
-            padding-top: 24px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .shake {
-            animation: shake 0.5s ease-in-out;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-    </style>
+  
 </body>
 </html>

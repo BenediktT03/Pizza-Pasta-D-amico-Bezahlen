@@ -3,35 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eatech Admin Dashboard</title>
+    <title>Eatech Admin Dashboard - Control Center</title>
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#FF0000">
+    <meta name="theme-color" content="#FF6B6B">
     
     <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    
+    <!-- Chart.js für Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Auth Check -->
+    <script src="js/auth-check.js"></script>
     
     <style>
-        /* Admin Dashboard Styles mit Theme Support */
+        /* Theme Variables - Identical to Main Site */
         :root {
-            --primary: #FF0000;
-            --primary-dark: #CC0000;
-            --secondary: #FFD700;
-            --dark: #1a1a1a;
-            --darker: #000000;
-            --light: #FFFFFF;
-            --text: #333333;
-            --text-light: #FFFFFF;
-            --success: #00C851;
-            --warning: #FFA500;
-            --danger: #FF0000;
-            --info: #33B5E5;
+            /* Noir Excellence (Default) */
+            --primary: #FF6B6B;
+            --primary-dark: #FF5252;
+            --secondary: #4ECDC4;
+            --dark: #2C3E50;
+            --darker: #1a1a2e;
+            --light: #F7F9FB;
+            --text: #E8E8E8;
+            --text-muted: #95A5A6;
+            --success: #2ECC71;
+            --warning: #F39C12;
+            --danger: #E74C3C;
+            --info: #3498DB;
+            --card-bg: #16213e;
             --sidebar-bg: #0f1419;
-            --card-bg: #FFFFFF;
-            --border: #E0E0E0;
+            --gradient-start: #0f0f1e;
+            --gradient-end: #1a1a2e;
+            --header-bg: rgba(26, 26, 46, 0.95);
+            --nav-bg: #16213e;
+            --border-accent: #FF6B6B;
+            --input-bg: #1a1a2e;
         }
 
+        /* Theme Definitions */
+        [data-theme="midnight-purple"] {
+            --primary: #9B59B6;
+            --primary-dark: #8E44AD;
+            --secondary: #3498DB;
+            --card-bg: #2C2C54;
+            --sidebar-bg: #1E1E3A;
+            --gradient-start: #1E1E3A;
+            --gradient-end: #2C2C54;
+            --header-bg: rgba(44, 44, 84, 0.95);
+            --nav-bg: #2C2C54;
+            --border-accent: #9B59B6;
+            --input-bg: #3A3A6A;
+        }
+
+        [data-theme="forest-green"] {
+            --primary: #27AE60;
+            --primary-dark: #229954;
+            --secondary: #F39C12;
+            --card-bg: #1D3E2C;
+            --sidebar-bg: #14281D;
+            --gradient-start: #0A1612;
+            --gradient-end: #1D3E2C;
+            --header-bg: rgba(29, 62, 44, 0.95);
+            --nav-bg: #1D3E2C;
+            --border-accent: #27AE60;
+            --input-bg: #2A5940;
+        }
+
+        [data-theme="ocean-blue"] {
+            --primary: #3498DB;
+            --primary-dark: #2980B9;
+            --secondary: #E74C3C;
+            --card-bg: #1C2E4A;
+            --sidebar-bg: #152238;
+            --gradient-start: #0C1929;
+            --gradient-end: #1C2E4A;
+            --header-bg: rgba(28, 46, 74, 0.95);
+            --nav-bg: #1C2E4A;
+            --border-accent: #3498DB;
+            --input-bg: #2A3F5F;
+        }
+
+        [data-theme="sunset-orange"] {
+            --primary: #E67E22;
+            --primary-dark: #D35400;
+            --secondary: #9B59B6;
+            --card-bg: #3E2723;
+            --sidebar-bg: #2E1A1A;
+            --gradient-start: #1A0E0E;
+            --gradient-end: #3E2723;
+            --header-bg: rgba(62, 39, 35, 0.95);
+            --nav-bg: #3E2723;
+            --border-accent: #E67E22;
+            --input-bg: #5D3A35;
+        }
+
+        [data-theme="royal-gold"] {
+            --primary: #F1C40F;
+            --primary-dark: #F39C12;
+            --secondary: #9B59B6;
+            --card-bg: #3D3A2B;
+            --sidebar-bg: #2A2817;
+            --gradient-start: #1A180F;
+            --gradient-end: #3D3A2B;
+            --header-bg: rgba(61, 58, 43, 0.95);
+            --nav-bg: #3D3A2B;
+            --border-accent: #F1C40F;
+            --input-bg: #5A5642;
+        }
+
+        [data-theme="deep-space"] {
+            --primary: #0080FF;
+            --primary-dark: #0066CC;
+            --secondary: #FF0080;
+            --card-bg: #001428;
+            --sidebar-bg: #000A14;
+            --gradient-start: #000000;
+            --gradient-end: #001428;
+            --header-bg: rgba(0, 20, 40, 0.95);
+            --nav-bg: #001428;
+            --border-accent: #0080FF;
+            --input-bg: #002244;
+        }
+
+        [data-theme="sakura-blossom"] {
+            --primary: #FFB6C1;
+            --primary-dark: #FF69B4;
+            --secondary: #FFD700;
+            --card-bg: #3D2525;
+            --sidebar-bg: #2D1B1B;
+            --gradient-start: #1A0F0F;
+            --gradient-end: #3D2525;
+            --header-bg: rgba(61, 37, 37, 0.95);
+            --nav-bg: #3D2525;
+            --border-accent: #FFB6C1;
+            --input-bg: #4D3535;
+        }
+
+        [data-theme="arctic-frost"] {
+            --primary: #2C3E50;
+            --primary-dark: #1A252F;
+            --secondary: #3498DB;
+            --dark: #FFFFFF;
+            --darker: #F8F9FA;
+            --light: #2C3E50;
+            --text: #2C3E50;
+            --text-muted: #7F8C8D;
+            --card-bg: #FFFFFF;
+            --sidebar-bg: #F8F9FA;
+            --gradient-start: #FFFFFF;
+            --gradient-end: #ECF0F1;
+            --header-bg: rgba(255, 255, 255, 0.95);
+            --nav-bg: #FFFFFF;
+            --border-accent: #2C3E50;
+            --input-bg: #ECF0F1;
+        }
+
+        [data-theme="volcanic-ash"] {
+            --primary: #757575;
+            --primary-dark: #424242;
+            --secondary: #FF5722;
+            --card-bg: #424242;
+            --sidebar-bg: #212121;
+            --gradient-start: #000000;
+            --gradient-end: #424242;
+            --header-bg: rgba(66, 66, 66, 0.95);
+            --nav-bg: #424242;
+            --border-accent: #757575;
+            --input-bg: #616161;
+        }
+
+        /* Global Styles */
         * {
             margin: 0;
             padding: 0;
@@ -40,68 +188,98 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #F5F5F5;
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
             color: var(--text);
             line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
         /* Admin Layout */
-        .admin-container {
+        .admin-wrapper {
             display: flex;
-            min-height: 100vh;
+            height: 100vh;
         }
 
         /* Sidebar */
-        .sidebar {
-            width: 260px;
+        .admin-sidebar {
+            width: 280px;
             background: var(--sidebar-bg);
-            color: var(--text-light);
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            transition: transform 0.3s ease;
-            z-index: 100;
+            border-right: 1px solid var(--border-accent);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .admin-sidebar.collapsed {
+            width: 80px;
         }
 
         .sidebar-header {
-            padding: 20px;
-            background: rgba(255, 0, 0, 0.1);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border-accent);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .sidebar-logo {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.75rem;
             font-size: 1.5rem;
             font-weight: bold;
             color: var(--primary);
         }
 
+        .admin-sidebar.collapsed .sidebar-logo span {
+            display: none;
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--card-bg);
+        }
+
+        /* Sidebar Navigation */
         .sidebar-nav {
-            padding: 20px 0;
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 0;
         }
 
         .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px 20px;
-            color: #CCCCCC;
+            display: block;
+            padding: 1rem 1.5rem;
+            color: var(--text);
             text-decoration: none;
             transition: all 0.3s ease;
             position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
         .nav-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-light);
+            background: var(--card-bg);
+            color: var(--primary);
         }
 
         .nav-item.active {
-            background: rgba(255, 0, 0, 0.2);
+            background: var(--card-bg);
             color: var(--primary);
-            border-left: 4px solid var(--primary);
+            border-left: 3px solid var(--primary);
         }
 
         .nav-item i {
@@ -110,298 +288,335 @@
             text-align: center;
         }
 
+        .admin-sidebar.collapsed .nav-item span {
+            display: none;
+        }
+
+        .admin-sidebar.collapsed .nav-item {
+            justify-content: center;
+            padding: 1rem;
+        }
+
         /* Main Content */
-        .main-content {
+        .admin-main {
             flex: 1;
-            margin-left: 260px;
-            background: #F5F5F5;
-            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        /* Header */
+        /* Admin Header */
         .admin-header {
-            background: var(--card-bg);
-            padding: 20px 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: var(--header-bg);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-accent);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 50;
+            position: relative;
+            z-index: 100;
         }
 
-        .header-title {
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .page-title {
             font-size: 1.5rem;
             font-weight: 600;
-            color: var(--text);
         }
 
-        .header-actions {
+        .header-right {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 1rem;
         }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 16px;
-            background: #F5F5F5;
-            border-radius: 25px;
-        }
-
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-        }
-
-        /* Dashboard Content */
-        .dashboard-content {
-            padding: 30px;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
+        /* Header Actions */
+        .header-btn {
             background: var(--card-bg);
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-accent);
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             transition: all 0.3s ease;
-            border: 1px solid var(--border);
         }
 
-        .stat-card:hover {
+        .header-btn:hover {
+            background: var(--primary);
+            color: white;
             transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
         }
 
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 15px;
+        /* Theme Switcher */
+        .theme-switcher {
+            position: relative;
+            z-index: 9998;
         }
 
-        .stat-icon.orders {
-            background: rgba(255, 0, 0, 0.1);
-            color: var(--danger);
-        }
-
-        .stat-icon.revenue {
-            background: rgba(0, 200, 81, 0.1);
-            color: var(--success);
-        }
-
-        .stat-icon.customers {
-            background: rgba(51, 181, 229, 0.1);
-            color: var(--info);
-        }
-
-        .stat-icon.products {
-            background: rgba(255, 165, 0, 0.1);
-            color: var(--warning);
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        .stat-change {
-            font-size: 0.85rem;
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .stat-change.positive {
-            color: var(--success);
-        }
-
-        .stat-change.negative {
-            color: var(--danger);
-        }
-
-        /* Section Card */
-        .section-card {
+        .theme-dropdown {
+            position: fixed;
+            top: auto;
+            right: 2rem;
             background: var(--card-bg);
+            border: 1px solid var(--border-accent);
             border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border: 1px solid var(--border);
+            padding: 1rem;
+            margin-top: 0.5rem;
+            width: 320px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 10000;
         }
 
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        /* Theme Manager Section */
-        .theme-manager {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border: 1px solid var(--border);
+        .theme-dropdown.active {
+            display: block;
         }
 
         .theme-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
         }
 
-        .theme-card {
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: #FAFAFA;
-        }
-
-        .theme-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .theme-card.active {
-            border-color: var(--primary);
-            background: rgba(255, 0, 0, 0.05);
-        }
-
-        .theme-preview {
-            height: 60px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            display: flex;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .theme-preview span {
-            flex: 1;
-            height: 100%;
-        }
-
-        .theme-name {
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 5px;
-        }
-
-        .theme-description {
-            font-size: 0.8rem;
-            color: #666;
-            text-align: center;
-        }
-
-        /* Quick Actions */
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .action-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 15px 20px;
+        .theme-option {
+            padding: 0.75rem;
             border-radius: 8px;
-            font-weight: 600;
+            border: 2px solid transparent;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
-            text-decoration: none;
+            gap: 0.5rem;
         }
 
-        .action-btn:hover {
-            background: var(--primary-dark);
+        .theme-option:hover {
+            border-color: var(--primary);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
         }
 
-        .action-btn.secondary {
-            background: #F5F5F5;
+        .theme-option.active {
+            border-color: var(--primary);
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .theme-preview {
+            display: flex;
+            gap: 4px;
+        }
+
+        .theme-preview span {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* Admin Content */
+        .admin-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Stats Card */
+        .stats-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-accent);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: var(--primary);
+            opacity: 0.1;
+            border-radius: 50%;
+            transform: translate(30px, -30px);
+        }
+
+        .stats-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .stats-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-label {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .stats-change {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .stats-change.positive {
+            background: rgba(46, 204, 113, 0.2);
+            color: var(--success);
+        }
+
+        .stats-change.negative {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-accent);
+            margin-bottom: 2rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-btn {
+            background: var(--input-bg);
+            border: none;
             color: var(--text);
-            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
         }
 
-        .action-btn.secondary:hover {
-            background: #E0E0E0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        .chart-btn:hover {
+            background: var(--primary);
+            color: white;
         }
 
-        /* Recent Orders Table */
+        .chart-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Live Orders */
+        .live-orders {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-accent);
+        }
+
+        .orders-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .orders-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .live-indicator {
+            width: 10px;
+            height: 10px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Orders Table */
         .orders-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
         }
 
         .orders-table th {
             text-align: left;
-            padding: 12px;
-            background: #F5F5F5;
-            font-weight: 600;
-            color: #666;
+            padding: 0.75rem;
+            border-bottom: 2px solid var(--border-accent);
+            color: var(--text-muted);
+            font-weight: 500;
             font-size: 0.9rem;
-            border-bottom: 2px solid var(--border);
         }
 
         .orders-table td {
-            padding: 15px 12px;
-            border-bottom: 1px solid var(--border);
+            padding: 1rem 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
         .orders-table tr:hover {
-            background: #FAFAFA;
+            background: rgba(255,255,255,0.02);
         }
 
         .order-id {
@@ -411,513 +626,554 @@
 
         .order-status {
             display: inline-block;
-            padding: 5px 12px;
+            padding: 0.25rem 0.75rem;
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 500;
         }
 
-        .order-status.pending {
-            background: rgba(255, 165, 0, 0.1);
-            color: var(--warning);
-        }
-
-        .order-status.preparing {
-            background: rgba(51, 181, 229, 0.1);
+        .order-status.new {
+            background: rgba(52, 152, 219, 0.2);
             color: var(--info);
         }
 
+        .order-status.preparing {
+            background: rgba(241, 196, 15, 0.2);
+            color: var(--warning);
+        }
+
         .order-status.ready {
-            background: rgba(0, 200, 81, 0.1);
+            background: rgba(46, 204, 113, 0.2);
             color: var(--success);
         }
 
         .order-status.completed {
-            background: rgba(128, 128, 128, 0.1);
-            color: #666;
+            background: rgba(149, 165, 166, 0.2);
+            color: var(--text-muted);
         }
 
-        /* Mobile Menu Toggle */
-        .mobile-menu-toggle {
-            display: none;
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 101;
-            background: var(--primary);
-            color: white;
+        .order-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            background: none;
             border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
+            color: var(--text-muted);
             cursor: pointer;
-            font-size: 1.2rem;
-        }
-
-        /* Voice Commands Status */
-        .voice-status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 16px;
-            background: rgba(0, 200, 81, 0.1);
-            color: var(--success);
-            border-radius: 20px;
-            font-size: 0.9rem;
-        }
-
-        .voice-status.inactive {
-            background: rgba(128, 128, 128, 0.1);
-            color: #666;
-        }
-
-        .voice-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: currentColor;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-
-        /* Settings Form */
-        .settings-form {
-            display: grid;
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-label {
-            font-weight: 500;
-            color: var(--text);
-        }
-
-        .form-input {
-            padding: 10px 15px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 1rem;
+            padding: 0.5rem;
+            border-radius: 5px;
             transition: all 0.3s ease;
         }
 
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
+        .action-btn:hover {
+            background: var(--input-bg);
+            color: var(--primary);
         }
 
-        .form-switch {
+        /* Quick Actions */
+        .quick-actions {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-accent);
+            margin-bottom: 2rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .quick-action {
+            background: var(--input-bg);
+            border: 1px solid var(--border-accent);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .quick-action:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .quick-action i {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .quick-action span {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        /* Notifications */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
         }
 
-        .switch {
-            position: relative;
-            width: 50px;
-            height: 26px;
-            background: #CCCCCC;
-            border-radius: 13px;
+        /* User Menu */
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--card-bg);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background 0.3s ease;
+            position: relative;
         }
 
-        .switch.active {
-            background: var(--success);
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
         }
 
-        .switch-slider {
+        .user-dropdown {
             position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 20px;
-            height: 20px;
-            background: white;
-            border-radius: 50%;
-            transition: transform 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            top: 100%;
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border-accent);
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            width: 200px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
         }
 
-        .switch.active .switch-slider {
-            transform: translateX(24px);
+        .user-dropdown.active {
+            display: block;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-
-            .sidebar.active {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .mobile-menu-toggle {
-                display: block;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .theme-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .admin-header {
-                padding-left: 70px;
-            }
+        .dropdown-item {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
 
-        /* Loading Spinner */
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 0, 0, 0.3);
-            border-radius: 50%;
+        .dropdown-item:hover {
+            background: var(--input-bg);
+            color: var(--primary);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border-accent);
+            margin: 0.5rem 0;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--input-bg);
             border-top-color: var(--primary);
-            animation: spin 1s ease-in-out infinite;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        /* Notification Toast */
-        .notification-toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: var(--text);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.3s ease;
-            z-index: 1000;
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .admin-sidebar {
+                position: fixed;
+                left: -280px;
+                height: 100vh;
+                z-index: 1000;
+            }
+
+            .admin-sidebar.mobile-open {
+                left: 0;
+            }
+
+            .admin-main {
+                width: 100%;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
-        .notification-toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
+        @media (max-width: 768px) {
+            .admin-content {
+                padding: 1rem;
+            }
 
-        .notification-toast.success {
-            background: var(--success);
-        }
+            .header-left {
+                gap: 1rem;
+            }
 
-        .notification-toast.error {
-            background: var(--danger);
+            .page-title {
+                font-size: 1.2rem;
+            }
+
+            .stats-value {
+                font-size: 1.5rem;
+            }
+
+            .actions-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .orders-table {
+                font-size: 0.9rem;
+            }
+
+            .orders-table th,
+            .orders-table td {
+                padding: 0.5rem;
+            }
         }
     </style>
 </head>
-<body>
-    <!-- Mobile Menu Toggle -->
-    <button class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
-
-    <div class="admin-container">
+<body data-theme="noir-excellence">
+    <div class="admin-wrapper">
         <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
+        <aside class="admin-sidebar" id="adminSidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo">
-                    <span>🍕</span>
-                    <span>Eatech Admin</span>
+                    <i class="fas fa-fire"></i>
+                    <span>Eatech</span>
                 </div>
+                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
             
             <nav class="sidebar-nav">
-                <a href="/admin-dashboard.html" class="nav-item active">
-                    <span>📊</span>
+                <a href="#" class="nav-item active">
+                    <i class="fas fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="/admin-orders.html" class="nav-item">
-                    <span>📋</span>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i>
                     <span>Bestellungen</span>
-                </a>
-                <a href="/admin-products.html" class="nav-item">
-                    <span>🍔</span>
-                    <span>Produkte</span>
-                </a>
-                <a href="#" class="nav-item" onclick="scrollToThemeManager()">
-                    <span>🎨</span>
-                    <span>Themes</span>
+                    <span class="notification-badge">3</span>
                 </a>
                 <a href="#" class="nav-item">
-                    <span>👥</span>
+                    <i class="fas fa-box"></i>
+                    <span>Produkte</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-users"></i>
                     <span>Kunden</span>
                 </a>
                 <a href="#" class="nav-item">
-                    <span>📈</span>
+                    <i class="fas fa-chart-line"></i>
                     <span>Analytics</span>
                 </a>
                 <a href="#" class="nav-item">
-                    <span>⚙️</span>
-                    <span>Einstellungen</span>
+                    <i class="fas fa-euro-sign"></i>
+                    <span>Finanzen</span>
                 </a>
-                <a href="#" class="nav-item" onclick="logout()">
-                    <span>🚪</span>
-                    <span>Logout</span>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>Marketing</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Einstellungen</span>
                 </a>
             </nav>
         </aside>
 
         <!-- Main Content -->
-        <main class="main-content">
+        <main class="admin-main">
             <!-- Header -->
             <header class="admin-header">
-                <h1 class="header-title">Dashboard</h1>
-                <div class="header-actions">
-                    <div class="voice-status" id="voiceStatus">
-                        <div class="voice-indicator"></div>
-                        <span>Voice aktiv</span>
+                <div class="header-left">
+                    <button class="header-btn mobile-menu" onclick="toggleMobileSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">Dashboard</h1>
+                </div>
+                
+                <div class="header-right">
+                    <div class="theme-switcher">
+                        <button class="header-btn" onclick="toggleThemeDropdown()">
+                            <i class="fas fa-palette"></i>
+                            <span>Theme</span>
+                        </button>
+                        
+                        <div class="theme-dropdown" id="themeDropdown">
+                            <div class="theme-grid">
+                                <div class="theme-option active" onclick="setTheme('noir-excellence')">
+                                    <div class="theme-preview">
+                                        <span style="background: #FF6B6B"></span>
+                                        <span style="background: #1a1a2e"></span>
+                                    </div>
+                                    <span>Noir Excellence</span>
+                                </div>
+                                
+                                <div class="theme-option" onclick="setTheme('midnight-purple')">
+                                    <div class="theme-preview">
+                                        <span style="background: #9B59B6"></span>
+                                        <span style="background: #2C2C54"></span>
+                                    </div>
+                                    <span>Midnight Purple</span>
+                                </div>
+                                
+                                <div class="theme-option" onclick="setTheme('forest-green')">
+                                    <div class="theme-preview">
+                                        <span style="background: #27AE60"></span>
+                                        <span style="background: #1D3E2C"></span>
+                                    </div>
+                                    <span>Forest Green</span>
+                                </div>
+                                
+                                <div class="theme-option" onclick="setTheme('ocean-blue')">
+                                    <div class="theme-preview">
+                                        <span style="background: #3498DB"></span>
+                                        <span style="background: #1C2E4A"></span>
+                                    </div>
+                                    <span>Ocean Blue</span>
+                                </div>
+                                
+                                <div class="theme-option" onclick="setTheme('sunset-orange')">
+                                    <div class="theme-preview">
+                                        <span style="background: #E67E22"></span>
+                                        <span style="background: #3E2723"></span>
+                                    </div>
+                                    <span>Sunset Orange</span>
+                                </div>
+                                
+                                <div class="theme-option" onclick="setTheme('royal-gold')">
+                                    <div class="theme-preview">
+                                        <span style="background: #F1C40F"></span>
+                                        <span style="background: #3D3A2B"></span>
+                                    </div>
+                                    <span>Royal Gold</span>
+                                </div>
+                                
+                                <div class="theme-option" onclick="setTheme('deep-space')">
+                                    <div class="theme-preview">
+                                        <span style="background: #0080FF"></span>
+                                        <span style="background: #001428"></span>
+                                    </div>
+                                    <span>Deep Space</span>
+                                </div>
+                                
+                                <div class="theme-option" onclick="setTheme('sakura-blossom')">
+                                    <div class="theme-preview">
+                                        <span style="background: #FFB6C1"></span>
+                                        <span style="background: #3D2525"></span>
+                                    </div>
+                                    <span>Sakura Blossom</span>
+                                </div>
+                                
+                                <div class="theme-option" onclick="setTheme('arctic-frost')">
+                                    <div class="theme-preview">
+                                        <span style="background: #2C3E50"></span>
+                                        <span style="background: #FFFFFF"></span>
+                                    </div>
+                                    <span>Arctic Frost</span>
+                                </div>
+                                
+                                <div class="theme-option" onclick="setTheme('volcanic-ash')">
+                                    <div class="theme-preview">
+                                        <span style="background: #757575"></span>
+                                        <span style="background: #424242"></span>
+                                    </div>
+                                    <span>Volcanic Ash</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="user-info">
+                    
+                    <button class="header-btn" onclick="syncData()">
+                        <i class="fas fa-sync"></i>
+                        <span>Sync</span>
+                    </button>
+                    
+                    <button class="header-btn" onclick="exportData()">
+                        <i class="fas fa-download"></i>
+                        <span>Export</span>
+                    </button>
+                    
+                    <div class="user-menu" onclick="toggleUserDropdown()">
                         <div class="user-avatar">A</div>
                         <span>Admin</span>
+                        <i class="fas fa-chevron-down"></i>
+                        
+                        <div class="user-dropdown" id="userDropdown">
+                            <a href="#" class="dropdown-item">
+                                <i class="fas fa-user"></i> Profil
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <i class="fas fa-cog"></i> Einstellungen
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
                     </div>
                 </div>
             </header>
 
-            <!-- Dashboard Content -->
-            <div class="dashboard-content">
+            <!-- Content -->
+            <div class="admin-content">
                 <!-- Stats Grid -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon orders">📦</div>
-                        <div class="stat-value" id="totalOrders">0</div>
-                        <div class="stat-label">Bestellungen heute</div>
-                        <div class="stat-change positive">
-                            <span>↑</span>
-                            <span>12% vs. gestern</span>
+                <div class="dashboard-grid">
+                    <div class="stats-card">
+                        <div class="stats-icon">
+                            <i class="fas fa-shopping-cart"></i>
                         </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-icon revenue">💰</div>
-                        <div class="stat-value">CHF <span id="totalRevenue">0</span></div>
-                        <div class="stat-label">Umsatz heute</div>
-                        <div class="stat-change positive">
-                            <span>↑</span>
-                            <span>8% vs. gestern</span>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-icon customers">👥</div>
-                        <div class="stat-value" id="totalCustomers">0</div>
-                        <div class="stat-label">Kunden heute</div>
-                        <div class="stat-change negative">
-                            <span>↓</span>
-                            <span>3% vs. gestern</span>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-icon products">🍕</div>
-                        <div class="stat-value" id="activeProducts">0</div>
-                        <div class="stat-label">Aktive Produkte</div>
-                        <div class="stat-change positive">
-                            <span>↑</span>
-                            <span>2 neue diese Woche</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Theme Manager -->
-                <div class="theme-manager" id="themeManager">
-                    <div class="section-header">
-                        <h2 class="section-title">🎨 Restaurant Theme Manager</h2>
-                        <button class="action-btn secondary" onclick="previewTheme()">
-                            👁️ Live Preview
-                        </button>
+                        <div class="stats-value" id="todayOrders">0</div>
+                        <div class="stats-label">Bestellungen heute</div>
+                        <span class="stats-change positive">+12.5%</span>
                     </div>
                     
-                    <p style="color: #666; margin-bottom: 20px;">
-                        Wähle das Design für dein Restaurant. Die Änderung wird sofort für alle Kunden sichtbar.
-                    </p>
-
-                    <div class="theme-grid">
-                        <!-- Theme 1 -->
-                        <div class="theme-card active" data-theme="noir-excellence" onclick="selectTheme('noir-excellence')">
-                            <div class="theme-preview">
-                                <span style="background: #FF0000"></span>
-                                <span style="background: #000000"></span>
-                                <span style="background: #FFD700"></span>
-                            </div>
-                            <div class="theme-name">Noir Excellence ⭐</div>
-                            <div class="theme-description">Original Schwarz-Rot</div>
+                    <div class="stats-card">
+                        <div class="stats-icon" style="background: var(--success);">
+                            <i class="fas fa-euro-sign"></i>
                         </div>
-
-                        <!-- Theme 2 -->
-                        <div class="theme-card" data-theme="midnight-sapphire" onclick="selectTheme('midnight-sapphire')">
-                            <div class="theme-preview">
-                                <span style="background: #4169E1"></span>
-                                <span style="background: #000033"></span>
-                                <span style="background: #FFD700"></span>
-                            </div>
-                            <div class="theme-name">Midnight Sapphire</div>
-                            <div class="theme-description">Premium Blau</div>
-                        </div>
-
-                        <!-- Theme 3 -->
-                        <div class="theme-card" data-theme="emerald-luxe" onclick="selectTheme('emerald-luxe')">
-                            <div class="theme-preview">
-                                <span style="background: #00C851"></span>
-                                <span style="background: #0D2818"></span>
-                                <span style="background: #FFD700"></span>
-                            </div>
-                            <div class="theme-name">Emerald Luxe</div>
-                            <div class="theme-description">Waldgrün Premium</div>
-                        </div>
-
-                        <!-- Theme 4 -->
-                        <div class="theme-card" data-theme="mocha-mousse" onclick="selectTheme('mocha-mousse')">
-                            <div class="theme-preview">
-                                <span style="background: #A47864"></span>
-                                <span style="background: #2C1810"></span>
-                                <span style="background: #D2691E"></span>
-                            </div>
-                            <div class="theme-name">Mocha Mousse 🆕</div>
-                            <div class="theme-description">Trend 2024/2025</div>
-                        </div>
-
-                        <!-- Theme 5 -->
-                        <div class="theme-card" data-theme="golden-hour" onclick="selectTheme('golden-hour')">
-                            <div class="theme-preview">
-                                <span style="background: #FF6B35"></span>
-                                <span style="background: #1A0E00"></span>
-                                <span style="background: #FFD700"></span>
-                            </div>
-                            <div class="theme-name">Golden Hour</div>
-                            <div class="theme-description">Warm Orange</div>
-                        </div>
-
-                        <!-- Theme 6 -->
-                        <div class="theme-card" data-theme="truffle-noir" onclick="selectTheme('truffle-noir')">
-                            <div class="theme-preview">
-                                <span style="background: #D4AF37"></span>
-                                <span style="background: #000000"></span>
-                                <span style="background: #FFFFFF"></span>
-                            </div>
-                            <div class="theme-name">Truffle Noir</div>
-                            <div class="theme-description">Schwarz-Gold Luxus</div>
-                        </div>
-
-                        <!-- Theme 7 -->
-                        <div class="theme-card" data-theme="mediterranean-azure" onclick="selectTheme('mediterranean-azure')">
-                            <div class="theme-preview">
-                                <span style="background: #0080FF"></span>
-                                <span style="background: #001428"></span>
-                                <span style="background: #FFD700"></span>
-                            </div>
-                            <div class="theme-name">Mediterranean</div>
-                            <div class="theme-description">Mittelmeer Blau</div>
-                        </div>
-
-                        <!-- Theme 8 -->
-                        <div class="theme-card" data-theme="sakura-blossom" onclick="selectTheme('sakura-blossom')">
-                            <div class="theme-preview">
-                                <span style="background: #FFB6C1"></span>
-                                <span style="background: #2D1B1B"></span>
-                                <span style="background: #FFD700"></span>
-                            </div>
-                            <div class="theme-name">Sakura Blossom</div>
-                            <div class="theme-description">Japanisch Rosa</div>
-                        </div>
-
-                        <!-- Theme 9 -->
-                        <div class="theme-card" data-theme="arctic-frost" onclick="selectTheme('arctic-frost')">
-                            <div class="theme-preview">
-                                <span style="background: #2C3E50"></span>
-                                <span style="background: #FFFFFF"></span>
-                                <span style="background: #3498DB"></span>
-                            </div>
-                            <div class="theme-name">Arctic Frost</div>
-                            <div class="theme-description">Clean Weiß</div>
-                        </div>
-
-                        <!-- Theme 10 -->
-                        <div class="theme-card" data-theme="volcanic-ash" onclick="selectTheme('volcanic-ash')">
-                            <div class="theme-preview">
-                                <span style="background: #757575"></span>
-                                <span style="background: #212121"></span>
-                                <span style="background: #FF5722"></span>
-                            </div>
-                            <div class="theme-name">Volcanic Ash</div>
-                            <div class="theme-description">Grau Minimalistisch</div>
-                        </div>
+                        <div class="stats-value" id="todayRevenue">CHF 0</div>
+                        <div class="stats-label">Umsatz heute</div>
+                        <span class="stats-change positive">+8.3%</span>
                     </div>
-
-                    <div class="quick-actions">
-                        <button class="action-btn" onclick="saveTheme()">
-                            💾 Theme speichern
-                        </button>
-                        <a href="/index.html" target="_blank" class="action-btn secondary">
-                            👁️ Kundenansicht
-                        </a>
+                    
+                    <div class="stats-card">
+                        <div class="stats-icon" style="background: var(--warning);">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stats-value" id="todayCustomers">0</div>
+                        <div class="stats-label">Kunden heute</div>
+                        <span class="stats-change positive">+5.7%</span>
+                    </div>
+                    
+                    <div class="stats-card">
+                        <div class="stats-icon" style="background: var(--info);">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stats-value" id="avgWaitTime">5 Min</div>
+                        <div class="stats-label">Ø Wartezeit</div>
+                        <span class="stats-change negative">-2 Min</span>
                     </div>
                 </div>
 
                 <!-- Quick Actions -->
-                <div class="section-card">
-                    <div class="section-header">
-                        <h2 class="section-title">⚡ Schnellaktionen</h2>
-                    </div>
-                    <div class="quick-actions">
-                        <a href="/admin-orders.html" class="action-btn">
-                            📋 Bestellungen
+                <div class="quick-actions">
+                    <h3 style="margin-bottom: 1rem;">Schnellzugriff</h3>
+                    <div class="actions-grid">
+                        <a href="#" class="quick-action">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Neue Bestellung</span>
                         </a>
-                        <a href="/admin-products.html" class="action-btn secondary">
-                            🍔 Neues Produkt
+                        <a href="#" class="quick-action">
+                            <i class="fas fa-box"></i>
+                            <span>Produkt hinzufügen</span>
                         </a>
-                        <button class="action-btn secondary" onclick="toggleVoiceCommands()">
-                            🎤 Voice Commands
-                        </button>
-                        <button class="action-btn secondary" onclick="exportData()">
-                            📊 Export Daten
-                        </button>
+                        <a href="#" class="quick-action">
+                            <i class="fas fa-percentage"></i>
+                            <span>Rabatt erstellen</span>
+                        </a>
+                        <a href="#" class="quick-action">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Bericht anzeigen</span>
+                        </a>
+                        <a href="#" class="quick-action">
+                            <i class="fas fa-bell"></i>
+                            <span>Benachrichtigung</span>
+                        </a>
+                        <a href="#" class="quick-action">
+                            <i class="fas fa-tools"></i>
+                            <span>Wartungsmodus</span>
+                        </a>
                     </div>
                 </div>
 
-                <!-- Recent Orders -->
-                <div class="section-card">
-                    <div class="section-header">
-                        <h2 class="section-title">📋 Aktuelle Bestellungen</h2>
-                        <a href="/admin-orders.html" class="action-btn secondary">
-                            Alle anzeigen
-                        </a>
+                <!-- Revenue Chart -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Umsatzentwicklung</h3>
+                        <div class="chart-actions">
+                            <button class="chart-btn active" onclick="updateChart('week')">Woche</button>
+                            <button class="chart-btn" onclick="updateChart('month')">Monat</button>
+                            <button class="chart-btn" onclick="updateChart('year')">Jahr</button>
+                        </div>
                     </div>
+                    <div style="position: relative; height: 250px;">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Live Orders -->
+                <div class="live-orders">
+                    <div class="orders-header">
+                        <h3 class="orders-title">
+                            <span class="live-indicator"></span>
+                            Live Bestellungen
+                        </h3>
+                        <button class="header-btn" onclick="refreshOrders()">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                    </div>
+                    
                     <table class="orders-table">
                         <thead>
                             <tr>
                                 <th>Bestellung</th>
                                 <th>Kunde</th>
-                                <th>Produkte</th>
+                                <th>Artikel</th>
                                 <th>Betrag</th>
                                 <th>Status</th>
                                 <th>Zeit</th>
+                                <th>Aktionen</th>
                             </tr>
                         </thead>
-                        <tbody id="recentOrdersTable">
-                            <!-- Orders will be loaded here -->
+                        <tbody id="ordersTableBody">
+                            <tr>
+                                <td colspan="7" class="loading">
+                                    <div class="spinner"></div>
+                                    <p>Lade Bestellungen...</p>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -925,241 +1181,488 @@
         </main>
     </div>
 
-    <!-- Notification Toast -->
-    <div class="notification-toast" id="notificationToast"></div>
-
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyD3OCMvc4Iup58Ao0BiFNuvA0fnJokzYS8",
-            authDomain: "pizzapastadamico.firebaseapp.com",
-            databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "pizzapastadamico",
-            storageBucket: "pizzapastadamico.firebasestorage.app",
-            messagingSenderId: "83240541532",
-            appId: "1:83240541532:web:11e3277850bf89a5b8b599",
-            measurementId: "G-6H2J5K88J7"
+            apiKey: "AIzaSyDFBlgWE81iHnACVwOmaU0jL7FV0l_tRmU",
+            authDomain: "eatech-foodtruck.firebaseapp.com",
+            databaseURL: "https://eatech-foodtruck-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "eatech-foodtruck",
+            storageBucket: "eatech-foodtruck.firebasestorage.app",
+            messagingSenderId: "261222802445",
+            appId: "1:261222802445:web:edde22580422fbced22144",
+            measurementId: "G-N0KHWJG9KP"
         };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const auth = firebase.auth();
+        const db = firebase.database();
 
-        // Current selected theme
+        // Global Variables
+        let revenueChart = null;
         let currentTheme = localStorage.getItem('eatechTheme') || 'noir-excellence';
 
         // Initialize Dashboard
-        document.addEventListener('DOMContentLoaded', () => {
-            checkAuth();
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Admin Dashboard loaded');
+            
+            // Load saved theme
+            setTheme(currentTheme, false);
+            
+            // Initialize components
+            initializeCharts();
             loadDashboardData();
-            loadRecentOrders();
-            initializeVoiceStatus();
-            selectTheme(currentTheme, false);
+            loadLiveOrders();
+            
+            // Start real-time updates
+            startRealtimeUpdates();
         });
 
-        // Check Authentication
-        function checkAuth() {
-            auth.onAuthStateChanged((user) => {
-                if (!user) {
-                    window.location.href = '/login.html';
+        // Toggle Sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('adminSidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+
+        // Toggle Mobile Sidebar
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('adminSidebar');
+            sidebar.classList.toggle('mobile-open');
+        }
+
+        // Toggle Theme Dropdown
+        function toggleThemeDropdown() {
+            const dropdown = document.getElementById('themeDropdown');
+            const button = event.currentTarget;
+            const rect = button.getBoundingClientRect();
+            
+            if (dropdown.classList.contains('active')) {
+                dropdown.classList.remove('active');
+            } else {
+                // Position dropdown
+                dropdown.style.position = 'fixed';
+                dropdown.style.top = (rect.bottom + 10) + 'px';
+                dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+                dropdown.classList.add('active');
+            }
+        }
+
+        // Set Theme
+        function setTheme(themeName, save = true) {
+            document.body.setAttribute('data-theme', themeName);
+            currentTheme = themeName;
+            
+            // Update active state
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('active');
+                if (option.getAttribute('onclick').includes(themeName)) {
+                    option.classList.add('active');
+                }
+            });
+            
+            // Save to localStorage
+            if (save) {
+                localStorage.setItem('eatechTheme', themeName);
+                showNotification('Theme geändert zu ' + themeName.replace('-', ' '));
+            }
+            
+            // Close dropdown
+            document.getElementById('themeDropdown').classList.remove('active');
+        }
+
+        // Toggle User Dropdown
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        // Initialize Charts
+        function initializeCharts() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            
+            // Get theme colors
+            const computedStyle = getComputedStyle(document.body);
+            const primaryColor = computedStyle.getPropertyValue('--primary').trim();
+            const secondaryColor = computedStyle.getPropertyValue('--secondary').trim();
+            const textColor = computedStyle.getPropertyValue('--text').trim();
+            const gridColor = currentTheme === 'arctic-frost' ? '#E0E0E0' : 'rgba(255,255,255,0.1)';
+            
+            revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
+                    datasets: [{
+                        label: 'Umsatz',
+                        data: [1200, 1900, 1500, 2100, 2400, 2800, 2200],
+                        borderColor: primaryColor,
+                        backgroundColor: `${primaryColor}20`,
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Vorwoche',
+                        data: [1000, 1700, 1400, 1900, 2200, 2500, 2000],
+                        borderColor: secondaryColor,
+                        backgroundColor: `${secondaryColor}20`,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        borderDash: [5, 5]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                color: textColor,
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: gridColor,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: textColor,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: gridColor,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: textColor,
+                                font: {
+                                    size: 11
+                                },
+                                callback: function(value) {
+                                    return 'CHF ' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
                 }
             });
         }
 
         // Load Dashboard Data
-        function loadDashboardData() {
-            // Load today's orders count
-            const today = new Date().toISOString().split('T')[0];
-            database.ref('orders').orderByChild('date').startAt(today).on('value', (snapshot) => {
-                const orders = snapshot.val() || {};
-                const orderCount = Object.keys(orders).length;
+        async function loadDashboardData() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                
+                // Load orders
+                const ordersSnapshot = await db.ref('orders').orderByChild('createdAt').startAt(today).once('value');
+                const orders = ordersSnapshot.val() || {};
+                
+                let totalOrders = 0;
                 let totalRevenue = 0;
                 const customers = new Set();
-
+                
                 Object.values(orders).forEach(order => {
-                    totalRevenue += order.total || 0;
-                    if (order.customer) {
-                        customers.add(order.customer.phone || order.customer.email);
+                    totalOrders++;
+                    totalRevenue += order.pricing?.total || order.total || 0;
+                    if (order.customer?.phone) {
+                        customers.add(order.customer.phone);
                     }
                 });
-
-                document.getElementById('totalOrders').textContent = orderCount;
-                document.getElementById('totalRevenue').textContent = totalRevenue.toFixed(2);
-                document.getElementById('totalCustomers').textContent = customers.size;
-            });
-
-            // Load active products count
-            database.ref('products').orderByChild('active').equalTo(true).on('value', (snapshot) => {
-                const products = snapshot.val() || {};
-                document.getElementById('activeProducts').textContent = Object.keys(products).length;
-            });
+                
+                // Update UI
+                document.getElementById('todayOrders').textContent = totalOrders;
+                document.getElementById('todayRevenue').textContent = `CHF ${totalRevenue.toFixed(2)}`;
+                document.getElementById('todayCustomers').textContent = customers.size;
+                
+                // Load average wait time
+                const waitTimeSnapshot = await db.ref('settings/waitTime').once('value');
+                const waitTime = waitTimeSnapshot.val() || 5;
+                document.getElementById('avgWaitTime').textContent = `${waitTime} Min`;
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
         }
 
-        // Load Recent Orders
-        function loadRecentOrders() {
-            database.ref('orders').orderByChild('timestamp').limitToLast(5).on('value', (snapshot) => {
-                const orders = snapshot.val() || {};
-                const ordersArray = Object.entries(orders)
-                    .map(([id, order]) => ({ id, ...order }))
-                    .reverse();
-
-                const tableBody = document.getElementById('recentOrdersTable');
-                tableBody.innerHTML = ordersArray.map(order => `
-                    <tr>
-                        <td><span class="order-id">#${order.id.slice(-6)}</span></td>
-                        <td>${order.customer?.name || 'Gast'}</td>
-                        <td>${order.items?.length || 0} Artikel</td>
-                        <td>CHF ${(order.total || 0).toFixed(2)}</td>
-                        <td><span class="order-status ${order.status}">${getStatusText(order.status)}</span></td>
-                        <td>${formatTime(order.timestamp)}</td>
-                    </tr>
-                `).join('');
-            });
-        }
-
-        // Theme Management
-        function selectTheme(themeName, showNotification = true) {
-            currentTheme = themeName;
-            
-            // Update active state
-            document.querySelectorAll('.theme-card').forEach(card => {
-                card.classList.remove('active');
-                if (card.dataset.theme === themeName) {
-                    card.classList.add('active');
+        // Load Live Orders
+        async function loadLiveOrders() {
+            try {
+                const ordersSnapshot = await db.ref('orders').limitToLast(10).once('value');
+                const orders = ordersSnapshot.val() || {};
+                
+                const tbody = document.getElementById('ordersTableBody');
+                tbody.innerHTML = '';
+                
+                const ordersArray = Object.entries(orders).reverse();
+                
+                if (ordersArray.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                                Keine Bestellungen vorhanden
+                            </td>
+                        </tr>
+                    `;
+                    return;
                 }
+                
+                ordersArray.forEach(([orderId, order]) => {
+                    const row = createOrderRow(orderId, order);
+                    tbody.appendChild(row);
+                });
+                
+            } catch (error) {
+                console.error('Error loading orders:', error);
+            }
+        }
+
+        // Create Order Row
+        function createOrderRow(orderId, order) {
+            const tr = document.createElement('tr');
+            
+            const time = new Date(order.createdAt || order.timestamp).toLocaleTimeString('de-CH', {
+                hour: '2-digit',
+                minute: '2-digit'
             });
-
-            if (showNotification) {
-                showToast(`Theme "${getThemeDisplayName(themeName)}" ausgewählt`, 'success');
-            }
-        }
-
-        function saveTheme() {
-            // Save to localStorage
-            localStorage.setItem('eatechTheme', currentTheme);
             
-            // Save to Firebase
-            database.ref('settings/theme').set({
-                name: currentTheme,
-                updatedAt: firebase.database.ServerValue.TIMESTAMP,
-                updatedBy: auth.currentUser?.email || 'admin'
-            }).then(() => {
-                showToast('Theme erfolgreich gespeichert!', 'success');
-            }).catch((error) => {
-                showToast('Fehler beim Speichern: ' + error.message, 'error');
-            });
-        }
-
-        function previewTheme() {
-            window.open(`/index.html?theme=${currentTheme}`, '_blank');
-        }
-
-        function getThemeDisplayName(theme) {
-            const names = {
-                'noir-excellence': 'Noir Excellence',
-                'midnight-sapphire': 'Midnight Sapphire',
-                'emerald-luxe': 'Emerald Luxe',
-                'mocha-mousse': 'Mocha Mousse',
-                'golden-hour': 'Golden Hour',
-                'truffle-noir': 'Truffle Noir',
-                'mediterranean-azure': 'Mediterranean Azure',
-                'sakura-blossom': 'Sakura Blossom',
-                'arctic-frost': 'Arctic Frost',
-                'volcanic-ash': 'Volcanic Ash'
-            };
-            return names[theme] || theme;
-        }
-
-        // Voice Commands
-        function initializeVoiceStatus() {
-            const isVoiceActive = localStorage.getItem('eatechVoiceActive') === 'true';
-            updateVoiceStatus(isVoiceActive);
-        }
-
-        function toggleVoiceCommands() {
-            const isActive = localStorage.getItem('eatechVoiceActive') === 'true';
-            const newStatus = !isActive;
-            localStorage.setItem('eatechVoiceActive', newStatus);
-            updateVoiceStatus(newStatus);
+            const itemCount = order.items?.reduce((sum, item) => sum + (item.quantity || 1), 0) || 0;
             
-            if (newStatus) {
-                showToast('Voice Commands aktiviert', 'success');
-                // Here you would initialize voice commands
-            } else {
-                showToast('Voice Commands deaktiviert', 'success');
-                // Here you would stop voice commands
-            }
-        }
-
-        function updateVoiceStatus(isActive) {
-            const voiceStatus = document.getElementById('voiceStatus');
-            if (isActive) {
-                voiceStatus.classList.remove('inactive');
-                voiceStatus.innerHTML = '<div class="voice-indicator"></div><span>Voice aktiv</span>';
-            } else {
-                voiceStatus.classList.add('inactive');
-                voiceStatus.innerHTML = '<div class="voice-indicator"></div><span>Voice inaktiv</span>';
-            }
-        }
-
-        // Utility Functions
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-        }
-
-        function scrollToThemeManager() {
-            document.getElementById('themeManager').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('notificationToast');
-            toast.textContent = message;
-            toast.className = `notification-toast ${type} show`;
+            tr.innerHTML = `
+                <td class="order-id">#${orderId.slice(-6).toUpperCase()}</td>
+                <td>${order.customer?.name || 'Gast'}</td>
+                <td>${itemCount} Artikel</td>
+                <td>CHF ${(order.pricing?.total || order.total || 0).toFixed(2)}</td>
+                <td><span class="order-status ${order.status || 'new'}">${getStatusText(order.status)}</span></td>
+                <td>${time}</td>
+                <td>
+                    <div class="order-actions">
+                        <button class="action-btn" onclick="viewOrder('${orderId}')" title="Anzeigen">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn" onclick="updateOrderStatus('${orderId}')" title="Status ändern">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn" onclick="printOrder('${orderId}')" title="Drucken">
+                            <i class="fas fa-print"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
             
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+            return tr;
         }
 
+        // Get Status Text
         function getStatusText(status) {
             const statusMap = {
-                'pending': 'Ausstehend',
+                'new': 'Neu',
                 'preparing': 'In Zubereitung',
-                'ready': 'Bereit',
+                'ready': 'Fertig',
                 'completed': 'Abgeschlossen'
             };
             return statusMap[status] || status;
         }
 
-        function formatTime(timestamp) {
-            if (!timestamp) return '-';
-            const date = new Date(timestamp);
-            return date.toLocaleTimeString('de-CH', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
+        // Start Realtime Updates
+        function startRealtimeUpdates() {
+            // Listen for new orders
+            db.ref('orders').on('child_added', (snapshot) => {
+                const order = snapshot.val();
+                const orderId = snapshot.key;
+                
+                // Show notification for new orders
+                if (order.status === 'new') {
+                    showNotification(`Neue Bestellung #${orderId.slice(-6).toUpperCase()}`, 'info');
+                    playNotificationSound();
+                }
+                
+                // Reload data
+                loadDashboardData();
+                loadLiveOrders();
+            });
+            
+            // Listen for order updates
+            db.ref('orders').on('child_changed', (snapshot) => {
+                loadLiveOrders();
             });
         }
 
-        function exportData() {
-            showToast('Export-Funktion wird vorbereitet...', 'success');
-            // Here you would implement data export
+        // Update Chart
+        function updateChart(period) {
+            // Update active button
+            document.querySelectorAll('.chart-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update chart data based on period
+            let labels, data1, data2;
+            
+            switch(period) {
+                case 'week':
+                    labels = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+                    data1 = [1200, 1900, 1500, 2100, 2400, 2800, 2200];
+                    data2 = [1000, 1700, 1400, 1900, 2200, 2500, 2000];
+                    break;
+                case 'month':
+                    labels = ['Woche 1', 'Woche 2', 'Woche 3', 'Woche 4'];
+                    data1 = [12000, 14000, 13500, 15000];
+                    data2 = [11000, 13000, 12500, 14000];
+                    break;
+                case 'year':
+                    labels = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+                    data1 = [45000, 52000, 48000, 55000, 60000, 65000, 70000, 68000, 62000, 58000, 55000, 60000];
+                    data2 = [42000, 48000, 45000, 52000, 56000, 60000, 65000, 64000, 58000, 54000, 52000, 56000];
+                    break;
+            }
+            
+            revenueChart.data.labels = labels;
+            revenueChart.data.datasets[0].data = data1;
+            revenueChart.data.datasets[1].data = data2;
+            revenueChart.update();
         }
 
+        // View Order
+        function viewOrder(orderId) {
+            console.log('View order:', orderId);
+            // Implement order details modal
+        }
+
+        // Update Order Status
+        function updateOrderStatus(orderId) {
+            console.log('Update order status:', orderId);
+            // Implement status update modal
+        }
+
+        // Print Order
+        function printOrder(orderId) {
+            console.log('Print order:', orderId);
+            // Implement print functionality
+        }
+
+        // Refresh Orders
+        function refreshOrders() {
+            loadLiveOrders();
+            showNotification('Bestellungen aktualisiert');
+        }
+
+        // Sync Data
+        function syncData() {
+            loadDashboardData();
+            loadLiveOrders();
+            showNotification('Daten synchronisiert');
+        }
+
+        // Export Data
+        function exportData() {
+            showNotification('Export gestartet...', 'info');
+            // Implement export functionality
+        }
+
+        // Logout
         function logout() {
             if (confirm('Möchten Sie sich wirklich abmelden?')) {
-                auth.signOut().then(() => {
-                    window.location.href = '/login.html';
-                });
+                localStorage.removeItem('adminLoggedIn');
+                localStorage.removeItem('adminUsername');
+                localStorage.removeItem('loginTime');
+                window.location.href = 'admin.html';
             }
         }
 
-        // Listen for theme changes from Firebase
-        database.ref('settings/theme').on('value', (snapshot) => {
-            const themeData = snapshot.val();
-            if (themeData && themeData.name !== currentTheme) {
-                selectTheme(themeData.name, false);
-                showToast('Theme wurde von einem anderen Admin geändert', 'success');
+        // Show Notification
+        function showNotification(message, type = 'success') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `admin-notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'info' ? 'info-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            // Add styles
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 2rem;
+                right: 2rem;
+                background: ${type === 'success' ? 'var(--success)' : type === 'info' ? 'var(--info)' : 'var(--danger)'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 10px;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                z-index: 9999;
+                animation: slideInRight 0.3s ease;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after delay
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Play Notification Sound
+        function playNotificationSound() {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSt+zPTXhjYGHGS56+2eSgwPTqzn77ViFAUWdL');
+            audio.volume = 0.3;
+            audio.play().catch(e => console.log('Audio play failed:', e));
+        }
+
+        // Add animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Close dropdowns on outside click
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.theme-switcher')) {
+                document.getElementById('themeDropdown').classList.remove('active');
+            }
+            if (!e.target.closest('.user-menu')) {
+                document.getElementById('userDropdown').classList.remove('active');
             }
         });
     </script>

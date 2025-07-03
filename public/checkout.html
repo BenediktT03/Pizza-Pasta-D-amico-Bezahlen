@@ -3,240 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eatech - Checkout</title>
+    <title>Checkout - Eatech Foodtruck</title>
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#FF0000">
+    <meta name="theme-color" content="#FF6B6B">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
     <!-- Stripe -->
     <script src="https://js.stripe.com/v3/"></script>
     
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    
     <style>
-        /* Theme System Support */
-        [data-theme="noir-excellence"] {
-            --primary: #FF0000;
-            --primary-dark: #CC0000;
-            --secondary: #FFD700;
-            --dark: #0A0A0A;
-            --darker: #000000;
+        :root {
+            --primary: #FF6B6B;
+            --primary-dark: #FF5252;
+            --secondary: #4ECDC4;
+            --dark: #2C3E50;
+            --darker: #1a1a2e;
             --light: #F7F9FB;
-            --text: #FFFFFF;
-            --text-muted: #999999;
+            --text: #E8E8E8;
+            --text-muted: #95A5A6;
             --success: #2ECC71;
             --warning: #F39C12;
             --danger: #E74C3C;
-            --card-bg: #1a1a1a;
-            --sidebar-bg: #0f0f0f;
-            --gradient-start: #000000;
-            --gradient-end: #1a1a1a;
-            --header-bg: rgba(26, 26, 26, 0.95);
-            --nav-bg: #1a1a1a;
-            --border-accent: #FF0000;
-            --input-bg: #2a2a2a;
+            --card-bg: #16213e;
+            --sidebar-bg: #0f1419;
         }
 
-        [data-theme="midnight-sapphire"] {
-            --primary: #4169E1;
-            --primary-dark: #1E90FF;
-            --secondary: #FFD700;
-            --dark: #000033;
-            --darker: #000022;
-            --light: #F7F9FB;
-            --text: #FFFFFF;
-            --text-muted: #87CEEB;
-            --success: #2ECC71;
-            --warning: #F39C12;
-            --danger: #E74C3C;
-            --card-bg: #000044;
-            --sidebar-bg: #000033;
-            --gradient-start: #000022;
-            --gradient-end: #000044;
-            --header-bg: rgba(0, 0, 51, 0.95);
-            --nav-bg: #000044;
-            --border-accent: #4169E1;
-            --input-bg: #000055;
-        }
-
-        [data-theme="emerald-luxe"] {
-            --primary: #00C851;
-            --primary-dark: #007E33;
-            --secondary: #FFD700;
-            --dark: #0D2818;
-            --darker: #051A0F;
-            --light: #F7F9FB;
-            --text: #FFFFFF;
-            --text-muted: #81C784;
-            --success: #00C851;
-            --warning: #FFEB3B;
-            --danger: #E74C3C;
-            --card-bg: #0D2818;
-            --sidebar-bg: #051A0F;
-            --gradient-start: #051A0F;
-            --gradient-end: #0D2818;
-            --header-bg: rgba(13, 40, 24, 0.95);
-            --nav-bg: #0D2818;
-            --border-accent: #00C851;
-            --input-bg: #1A3A2A;
-        }
-
-        [data-theme="mocha-mousse"] {
-            --primary: #A47864;
-            --primary-dark: #8B5A3C;
-            --secondary: #D2691E;
-            --dark: #2C1810;
-            --darker: #1A0F08;
-            --light: #FFF8F0;
-            --text: #FFFFFF;
-            --text-muted: #D2B48C;
-            --success: #8FBC8F;
-            --warning: #DAA520;
-            --danger: #DC143C;
-            --card-bg: #3E2723;
-            --sidebar-bg: #2C1810;
-            --gradient-start: #1A0F08;
-            --gradient-end: #3E2723;
-            --header-bg: rgba(62, 39, 35, 0.95);
-            --nav-bg: #3E2723;
-            --border-accent: #A47864;
-            --input-bg: #4E342E;
-        }
-
-        [data-theme="golden-hour"] {
-            --primary: #FF6B35;
-            --primary-dark: #E55100;
-            --secondary: #FFD700;
-            --dark: #1A0E00;
-            --darker: #0D0700;
-            --light: #FFF3E0;
-            --text: #FFFFFF;
-            --text-muted: #FFB380;
-            --success: #4CAF50;
-            --warning: #FFC107;
-            --danger: #F44336;
-            --card-bg: #331A00;
-            --sidebar-bg: #1A0E00;
-            --gradient-start: #0D0700;
-            --gradient-end: #331A00;
-            --header-bg: rgba(51, 26, 0, 0.95);
-            --nav-bg: #331A00;
-            --border-accent: #FF6B35;
-            --input-bg: #4D2600;
-        }
-
-        [data-theme="truffle-noir"] {
-            --primary: #D4AF37;
-            --primary-dark: #B8860B;
-            --secondary: #FFFFFF;
-            --dark: #0A0A0A;
-            --darker: #000000;
-            --light: #F5F5F5;
-            --text: #D4AF37;
-            --text-muted: #999999;
-            --success: #228B22;
-            --warning: #FFD700;
-            --danger: #DC143C;
-            --card-bg: #141414;
-            --sidebar-bg: #0A0A0A;
-            --gradient-start: #000000;
-            --gradient-end: #1A1A1A;
-            --header-bg: rgba(20, 20, 20, 0.95);
-            --nav-bg: #141414;
-            --border-accent: #D4AF37;
-            --input-bg: #1F1F1F;
-        }
-
-        [data-theme="mediterranean-azure"] {
-            --primary: #0080FF;
-            --primary-dark: #0066CC;
-            --secondary: #FFD700;
-            --dark: #001428;
-            --darker: #000A14;
-            --light: #E6F7FF;
-            --text: #FFFFFF;
-            --text-muted: #6BB6FF;
-            --success: #00FF88;
-            --warning: #FFD700;
-            --danger: #FF4444;
-            --card-bg: #002244;
-            --sidebar-bg: #001428;
-            --gradient-start: #000A14;
-            --gradient-end: #003366;
-            --header-bg: rgba(0, 34, 68, 0.95);
-            --nav-bg: #002244;
-            --border-accent: #0080FF;
-            --input-bg: #003366;
-        }
-
-        [data-theme="sakura-blossom"] {
-            --primary: #FFB6C1;
-            --primary-dark: #FF69B4;
-            --secondary: #FFD700;
-            --dark: #2D1B1B;
-            --darker: #1A0F0F;
-            --light: #FFF0F5;
-            --text: #FFFFFF;
-            --text-muted: #FFCCCB;
-            --success: #98FB98;
-            --warning: #FFD700;
-            --danger: #DC143C;
-            --card-bg: #3D2525;
-            --sidebar-bg: #2D1B1B;
-            --gradient-start: #1A0F0F;
-            --gradient-end: #3D2525;
-            --header-bg: rgba(61, 37, 37, 0.95);
-            --nav-bg: #3D2525;
-            --border-accent: #FFB6C1;
-            --input-bg: #4D3535;
-        }
-
-        [data-theme="arctic-frost"] {
-            --primary: #2C3E50;
-            --primary-dark: #1A252F;
-            --secondary: #3498DB;
-            --dark: #FFFFFF;
-            --darker: #F8F9FA;
-            --light: #2C3E50;
-            --text: #2C3E50;
-            --text-muted: #7F8C8D;
-            --success: #27AE60;
-            --warning: #F39C12;
-            --danger: #E74C3C;
-            --card-bg: #FFFFFF;
-            --sidebar-bg: #F8F9FA;
-            --gradient-start: #FFFFFF;
-            --gradient-end: #ECF0F1;
-            --header-bg: rgba(255, 255, 255, 0.95);
-            --nav-bg: #FFFFFF;
-            --border-accent: #2C3E50;
-            --input-bg: #ECF0F1;
-        }
-
-        [data-theme="volcanic-ash"] {
-            --primary: #757575;
-            --primary-dark: #424242;
-            --secondary: #FF5722;
-            --dark: #212121;
-            --darker: #000000;
-            --light: #FAFAFA;
-            --text: #FFFFFF;
-            --text-muted: #BDBDBD;
-            --success: #4CAF50;
-            --warning: #FF9800;
-            --danger: #F44336;
-            --card-bg: #424242;
-            --sidebar-bg: #212121;
-            --gradient-start: #000000;
-            --gradient-end: #424242;
-            --header-bg: rgba(66, 66, 66, 0.95);
-            --nav-bg: #424242;
-            --border-accent: #757575;
-            --input-bg: #616161;
-        }
-
-        /* Base Styles */
         * {
             margin: 0;
             padding: 0;
@@ -245,7 +39,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
@@ -253,23 +47,33 @@
 
         /* Header */
         .checkout-header {
-            background: var(--header-bg);
+            background: rgba(26, 26, 46, 0.95);
             backdrop-filter: blur(10px);
             padding: 1rem 0;
             box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 2px solid var(--border-accent);
+            border-bottom: 2px solid var(--primary);
         }
 
         .header-content {
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
             padding: 0 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .back-btn:hover {
+            color: var(--primary);
         }
 
         .logo {
@@ -279,116 +83,362 @@
             font-size: 1.5rem;
             font-weight: bold;
             color: var(--primary);
-            text-decoration: none;
-        }
-
-        .checkout-steps {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .step {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .step.active {
-            color: var(--primary);
-        }
-
-        .step-number {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: var(--darker);
-            border: 2px solid var(--text-muted);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        .step.active .step-number {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-
-        .step.completed .step-number {
-            background: var(--success);
-            border-color: var(--success);
-            color: white;
         }
 
         /* Main Container */
         .checkout-container {
-            max-width: 1200px;
+            max-width: 800px;
             margin: 2rem auto;
             padding: 0 1rem;
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 2rem;
-            align-items: start;
         }
 
-        /* Form Section */
-        .checkout-form {
+        /* Progress Steps */
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--darker);
+            z-index: 0;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--darker);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-circle {
+            background: var(--primary);
+            color: white;
+        }
+
+        .step.completed .step-circle {
+            background: var(--success);
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .step.active .step-label {
+            color: var(--text);
+        }
+
+        /* Cards */
+        .checkout-card {
             background: var(--card-bg);
             border-radius: 15px;
             padding: 2rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            border: 1px solid var(--border-accent);
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        .form-section {
-            margin-bottom: 2rem;
-        }
-
-        .section-title {
+        .card-title {
             font-size: 1.3rem;
             margin-bottom: 1.5rem;
-            color: var(--text);
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
+        /* Order Summary */
+        .order-items {
+            margin-bottom: 1rem;
         }
 
-        .form-group {
+        .order-item {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
+            align-items: start;
+            padding: 1rem;
+            background: var(--darker);
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .item-quantity {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .item-special {
+            font-size: 0.85rem;
+            color: var(--secondary);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        .item-price {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* Coupon Section */
+        .coupon-section {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+        }
+
+        .coupon-input-group {
+            display: flex;
             gap: 0.5rem;
         }
 
-        .form-group.full-width {
-            grid-column: 1 / -1;
+        .coupon-input {
+            flex: 1;
+            text-transform: uppercase;
         }
 
-        .form-label {
+        .coupon-btn {
+            background: var(--secondary);
+            color: var(--dark);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .coupon-btn:hover:not(:disabled) {
+            background: #3eb8af;
+            transform: translateY(-2px);
+        }
+
+        .coupon-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .coupon-message {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            padding: 0.5rem;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .coupon-message.success {
+            display: block;
+            color: var(--success);
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        .coupon-message.error {
+            display: block;
+            color: var(--danger);
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        /* Order Summary */
+        .order-summary {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid var(--darker);
+        }
+
+        .discount-value {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        /* Tip Section */
+        .tip-section {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+        }
+
+        .tip-header {
+            margin-bottom: 1rem;
             font-weight: 500;
+        }
+
+        .tip-options {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+        }
+
+        .tip-btn {
+            background: var(--darker);
+            border: 2px solid transparent;
             color: var(--text);
+            padding: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
             font-size: 0.9rem;
         }
 
-        .form-label.required::after {
-            content: " *";
-            color: var(--danger);
+        .tip-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .tip-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .custom-tip-input {
+            margin-top: 1rem;
+        }
+
+        #customTipAmount {
+            max-width: 150px;
+        }
+
+        /* Summary */
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .summary-row.total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            border-top: 2px solid var(--darker);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+
+        .coupon-discount {
+            color: var(--success);
+        }
+
+        /* Location Info */
+        .location-info {
+            background: var(--darker);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid var(--primary);
+        }
+
+        .location-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .location-address {
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Pickup Time */
+        .pickup-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .pickup-option {
+            background: var(--darker);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .pickup-option:hover {
+            border-color: var(--primary);
+        }
+
+        .pickup-option.selected {
+            border-color: var(--primary);
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .pickup-option-title {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .pickup-option-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .time-selector {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .time-selector.show {
+            display: block;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
         }
 
         .form-input {
-            background: var(--input-bg);
-            border: 1px solid var(--darker);
-            color: var(--text);
-            padding: 0.75rem 1rem;
+            width: 100%;
+            background: var(--darker);
+            border: 1px solid var(--card-bg);
             border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text);
             font-size: 1rem;
             transition: all 0.3s ease;
         }
@@ -396,145 +446,36 @@
         .form-input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
         }
 
-        .form-input.error {
-            border-color: var(--danger);
-        }
-
-        .error-message {
-            color: var(--danger);
-            font-size: 0.85rem;
-            margin-top: 0.25rem;
-        }
-
-        /* Pickup Info */
-        .pickup-info {
-            background: var(--darker);
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            border: 1px solid var(--primary);
-        }
-
-        .pickup-location {
+        /* Phone Input */
+        .phone-input-group {
             display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 0.5rem;
         }
 
-        .location-icon {
-            font-size: 2rem;
+        .country-code {
+            width: 100px;
         }
 
-        .location-details h3 {
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .location-address {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
-
-        .pickup-time-info {
+        /* WhatsApp Option */
+        .whatsapp-option {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: var(--success);
-            font-weight: 500;
+            margin-top: 0.5rem;
         }
 
-        /* Time Selection */
-        .time-selection {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .time-option {
-            background: var(--darker);
-            border: 2px solid transparent;
-            border-radius: 10px;
-            padding: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .time-option:hover {
-            border-color: var(--primary);
-        }
-
-        .time-option.selected {
-            border-color: var(--primary);
-            background: rgba(255, 0, 0, 0.1);
-        }
-
-        .time-radio {
+        .whatsapp-checkbox {
             width: 20px;
             height: 20px;
-            accent-color: var(--primary);
-        }
-
-        .time-info {
-            flex: 1;
-        }
-
-        .time-title {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .time-desc {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        .wait-time {
-            color: var(--success);
-            font-weight: 500;
-        }
-
-        /* Time Slots */
-        .time-slots {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .time-slot {
-            background: var(--darker);
-            border: 2px solid transparent;
-            border-radius: 8px;
-            padding: 0.75rem;
-            text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .time-slot:hover {
-            border-color: var(--primary);
-        }
-
-        .time-slot.selected {
-            border-color: var(--primary);
-            background: rgba(255, 0, 0, 0.1);
-        }
-
-        .time-slot.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
         }
 
         /* Payment Methods */
         .payment-methods {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 1rem;
         }
 
@@ -554,7 +495,7 @@
 
         .payment-method.selected {
             border-color: var(--primary);
-            background: rgba(255, 0, 0, 0.1);
+            background: rgba(255, 107, 107, 0.1);
         }
 
         .payment-icon {
@@ -563,959 +504,862 @@
         }
 
         .payment-name {
-            font-weight: 500;
+            font-weight: bold;
         }
 
-        /* WhatsApp Notification */
-        .whatsapp-option {
-            background: var(--darker);
+        /* Wait Time Notice */
+        .wait-time-notice {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid var(--warning);
             border-radius: 10px;
-            padding: 1.5rem;
-            margin-top: 1rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
             gap: 1rem;
         }
 
-        .whatsapp-checkbox {
-            width: 20px;
-            height: 20px;
-            accent-color: var(--success);
+        .wait-time-icon {
+            font-size: 1.5rem;
         }
 
-        .whatsapp-info {
+        .wait-time-text {
             flex: 1;
         }
 
-        .whatsapp-title {
-            font-weight: 600;
-            color: var(--success);
-            margin-bottom: 0.25rem;
+        .wait-time-value {
+            font-weight: bold;
+            color: var(--warning);
         }
 
-        .whatsapp-desc {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        /* Order Summary */
-        .order-summary {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            border: 1px solid var(--border-accent);
-            position: sticky;
-            top: 100px;
-        }
-
-        .summary-header {
-            font-size: 1.3rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--darker);
-        }
-
-        .summary-items {
-            margin-bottom: 1.5rem;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .summary-item {
+        /* Action Buttons */
+        .checkout-actions {
             display: flex;
             gap: 1rem;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--darker);
+            margin-top: 2rem;
         }
 
-        .summary-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .item-image {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        .item-details {
+        .btn {
             flex: 1;
-        }
-
-        .item-name {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .item-quantity {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        .item-price {
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        /* Promo Code */
-        .promo-section {
-            margin: 1.5rem 0;
             padding: 1rem;
-            background: var(--darker);
-            border-radius: 10px;
-        }
-
-        .promo-input-group {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .promo-input {
-            flex: 1;
-            background: var(--input-bg);
-            border: 1px solid var(--darker);
-            color: var(--text);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-        }
-
-        .promo-btn {
-            background: var(--primary);
-            color: white;
             border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .promo-btn:hover {
-            background: var(--primary-dark);
-        }
-
-        .promo-success {
-            color: var(--success);
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-        }
-
-        /* Summary Totals */
-        .summary-totals {
-            border-top: 2px solid var(--darker);
-            padding-top: 1rem;
-        }
-
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.75rem;
-            font-size: 0.95rem;
-        }
-
-        .total-row.final {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--primary);
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--darker);
-        }
-
-        /* Place Order Button */
-        .place-order-btn {
-            width: 100%;
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 1.25rem;
             border-radius: 10px;
             font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
         }
 
-        .place-order-btn:hover:not(:disabled) {
+        .btn-secondary {
+            background: var(--darker);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: var(--card-bg);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(255, 0, 0, 0.3);
         }
 
-        .place-order-btn:disabled {
-            opacity: 0.6;
+        .btn:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
         }
 
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Terms */
-        .terms {
-            margin-top: 1rem;
-            padding: 1rem;
-            background: var(--darker);
-            border-radius: 8px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-align: center;
-        }
-
-        .terms a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        .terms a:hover {
-            text-decoration: underline;
-        }
-
-        /* Security Badge */
-        .security-badge {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            color: var(--success);
-            font-size: 0.9rem;
-        }
-
-        /* Mobile Styles */
-        @media (max-width: 768px) {
-            .checkout-container {
-                grid-template-columns: 1fr;
-            }
-
-            .order-summary {
-                position: relative;
-                top: auto;
-                order: -1;
-            }
-
-            .checkout-steps {
-                display: none;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .payment-methods {
-                grid-template-columns: 1fr;
-            }
-
-            .header-content {
-                justify-content: center;
-            }
-        }
-
-        /* Loading Overlay */
-        .loading-overlay {
+        /* Modal Overlay for Payment */
+        .payment-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.8);
-            display: flex;
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
         }
 
-        .loading-overlay.active {
-            opacity: 1;
-            pointer-events: all;
+        .payment-overlay.active {
+            display: flex;
         }
 
-        .loading-content {
+        .payment-modal {
             background: var(--card-bg);
+            border-radius: 20px;
             padding: 2rem;
-            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .payment-processing {
             text-align: center;
+            padding: 2rem;
         }
 
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid var(--darker);
             border-top-color: var(--primary);
-            animation: spin 1s ease-in-out infinite;
+            border-radius: 50%;
             margin: 0 auto 1rem;
+            animation: spin 1s linear infinite;
         }
 
-        /* Success State */
-        .success-icon {
-            font-size: 4rem;
-            color: var(--success);
-            margin-bottom: 1rem;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
-        .success-message {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
+        /* Error Message */
+        .error-message {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            color: var(--danger);
+            display: none;
         }
 
-        .order-number {
-            color: var(--primary);
-            font-weight: bold;
-            font-size: 1.2rem;
+        .error-message.show {
+            display: block;
         }
 
-        /* Special Arctic Frost Adjustments */
-        [data-theme="arctic-frost"] .form-input {
-            color: var(--text);
-            background: var(--input-bg);
-        }
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .checkout-container {
+                padding: 0 0.5rem;
+            }
 
-        [data-theme="arctic-frost"] .form-input::placeholder {
-            color: var(--text-muted);
+            .checkout-card {
+                padding: 1.5rem;
+            }
+
+            .pickup-options,
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+
+            .checkout-actions {
+                flex-direction: column;
+            }
+
+            .progress-steps {
+                display: none;
+            }
+            
+            .tip-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .coupon-input-group {
+                flex-direction: column;
+            }
+            
+            .coupon-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
-<body data-theme="noir-excellence">
+<body>
     <!-- Header -->
     <header class="checkout-header">
         <div class="header-content">
-            <a href="/" class="logo">
+            <a href="index.html" class="back-btn">
+                <span>←</span> Zurück
+            </a>
+            <div class="logo">
                 <span>🍕</span>
                 <span>Eatech</span>
-            </a>
-            
-            <div class="checkout-steps">
-                <div class="step active">
-                    <div class="step-number">1</div>
-                    <span>Kontakt</span>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <span>Zahlung</span>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <span>Bestätigung</span>
-                </div>
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
+    <!-- Main Container -->
     <div class="checkout-container">
-        <!-- Checkout Form -->
-        <div class="checkout-form">
-            <form id="checkoutForm">
-                <!-- Pickup Information -->
-                <div class="form-section">
-                    <h2 class="section-title">
-                        <span>🚚</span>
-                        <span>Abholung am Foodtruck</span>
-                    </h2>
-                    
-                    <div class="pickup-info">
-                        <div class="pickup-location">
-                            <div class="location-icon">📍</div>
-                            <div class="location-details">
-                                <h3>Eatech Foodtruck</h3>
-                                <p class="location-address">
-                                    Bahnhofplatz 10, 3011 Bern<br>
-                                    Vor dem Hauptbahnhof
-                                </p>
-                            </div>
-                        </div>
-                        <div class="pickup-time-info">
-                            <span>⏱️</span>
-                            <span>Aktuelle Wartezeit: <span id="currentWaitTime">5 Min</span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Contact Information -->
-                <div class="form-section">
-                    <h2 class="section-title">
-                        <span>📧</span>
-                        <span>Kontaktinformationen</span>
-                    </h2>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label required">Vorname</label>
-                            <input type="text" class="form-input" name="firstName" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label required">Nachname</label>
-                            <input type="text" class="form-input" name="lastName" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label required">E-Mail</label>
-                            <input type="email" class="form-input" name="email" placeholder="ihre@email.ch" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label required">Telefon</label>
-                            <input type="tel" class="form-input" name="phone" placeholder="+41 XX XXX XX XX" required>
-                        </div>
-                    </div>
-
-                    <!-- WhatsApp Notifications -->
-                    <div class="whatsapp-option">
-                        <input type="checkbox" id="whatsappNotifications" class="whatsapp-checkbox" checked>
-                        <div class="whatsapp-info">
-                            <div class="whatsapp-title">WhatsApp-Benachrichtigungen erhalten</div>
-                            <div class="whatsapp-desc">
-                                Erhalten Sie Updates zu Ihrer Bestellung per WhatsApp
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pickup Time -->
-                <div class="form-section">
-                    <h2 class="section-title">
-                        <span>⏰</span>
-                        <span>Abholzeit</span>
-                    </h2>
-                    <div class="time-selection">
-                        <label class="time-option selected">
-                            <input type="radio" name="pickupTime" value="asap" class="time-radio" checked>
-                            <div class="time-info">
-                                <div class="time-title">So schnell wie möglich</div>
-                                <div class="time-desc">
-                                    Ihre Bestellung ist in ca. <span class="wait-time">5 Minuten</span> bereit
-                                </div>
-                            </div>
-                        </label>
-                        
-                        <label class="time-option">
-                            <input type="radio" name="pickupTime" value="scheduled" class="time-radio">
-                            <div class="time-info">
-                                <div class="time-title">Vorbestellung für später</div>
-                                <div class="time-desc">Wählen Sie Ihre gewünschte Abholzeit</div>
-                            </div>
-                        </label>
-                    </div>
-                    
-                    <div class="time-slots" id="timeSlots" style="display: none;">
-                        <!-- Time slots will be generated here -->
-                    </div>
-                </div>
-
-                <!-- Payment Method -->
-                <div class="form-section">
-                    <h2 class="section-title">
-                        <span>💳</span>
-                        <span>Zahlungsmethode</span>
-                    </h2>
-                    <div class="payment-methods">
-                        <label class="payment-method selected">
-                            <input type="radio" name="payment" value="card" checked style="display: none;">
-                            <div class="payment-icon">💳</div>
-                            <div class="payment-name">Kreditkarte</div>
-                        </label>
-                        
-                        <label class="payment-method">
-                            <input type="radio" name="payment" value="twint" style="display: none;">
-                            <div class="payment-icon">📱</div>
-                            <div class="payment-name">TWINT</div>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Card Details (Stripe) -->
-                <div class="form-section" id="cardDetails">
-                    <h2 class="section-title">
-                        <span>🔒</span>
-                        <span>Kartendaten</span>
-                    </h2>
-                    <div class="form-group">
-                        <div id="card-element" style="padding: 1rem; background: var(--input-bg); border: 1px solid var(--darker); border-radius: 8px;"></div>
-                        <div id="card-errors" class="error-message" style="margin-top: 0.5rem;"></div>
-                    </div>
-                </div>
-
-                <!-- TWINT Details -->
-                <div class="form-section" id="twintDetails" style="display: none;">
-                    <h2 class="section-title">
-                        <span>📱</span>
-                        <span>TWINT</span>
-                    </h2>
-                    <div style="text-align: center; padding: 2rem;">
-                        <p style="margin-bottom: 1rem;">Scannen Sie den QR-Code mit Ihrer TWINT App</p>
-                        <div style="background: white; padding: 2rem; display: inline-block; border-radius: 10px;">
-                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0id2hpdGUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCI+VFdJTlQgUVIgQ29kZTwvdGV4dD48L3N2Zz4=" alt="TWINT QR Code" style="width: 200px; height: 200px;">
-                        </div>
-                        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 0.9rem;">
-                            Der QR-Code wird nach Bestellbestätigung generiert
-                        </p>
-                    </div>
-                </div>
-            </form>
+        <!-- Progress Steps -->
+        <div class="progress-steps">
+            <div class="step active" id="step1">
+                <div class="step-circle">1</div>
+                <div class="step-label">Bestellung</div>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-circle">2</div>
+                <div class="step-label">Details</div>
+            </div>
+            <div class="step" id="step3">
+                <div class="step-circle">3</div>
+                <div class="step-label">Zahlung</div>
+            </div>
         </div>
 
         <!-- Order Summary -->
-        <div class="order-summary">
-            <h2 class="summary-header">📋 Bestellübersicht</h2>
-            
-            <div class="summary-items" id="summaryItems">
+        <div class="checkout-card">
+            <h2 class="card-title">
+                <span>🛒</span> Ihre Bestellung
+            </h2>
+            <div class="order-items" id="orderItems">
                 <!-- Items will be loaded here -->
             </div>
-
-            <!-- Promo Code -->
-            <div class="promo-section">
-                <div class="promo-input-group">
-                    <input type="text" class="promo-input" id="promoCode" placeholder="Gutscheincode">
-                    <button class="promo-btn" onclick="applyPromo()">Anwenden</button>
+            
+            <!-- Gutscheincode -->
+            <div class="coupon-section">
+                <div class="coupon-input-group">
+                    <input type="text" 
+                           id="couponCode" 
+                           class="form-input coupon-input" 
+                           placeholder="Gutscheincode eingeben">
+                    <button type="button" 
+                            class="coupon-btn" 
+                            id="couponBtn"
+                            onclick="applyCoupon()">
+                        Einlösen
+                    </button>
                 </div>
-                <div class="promo-success" id="promoSuccess" style="display: none;"></div>
+                <div class="coupon-message" id="couponMessage"></div>
             </div>
-
-            <!-- Totals -->
-            <div class="summary-totals">
-                <div class="total-row">
-                    <span>Zwischensumme</span>
+            
+            <!-- Bestellübersicht -->
+            <div class="order-summary">
+                <div class="summary-row">
+                    <span>Zwischensumme:</span>
                     <span id="subtotal">CHF 0.00</span>
                 </div>
-                <div class="total-row" id="discountRow" style="display: none;">
-                    <span>Rabatt</span>
-                    <span id="discount" style="color: var(--success);">-CHF 0.00</span>
+                <div class="summary-row coupon-discount" id="discountRow" style="display: none;">
+                    <span>Rabatt (<span id="discountPercent">0</span>%):</span>
+                    <span id="discountAmount" class="discount-value">- CHF 0.00</span>
                 </div>
-                <div class="total-row final">
-                    <span>Gesamt</span>
+                
+                <!-- Trinkgeld -->
+                <div class="tip-section">
+                    <div class="tip-header">
+                        <span>💰 Trinkgeld hinzufügen:</span>
+                    </div>
+                    <div class="tip-options">
+                        <button type="button" class="tip-btn" data-tip="0">
+                            Kein
+                        </button>
+                        <button type="button" class="tip-btn" data-tip="10">
+                            10%
+                        </button>
+                        <button type="button" class="tip-btn active" data-tip="15">
+                            15%
+                        </button>
+                        <button type="button" class="tip-btn" data-tip="20">
+                            20%
+                        </button>
+                        <button type="button" class="tip-btn custom" data-tip="custom">
+                            Andere
+                        </button>
+                    </div>
+                    <div class="custom-tip-input" id="customTipInput" style="display: none;">
+                        <input type="number" 
+                               id="customTipAmount" 
+                               class="form-input" 
+                               placeholder="CHF" 
+                               min="0" 
+                               step="0.50"
+                               onchange="applyCustomTip()">
+                    </div>
+                </div>
+                
+                <div class="summary-row" id="tipRow">
+                    <span>Trinkgeld (<span id="tipPercent">15</span>%):</span>
+                    <span id="tipAmount">CHF 0.00</span>
+                </div>
+                
+                <div class="summary-row total">
+                    <span>Gesamt:</span>
                     <span id="total">CHF 0.00</span>
                 </div>
             </div>
+        </div>
 
-            <!-- Place Order Button -->
-            <button class="place-order-btn" id="placeOrderBtn" onclick="placeOrder()">
-                <span>Bestellung aufgeben</span>
+        <!-- Location & Pickup -->
+        <div class="checkout-card">
+            <h2 class="card-title">
+                <span>📍</span> Abholort & Zeit
+            </h2>
+            
+            <!-- Foodtruck Location -->
+            <div class="location-info">
+                <div class="location-header">
+                    <span>🚚</span> Foodtruck Standort
+                </div>
+                <div class="location-address">
+                    Bahnhofplatz 10<br>
+                    3011 Bern
+                </div>
+            </div>
+
+            <!-- Pickup Time -->
+            <div class="form-group">
+                <label class="form-label">Abholzeit wählen:</label>
+                <div class="pickup-options">
+                    <div class="pickup-option selected" onclick="selectPickupTime('asap')">
+                        <div class="pickup-option-title">⚡ So schnell wie möglich</div>
+                        <div class="pickup-option-desc" id="asapTime">In ca. 5 Min</div>
+                    </div>
+                    <div class="pickup-option" onclick="selectPickupTime('scheduled')">
+                        <div class="pickup-option-title">⏰ Vorbestellen</div>
+                        <div class="pickup-option-desc">Für später</div>
+                    </div>
+                </div>
+                
+                <div class="time-selector" id="timeSelector">
+                    <input type="time" class="form-input" id="scheduledTime" min="" max="">
+                    <small style="color: var(--text-muted); display: block; margin-top: 0.5rem;">
+                        Vorbestellungen bis max. 1 Stunde im Voraus
+                    </small>
+                </div>
+            </div>
+
+            <!-- Wait Time Notice -->
+            <div class="wait-time-notice">
+                <div class="wait-time-icon">⏱️</div>
+                <div class="wait-time-text">
+                    Geschätzte Wartezeit: <span class="wait-time-value" id="waitTimeDisplay">5 Minuten</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Details -->
+        <div class="checkout-card">
+            <h2 class="card-title">
+                <span>👤</span> Ihre Kontaktdaten
+            </h2>
+            
+            <div class="form-group">
+                <label class="form-label">Name *</label>
+                <input type="text" class="form-input" id="customerName" placeholder="Ihr Name" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Telefonnummer *</label>
+                <div class="phone-input-group">
+                    <select class="form-input country-code" id="countryCode">
+                        <option value="+41">🇨🇭 +41</option>
+                        <option value="+49">🇩🇪 +49</option>
+                        <option value="+43">🇦🇹 +43</option>
+                        <option value="+33">🇫🇷 +33</option>
+                        <option value="+39">🇮🇹 +39</option>
+                    </select>
+                    <input type="tel" class="form-input" id="phoneNumber" placeholder="79 123 45 67" required>
+                </div>
+                <div class="whatsapp-option">
+                    <input type="checkbox" class="whatsapp-checkbox" id="whatsappNotify" checked>
+                    <label for="whatsappNotify">WhatsApp-Benachrichtigungen erhalten</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">E-Mail (optional)</label>
+                <input type="email" class="form-input" id="customerEmail" placeholder="ihre@email.ch">
+            </div>
+        </div>
+
+        <!-- Payment -->
+        <div class="checkout-card">
+            <h2 class="card-title">
+                <span>💳</span> Zahlungsmethode
+            </h2>
+            
+            <div class="payment-methods">
+                <div class="payment-method selected" onclick="selectPayment('card')">
+                    <div class="payment-icon">💳</div>
+                    <div class="payment-name">Kreditkarte</div>
+                </div>
+                <div class="payment-method" onclick="selectPayment('twint')">
+                    <div class="payment-icon">📱</div>
+                    <div class="payment-name">TWINT</div>
+                </div>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="checkout-actions">
+            <button class="btn btn-secondary" onclick="window.location.href='index.html'">
+                Zurück zum Menü
             </button>
-
-            <!-- Terms -->
-            <div class="terms">
-                Mit Ihrer Bestellung akzeptieren Sie unsere 
-                <a href="/agb">AGB</a> und 
-                <a href="/datenschutz">Datenschutzerklärung</a>
-            </div>
-
-            <!-- Security Badge -->
-            <div class="security-badge">
-                <span>🔒</span>
-                <span>Sichere SSL-Verschlüsselung</span>
-            </div>
+            <button class="btn btn-primary" id="placeOrderBtn" onclick="placeOrder()">
+                Bestellung aufgeben
+            </button>
         </div>
     </div>
 
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <p id="loadingText">Bestellung wird verarbeitet...</p>
+    <!-- Payment Modal -->
+    <div class="payment-overlay" id="paymentOverlay">
+        <div class="payment-modal">
+            <div class="payment-processing">
+                <div class="spinner"></div>
+                <h3>Zahlung wird verarbeitet...</h3>
+                <p>Bitte warten Sie einen Moment</p>
+            </div>
         </div>
     </div>
 
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyD3OCMvc4Iup58Ao0BiFNuvA0fnJokzYS8",
-            authDomain: "pizzapastadamico.firebaseapp.com",
-            databaseURL: "https://pizzapastadamico-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "pizzapastadamico",
-            storageBucket: "pizzapastadamico.firebasestorage.app",
-            messagingSenderId: "83240541532",
-            appId: "1:83240541532:web:11e3277850bf89a5b8b599",
-            measurementId: "G-6H2J5K88J7"
+            apiKey: "AIzaSyDFBlgWE81iHnACVwOmaU0jL7FV0l_tRmU",
+            authDomain: "eatech-foodtruck.firebaseapp.com",
+            databaseURL: "https://eatech-foodtruck-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "eatech-foodtruck",
+            storageBucket: "eatech-foodtruck.firebasestorage.app",
+            messagingSenderId: "261222802445",
+            appId: "1:261222802445:web:edde22580422fbced22144",
+            measurementId: "G-N0KHWJG9KP"
         };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const db = firebase.database();
 
-        // Stripe Setup
+        // Initialize Stripe
         const stripe = Stripe('pk_test_51Rg6MY4I9wcGYX9JUBunT1Yh6kr776piJvLCk3Ln6ovyk0RGBQ0icKbbEYvOUInOIZGKdbvfsCPLZ14JDoOlrPeV00SJRbRsDo');
-        const elements = stripe.elements();
-        let cardElement = null;
 
-        // Theme Setup
-        const savedTheme = localStorage.getItem('eatechTheme') || 'noir-excellence';
-        document.body.setAttribute('data-theme', savedTheme);
+        // Variables
+        let cart = JSON.parse(localStorage.getItem('eatechCart')) || [];
+        let selectedPickupTime = 'asap';
+        let selectedPayment = 'card';
+        let currentWaitTime = 5;
+        let tipPercentage = 15;
+        let tipAmount = 0;
+        let couponDiscount = 0;
+        let appliedCoupon = null;
 
-        // Cart Data
-        let cartData = null;
-        let discount = 0;
-        let currentWaitTime = 5; // Default wait time in minutes
+        // Vordefinierte Gutscheincodes
+        const validCoupons = {
+            'WELCOME10': { discount: 10, description: '10% Willkommensrabatt' },
+            'STUDENT15': { discount: 15, description: '15% Studentenrabatt' },
+            'FOODTRUCK20': { discount: 20, description: '20% Foodtruck Special' },
+            'EATECH25': { discount: 25, description: '25% Treuerabatt' }
+        };
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            loadCartData();
-            setupEventListeners();
-            setupStripeCard();
-            generateTimeSlots();
-            loadWaitTime();
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== CHECKOUT PAGE LOADED ===');
+            
+            // Cart aus localStorage laden
+            const savedCart = localStorage.getItem('eatechCart');
+            console.log('Saved cart from localStorage:', savedCart);
+            
+            if (savedCart) {
+                try {
+                    cart = JSON.parse(savedCart);
+                    console.log('Parsed cart:', cart);
+                } catch (e) {
+                    console.error('Error parsing cart:', e);
+                    cart = [];
+                }
+            }
+            
+            // Initiale Funktionen aufrufen
+            if (cart && cart.length > 0) {
+                loadCartItems();
+                calculateWaitTime();
+                setupTipButtons();
+                updateProgress(1);
+            } else {
+                console.warn('Cart is empty, redirecting to index...');
+                alert('Ihr Warenkorb ist leer!');
+                window.location.href = 'index.html';
+            }
         });
 
-        // Load Cart Data
-        function loadCartData() {
-            const checkoutData = sessionStorage.getItem('checkoutData');
-            if (!checkoutData) {
-                window.location.href = '/';
+        // Load Cart Items
+        function loadCartItems() {
+            console.log('=== LOADING CART ITEMS ===');
+            const orderItems = document.getElementById('orderItems');
+            
+            if (!cart || cart.length === 0) {
+                console.error('Cart is empty!');
+                alert('Ihr Warenkorb ist leer!');
+                window.location.href = 'index.html';
                 return;
             }
 
-            cartData = JSON.parse(checkoutData);
-            displayOrderSummary();
-            updateTotals();
-        }
+            console.log('Number of items in cart:', cart.length);
+            console.log('Cart contents:', cart);
 
-        // Display Order Summary
-        function displayOrderSummary() {
-            const summaryItems = document.getElementById('summaryItems');
-            summaryItems.innerHTML = cartData.items.map(item => `
-                <div class="summary-item">
-                    <img src="${item.image}" alt="${item.name}" class="item-image">
-                    <div class="item-details">
-                        <div class="item-name">${item.name}</div>
-                        <div class="item-quantity">${item.quantity}x @ CHF ${item.price.toFixed(2)}</div>
+            try {
+                orderItems.innerHTML = cart.map(item => `
+                    <div class="order-item">
+                        <div class="item-details">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-quantity">${item.quantity}x à CHF ${(item.price || 0).toFixed(2)}</div>
+                            ${item.specialRequest ? `<div class="item-special">📝 ${item.specialRequest}</div>` : ''}
+                        </div>
+                        <div class="item-price">CHF ${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</div>
                     </div>
-                    <div class="item-price">CHF ${(item.price * item.quantity).toFixed(2)}</div>
-                </div>
-            `).join('');
+                `).join('');
+
+                console.log('Cart items rendered successfully');
+                updateTotals();
+            } catch (error) {
+                console.error('Error rendering cart items:', error);
+            }
         }
 
         // Update Totals
         function updateTotals() {
-            const subtotal = cartData.total;
-            const total = subtotal - discount;
-
-            document.getElementById('subtotal').textContent = `CHF ${subtotal.toFixed(2)}`;
-            document.getElementById('total').textContent = `CHF ${total.toFixed(2)}`;
-
-            if (discount > 0) {
+            console.log('=== UPDATING TOTALS ===');
+            
+            if (!cart || cart.length === 0) {
+                console.error('Cart is empty in updateTotals');
+                return;
+            }
+            
+            // Berechne Zwischensumme
+            const subtotal = cart.reduce((sum, item) => {
+                const itemTotal = (item.price || 0) * (item.quantity || 1);
+                console.log(`Item: ${item.name}, Price: ${item.price}, Qty: ${item.quantity}, Total: ${itemTotal}`);
+                return sum + itemTotal;
+            }, 0);
+            
+            console.log('Calculated subtotal:', subtotal);
+            
+            // Calculate discount
+            const discountAmount = (subtotal * couponDiscount) / 100;
+            const afterDiscount = subtotal - discountAmount;
+            
+            // Calculate tip based on percentage
+            if (tipPercentage !== 'custom') {
+                tipAmount = (afterDiscount * tipPercentage) / 100;
+            }
+            
+            const total = afterDiscount + tipAmount;
+            
+            console.log('Discount:', discountAmount, 'Tip:', tipAmount, 'Total:', total);
+            
+            // Update UI - Stellen Sie sicher, dass die Elemente existieren
+            const subtotalElement = document.getElementById('subtotal');
+            if (subtotalElement) {
+                subtotalElement.textContent = `CHF ${subtotal.toFixed(2)}`;
+                console.log('Subtotal updated in UI');
+            } else {
+                console.error('Subtotal element not found!');
+            }
+            
+            // Show/hide discount row
+            if (couponDiscount > 0) {
                 document.getElementById('discountRow').style.display = 'flex';
-                document.getElementById('discount').textContent = `-CHF ${discount.toFixed(2)}`;
+                document.getElementById('discountPercent').textContent = couponDiscount;
+                document.getElementById('discountAmount').textContent = `- CHF ${discountAmount.toFixed(2)}`;
+            } else {
+                document.getElementById('discountRow').style.display = 'none';
+            }
+            
+            // Update tip display
+            const tipPercentElement = document.getElementById('tipPercent');
+            const tipAmountElement = document.getElementById('tipAmount');
+            
+            if (tipPercentElement && tipAmountElement) {
+                if (tipPercentage !== 'custom') {
+                    tipPercentElement.textContent = tipPercentage;
+                    tipAmountElement.textContent = `CHF ${tipAmount.toFixed(2)}`;
+                } else {
+                    tipPercentElement.textContent = 'Custom';
+                    tipAmountElement.textContent = `CHF ${tipAmount.toFixed(2)}`;
+                }
+            }
+            
+            // Update total
+            const totalElement = document.getElementById('total');
+            if (totalElement) {
+                totalElement.textContent = `CHF ${total.toFixed(2)}`;
+                console.log('Total updated in UI');
+            } else {
+                console.error('Total element not found!');
             }
         }
 
-        // Load Current Wait Time from Firebase
-        function loadWaitTime() {
-            database.ref('settings/waitTime').on('value', (snapshot) => {
-                const waitTime = snapshot.val() || 5;
-                currentWaitTime = waitTime;
-                document.getElementById('currentWaitTime').textContent = `${waitTime} Min`;
-                document.querySelector('.wait-time').textContent = `${waitTime} Minuten`;
+        // Apply Coupon
+        function applyCoupon() {
+            const code = document.getElementById('couponCode').value.trim().toUpperCase();
+            const messageEl = document.getElementById('couponMessage');
+            const couponBtn = document.getElementById('couponBtn');
+            
+            if (!code) {
+                messageEl.textContent = 'Bitte geben Sie einen Gutscheincode ein';
+                messageEl.className = 'coupon-message error';
+                return;
+            }
+            
+            if (validCoupons[code]) {
+                appliedCoupon = code;
+                couponDiscount = validCoupons[code].discount;
+                messageEl.textContent = `✓ ${validCoupons[code].description} wurde angewendet`;
+                messageEl.className = 'coupon-message success';
                 
-                // Calculate total items in queue for more accurate wait time
-                const itemCount = cartData.items.reduce((sum, item) => sum + item.quantity, 0);
-                const estimatedTime = waitTime * Math.ceil(itemCount / 2); // Assume 2 items per wait period
-                document.querySelector('.wait-time').textContent = `${estimatedTime} Minuten`;
-            });
-        }
-
-        // Setup Event Listeners
-        function setupEventListeners() {
-            // Pickup Time
-            document.querySelectorAll('input[name="pickupTime"]').forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    const timeSlotsDiv = document.getElementById('timeSlots');
-                    timeSlotsDiv.style.display = e.target.value === 'scheduled' ? 'grid' : 'none';
-                });
-            });
-
-            // Payment Method
-            document.querySelectorAll('input[name="payment"]').forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    const cardDetails = document.getElementById('cardDetails');
-                    const twintDetails = document.getElementById('twintDetails');
-                    
-                    if (e.target.value === 'card') {
-                        cardDetails.style.display = 'block';
-                        twintDetails.style.display = 'none';
-                    } else if (e.target.value === 'twint') {
-                        cardDetails.style.display = 'none';
-                        twintDetails.style.display = 'block';
-                    }
-                });
-            });
-
-            // Update visual selection for payment methods
-            document.querySelectorAll('.payment-method').forEach(method => {
-                method.addEventListener('click', () => {
-                    document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
-                    method.classList.add('selected');
-                });
-            });
-
-            // Update visual selection for time options
-            document.querySelectorAll('.time-option').forEach(option => {
-                option.addEventListener('click', () => {
-                    document.querySelectorAll('.time-option').forEach(opt => opt.classList.remove('selected'));
-                    option.classList.add('selected');
-                });
-            });
-        }
-
-        // Setup Stripe Card
-        function setupStripeCard() {
-            cardElement = elements.create('card', {
-                style: {
-                    base: {
-                        color: savedTheme === 'arctic-frost' ? '#2C3E50' : '#FFFFFF',
-                        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                        fontSmoothing: 'antialiased',
-                        fontSize: '16px',
-                        '::placeholder': {
-                            color: savedTheme === 'arctic-frost' ? '#7F8C8D' : '#999999'
-                        }
-                    },
-                    invalid: {
-                        color: '#E74C3C',
-                        iconColor: '#E74C3C'
-                    }
-                }
-            });
-
-            cardElement.mount('#card-element');
-
-            cardElement.on('change', (event) => {
-                const displayError = document.getElementById('card-errors');
-                if (event.error) {
-                    displayError.textContent = event.error.message;
-                } else {
-                    displayError.textContent = '';
-                }
-            });
-        }
-
-        // Generate Time Slots
-        function generateTimeSlots() {
-            const timeSlotsDiv = document.getElementById('timeSlots');
-            const now = new Date();
-            const slots = [];
-
-            // Generate slots for next 3 hours (every 15 minutes)
-            for (let i = 1; i <= 12; i++) {
-                const time = new Date(now.getTime() + i * 15 * 60000); // 15-minute intervals
-                const hours = time.getHours().toString().padStart(2, '0');
-                const minutes = time.getMinutes().toString().padStart(2, '0');
-                slots.push(`${hours}:${minutes}`);
-            }
-
-            timeSlotsDiv.innerHTML = slots.map(slot => `
-                <div class="time-slot" onclick="selectTimeSlot(this)">
-                    ${slot}
-                </div>
-            `).join('');
-        }
-
-        // Select Time Slot
-        function selectTimeSlot(element) {
-            document.querySelectorAll('.time-slot').forEach(slot => {
-                slot.classList.remove('selected');
-            });
-            element.classList.add('selected');
-        }
-
-        // Apply Promo Code
-        function applyPromo() {
-            const promoCode = document.getElementById('promoCode').value.toUpperCase();
-            const promoCodes = {
-                'EATECH10': { discount: 0.1, type: 'percentage' },
-                'GRATIS5': { discount: 5, type: 'fixed' },
-                'WILLKOMMEN': { discount: 0.15, type: 'percentage' },
-                'STUDENT20': { discount: 0.2, type: 'percentage' }
-            };
-
-            const promo = promoCodes[promoCode];
-            if (promo) {
-                if (promo.type === 'percentage') {
-                    discount = cartData.total * promo.discount;
-                } else {
-                    discount = promo.discount;
-                }
-
-                document.getElementById('promoSuccess').textContent = `Gutschein "${promoCode}" angewendet!`;
-                document.getElementById('promoSuccess').style.display = 'block';
+                // Disable input
+                document.getElementById('couponCode').disabled = true;
+                couponBtn.textContent = 'Eingelöst';
+                couponBtn.disabled = true;
+                
                 updateTotals();
             } else {
-                alert('Ungültiger Gutscheincode');
+                messageEl.textContent = 'Ungültiger Gutscheincode';
+                messageEl.className = 'coupon-message error';
             }
+        }
+
+        // Setup Tip Buttons
+        function setupTipButtons() {
+            console.log('=== SETTING UP TIP BUTTONS ===');
+            const tipButtons = document.querySelectorAll('.tip-btn');
+            console.log('Found tip buttons:', tipButtons.length);
+            
+            tipButtons.forEach(btn => {
+                // Entferne alte Event Listener falls vorhanden
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+                
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Tip button clicked:', this.dataset.tip);
+                    
+                    const tipValue = this.dataset.tip;
+                    
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.tip-btn').forEach(b => b.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    if (tipValue === 'custom') {
+                        document.getElementById('customTipInput').style.display = 'block';
+                        document.getElementById('customTipAmount').focus();
+                        tipPercentage = 'custom';
+                    } else {
+                        document.getElementById('customTipInput').style.display = 'none';
+                        tipPercentage = parseInt(tipValue);
+                        console.log('Tip percentage set to:', tipPercentage);
+                        updateTotals();
+                    }
+                });
+            });
+        }
+
+        // Apply Custom Tip
+        function applyCustomTip() {
+            const amount = parseFloat(document.getElementById('customTipAmount').value) || 0;
+            tipAmount = amount;
+            tipPercentage = 'custom';
+            updateTotals();
+        }
+
+        // Calculate Wait Time
+        async function calculateWaitTime() {
+            try {
+                const snapshot = await db.ref('settings/waitTime').once('value');
+                const baseWaitTime = snapshot.val() || 5;
+                
+                const totalPortions = cart.reduce((sum, item) => sum + item.quantity, 0);
+                currentWaitTime = baseWaitTime + (totalPortions * 5);
+                
+                document.getElementById('waitTimeDisplay').textContent = `${currentWaitTime} Minuten`;
+                document.getElementById('asapTime').textContent = `In ca. ${currentWaitTime} Min`;
+            } catch (error) {
+                console.error('Error calculating wait time:', error);
+            }
+        }
+
+        // Select Pickup Time
+        function selectPickupTime(type) {
+            selectedPickupTime = type;
+            
+            document.querySelectorAll('.pickup-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            event.currentTarget.classList.add('selected');
+            
+            if (type === 'scheduled') {
+                document.getElementById('timeSelector').classList.add('show');
+                
+                const now = new Date();
+                const min = new Date(now.getTime() + 30 * 60000);
+                const max = new Date(now.getTime() + 60 * 60000);
+                
+                document.getElementById('scheduledTime').min = `${min.getHours().toString().padStart(2, '0')}:${min.getMinutes().toString().padStart(2, '0')}`;
+                document.getElementById('scheduledTime').max = `${max.getHours().toString().padStart(2, '0')}:${max.getMinutes().toString().padStart(2, '0')}`;
+            } else {
+                document.getElementById('timeSelector').classList.remove('show');
+            }
+        }
+
+        // Select Payment Method
+        function selectPayment(method) {
+            selectedPayment = method;
+            
+            document.querySelectorAll('.payment-method').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            event.currentTarget.classList.add('selected');
         }
 
         // Validate Form
         function validateForm() {
-            const form = document.getElementById('checkoutForm');
-            const requiredFields = form.querySelectorAll('[required]');
-            let isValid = true;
-
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    field.classList.add('error');
-                    isValid = false;
-                } else {
-                    field.classList.remove('error');
-                }
-            });
-
-            // Validate email
-            const email = form.email.value;
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                form.email.classList.add('error');
-                isValid = false;
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('phoneNumber').value.trim();
+            
+            if (!name || !phone) {
+                showError('Bitte füllen Sie alle Pflichtfelder aus');
+                return false;
             }
-
-            // Validate phone
-            const phone = form.phone.value;
-            const phoneRegex = /^(\+41|0041|0)?[0-9]{9,10}$/;
-            if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
-                form.phone.classList.add('error');
-                isValid = false;
+            
+            if (phone.length < 7) {
+                showError('Bitte geben Sie eine gültige Telefonnummer ein');
+                return false;
             }
+            
+            if (selectedPickupTime === 'scheduled' && !document.getElementById('scheduledTime').value) {
+                showError('Bitte wählen Sie eine Abholzeit');
+                return false;
+            }
+            
+            return true;
+        }
 
-            return isValid;
+        // Show Error
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+            
+            setTimeout(() => {
+                errorElement.classList.remove('show');
+            }, 5000);
         }
 
         // Place Order
         async function placeOrder() {
+            console.log('=== PLACE ORDER CLICKED ===');
+            
             if (!validateForm()) {
-                alert('Bitte füllen Sie alle Pflichtfelder aus.');
+                console.log('Form validation failed');
                 return;
             }
-
+            
             const btn = document.getElementById('placeOrderBtn');
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span><span>Wird verarbeitet...</span>';
-
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            loadingOverlay.classList.add('active');
-
+            console.log('Button disabled, showing payment overlay...');
+            
+            document.getElementById('paymentOverlay').classList.add('active');
+            
             try {
-                const form = document.getElementById('checkoutForm');
-                const paymentMethod = form.payment.value;
+                const subtotal = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
+                const discountAmount = (subtotal * couponDiscount) / 100;
+                const afterDiscount = subtotal - discountAmount;
+                const finalTotal = afterDiscount + tipAmount;
                 
-                // Calculate pickup time
-                let pickupTime = null;
-                if (form.pickupTime.value === 'asap') {
-                    const itemCount = cartData.items.reduce((sum, item) => sum + item.quantity, 0);
-                    const estimatedMinutes = currentWaitTime * Math.ceil(itemCount / 2);
-                    pickupTime = new Date(Date.now() + estimatedMinutes * 60000);
-                } else {
-                    const selectedSlot = document.querySelector('.time-slot.selected');
-                    if (selectedSlot) {
-                        const [hours, minutes] = selectedSlot.textContent.split(':');
-                        pickupTime = new Date();
-                        pickupTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-                    }
-                }
-
-                // Create order data
+                console.log('Order total:', finalTotal);
+                
                 const orderData = {
+                    items: cart,
+                    pricing: {
+                        subtotal: subtotal,
+                        discount: couponDiscount,
+                        discountAmount: discountAmount,
+                        couponCode: appliedCoupon,
+                        tip: tipAmount,
+                        tipPercentage: tipPercentage === 'custom' ? 'custom' : tipPercentage,
+                        total: finalTotal
+                    },
                     customer: {
-                        firstName: form.firstName.value,
-                        lastName: form.lastName.value,
-                        email: form.email.value,
-                        phone: form.phone.value,
-                        whatsappEnabled: document.getElementById('whatsappNotifications').checked
+                        name: document.getElementById('customerName').value,
+                        phone: document.getElementById('countryCode').value + document.getElementById('phoneNumber').value,
+                        email: document.getElementById('customerEmail').value || null,
+                        whatsapp: document.getElementById('whatsappNotify').checked
                     },
                     pickup: {
-                        location: 'Eatech Foodtruck - Bahnhofplatz 10, 3011 Bern',
-                        time: pickupTime.toISOString(),
-                        method: form.pickupTime.value
+                        type: selectedPickupTime,
+                        time: selectedPickupTime === 'asap' 
+                            ? new Date(Date.now() + currentWaitTime * 60000).toISOString()
+                            : new Date(`${new Date().toISOString().split('T')[0]}T${document.getElementById('scheduledTime').value}`).toISOString(),
+                        location: 'Bahnhofplatz 10, 3011 Bern'
                     },
-                    items: cartData.items,
                     payment: {
-                        method: paymentMethod,
-                        subtotal: cartData.total,
-                        discount: discount,
-                        total: cartData.total - discount
+                        method: selectedPayment,
+                        status: 'pending'
                     },
-                    status: 'pending',
+                    status: 'new',
                     timestamp: firebase.database.ServerValue.TIMESTAMP,
-                    date: new Date().toISOString()
+                    createdAt: new Date().toISOString()
                 };
-
-                // Handle payment
-                if (paymentMethod === 'card') {
-                    // Create payment intent
-                    const { paymentMethod, error } = await stripe.createPaymentMethod({
-                        type: 'card',
-                        card: cardElement,
-                        billing_details: {
-                            name: `${form.firstName.value} ${form.lastName.value}`,
-                            email: form.email.value
-                        }
-                    });
-
-                    if (error) {
-                        throw new Error(error.message);
-                    }
-
-                    orderData.payment.stripePaymentMethod = paymentMethod.id;
-                } else if (paymentMethod === 'twint') {
-                    // TWINT payment will be handled separately
-                    orderData.payment.twintPending = true;
-                }
-
-                // Save order to Firebase
-                const orderRef = await database.ref('orders').push(orderData);
+                
+                console.log('Saving order to Firebase...', orderData);
+                
+                const orderRef = await db.ref('orders').push(orderData);
                 const orderId = orderRef.key;
-
-                // Clear cart
-                localStorage.removeItem('eatechCart');
-                sessionStorage.removeItem('checkoutData');
-
-                // Show success
+                
+                console.log('Order saved with ID:', orderId);
+                
+                // Simulate payment processing
                 setTimeout(() => {
-                    loadingOverlay.innerHTML = `
-                        <div class="loading-content">
-                            <div class="success-icon">✅</div>
-                            <h2 class="success-message">Bestellung erfolgreich!</h2>
-                            <p>Ihre Bestellnummer:</p>
-                            <p class="order-number">#${orderId.slice(-6).toUpperCase()}</p>
-                            <p style="margin-top: 1rem;">Sie werden in 3 Sekunden weitergeleitet...</p>
-                        </div>
-                    `;
-
-                    // Redirect to success page
-                    setTimeout(() => {
-                        window.location.href = `/success.html?order=${orderId}`;
-                    }, 3000);
-                }, 1500);
-
+                    console.log('Payment processed, clearing cart...');
+                    localStorage.removeItem('eatechCart');
+                    sessionStorage.setItem('lastOrderId', orderId);
+                    sessionStorage.setItem('lastOrderData', JSON.stringify(orderData));
+                    
+                    console.log('Redirecting to success page...');
+                    window.location.href = `success.html?order=${orderId}`;
+                }, 2000);
+                
             } catch (error) {
-                console.error('Order error:', error);
-                alert('Es ist ein Fehler aufgetreten: ' + error.message);
+                console.error('Error placing order:', error);
+                document.getElementById('paymentOverlay').classList.remove('active');
+                showError('Fehler bei der Bestellung. Bitte versuchen Sie es erneut.');
                 btn.disabled = false;
-                btn.innerHTML = '<span>Bestellung aufgeben</span>';
-                loadingOverlay.classList.remove('active');
             }
         }
-    </script>
 
-    <!-- Include Cart JS -->
-    <script src="/js/cart.js"></script>
+        // Update progress steps
+        function updateProgress(step) {
+            for (let i = 1; i <= 3; i++) {
+                const stepElement = document.getElementById(`step${i}`);
+                if (i < step) {
+                    stepElement.classList.add('completed');
+                } else if (i === step) {
+                    stepElement.classList.add('active');
+                } else {
+                    stepElement.classList.remove('active', 'completed');
+                }
+            }
+        }
+
+        // Animate on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        });
+
+        document.querySelectorAll('.checkout-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
 </body>
 </html>

@@ -7,233 +7,30 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#FF6B6B">
     
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
+    <!-- Cart Script -->
+    <script src="js/cart.js"></script>
+    
     <style>
-        /* Theme System - Professionelle Restaurant-Farbkombinationen */
         :root {
-            /* Default Theme wird durch data-theme überschrieben */
-        }
-
-        /* Theme 1: NOIR EXCELLENCE - Das Original Schwarz-Rot */
-        [data-theme="noir-excellence"] {
-            --primary: #FF0000;
-            --primary-dark: #CC0000;
-            --secondary: #FFD700;
-            --dark: #0A0A0A;
-            --darker: #000000;
+            --primary: #FF6B6B;
+            --primary-dark: #FF5252;
+            --secondary: #4ECDC4;
+            --dark: #2C3E50;
+            --darker: #1a1a2e;
             --light: #F7F9FB;
-            --text: #FFFFFF;
-            --text-muted: #999999;
+            --text: #E8E8E8;
+            --text-muted: #95A5A6;
             --success: #2ECC71;
             --warning: #F39C12;
             --danger: #E74C3C;
-            --card-bg: #1a1a1a;
-            --sidebar-bg: #0f0f0f;
-            --gradient-start: #000000;
-            --gradient-end: #1a1a1a;
-            --header-bg: rgba(26, 26, 26, 0.95);
-            --nav-bg: #1a1a1a;
-            --border-accent: #FF0000;
+            --card-bg: #16213e;
+            --sidebar-bg: #0f1419;
         }
 
-        /* Theme 2: MIDNIGHT SAPPHIRE - Premium Blau */
-        [data-theme="midnight-sapphire"] {
-            --primary: #4169E1;
-            --primary-dark: #1E90FF;
-            --secondary: #FFD700;
-            --dark: #000033;
-            --darker: #000022;
-            --light: #F7F9FB;
-            --text: #FFFFFF;
-            --text-muted: #87CEEB;
-            --success: #2ECC71;
-            --warning: #F39C12;
-            --danger: #E74C3C;
-            --card-bg: #000044;
-            --sidebar-bg: #000033;
-            --gradient-start: #000022;
-            --gradient-end: #000044;
-            --header-bg: rgba(0, 0, 51, 0.95);
-            --nav-bg: #000044;
-            --border-accent: #4169E1;
-        }
-
-        /* Theme 3: EMERALD LUXE - Waldgrün Premium */
-        [data-theme="emerald-luxe"] {
-            --primary: #00C851;
-            --primary-dark: #007E33;
-            --secondary: #FFD700;
-            --dark: #0D2818;
-            --darker: #051A0F;
-            --light: #F7F9FB;
-            --text: #FFFFFF;
-            --text-muted: #81C784;
-            --success: #00C851;
-            --warning: #FFEB3B;
-            --danger: #E74C3C;
-            --card-bg: #0D2818;
-            --sidebar-bg: #051A0F;
-            --gradient-start: #051A0F;
-            --gradient-end: #0D2818;
-            --header-bg: rgba(13, 40, 24, 0.95);
-            --nav-bg: #0D2818;
-            --border-accent: #00C851;
-        }
-
-        /* Theme 4: MOCHA MOUSSE - Trend 2024/2025 */
-        [data-theme="mocha-mousse"] {
-            --primary: #A47864;
-            --primary-dark: #8B5A3C;
-            --secondary: #D2691E;
-            --dark: #2C1810;
-            --darker: #1A0F08;
-            --light: #FFF8F0;
-            --text: #FFFFFF;
-            --text-muted: #D2B48C;
-            --success: #8FBC8F;
-            --warning: #DAA520;
-            --danger: #DC143C;
-            --card-bg: #3E2723;
-            --sidebar-bg: #2C1810;
-            --gradient-start: #1A0F08;
-            --gradient-end: #3E2723;
-            --header-bg: rgba(62, 39, 35, 0.95);
-            --nav-bg: #3E2723;
-            --border-accent: #A47864;
-        }
-
-        /* Theme 5: GOLDEN HOUR - Warm Orange */
-        [data-theme="golden-hour"] {
-            --primary: #FF6B35;
-            --primary-dark: #E55100;
-            --secondary: #FFD700;
-            --dark: #1A0E00;
-            --darker: #0D0700;
-            --light: #FFF3E0;
-            --text: #FFFFFF;
-            --text-muted: #FFB380;
-            --success: #4CAF50;
-            --warning: #FFC107;
-            --danger: #F44336;
-            --card-bg: #331A00;
-            --sidebar-bg: #1A0E00;
-            --gradient-start: #0D0700;
-            --gradient-end: #331A00;
-            --header-bg: rgba(51, 26, 0, 0.95);
-            --nav-bg: #331A00;
-            --border-accent: #FF6B35;
-        }
-
-        /* Theme 6: TRUFFLE NOIR - Schwarz-Gold Luxus */
-        [data-theme="truffle-noir"] {
-            --primary: #D4AF37;
-            --primary-dark: #B8860B;
-            --secondary: #FFFFFF;
-            --dark: #0A0A0A;
-            --darker: #000000;
-            --light: #F5F5F5;
-            --text: #D4AF37;
-            --text-muted: #999999;
-            --success: #228B22;
-            --warning: #FFD700;
-            --danger: #DC143C;
-            --card-bg: #141414;
-            --sidebar-bg: #0A0A0A;
-            --gradient-start: #000000;
-            --gradient-end: #1A1A1A;
-            --header-bg: rgba(20, 20, 20, 0.95);
-            --nav-bg: #141414;
-            --border-accent: #D4AF37;
-        }
-
-        /* Theme 7: MEDITERRANEAN AZURE - Mittelmeer Blau */
-        [data-theme="mediterranean-azure"] {
-            --primary: #0080FF;
-            --primary-dark: #0066CC;
-            --secondary: #FFD700;
-            --dark: #001428;
-            --darker: #000A14;
-            --light: #E6F7FF;
-            --text: #FFFFFF;
-            --text-muted: #6BB6FF;
-            --success: #00FF88;
-            --warning: #FFD700;
-            --danger: #FF4444;
-            --card-bg: #002244;
-            --sidebar-bg: #001428;
-            --gradient-start: #000A14;
-            --gradient-end: #003366;
-            --header-bg: rgba(0, 34, 68, 0.95);
-            --nav-bg: #002244;
-            --border-accent: #0080FF;
-        }
-
-        /* Theme 8: SAKURA BLOSSOM - Japanisch Rosa */
-        [data-theme="sakura-blossom"] {
-            --primary: #FFB6C1;
-            --primary-dark: #FF69B4;
-            --secondary: #FFD700;
-            --dark: #2D1B1B;
-            --darker: #1A0F0F;
-            --light: #FFF0F5;
-            --text: #FFFFFF;
-            --text-muted: #FFCCCB;
-            --success: #98FB98;
-            --warning: #FFD700;
-            --danger: #DC143C;
-            --card-bg: #3D2525;
-            --sidebar-bg: #2D1B1B;
-            --gradient-start: #1A0F0F;
-            --gradient-end: #3D2525;
-            --header-bg: rgba(61, 37, 37, 0.95);
-            --nav-bg: #3D2525;
-            --border-accent: #FFB6C1;
-        }
-
-        /* Theme 9: ARCTIC FROST - Clean Weiß */
-        [data-theme="arctic-frost"] {
-            --primary: #2C3E50;
-            --primary-dark: #1A252F;
-            --secondary: #3498DB;
-            --dark: #FFFFFF;
-            --darker: #F8F9FA;
-            --light: #2C3E50;
-            --text: #2C3E50;
-            --text-muted: #7F8C8D;
-            --success: #27AE60;
-            --warning: #F39C12;
-            --danger: #E74C3C;
-            --card-bg: #FFFFFF;
-            --sidebar-bg: #F8F9FA;
-            --gradient-start: #FFFFFF;
-            --gradient-end: #ECF0F1;
-            --header-bg: rgba(255, 255, 255, 0.95);
-            --nav-bg: #FFFFFF;
-            --border-accent: #2C3E50;
-        }
-
-        /* Theme 10: VOLCANIC ASH - Grau Minimalistisch */
-        [data-theme="volcanic-ash"] {
-            --primary: #757575;
-            --primary-dark: #424242;
-            --secondary: #FF5722;
-            --dark: #212121;
-            --darker: #000000;
-            --light: #FAFAFA;
-            --text: #FFFFFF;
-            --text-muted: #BDBDBD;
-            --success: #4CAF50;
-            --warning: #FF9800;
-            --danger: #F44336;
-            --card-bg: #424242;
-            --sidebar-bg: #212121;
-            --gradient-start: #000000;
-            --gradient-end: #424242;
-            --header-bg: rgba(66, 66, 66, 0.95);
-            --nav-bg: #424242;
-            --border-accent: #757575;
-        }
-
-        /* Base Styles - EXAKT WIE ORIGINAL */
         * {
             margin: 0;
             padding: 0;
@@ -242,89 +39,23 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* Admin Theme Switcher (nur für Admin sichtbar) */
-        .admin-theme-panel {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--card-bg);
-            border: 2px solid var(--border-accent);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            z-index: 1000;
-            max-width: 300px;
-            display: none; /* Wird nur im Admin-Bereich angezeigt */
-        }
-
-        .admin-theme-panel.active {
-            display: block;
-        }
-
-        .admin-theme-panel h3 {
-            color: var(--primary);
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-        }
-
-        .theme-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .theme-option {
-            background: var(--darker);
-            border: 2px solid transparent;
-            padding: 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            font-size: 0.8rem;
-        }
-
-        .theme-option:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        .theme-option.active {
-            background: var(--primary);
-            color: var(--darker);
-            border-color: var(--primary);
-        }
-
-        .theme-preview {
-            width: 100%;
-            height: 30px;
-            border-radius: 5px;
-            margin-bottom: 5px;
-            display: flex;
-        }
-
-        .theme-preview span {
-            flex: 1;
-            height: 100%;
-        }
-
-        /* Header - MIT THEME ANPASSUNG */
+        /* Header */
         header {
-            background: var(--header-bg);
+            background: rgba(26, 26, 46, 0.95);
             backdrop-filter: blur(10px);
             padding: 1rem 0;
             box-shadow: 0 2px 20px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
             z-index: 100;
-            border-bottom: 2px solid var(--border-accent);
+            border-bottom: 2px solid var(--primary);
         }
 
         .header-content {
@@ -355,14 +86,19 @@
             font-size: 0.9rem;
         }
 
-        /* Navigation - MIT THEME ANPASSUNG */
+        .wait-time-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Navigation */
         nav {
-            background: var(--nav-bg);
+            background: var(--card-bg);
             padding: 1rem 0;
             position: sticky;
             top: 73px;
             z-index: 99;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         .nav-container {
@@ -373,7 +109,6 @@
             gap: 1rem;
             overflow-x: auto;
             scrollbar-width: none;
-            -ms-overflow-style: none;
         }
 
         .nav-container::-webkit-scrollbar {
@@ -381,70 +116,97 @@
         }
 
         .category-btn {
-            background: var(--darker);
-            color: var(--text);
+            background: transparent;
             border: 2px solid transparent;
-            padding: 0.5rem 1.5rem;
-            border-radius: 25px;
+            color: var(--text);
+            padding: 0.75rem 1.5rem;
+            border-radius: 30px;
             cursor: pointer;
             transition: all 0.3s ease;
             white-space: nowrap;
-            font-weight: 500;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
         }
 
         .category-btn:hover {
-            background: var(--primary);
+            background: var(--darker);
+            border-color: var(--primary);
             transform: translateY(-2px);
         }
 
         .category-btn.active {
             background: var(--primary);
             color: white;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
         }
 
-        /* Main Layout - EXAKT WIE ORIGINAL */
+        .category-btn span {
+            font-size: 1.2rem;
+        }
+
+        /* Main Container */
         .container {
             max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
+            margin: 0 auto;
+            padding: 2rem 1rem;
         }
 
         main {
             display: flex;
             gap: 2rem;
-            align-items: flex-start;
         }
 
+        /* Products Section */
         .products-section {
             flex: 1;
         }
 
-        /* Product Grid - EXAKT WIE ORIGINAL */
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.5rem;
-            margin-bottom: 2rem;
+        }
+
+        /* Product Card Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .product-card {
             background: var(--card-bg);
             border-radius: 15px;
             overflow: hidden;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
-            border: 1px solid var(--border-accent);
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            opacity: 0;
+            animation: fadeInUp 0.6s ease forwards;
         }
+
+        .product-card:nth-child(1) { animation-delay: 0.1s; }
+        .product-card:nth-child(2) { animation-delay: 0.2s; }
+        .product-card:nth-child(3) { animation-delay: 0.3s; }
+        .product-card:nth-child(4) { animation-delay: 0.4s; }
+        .product-card:nth-child(5) { animation-delay: 0.5s; }
+        .product-card:nth-child(6) { animation-delay: 0.6s; }
+        .product-card:nth-child(7) { animation-delay: 0.7s; }
+        .product-card:nth-child(8) { animation-delay: 0.8s; }
+        .product-card:nth-child(9) { animation-delay: 0.9s; }
+        .product-card:nth-child(10) { animation-delay: 1s; }
 
         .product-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
 
         .product-image {
@@ -455,9 +217,6 @@
 
         .product-info {
             padding: 1.5rem;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
         }
 
         .product-name {
@@ -471,14 +230,12 @@
             color: var(--text-muted);
             font-size: 0.9rem;
             margin-bottom: 1rem;
-            flex: 1;
         }
 
         .product-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: auto;
         }
 
         .product-price {
@@ -487,90 +244,59 @@
             color: var(--primary);
         }
 
-        /* Quantity Controls - EXAKT WIE ORIGINAL */
-        .quantity-controls {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            background: var(--darker);
-            border-radius: 25px;
-            padding: 0.25rem;
-        }
-
-        .quantity-btn {
-            width: 32px;
-            height: 32px;
-            border: none;
+        .add-to-cart {
             background: var(--primary);
             color: white;
-            border-radius: 50%;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 25px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             transition: all 0.3s ease;
-            font-size: 1.2rem;
-        }
-
-        .quantity-btn:hover:not(:disabled) {
-            background: var(--primary-dark);
-            transform: scale(1.1);
-        }
-
-        .quantity-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .quantity {
             font-weight: bold;
-            min-width: 30px;
-            text-align: center;
-            color: var(--text);
         }
 
-        /* Cart Sidebar - Desktop Only - EXAKT WIE ORIGINAL */
+        .add-to-cart:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        /* Cart Sidebar - Desktop */
         .cart-sidebar {
             width: 350px;
-            background: var(--card-bg);
+            background: var(--sidebar-bg);
             border-radius: 15px;
             padding: 1.5rem;
             position: sticky;
-            top: 150px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            border: 1px solid var(--border-accent);
+            top: 140px;
+            height: fit-content;
         }
 
         .cart-header {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 0.5rem;
             margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--darker);
         }
 
         .cart-header h2 {
-            color: var(--text);
             font-size: 1.3rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .cart-badge {
             background: var(--primary);
             color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: bold;
+            padding: 0.2rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
         }
 
         .cart-empty {
             text-align: center;
-            padding: 3rem 1rem;
+            padding: 2rem 1rem;
             color: var(--text-muted);
         }
 
@@ -593,6 +319,7 @@
             background: var(--darker);
             border-radius: 10px;
             margin-bottom: 0.5rem;
+            position: relative;
         }
 
         .cart-item-image {
@@ -612,14 +339,78 @@
             color: var(--text);
         }
 
-        .cart-item-quantity {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
         .cart-item-price {
             font-weight: bold;
             color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Quantity Controls */
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .quantity-btn {
+            background: var(--card-bg);
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 5px;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .quantity-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .quantity-display {
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        /* Special Requests */
+        .special-request {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--darker);
+            border-radius: 5px;
+            padding: 0.5rem;
+            color: var(--text);
+            font-size: 0.85rem;
+            resize: none;
+            margin-top: 0.5rem;
+        }
+
+        .special-request::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Remove Button */
+        .remove-item {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1.2rem;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+
+        .remove-item:hover {
+            opacity: 1;
         }
 
         .cart-total {
@@ -660,90 +451,58 @@
             transform: translateY(-2px);
         }
 
-        /* Mobile Styles - EXAKT WIE ORIGINAL */
-        @media (max-width: 768px) {
-            .admin-theme-panel {
-                bottom: 100px;
-                right: 10px;
-                left: 10px;
-                max-width: none;
-            }
-
-            .theme-grid {
-                grid-template-columns: 1fr;
-            }
-
-            main {
-                flex-direction: column;
-            }
-
-            .cart-sidebar {
-                display: none;
-            }
-
-            .products-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .mobile-cart-btn {
-                position: fixed;
-                bottom: 2rem;
-                right: 2rem;
-                background: var(--primary);
-                color: white;
-                border: none;
-                width: 60px;
-                height: 60px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.5rem;
-                box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
-                cursor: pointer;
-                z-index: 90;
-                transition: all 0.3s ease;
-            }
-
-            .mobile-cart-btn:hover {
-                transform: scale(1.1);
-            }
-
-            .cart-count {
-                position: absolute;
-                top: -5px;
-                right: -5px;
-                background: var(--danger);
-                color: white;
-                border-radius: 50%;
-                width: 24px;
-                height: 24px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 0.8rem;
-                font-weight: bold;
-            }
-        }
-
-        /* Desktop only - EXAKT WIE ORIGINAL */
-        @media (min-width: 769px) {
-            .mobile-cart-btn {
-                display: none;
-            }
-        }
-
-        /* Modal Overlay - EXAKT WIE ORIGINAL */
-        .modal-overlay {
+        /* Mobile Cart Button */
+        .mobile-cart-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
             display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-cart-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--secondary);
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(5px);
-            z-index: 200;
+            z-index: 1001;
+            display: none;
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -753,23 +512,24 @@
             opacity: 1;
         }
 
-        /* Mobile Cart Modal - EXAKT WIE ORIGINAL */
+        /* Mobile Cart Modal */
         .mobile-cart-modal {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: var(--card-bg);
+            background: var(--sidebar-bg);
             border-radius: 20px 20px 0 0;
-            padding: 1.5rem;
+            max-height: 85vh;
             transform: translateY(100%);
             transition: transform 0.3s ease;
-            z-index: 201;
-            max-height: 80vh;
-            overflow-y: auto;
+            z-index: 1002;
+            display: none;
+            flex-direction: column;
         }
 
         .mobile-cart-modal.active {
+            display: flex;
             transform: translateY(0);
         }
 
@@ -777,171 +537,88 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--darker);
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--darker);
         }
 
         .modal-header h2 {
+            font-size: 1.3rem;
             color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .close-modal {
-            background: var(--darker);
+            background: none;
             border: none;
             color: var(--text);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 1.5rem;
             cursor: pointer;
-            font-size: 1.2rem;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
         }
 
-        /* Loading Animation - EXAKT WIE ORIGINAL */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid var(--text-muted);
-            border-radius: 50%;
-            border-top-color: var(--primary);
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Notifications - EXAKT WIE ORIGINAL */
-        .notification {
-            position: fixed;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--success);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-            z-index: 300;
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-
-        .notification.show {
-            transform: translateX(-50%) translateY(0);
+        .close-modal:hover {
             opacity: 1;
         }
 
-        /* Special Theme Adjustments */
-        [data-theme="arctic-frost"] .category-btn.active,
-        [data-theme="arctic-frost"] .checkout-btn {
+        #mobileCartContent {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: var(--success);
             color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1003;
         }
 
-        [data-theme="truffle-noir"] .product-price {
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        .notification.show {
+            transform: translateX(0);
         }
 
-        [data-theme="sakura-blossom"] .product-card {
-            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(255, 182, 193, 0.1) 100%);
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
         }
 
-        [data-theme="volcanic-ash"] .product-card:hover {
-            border-color: var(--secondary);
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            main {
+                flex-direction: column;
+            }
+
+            .cart-sidebar {
+                display: none;
+            }
+
+            .mobile-cart-btn {
+                display: flex;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-container {
+                justify-content: flex-start;
+            }
         }
     </style>
 </head>
-<body data-theme="noir-excellence">
-    <!-- Admin Theme Panel (nur im Admin-Bereich sichtbar) -->
-    <div class="admin-theme-panel" id="adminThemePanel">
-        <h3>🎨 Restaurant Theme auswählen</h3>
-        <div class="theme-grid">
-            <div class="theme-option active" data-theme="noir-excellence" onclick="setTheme('noir-excellence')">
-                <div class="theme-preview">
-                    <span style="background: #FF0000"></span>
-                    <span style="background: #000000"></span>
-                </div>
-                <span>Noir Excellence</span>
-            </div>
-            
-            <div class="theme-option" data-theme="midnight-sapphire" onclick="setTheme('midnight-sapphire')">
-                <div class="theme-preview">
-                    <span style="background: #4169E1"></span>
-                    <span style="background: #000033"></span>
-                </div>
-                <span>Midnight Sapphire</span>
-            </div>
-            
-            <div class="theme-option" data-theme="emerald-luxe" onclick="setTheme('emerald-luxe')">
-                <div class="theme-preview">
-                    <span style="background: #00C851"></span>
-                    <span style="background: #0D2818"></span>
-                </div>
-                <span>Emerald Luxe</span>
-            </div>
-            
-            <div class="theme-option" data-theme="mocha-mousse" onclick="setTheme('mocha-mousse')">
-                <div class="theme-preview">
-                    <span style="background: #A47864"></span>
-                    <span style="background: #2C1810"></span>
-                </div>
-                <span>Mocha Mousse</span>
-            </div>
-            
-            <div class="theme-option" data-theme="golden-hour" onclick="setTheme('golden-hour')">
-                <div class="theme-preview">
-                    <span style="background: #FF6B35"></span>
-                    <span style="background: #1A0E00"></span>
-                </div>
-                <span>Golden Hour</span>
-            </div>
-            
-            <div class="theme-option" data-theme="truffle-noir" onclick="setTheme('truffle-noir')">
-                <div class="theme-preview">
-                    <span style="background: #D4AF37"></span>
-                    <span style="background: #000000"></span>
-                </div>
-                <span>Truffle Noir</span>
-            </div>
-            
-            <div class="theme-option" data-theme="mediterranean-azure" onclick="setTheme('mediterranean-azure')">
-                <div class="theme-preview">
-                    <span style="background: #0080FF"></span>
-                    <span style="background: #001428"></span>
-                </div>
-                <span>Mediterranean</span>
-            </div>
-            
-            <div class="theme-option" data-theme="sakura-blossom" onclick="setTheme('sakura-blossom')">
-                <div class="theme-preview">
-                    <span style="background: #FFB6C1"></span>
-                    <span style="background: #2D1B1B"></span>
-                </div>
-                <span>Sakura Blossom</span>
-            </div>
-            
-            <div class="theme-option" data-theme="arctic-frost" onclick="setTheme('arctic-frost')">
-                <div class="theme-preview">
-                    <span style="background: #2C3E50"></span>
-                    <span style="background: #FFFFFF"></span>
-                </div>
-                <span>Arctic Frost</span>
-            </div>
-            
-            <div class="theme-option" data-theme="volcanic-ash" onclick="setTheme('volcanic-ash')">
-                <div class="theme-preview">
-                    <span style="background: #757575"></span>
-                    <span style="background: #212121"></span>
-                </div>
-                <span>Volcanic Ash</span>
-            </div>
-        </div>
-    </div>
-
+<body>
     <!-- Header -->
     <header>
         <div class="header-content">
@@ -951,7 +628,10 @@
             </div>
             <div class="wait-time">
                 <span>⏱️</span>
-                <span id="waitTime">5 Min</span>
+                <div>
+                    <span class="wait-time-label">Wartezeit</span>
+                    <div id="waitTime">5 Min</div>
+                </div>
             </div>
         </div>
     </header>
@@ -983,7 +663,7 @@
             <!-- Products Section -->
             <section class="products-section">
                 <div class="products-grid" id="productsGrid">
-                    <!-- Products will be loaded here -->
+                    <div class="loading">Lade Produkte...</div>
                 </div>
             </section>
 
@@ -1030,257 +710,222 @@
     <div class="notification" id="notification"></div>
 
     <script>
-        // Sample products data
-        const products = [
-            {
-                id: 1,
-                name: 'Classic Burger',
-                description: 'Saftiges Rindfleisch mit frischen Zutaten',
-                price: 15.90,
-                category: 'burger',
-                image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop'
-            },
-            {
-                id: 2,
-                name: 'Truffle Burger',
-                description: 'Premium Burger mit Trüffel-Mayo',
-                price: 18.50,
-                category: 'burger',
-                image: 'https://images.unsplash.com/photo-1549611016-3a70d82b5040?w=400&h=300&fit=crop'
-            },
-            {
-                id: 3,
-                name: 'Pizza Margherita',
-                description: 'Klassisch mit Tomate und Mozzarella',
-                price: 12.90,
-                category: 'pizza',
-                image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&h=300&fit=crop'
-            },
-            {
-                id: 4,
-                name: 'Hausgemachte Limonade',
-                description: 'Erfrischend mit Zitrone und Minze',
-                price: 4.50,
-                category: 'drinks',
-                image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&h=300&fit=crop'
-            },
-            {
-                id: 5,
-                name: 'Bacon Deluxe',
-                description: 'Double Bacon, Cheddar und BBQ-Sauce',
-                price: 19.90,
-                category: 'burger',
-                image: 'https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&h=300&fit=crop'
-            },
-            {
-                id: 6,
-                name: 'Pizza Diavola',
-                description: 'Scharfe Salami mit Chili',
-                price: 21.50,
-                category: 'pizza',
-                image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&h=300&fit=crop'
-            }
-        ];
+        // Firebase Configuration - NEUE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyDFBlgWE81iHnACVwOmaU0jL7FV0l_tRmU",
+            authDomain: "eatech-foodtruck.firebaseapp.com",
+            databaseURL: "https://eatech-foodtruck-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "eatech-foodtruck",
+            storageBucket: "eatech-foodtruck.firebasestorage.app",
+            messagingSenderId: "261222802445",
+            appId: "1:261222802445:web:edde22580422fbced22144",
+            measurementId: "G-N0KHWJG9KP"
+        };
 
-        // Cart state
-        let cart = [];
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        // Theme Management
-        function setTheme(themeName) {
-            document.body.setAttribute('data-theme', themeName);
-            
-            // Update active state
-            document.querySelectorAll('.theme-option').forEach(opt => {
-                opt.classList.remove('active');
-                if (opt.dataset.theme === themeName) {
-                    opt.classList.add('active');
-                }
-            });
-            
-            // Save to localStorage
-            localStorage.setItem('eatechTheme', themeName);
-            
-            // Update meta theme-color
-            updateMetaThemeColor(themeName);
-        }
+        // Cart Management
+        let cart = JSON.parse(localStorage.getItem('eatechCart')) || [];
+        let products = [];
+        let selectedCategory = 'all';
 
-        // Update browser theme color
-        function updateMetaThemeColor(themeName) {
-            const themeColors = {
-                'noir-excellence': '#FF0000',
-                'midnight-sapphire': '#4169E1',
-                'emerald-luxe': '#00C851',
-                'mocha-mousse': '#A47864',
-                'golden-hour': '#FF6B35',
-                'truffle-noir': '#D4AF37',
-                'mediterranean-azure': '#0080FF',
-                'sakura-blossom': '#FFB6C1',
-                'arctic-frost': '#2C3E50',
-                'volcanic-ash': '#757575'
-            };
-            
-            const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-            if (metaThemeColor) {
-                metaThemeColor.content = themeColors[themeName] || '#FF6B6B';
+        // Load Products from Firebase
+        async function loadProducts() {
+            try {
+                const snapshot = await db.ref('products').once('value');
+                products = snapshot.val() ? Object.entries(snapshot.val()).map(([id, product]) => ({
+                    id,
+                    ...product
+                })) : [];
+                
+                displayProducts();
+            } catch (error) {
+                console.error('Error loading products:', error);
+                document.getElementById('productsGrid').innerHTML = '<p>Fehler beim Laden der Produkte</p>';
             }
         }
 
-        // Check if admin (normally würde das vom Backend kommen)
-        function checkAdminStatus() {
-            // Hier würde normalerweise eine Prüfung stattfinden
-            // Für Demo: Theme Panel mit URL Parameter ?admin=true anzeigen
-            const urlParams = new URLSearchParams(window.location.search);
-            const isAdmin = urlParams.get('admin') === 'true';
-            
-            if (isAdmin) {
-                document.getElementById('adminThemePanel').classList.add('active');
-            }
-        }
-
-        // Load saved theme
-        const savedTheme = localStorage.getItem('eatechTheme') || 'noir-excellence';
-        setTheme(savedTheme);
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            checkAdminStatus();
-            renderProducts('all');
-            updateCart();
-            
-            // Category buttons
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    renderProducts(btn.dataset.category);
-                });
-            });
-        });
-
-        // Render products
-        function renderProducts(category) {
-            const grid = document.getElementById('productsGrid');
-            const filtered = category === 'all' 
+        // Display Products with Animation
+        function displayProducts() {
+            const productsGrid = document.getElementById('productsGrid');
+            const filteredProducts = selectedCategory === 'all' 
                 ? products 
-                : products.filter(p => p.category === category);
-            
-            grid.innerHTML = filtered.map(product => {
-                const quantity = getQuantityInCart(product.id);
-                return `
-                    <div class="product-card">
-                        <img src="${product.image}" alt="${product.name}" class="product-image">
-                        <div class="product-info">
-                            <h3 class="product-name">${product.name}</h3>
-                            <p class="product-description">${product.description}</p>
-                            <div class="product-footer">
-                                <span class="product-price">CHF ${product.price.toFixed(2)}</span>
-                                <div class="quantity-controls">
-                                    <button class="quantity-btn" onclick="updateQuantity(${product.id}, -1)" ${quantity === 0 ? 'disabled' : ''}>−</button>
-                                    <span class="quantity">${quantity}</span>
-                                    <button class="quantity-btn" onclick="updateQuantity(${product.id}, 1)">+</button>
-                                </div>
-                            </div>
+                : products.filter(p => p.category === selectedCategory);
+
+            if (filteredProducts.length === 0) {
+                productsGrid.innerHTML = '<p>Keine Produkte in dieser Kategorie</p>';
+                return;
+            }
+
+            productsGrid.innerHTML = filteredProducts.map(product => `
+                <div class="product-card">
+                    <img src="${product.image || 'https://via.placeholder.com/280x200'}" alt="${product.name}" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-description">${product.description || ''}</p>
+                        <div class="product-footer">
+                            <span class="product-price">CHF ${product.price.toFixed(2)}</span>
+                            <button class="add-to-cart" onclick="addToCart('${product.id}')">
+                                Hinzufügen
+                            </button>
                         </div>
                     </div>
-                `;
-            }).join('');
+                </div>
+            `).join('');
         }
 
-        // Get quantity in cart
-        function getQuantityInCart(productId) {
-            const item = cart.find(item => item.id === productId);
-            return item ? item.quantity : 0;
-        }
-
-        // Update quantity
-        function updateQuantity(productId, change) {
+        // Add to Cart
+        function addToCart(productId) {
             const product = products.find(p => p.id === productId);
+            if (!product) return;
+
             const existingItem = cart.find(item => item.id === productId);
             
             if (existingItem) {
-                existingItem.quantity += change;
-                if (existingItem.quantity <= 0) {
-                    cart = cart.filter(item => item.id !== productId);
-                }
-            } else if (change > 0) {
+                existingItem.quantity += 1;
+            } else {
                 cart.push({
                     ...product,
-                    quantity: 1
+                    quantity: 1,
+                    specialRequest: ''
                 });
             }
-            
-            updateCart();
-            renderProducts(document.querySelector('.category-btn.active').dataset.category);
-            
-            // Show notification
-            if (change > 0) {
-                showNotification(`${product.name} hinzugefügt`);
-            }
+
+            saveCart();
+            updateCartDisplay();
+            showNotification(`${product.name} wurde zum Warenkorb hinzugefügt`);
         }
 
-        // Update cart display
-        function updateCart() {
+        // Update Cart Display
+        function updateCartDisplay() {
+            updateDesktopCart();
+            updateMobileCart();
+            updateCartBadges();
+        }
+
+        // Update Desktop Cart
+        function updateDesktopCart() {
             const cartContent = document.getElementById('cartContent');
-            const mobileCartContent = document.getElementById('mobileCartContent');
-            const cartBadge = document.querySelector('.cart-badge');
-            const cartCount = document.querySelector('.cart-count');
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            
-            // Update badges
-            cartBadge.textContent = totalItems;
-            cartCount.textContent = totalItems;
-            cartCount.style.display = totalItems > 0 ? 'flex' : 'none';
             
             if (cart.length === 0) {
-                const emptyHTML = `
+                cartContent.innerHTML = `
                     <div class="cart-empty">
                         <div class="cart-empty-icon">🛒</div>
                         <p>Ihr Warenkorb ist leer</p>
                     </div>
                 `;
-                cartContent.innerHTML = emptyHTML;
-                mobileCartContent.innerHTML = emptyHTML;
                 return;
             }
-            
-            const cartHTML = `
-                <div class="cart-items">
-                    ${cart.map(item => `
-                        <div class="cart-item">
-                            <img src="${item.image}" alt="${item.name}" class="cart-item-image">
-                            <div class="cart-item-details">
-                                <div class="cart-item-name">${item.name}</div>
-                                <div class="cart-item-quantity">${item.quantity}x @ CHF ${item.price.toFixed(2)}</div>
-                            </div>
-                            <div class="cart-item-price">CHF ${(item.price * item.quantity).toFixed(2)}</div>
+
+            const cartItemsHtml = cart.map(item => `
+                <div class="cart-item">
+                    <img src="${item.image || 'https://via.placeholder.com/60x60'}" alt="${item.name}" class="cart-item-image">
+                    <div class="cart-item-details">
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-price">CHF ${item.price.toFixed(2)}</div>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="updateQuantity('${item.id}', ${item.quantity - 1})">-</button>
+                            <span class="quantity-display">${item.quantity}</span>
+                            <button class="quantity-btn" onclick="updateQuantity('${item.id}', ${item.quantity + 1})">+</button>
                         </div>
-                    `).join('')}
+                        <textarea 
+                            class="special-request" 
+                            placeholder="Spezielle Wünsche..."
+                            rows="2"
+                            onchange="updateSpecialRequest('${item.id}', this.value)"
+                        >${item.specialRequest || ''}</textarea>
+                    </div>
+                    <button class="remove-item" onclick="removeFromCart('${item.id}')">×</button>
                 </div>
+            `).join('');
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            cartContent.innerHTML = `
+                <div class="cart-items">${cartItemsHtml}</div>
                 <div class="cart-total">
                     <div class="cart-total-row">
                         <span>Zwischensumme:</span>
-                        <span>CHF ${calculateTotal().toFixed(2)}</span>
+                        <span>CHF ${total.toFixed(2)}</span>
                     </div>
                     <div class="cart-total-row final">
                         <span>Gesamt:</span>
-                        <span>CHF ${calculateTotal().toFixed(2)}</span>
+                        <span>CHF ${total.toFixed(2)}</span>
                     </div>
                 </div>
-                <button class="checkout-btn" onclick="checkout()">
+                <button class="checkout-btn" onclick="goToCheckout()">
                     Zur Kasse
                 </button>
             `;
+        }
+
+        // Update Mobile Cart
+        function updateMobileCart() {
+            const mobileCartContent = document.getElementById('mobileCartContent');
+            mobileCartContent.innerHTML = document.getElementById('cartContent').innerHTML;
+        }
+
+        // Update Cart Badges
+        function updateCartBadges() {
+            const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.querySelector('.cart-badge').textContent = itemCount;
             
-            cartContent.innerHTML = cartHTML;
-            mobileCartContent.innerHTML = cartHTML;
+            const cartCount = document.querySelector('.cart-count');
+            cartCount.textContent = itemCount;
+            cartCount.style.display = itemCount > 0 ? 'flex' : 'none';
         }
 
-        // Calculate total
-        function calculateTotal() {
-            return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        // Update Quantity
+        function updateQuantity(productId, newQuantity) {
+            if (newQuantity <= 0) {
+                removeFromCart(productId);
+                return;
+            }
+
+            const item = cart.find(item => item.id === productId);
+            if (item) {
+                item.quantity = newQuantity;
+                saveCart();
+                updateCartDisplay();
+            }
         }
 
-        // Mobile cart functions
+        // Update Special Request
+        function updateSpecialRequest(productId, request) {
+            const item = cart.find(item => item.id === productId);
+            if (item) {
+                item.specialRequest = request;
+                saveCart();
+            }
+        }
+
+        // Remove from Cart
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            saveCart();
+            updateCartDisplay();
+            showNotification('Produkt wurde entfernt');
+        }
+
+        // Save Cart
+        function saveCart() {
+            localStorage.setItem('eatechCart', JSON.stringify(cart));
+        }
+
+        // Show Notification
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Mobile Cart Functions
         function openMobileCart() {
             document.querySelector('.modal-overlay').classList.add('active');
             document.querySelector('.mobile-cart-modal').classList.add('active');
@@ -1293,48 +938,48 @@
             document.body.style.overflow = '';
         }
 
-        // Show notification
-        function showNotification(message) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.classList.add('show');
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 2000);
-        }
-
-        // Checkout
-        function checkout() {
-            if (cart.length === 0) return;
-            
-            // Close mobile cart if open
-            closeMobileCart();
-            
-            // Here you would normally redirect to checkout
-            showNotification('Weiterleitung zur Kasse...');
-            
-            // Simulate redirect
-            setTimeout(() => {
-                alert('Checkout würde hier starten');
-            }, 1000);
-        }
-
-        // Update wait time (simulate)
-        let waitTime = 5;
-        setInterval(() => {
-            const waitTimeEl = document.getElementById('waitTime');
-            if (waitTime > 20) {
-                waitTimeEl.textContent = `${waitTime} Min`;
-                waitTimeEl.style.color = 'var(--danger)';
-            } else if (waitTime > 10) {
-                waitTimeEl.textContent = `${waitTime} Min`;
-                waitTimeEl.style.color = 'var(--warning)';
-            } else {
-                waitTimeEl.textContent = `${waitTime} Min`;
-                waitTimeEl.style.color = 'var(--text)';
+        // Go to Checkout
+        function goToCheckout() {
+            if (cart.length === 0) {
+                showNotification('Ihr Warenkorb ist leer');
+                return;
             }
-        }, 30000);
+            // Speichere Warenkorb-Daten explizit vor dem Redirect
+            localStorage.setItem('eatechCart', JSON.stringify(cart));
+            window.location.href = 'checkout.html';
+        }
+
+        // Category Filter with Animation
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                selectedCategory = this.dataset.category;
+                displayProducts();
+            });
+        });
+
+        // Load Wait Time from Firebase
+        async function loadWaitTime() {
+            try {
+                const snapshot = await db.ref('settings/waitTime').once('value');
+                const waitTime = snapshot.val() || 5;
+                document.getElementById('waitTime').textContent = `${waitTime} Min`;
+            } catch (error) {
+                console.error('Error loading wait time:', error);
+            }
+        }
+
+        // Initialize
+        loadProducts();
+        updateCartDisplay();
+        loadWaitTime();
+
+        // Real-time wait time updates
+        db.ref('settings/waitTime').on('value', (snapshot) => {
+            const waitTime = snapshot.val() || 5;
+            document.getElementById('waitTime').textContent = `${waitTime} Min`;
+        });
     </script>
 </body>
 </html>

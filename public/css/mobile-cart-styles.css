@@ -1,0 +1,390 @@
+/* ============================================================================
+   EATECH - MOBILE CART MODAL STYLES
+   Version: 1.0.0
+   Description: Erweiterte Styles für Mobile Cart mit Blur-Effekt
+   ============================================================================ */
+
+/* Modal Overlay mit Blur-Effekt */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1001;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Mobile Cart Modal - Slide Up Animation */
+.mobile-cart-modal {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--sidebar-bg, #0f1419);
+    border-radius: 30px 30px 0 0;
+    max-height: 90vh;
+    height: auto;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1002;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-cart-modal.active {
+    transform: translateY(0);
+}
+
+/* Modal Handle */
+.mobile-cart-modal::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+/* Modal Header */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.modal-header h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text, #E8E8E8);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.close-modal {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: var(--text, #E8E8E8);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.close-modal:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+/* Modal Content */
+#mobileCartContent {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    padding-bottom: 2rem;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Scrollbar Styling */
+#mobileCartContent::-webkit-scrollbar {
+    width: 4px;
+}
+
+#mobileCartContent::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#mobileCartContent::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+/* Enhanced Cart Items for Mobile */
+.mobile-cart-modal .cart-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.mobile-cart-modal .cart-item:active {
+    transform: scale(0.98);
+}
+
+/* Quantity Controls Mobile Optimized */
+.mobile-cart-modal .quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0.75rem 0;
+}
+
+.mobile-cart-modal .quantity-btn {
+    width: 36px;
+    height: 36px;
+    background: var(--primary, #FF6B6B);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+.mobile-cart-modal .quantity-btn:active {
+    transform: scale(0.9);
+}
+
+.mobile-cart-modal .quantity-display {
+    font-size: 1.1rem;
+    font-weight: 700;
+    min-width: 40px;
+    text-align: center;
+}
+
+/* Special Request Field Mobile */
+.mobile-cart-modal .special-request {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.75rem;
+    color: var(--text, #E8E8E8);
+    font-size: 0.95rem;
+    resize: none;
+    margin-top: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.mobile-cart-modal .special-request:focus {
+    outline: none;
+    border-color: var(--primary, #FF6B6B);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Remove Button Mobile */
+.mobile-cart-modal .remove-item {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(231, 76, 60, 0.2);
+    border: none;
+    color: var(--danger, #E74C3C);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.mobile-cart-modal .remove-item:active {
+    transform: scale(0.9);
+    background: rgba(231, 76, 60, 0.3);
+}
+
+/* Checkout Button Mobile */
+.mobile-cart-modal .checkout-btn {
+    width: 100%;
+    background: var(--primary, #FF6B6B);
+    color: white;
+    border: none;
+    padding: 1.2rem;
+    border-radius: 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+    box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.mobile-cart-modal .checkout-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.mobile-cart-modal .checkout-btn:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Empty Cart Mobile */
+.mobile-cart-modal .cart-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted, #95A5A6);
+}
+
+.mobile-cart-modal .cart-empty-icon {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+    opacity: 0.2;
+}
+
+/* Cart Total Mobile */
+.mobile-cart-modal .cart-total {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+/* Mobile Cart Button Enhanced */
+.mobile-cart-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--primary, #FF6B6B);
+    color: white;
+    border: none;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    font-size: 1.6rem;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.mobile-cart-btn:active {
+    transform: scale(0.9);
+}
+
+.mobile-cart-btn.has-items {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+    }
+    50% {
+        box-shadow: 0 4px 30px rgba(255, 107, 107, 0.6);
+    }
+    100% {
+        box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+    }
+}
+
+/* Cart Count Badge */
+.cart-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--secondary, #4ECDC4);
+    color: white;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Swipe to Close Indicator */
+.mobile-cart-modal.active::after {
+    content: 'Wischen zum Schließen';
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: var(--text-muted, #95A5A6);
+    opacity: 0.5;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .modal-overlay {
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    
+    .mobile-cart-modal {
+        border-radius: 25px 25px 0 0;
+    }
+    
+    .notification {
+        bottom: 90px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+}
+
+/* iOS Safe Area Support */
+@supports (padding: max(0px)) {
+    .mobile-cart-modal {
+        padding-bottom: max(2rem, env(safe-area-inset-bottom));
+    }
+    
+    .mobile-cart-btn {
+        bottom: max(2rem, env(safe-area-inset-bottom) + 1rem);
+    }
+}
+
+/* Dark Theme Optimizations */
+@media (prefers-color-scheme: dark) {
+    .modal-overlay {
+        background: rgba(0, 0, 0, 0.6);
+    }
+    
+    .mobile-cart-modal {
+        background: #0a0a0a;
+    }
+}

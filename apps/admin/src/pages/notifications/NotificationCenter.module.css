@@ -1,0 +1,514 @@
+/**
+ * EATECH - Notification Center Styles
+ * Version: 23.0.0
+ * File Path: /apps/admin/src/pages/notifications/NotificationCenter.module.css
+ */
+
+.container {
+  padding: var(--spacing-6);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-6);
+}
+
+.title {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+.tabs {
+  margin-bottom: var(--spacing-6);
+}
+
+/* Overview Tab */
+.overview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.channelGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.channelCard {
+  padding: var(--spacing-5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.channelCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.channelIcon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-3);
+}
+
+.channelCard h3 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.channelDescription {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-4) 0;
+  line-height: 1.5;
+}
+
+.channelStats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-4);
+  padding-bottom: var(--spacing-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.stat {
+  text-align: center;
+}
+
+.statValue {
+  display: block;
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.statLabel {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  margin-top: var(--spacing-1);
+}
+
+/* Quick Stats */
+.quickStats {
+  padding: var(--spacing-6);
+}
+
+.quickStats h3 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-6);
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+.statIcon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-background-subtle);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.statNumber {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.statText {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Recent Activity */
+.recentActivity {
+  padding: var(--spacing-6);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+}
+
+.cardHeader h3 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.activityItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  background: var(--color-background-subtle);
+  border-radius: var(--radius-md);
+}
+
+.activityIcon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-background);
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.activityContent {
+  flex: 1;
+}
+
+.activityTitle {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-1) 0;
+}
+
+.activityMeta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* History Tab */
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.historyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+}
+
+.historyHeader h3 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.historyFilters {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+.filterSelect {
+  min-width: 150px;
+}
+
+.historyTable {
+  overflow-x: auto;
+}
+
+.historyTable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.historyTable th {
+  text-align: left;
+  padding: var(--spacing-3);
+  background: var(--color-background-subtle);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.historyTable td {
+  padding: var(--spacing-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.channelCell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.actionButtons {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.actionButton {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-background-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionButton:hover {
+  background: var(--color-background-elevated);
+  color: var(--color-text-primary);
+  border-color: var(--color-primary);
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-12) var(--spacing-6);
+  color: var(--color-text-secondary);
+}
+
+.emptyState svg {
+  margin-bottom: var(--spacing-4);
+  opacity: 0.3;
+}
+
+/* Settings Tab */
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.settingsCard {
+  padding: var(--spacing-6);
+}
+
+.settingsCard h3 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-3) 0;
+}
+
+.settingsDescription {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+.settingItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-4) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.settingItem:last-child {
+  border-bottom: none;
+}
+
+.settingLabel {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-1) 0;
+}
+
+.settingHelp {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.settingInput {
+  width: 250px;
+}
+
+/* Compose Modal */
+.composeForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.channelSelection {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+}
+
+.channelOption {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  background: var(--color-background-subtle);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.channelOption:hover {
+  background: var(--color-background-elevated);
+}
+
+.channelOption.selected {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.channelOption input[type="radio"] {
+  display: none;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.formGroup label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.scheduleInput {
+  margin-top: var(--spacing-2);
+}
+
+.modalActions {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: flex-end;
+  margin-top: var(--spacing-4);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+  
+  .headerActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .channelGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .historyFilters {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .filterSelect {
+    width: 100%;
+  }
+  
+  .historyTable {
+    font-size: var(--font-size-sm);
+  }
+  
+  .settingItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+  }
+  
+  .settingInput {
+    width: 100%;
+  }
+  
+  .channelSelection {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .channelCard:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .statIcon {
+    background: var(--color-background);
+  }
+  
+  .activityItem {
+    background: var(--color-background);
+  }
+  
+  .activityIcon {
+    background: var(--color-background-elevated);
+  }
+  
+  .actionButton {
+    background: var(--color-background);
+  }
+  
+  .channelOption {
+    background: var(--color-background);
+  }
+  
+  .channelOption.selected {
+    background: rgba(59, 130, 246, 0.1);
+  }
+}

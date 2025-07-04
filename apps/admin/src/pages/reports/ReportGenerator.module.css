@@ -1,0 +1,430 @@
+/**
+ * EATECH - Report Generator Styles
+ * Version: 23.0.0
+ * File Path: /apps/admin/src/pages/reports/ReportGenerator.module.css
+ */
+
+.container {
+  padding: var(--spacing-6);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-8);
+}
+
+.title {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+/* Section Styles */
+.section {
+  padding: var(--spacing-6);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+.sectionIcon {
+  color: var(--color-text-secondary);
+}
+
+/* Report Types Grid */
+.reportTypes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.reportType {
+  position: relative;
+  padding: var(--spacing-5);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--color-background);
+}
+
+.reportType:hover {
+  border-color: var(--report-color, var(--color-primary));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.reportType.selected {
+  border-color: var(--report-color, var(--color-primary));
+  background: var(--color-background-elevated);
+}
+
+.reportType.selected::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, var(--report-color), transparent);
+  border-radius: var(--radius-lg);
+  opacity: 0.1;
+  z-index: -1;
+}
+
+.reportIcon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-background-elevated);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-3);
+  color: var(--report-color, var(--color-primary));
+}
+
+.reportType h3 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.reportType p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-3) 0;
+  line-height: 1.5;
+}
+
+.formats {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.format {
+  padding: var(--spacing-1) var(--spacing-2);
+  background: var(--color-background-subtle);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+/* Configuration Grid */
+.configGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-6);
+}
+
+@media (max-width: 768px) {
+  .configGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Quick Ranges */
+.quickRanges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-4);
+}
+
+.quickRange {
+  padding: var(--spacing-2) var(--spacing-3);
+  background: var(--color-background-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quickRange:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+/* Date Range Picker */
+.dateRangePicker {
+  margin-bottom: var(--spacing-4);
+}
+
+.datePreview {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  background: var(--color-background-subtle);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Form Fields */
+.field {
+  margin-bottom: var(--spacing-4);
+}
+
+.field label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.field select,
+.field input {
+  width: 100%;
+  padding: var(--spacing-3);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  transition: border-color 0.2s ease;
+}
+
+.field select:focus,
+.field input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+/* Options */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+/* Recent Reports */
+.recentReports {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.recentReport {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  background: var(--color-background-subtle);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.recentReport:hover {
+  background: var(--color-background-elevated);
+  transform: translateX(4px);
+}
+
+.reportInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.reportName {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.reportMeta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.reportAction {
+  color: var(--color-text-tertiary);
+}
+
+/* Scheduled Reports */
+.scheduledReports {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.scheduledReport {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  background: var(--color-background-subtle);
+  border-radius: var(--radius-md);
+}
+
+.scheduleIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scheduleIndicator .active {
+  color: var(--color-success);
+}
+
+.scheduleIndicator .inactive {
+  color: var(--color-text-tertiary);
+}
+
+.scheduleInfo {
+  flex: 1;
+}
+
+.scheduleInfo h4 {
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-1) 0;
+}
+
+.scheduleInfo p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Schedule Modal */
+.scheduleForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.timeInput {
+  width: 100%;
+  padding: var(--spacing-3);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+}
+
+.emailField {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
+}
+
+.emailInput {
+  flex: 1;
+  padding: var(--spacing-3);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+}
+
+.removeEmail {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-danger);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xl);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.removeEmail:hover {
+  opacity: 0.8;
+}
+
+.modalActions {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: flex-end;
+  margin-top: var(--spacing-4);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .reportType {
+    background: var(--color-background-elevated);
+  }
+  
+  .reportType:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .reportIcon {
+    background: var(--color-background);
+  }
+  
+  .quickRange {
+    background: var(--color-background);
+  }
+  
+  .field select,
+  .field input,
+  .timeInput,
+  .emailInput {
+    background: var(--color-background-elevated);
+  }
+}

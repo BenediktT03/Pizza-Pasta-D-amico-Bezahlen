@@ -1,0 +1,1071 @@
+/**
+ * EATECH - System Metrics Styles
+ * Version: 5.0.0
+ * File Path: /apps/admin/src/pages/master/SystemMetrics.module.css
+ */
+
+/* ============================================================================
+   BASE STYLES
+   ============================================================================ */
+
+.systemMetrics {
+  padding: 24px;
+  background-color: #0A0A0A;
+  min-height: 100vh;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ============================================================================
+   HEADER
+   ============================================================================ */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.headerLeft h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.headerLeft p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.headerRight {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.timeSelect {
+  padding: 8px 16px;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.timeSelect:hover {
+  border-color: #3a3a3a;
+}
+
+.autoRefreshToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.autoRefreshToggle:hover {
+  border-color: #3a3a3a;
+}
+
+.autoRefreshToggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #4ECDC4;
+  cursor: pointer;
+}
+
+.refreshButton,
+.exportButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refreshButton:hover,
+.exportButton:hover {
+  background-color: #2a2a2a;
+  transform: translateY(-1px);
+}
+
+.exportButton {
+  background-color: #4ECDC4;
+  border-color: #4ECDC4;
+}
+
+.exportButton:hover {
+  background-color: #44A08D;
+  border-color: #44A08D;
+}
+
+/* ============================================================================
+   CATEGORY TABS
+   ============================================================================ */
+
+.categoryTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid #1a1a1a;
+  padding-bottom: -1px;
+}
+
+.categoryTab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  top: 2px;
+}
+
+.categoryTab:hover {
+  color: #999;
+}
+
+.categoryTab.active {
+  color: #fff;
+  border-bottom-color: #4ECDC4;
+}
+
+/* ============================================================================
+   SUMMARY GRID
+   ============================================================================ */
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.metricCard {
+  background: linear-gradient(135deg, #1a1a1a 0%, #141414 100%);
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.metricCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #4ECDC4;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.metricCard:hover {
+  transform: translateY(-2px);
+  border-color: #3a3a3a;
+}
+
+.metricCard:hover::before {
+  opacity: 1;
+}
+
+.metricCard.healthy::before { background: #2ECC71; }
+.metricCard.warning::before { background: #F39C12; }
+.metricCard.critical::before { background: #E74C3C; }
+
+.metricHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.metricHeader h4 {
+  font-size: 13px;
+  font-weight: 500;
+  color: #999;
+  margin: 0;
+}
+
+.metricIcon {
+  color: #666;
+}
+
+.metricValue {
+  font-size: 28px;
+  font-weight: 700;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.metricUnit {
+  font-size: 16px;
+  font-weight: 400;
+  color: #666;
+}
+
+.metricTrend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.metricTrend.up { color: #2ECC71; }
+.metricTrend.down { color: #E74C3C; }
+
+/* ============================================================================
+   CONTENT SECTIONS
+   ============================================================================ */
+
+.content {
+  margin-bottom: 32px;
+}
+
+.chartSection {
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.chartSection h3,
+.chartSection h4 {
+  margin: 0 0 20px 0;
+  font-weight: 600;
+}
+
+.chartSection h3 {
+  font-size: 20px;
+}
+
+.chartSection h4 {
+  font-size: 16px;
+}
+
+.chartContainer {
+  width: 100%;
+  height: 300px;
+}
+
+.chartsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+/* ============================================================================
+   SERVER SECTION
+   ============================================================================ */
+
+.serversSection {
+  margin-bottom: 32px;
+}
+
+.serversSection h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+}
+
+.serverGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.serverCard {
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.2s ease;
+}
+
+.serverCard.healthy { border-color: rgba(46, 204, 113, 0.3); }
+.serverCard.warning { border-color: rgba(243, 156, 18, 0.3); }
+.serverCard.critical { border-color: rgba(231, 76, 60, 0.3); }
+
+.serverCard:hover {
+  transform: translateY(-2px);
+}
+
+.serverHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.serverInfo h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.serverLocation {
+  font-size: 13px;
+  color: #666;
+}
+
+.serverStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background-color: #0a0a0a;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.healthyIcon { color: #2ECC71; }
+.warningIcon { color: #F39C12; }
+.criticalIcon { color: #E74C3C; }
+
+.serverMetrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.serverMetric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px;
+  background-color: #0a0a0a;
+  border-radius: 8px;
+}
+
+.serverMetric svg {
+  color: #666;
+}
+
+.serverMetric span {
+  font-size: 12px;
+  color: #999;
+}
+
+.serverMetric strong {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.serverFooter {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+  padding-top: 16px;
+  border-top: 1px solid #2a2a2a;
+}
+
+/* ============================================================================
+   DATABASE SECTION
+   ============================================================================ */
+
+.databaseSection {
+  margin-bottom: 32px;
+}
+
+.databaseSection h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+}
+
+.databaseGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+}
+
+.databaseCard {
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.2s ease;
+}
+
+.databaseCard:hover {
+  border-color: #3a3a3a;
+}
+
+.databaseHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.databaseHeader h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status.healthy {
+  background-color: rgba(46, 204, 113, 0.1);
+  color: #2ECC71;
+}
+
+.databaseMetrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.databaseMetric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.databaseMetric span {
+  font-size: 12px;
+  color: #666;
+}
+
+.databaseMetric strong {
+  font-size: 14px;
+}
+
+/* ============================================================================
+   API SECTION
+   ============================================================================ */
+
+.apiSection {
+  margin-bottom: 32px;
+}
+
+.apiSection h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+}
+
+.apiTable {
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.apiTable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.apiTable th {
+  text-align: left;
+  padding: 16px 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #666;
+  background-color: #0a0a0a;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.apiTable td {
+  padding: 16px 20px;
+  font-size: 14px;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.apiTable tr:last-child td {
+  border-bottom: none;
+}
+
+.endpoint {
+  font-family: 'SF Mono', Monaco, monospace;
+  color: #4ECDC4;
+}
+
+.apiTable td.warning {
+  color: #F39C12;
+}
+
+/* ============================================================================
+   PIE CHART SECTION
+   ============================================================================ */
+
+.pieChartContainer {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.pieChartLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.legendLabel {
+  flex: 1;
+  color: #999;
+}
+
+.legendValue {
+  font-weight: 600;
+}
+
+/* ============================================================================
+   REGION SECTION
+   ============================================================================ */
+
+.regionTable {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.regionRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #0a0a0a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.regionRow:hover {
+  border-color: #3a3a3a;
+}
+
+.regionName {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.regionMetrics {
+  display: flex;
+  gap: 16px;
+}
+
+.regionLatency,
+.regionAvailability {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #999;
+}
+
+/* ============================================================================
+   DATABASE METRICS SECTION
+   ============================================================================ */
+
+.databaseMetricsSection {
+  margin-bottom: 32px;
+}
+
+.databaseChartsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.connectionMetrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 20px;
+}
+
+.connectionMetric {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background-color: #0a0a0a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+}
+
+.connectionMetric span {
+  font-size: 12px;
+  color: #666;
+}
+
+.connectionMetric strong {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* ============================================================================
+   NETWORK SECTION
+   ============================================================================ */
+
+.networkSection {
+  margin-bottom: 32px;
+}
+
+.cdnSection {
+  margin-top: 32px;
+}
+
+.cdnSection h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+}
+
+.cdnGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.cdnCard {
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+}
+
+.cdnCard h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.cdnValue {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #4ECDC4;
+}
+
+.cdnStats {
+  display: flex;
+  justify-content: space-around;
+  font-size: 13px;
+  color: #999;
+}
+
+/* ============================================================================
+   SECURITY SECTION
+   ============================================================================ */
+
+.securitySection {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.threatOverview h3,
+.vulnerabilitySection h3,
+.complianceSection h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+}
+
+.threatGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.threatCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.threatCard:hover {
+  border-color: #3a3a3a;
+  transform: translateY(-2px);
+}
+
+.threatIcon {
+  color: #4ECDC4;
+}
+
+.threatContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.threatLabel {
+  font-size: 13px;
+  color: #999;
+}
+
+.threatValue {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.vulnerabilityGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.vulnerabilityCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+  background-color: #1a1a1a;
+  border: 2px solid #2a2a2a;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.vulnerabilityCard.critical { border-color: rgba(231, 76, 60, 0.5); }
+.vulnerabilityCard.high { border-color: rgba(243, 156, 18, 0.5); }
+.vulnerabilityCard.medium { border-color: rgba(241, 196, 15, 0.5); }
+.vulnerabilityCard.low { border-color: rgba(46, 204, 113, 0.5); }
+
+.vulnerabilitySeverity {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #999;
+}
+
+.vulnerabilityCount {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.vulnerabilityCard.critical .vulnerabilityCount { color: #E74C3C; }
+.vulnerabilityCard.high .vulnerabilityCount { color: #F39C12; }
+.vulnerabilityCard.medium .vulnerabilityCount { color: #F1C40F; }
+.vulnerabilityCard.low .vulnerabilityCount { color: #2ECC71; }
+
+.complianceGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.complianceItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+}
+
+.complianceName {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.complianceStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.complianceStatus.compliant {
+  color: #2ECC71;
+}
+
+.lastAudit {
+  font-size: 13px;
+  color: #666;
+  text-align: center;
+}
+
+/* ============================================================================
+   ALERTS SECTION
+   ============================================================================ */
+
+.alertsSection {
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.alertsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.alertsHeader h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.clearAlertsButton {
+  padding: 6px 12px;
+  background-color: #0a0a0a;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  color: #999;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clearAlertsButton:hover {
+  color: #fff;
+  border-color: #3a3a3a;
+}
+
+.alertsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.alertItem {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background-color: #0a0a0a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.alertItem.critical { border-color: rgba(231, 76, 60, 0.3); }
+.alertItem.warning { border-color: rgba(243, 156, 18, 0.3); }
+.alertItem.info { border-color: rgba(52, 152, 219, 0.3); }
+
+.alertItem:hover {
+  transform: translateX(4px);
+}
+
+.alertIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.alertItem.critical .alertIcon { 
+  background-color: rgba(231, 76, 60, 0.1);
+  color: #E74C3C;
+}
+
+.alertItem.warning .alertIcon { 
+  background-color: rgba(243, 156, 18, 0.1);
+  color: #F39C12;
+}
+
+.alertItem.info .alertIcon { 
+  background-color: rgba(52, 152, 219, 0.1);
+  color: #3498DB;
+}
+
+.alertContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.alertTitle {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.alertMessage {
+  font-size: 13px;
+  color: #999;
+}
+
+.alertTime {
+  font-size: 12px;
+  color: #666;
+}
+
+/* ============================================================================
+   LOADING & ERROR STATES
+   ============================================================================ */
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+  color: #999;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 1400px) {
+  .databaseChartsGrid,
+  .chartsRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .systemMetrics {
+    padding: 16px;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .headerRight {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  
+  .categoryTabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .summaryGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .serverGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .databaseGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .threatGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .connectionMetrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .systemMetrics {
+    padding: 12px;
+  }
+  
+  .headerLeft h1 {
+    font-size: 24px;
+  }
+  
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .serverMetrics {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .threatGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .vulnerabilityGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .apiTable {
+    overflow-x: auto;
+  }
+  
+  .apiTable table {
+    min-width: 600px;
+  }
+}

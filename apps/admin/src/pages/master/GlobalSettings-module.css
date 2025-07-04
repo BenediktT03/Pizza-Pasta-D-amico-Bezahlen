@@ -1,0 +1,819 @@
+/**
+ * EATECH - Global Settings Styles
+ * Version: 5.0.0
+ * File Path: /apps/admin/src/pages/master/GlobalSettings.module.css
+ */
+
+/* ============================================================================
+   BASE STYLES
+   ============================================================================ */
+
+.globalSettings {
+  padding: 24px;
+  background-color: #0A0A0A;
+  min-height: 100vh;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ============================================================================
+   HEADER
+   ============================================================================ */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.headerLeft h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.headerLeft p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.headerRight {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.resetButton,
+.saveButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.resetButton {
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  color: #fff;
+}
+
+.resetButton:hover {
+  background-color: #2a2a2a;
+  transform: translateY(-1px);
+}
+
+.saveButton {
+  background-color: #6C5CE7;
+  border: none;
+  color: #fff;
+}
+
+.saveButton:hover {
+  background-color: #5F4DE3;
+  transform: translateY(-1px);
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================================================
+   UNSAVED WARNING
+   ============================================================================ */
+
+.unsavedWarning {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background-color: rgba(243, 156, 18, 0.1);
+  border: 1px solid rgba(243, 156, 18, 0.3);
+  border-radius: 8px;
+  color: #F39C12;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+/* ============================================================================
+   CATEGORIES
+   ============================================================================ */
+
+.categories {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 280px;
+  float: left;
+  margin-right: 32px;
+  position: sticky;
+  top: 24px;
+}
+
+.categoryButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #999;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.categoryButton:hover {
+  background-color: #2a2a2a;
+  color: #fff;
+  transform: translateX(4px);
+}
+
+.categoryButton.active {
+  background-color: #6C5CE7;
+  border-color: #6C5CE7;
+  color: #fff;
+}
+
+.categoryArrow {
+  margin-left: auto;
+  transition: transform 0.2s ease;
+}
+
+.categoryButton:hover .categoryArrow {
+  transform: translateX(4px);
+}
+
+/* ============================================================================
+   CONTENT
+   ============================================================================ */
+
+.content {
+  margin-left: 312px;
+  min-height: 600px;
+}
+
+.settingsSection {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.settingsSection h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 32px 0;
+}
+
+.settingsSection h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 32px 0 20px 0;
+  padding-top: 32px;
+  border-top: 1px solid #2a2a2a;
+}
+
+.sectionDescription {
+  font-size: 14px;
+  color: #666;
+  margin: -16px 0 20px 0;
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+/* ============================================================================
+   SETTING CONTROLS
+   ============================================================================ */
+
+/* Toggle Switch */
+.settingToggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.settingToggle:hover {
+  border-color: #3a3a3a;
+}
+
+.toggleContent {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.toggleLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.toggleDescription {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #2a2a2a;
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: #666;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.switch input:checked + .slider {
+  background-color: #6C5CE7;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(24px);
+  background-color: #fff;
+}
+
+/* Input Fields */
+.settingInput,
+.settingSelect,
+.settingTextarea {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inputLabel,
+.selectLabel,
+.textareaLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inputDescription,
+.selectDescription,
+.textareaDescription {
+  font-size: 12px;
+  color: #666;
+  margin: -4px 0 4px 0;
+}
+
+.inputWrapper {
+  position: relative;
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.input:hover,
+.select:hover,
+.textarea:hover {
+  border-color: #3a3a3a;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: #6C5CE7;
+  background-color: #141414;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: #666;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* ============================================================================
+   SPECIFIC SECTIONS
+   ============================================================================ */
+
+/* Maintenance Section */
+.maintenanceSection {
+  margin-top: 32px;
+}
+
+/* Password Section */
+.passwordSection {
+  margin-top: 32px;
+}
+
+/* Network Section */
+.networkSection {
+  margin-top: 32px;
+}
+
+/* API Keys Section */
+.apiKeysSection {
+  margin-bottom: 32px;
+}
+
+.apiKeyCard {
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.apiKeyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.apiKeyHeader h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.regenerateButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: #0a0a0a;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  color: #999;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.regenerateButton:hover {
+  color: #fff;
+  border-color: #3a3a3a;
+}
+
+.apiKeyContent {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.apiKey {
+  flex: 1;
+  padding: 12px 16px;
+  background-color: #0a0a0a;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  font-family: 'SF Mono', Monaco, monospace;
+  font-size: 13px;
+  color: #6C5CE7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.apiKeyActions {
+  display: flex;
+  gap: 8px;
+}
+
+.apiKeyActions button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background-color: #0a0a0a;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  color: #999;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.apiKeyActions button:hover {
+  color: #fff;
+  border-color: #3a3a3a;
+}
+
+/* API Features */
+.apiFeatures {
+  margin-top: 32px;
+}
+
+.featureToggles {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Payment Providers */
+.paymentProviders {
+  margin-bottom: 32px;
+}
+
+.providerSection {
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.providerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.providerHeader h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.providerSettings {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  padding-top: 20px;
+  border-top: 1px solid #2a2a2a;
+}
+
+/* Payment Settings */
+.paymentSettings {
+  margin-top: 32px;
+}
+
+/* Email Settings */
+.emailSettings {
+  margin-bottom: 32px;
+}
+
+.smtpSettings {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+}
+
+.smtpSettings h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+/* Notification Settings */
+.notificationSettings {
+  margin-top: 32px;
+}
+
+.notificationToggles {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.twilioSettings {
+  padding: 20px;
+  background-color: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+}
+
+.twilioSettings h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+/* Color Settings */
+.colorSettings {
+  margin-bottom: 32px;
+}
+
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.colorInput {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.colorInput label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.colorPicker {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.colorPicker input[type="color"] {
+  width: 48px;
+  height: 48px;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  cursor: pointer;
+  background: none;
+  padding: 4px;
+}
+
+.colorPicker input[type="text"] {
+  flex: 1;
+  padding: 12px 16px;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  font-family: 'SF Mono', Monaco, monospace;
+}
+
+/* Theme Settings */
+.themeSettings {
+  margin-bottom: 32px;
+}
+
+.themeToggles {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* Customization Settings */
+.customizationSettings {
+  margin-top: 32px;
+}
+
+/* Debug Settings */
+.debugSettings {
+  margin-bottom: 32px;
+}
+
+/* Performance Settings */
+.performanceSettings {
+  margin-bottom: 32px;
+}
+
+/* Storage Settings */
+.storageSettings {
+  margin-bottom: 32px;
+}
+
+/* Backup Settings */
+.backupSettings {
+  margin-bottom: 32px;
+}
+
+.backupActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.backupButton,
+.restoreButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.backupButton {
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  color: #fff;
+}
+
+.backupButton:hover {
+  background-color: #2a2a2a;
+}
+
+.restoreButton {
+  background-color: #0a0a0a;
+  border: 1px solid #2a2a2a;
+  color: #999;
+}
+
+.restoreButton:hover {
+  color: #fff;
+  border-color: #3a3a3a;
+}
+
+/* Analytics Settings */
+.analyticsSettings {
+  margin-top: 32px;
+}
+
+/* ============================================================================
+   LOADING STATE
+   ============================================================================ */
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+  color: #999;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 1024px) {
+  .globalSettings {
+    padding: 16px;
+  }
+  
+  .categories {
+    float: none;
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 24px;
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+  
+  .content {
+    margin-left: 0;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .headerRight {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .settingsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .globalSettings {
+    padding: 12px;
+  }
+  
+  .headerLeft h1 {
+    font-size: 24px;
+  }
+  
+  .categories {
+    grid-template-columns: 1fr;
+  }
+  
+  .categoryButton {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+  
+  .settingToggle {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .toggleContent {
+    margin-right: 0;
+    margin-bottom: 12px;
+  }
+  
+  .switch {
+    align-self: flex-start;
+  }
+  
+  .apiKeyContent {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .apiKeyActions {
+    justify-content: space-between;
+  }
+  
+  .colorGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .backupActions {
+    flex-direction: column;
+  }
+  
+  .backupButton,
+  .restoreButton {
+    width: 100%;
+    justify-content: center;
+  }
+}

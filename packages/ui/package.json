@@ -1,0 +1,14 @@
+{
+  "name": "@eatech/ui",
+  "version": "12.0.0",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./styles": "./src/styles/index.css"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "lucide-react": "latest",
+    "clsx": "^2.1.0"
+  }
+}

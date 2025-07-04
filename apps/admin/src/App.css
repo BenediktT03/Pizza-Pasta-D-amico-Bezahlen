@@ -1,0 +1,13 @@
+/**
+ * EATECH - Admin App Styles
+ * Version: 14.0.0
+ * Description: App-level styles
+ * Author: EATECH Development Team
+ * Created: 2025-07-04
+ * File Path: /apps/admin/src/App.css
+ */
+
+.app {
+    min-height: 100vh;
+    background-color: #0A0A0A;
+}

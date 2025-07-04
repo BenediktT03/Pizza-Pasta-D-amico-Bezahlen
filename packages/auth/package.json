@@ -1,12 +1,13 @@
 {
   "name": "@eatech/auth",
-  "version": "12.0.0",
-  "main": "./src/index.js",
+  "version": "1.0.0",
+  "main": "./src/index.jsx",
+  "module": "./src/index.jsx",
   "exports": {
-    ".": "./src/index.js"
+    ".": "./src/index.jsx"
   },
   "dependencies": {
-    "firebase": "^10.8.0",
-    "react": "^19.0.0"
+    "react": "^19.0.0",
+    "firebase": "^10.14.1"
   }
 }

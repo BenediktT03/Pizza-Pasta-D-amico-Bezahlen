@@ -1,12 +1,15 @@
 {
   "name": "@eatech/core",
-  "version": "12.0.0",
+  "version": "1.0.0",
   "main": "./src/index.js",
+  "module": "./src/index.js",
   "exports": {
-    ".": "./src/index.js"
+    ".": "./src/index.js",
+    "./config/firebase": "./src/config/firebase.js",
+    "./contexts/TenantContext": "./src/contexts/TenantContext.jsx"
   },
   "dependencies": {
-    "firebase": "^10.14.1",
-    "react": "^19.0.0"
+    "react": "^19.0.0",
+    "firebase": "^10.14.1"
   }
 }

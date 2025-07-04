@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "tenants": {
+      "$tenantId": {
+        "products": {
+          ".read": true,
+          ".write": true
+        },
+        "orders": {
+          ".read": true,
+          ".write": true
+        }
+      }
+    },
+    "users": {
+      "$userId": {
+        ".read": "$userId === auth.uid",
+        ".write": "$userId === auth.uid"
+      }
+    }
+  }
+}

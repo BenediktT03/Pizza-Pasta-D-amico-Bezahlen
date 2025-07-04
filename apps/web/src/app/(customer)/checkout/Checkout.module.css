@@ -1,0 +1,586 @@
+/**
+ * EATECH - Checkout Page Styles
+ * Version: 16.0.0
+ * Description: Styles für den Multi-Step Checkout Prozess
+ * File Path: /apps/web/src/app/(customer)/checkout/Checkout.module.css
+ */
+
+.checkoutPage {
+  min-height: 100vh;
+  background: #0A0A0A;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-geist-sans);
+}
+
+/* Header */
+.header {
+  position: sticky;
+  top: 0;
+  background: #0A0A0A;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  z-index: 100;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  color: white;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.backButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.backButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.header h1 {
+  flex: 1;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Progress Steps */
+.steps {
+  display: flex;
+  gap: 8px;
+}
+
+.step {
+  width: 40px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.step.active {
+  background: #FF6B6B;
+}
+
+/* Main Content */
+.main {
+  flex: 1;
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.stepContent {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stepContent h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 32px 0;
+}
+
+/* Form Elements */
+.formGroup {
+  margin-bottom: 24px;
+}
+
+.formGroup label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 8px;
+}
+
+.formGroup input,
+.formGroup textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: white;
+  font-size: 16px;
+  font-family: var(--font-geist-sans);
+  transition: all 0.2s ease;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: #FF6B6B;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.formGroup input.error,
+.formGroup textarea.error {
+  border-color: #F56565;
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 16px;
+}
+
+.errorMessage {
+  display: block;
+  color: #F56565;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* Radio Cards */
+.radioCard {
+  display: block;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.radioCard input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+}
+
+.radioContent {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  transition: all 0.2s ease;
+}
+
+.radioCard:hover .radioContent {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.radioCard input[type="radio"]:checked + .radioContent {
+  background: rgba(255, 107, 107, 0.1);
+  border-color: #FF6B6B;
+}
+
+.radioCard input[type="radio"]:disabled + .radioContent {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.radioContent h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.radioContent h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.radioContent p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 4px 0 0 0;
+}
+
+/* Delivery Type Selection */
+.deliveryTypeSelection {
+  margin-bottom: 32px;
+}
+
+/* Address Form */
+.addressForm {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Time Selection */
+.timeSelection {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.timeSelection h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.timeOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.timeOptions input[type="time"] {
+  margin-top: 8px;
+  width: auto;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: white;
+  font-size: 14px;
+}
+
+.timeOptions input[type="time"]:disabled {
+  opacity: 0.3;
+}
+
+/* Checkbox Group */
+.checkboxGroup {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.checkboxGroup label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.checkboxGroup input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #FF6B6B;
+}
+
+/* Payment Methods */
+.paymentMethods {
+  margin-bottom: 32px;
+}
+
+.twintLogo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.cashIcon {
+  font-size: 24px;
+  font-weight: 700;
+  color: #4FD1C5;
+}
+
+/* Order Summary */
+.orderSummary {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 32px;
+}
+
+.orderSummary h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.summaryItems {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.quantity {
+  color: #FF6B6B;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.summaryTotals {
+  font-size: 14px;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.summaryTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+/* Success Content */
+.successContent {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.successIcon {
+  width: 96px;
+  height: 96px;
+  background: linear-gradient(135deg, #4FD1C5, #38B2AC);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 32px;
+  animation: successPulse 0.6s ease;
+}
+
+@keyframes successPulse {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.successContent h2 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+}
+
+.orderNumber {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 32px;
+}
+
+.orderNumber strong {
+  color: #FF6B6B;
+  font-family: monospace;
+  font-size: 20px;
+}
+
+.successDetails {
+  max-width: 400px;
+  margin: 0 auto 32px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.successDetails p {
+  margin-bottom: 12px;
+}
+
+.successActions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.trackButton,
+.newOrderButton {
+  flex: 1;
+  padding: 16px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.trackButton {
+  background: linear-gradient(135deg, #FF6B6B, #F56565);
+  border: none;
+  color: white;
+}
+
+.trackButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+}
+
+.newOrderButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.newOrderButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Footer */
+.footer {
+  position: sticky;
+  bottom: 0;
+  background: #0A0A0A;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 16px 24px;
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.primaryButton,
+.secondaryButton {
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-geist-sans);
+}
+
+.primaryButton {
+  background: linear-gradient(135deg, #FF6B6B, #F56565);
+  border: none;
+  color: white;
+  min-width: 160px;
+  justify-content: center;
+}
+
+.primaryButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+}
+
+.primaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Spinner */
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 640px) {
+  .header {
+    padding: 12px 16px;
+  }
+  
+  .main {
+    padding: 16px;
+  }
+  
+  .stepContent h2 {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+  
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+  
+  .radioContent {
+    padding: 16px;
+  }
+  
+  .orderSummary {
+    padding: 16px;
+  }
+  
+  .successContent {
+    padding: 32px 16px;
+  }
+  
+  .successActions {
+    flex-direction: column;
+  }
+  
+  .footer {
+    padding: 12px 16px;
+    flex-direction: column;
+  }
+  
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+}

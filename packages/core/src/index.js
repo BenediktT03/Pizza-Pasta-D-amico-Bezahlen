@@ -1,12 +1,13 @@
 /**
- * EATECH - Core Package Exports
- * Version: 1.0.0
- * Description: Central exports for core functionality
+ * EATECH Core Package Exports
  * File Path: /packages/core/src/index.js
  */
 
-// Export all contexts
-export { TenantProvider, useTenant } from './contexts/TenantContext';
+// Firebase Config
+export { auth, db, storage } from './config/firebase';
 
-// Export firebase config
-export { database, auth, storage } from './config/firebase';
+// Services
+export { default as productService } from './services/productService';
+
+// Hooks
+export { useProducts, useProduct, useCategories } from './hooks/useProducts';

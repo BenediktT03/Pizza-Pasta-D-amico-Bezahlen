@@ -1,29 +1,137 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
-    "version": "1.0.0",
+    "name": "EATECH Admin",
+    "slug": "eatech-admin",
+    "version": "25.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "userInterfaceStyle": "automatic",
+    "scheme": "eatechadmin",
+    "platforms": ["ios", "android"],
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0A0A0A"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "ch.eatech.admin",
+      "buildNumber": "1",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "CFBundleDisplayName": "EATECH Admin",
+        "NSFaceIDUsageDescription": "EATECH verwendet Face ID für sicheren und schnellen Login",
+        "NSCameraUsageDescription": "EATECH benötigt Kamera-Zugriff für Produktfotos",
+        "NSPhotoLibraryUsageDescription": "EATECH benötigt Zugriff auf Fotos für Produktbilder",
+        "UIBackgroundModes": ["remote-notification", "fetch", "processing"],
+        "UIApplicationShortcutItems": [
+          {
+            "UIApplicationShortcutItemType": "ch.eatech.admin.toggle_store",
+            "UIApplicationShortcutItemTitle": "Status ändern",
+            "UIApplicationShortcutItemSubtitle": "Foodtruck öffnen/schließen",
+            "UIApplicationShortcutItemIconType": "UIApplicationShortcutIconTypeStore"
+          },
+          {
+            "UIApplicationShortcutItemType": "ch.eatech.admin.new_order",
+            "UIApplicationShortcutItemTitle": "Neue Bestellung",
+            "UIApplicationShortcutItemSubtitle": "Bestellung erfassen",
+            "UIApplicationShortcutItemIconType": "UIApplicationShortcutIconTypeCompose"
+          },
+          {
+            "UIApplicationShortcutItemType": "ch.eatech.admin.revenue",
+            "UIApplicationShortcutItemTitle": "Tagesumsatz",
+            "UIApplicationShortcutItemSubtitle": "Einnahmen anzeigen",
+            "UIApplicationShortcutItemIconType": "UIApplicationShortcutIconTypeShare"
+          }
+        ]
+      },
+      "associatedDomains": [
+        "applinks:app.eatech.ch",
+        "webcredentials:app.eatech.ch"
+      ]
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0A0A0A"
       },
-      "edgeToEdgeEnabled": true
+      "package": "ch.eatech.admin",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT",
+        "VIBRATE",
+        "RECEIVE_BOOT_COMPLETED",
+        "WAKE_LOCK"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "app.eatech.ch",
+              "pathPrefix": "/admin"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-notifications",
+      "expo-local-authentication",
+      [
+        "expo-quick-actions",
+        {
+          "androidIcons": {
+            "toggle_store": "./assets/shortcuts/store.png",
+            "new_order": "./assets/shortcuts/order.png",
+            "revenue": "./assets/shortcuts/revenue.png"
+          }
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "14.0"
+          },
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "minSdkVersion": 26
+          }
+        }
+      ]
+    ],
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#FF6B6B",
+      "androidMode": "default",
+      "androidCollapsedTitle": "EATECH Admin",
+      "iosDisplayInForeground": true
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "checkAutomatically": "ON_LOAD",
+      "url": "https://u.expo.dev/YOUR_PROJECT_ID"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "YOUR_EAS_PROJECT_ID"
+      }
     }
   }
 }

@@ -1,0 +1,968 @@
+/**
+ * EATECH - Order Management Styles
+ * Version: 20.0.0
+ * File Path: /src/pages/OrderManagement/OrderManagement.module.css
+ */
+
+/* ============================================================================
+   CONTAINER & LAYOUT
+   ============================================================================ */
+.orderManagement {
+  padding: 2rem;
+  background: var(--bg-primary);
+  min-height: 100vh;
+}
+
+/* ============================================================================
+   HEADER
+   ============================================================================ */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.titleSection h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.refreshButton:hover {
+  background: var(--bg-tertiary);
+}
+
+.headerActions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* ============================================================================
+   SEARCH BAR
+   ============================================================================ */
+.searchBar {
+  position: relative;
+  width: 300px;
+}
+
+.searchBar svg {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+.searchBar input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 3rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.searchBar input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+/* ============================================================================
+   BUTTONS
+   ============================================================================ */
+.filterButton,
+.exportButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filterButton:hover,
+.exportButton:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--primary);
+}
+
+.exportButton {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.exportButton:hover {
+  background: var(--primary-hover);
+}
+
+/* ============================================================================
+   STATISTICS
+   ============================================================================ */
+.statistics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.statIcon {
+  width: 48px;
+  height: 48px;
+  background: var(--bg-tertiary);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.statContent h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.statContent p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ============================================================================
+   FILTERS
+   ============================================================================ */
+.filters {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: none;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.filters.show {
+  display: flex;
+}
+
+.filterGroup {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filterGroup label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.filterSelect {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.viewToggle {
+  display: flex;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.viewToggle button {
+  flex: 1;
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.viewToggle button.active {
+  background: var(--primary);
+  color: white;
+}
+
+/* ============================================================================
+   TABLE VIEW
+   ============================================================================ */
+.tableContainer {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.orderTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.orderTable th {
+  background: var(--bg-tertiary);
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  user-select: none;
+}
+
+.orderTable th svg {
+  display: inline-block;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+.orderTable td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.orderTable tr:last-child td {
+  border-bottom: none;
+}
+
+.orderTable tr:hover {
+  background: var(--bg-primary);
+}
+
+.orderTable tr.selected {
+  background: rgba(var(--primary-rgb), 0.1);
+}
+
+.orderId {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.customerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.customerContact {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.amount {
+  font-weight: 600;
+}
+
+.paymentMethod {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: white;
+}
+
+/* ============================================================================
+   CARD VIEW
+   ============================================================================ */
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.orderCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.orderCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cardHeader h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.cardHeader p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.cardBody {
+  padding: 1.5rem;
+}
+
+.customerSection {
+  margin-bottom: 1rem;
+}
+
+.customerSection h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.customerSection p {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0.25rem 0;
+}
+
+.itemsList {
+  background: var(--bg-primary);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.itemPreview {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  padding: 0.25rem 0;
+}
+
+.moreItems {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-top: 0.5rem;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.paymentInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.totalAmount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.cardActions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: var(--bg-tertiary);
+  border-top: 1px solid var(--border-color);
+}
+
+.cardActions button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cardActions button:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.statusSelect {
+  flex: 1;
+  padding: 0.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+/* ============================================================================
+   ACTIONS
+   ============================================================================ */
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.actionButton {
+  padding: 0.5rem;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.actionButton:hover {
+  background: var(--bg-tertiary);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdownContent {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  min-width: 200px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.dropdown:hover .dropdownContent {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdownContent button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dropdownContent button:hover {
+  background: var(--bg-tertiary);
+  color: var(--primary);
+}
+
+/* ============================================================================
+   BULK ACTIONS
+   ============================================================================ */
+.bulkActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--primary);
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.bulkActions span {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.bulkButtons {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.bulkButtons button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bulkButtons button:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.clearSelection {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clearSelection:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* ============================================================================
+   MODAL
+   ============================================================================ */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modalContent {
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease-out;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modalHeader h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modalHeader button {
+  font-size: 2rem;
+  line-height: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: all 0.2s;
+}
+
+.modalHeader button:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.modalBody {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.section h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 1rem 0;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.infoGrid label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.infoGrid p {
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.itemsTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.itemsTable th {
+  text-align: left;
+  padding: 0.75rem;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.itemsTable td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.itemsTable tfoot td {
+  font-weight: 500;
+}
+
+.itemsTable .totalRow td {
+  font-weight: 700;
+  font-size: 1.125rem;
+  padding-top: 1rem;
+}
+
+.modifiers {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0.5rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border-color);
+}
+
+.timelineItem {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.timelineDot {
+  position: absolute;
+  left: -1.5rem;
+  top: 0.25rem;
+  width: 1rem;
+  height: 1rem;
+  background: var(--primary);
+  border: 3px solid var(--bg-secondary);
+  border-radius: 50%;
+}
+
+.timelineContent p {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.timelineContent span {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.notes {
+  background: var(--bg-primary);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.modalFooter {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.printButton,
+.refundButton,
+.primaryButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.printButton {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.refundButton {
+  background: #FF6B6B;
+  color: white;
+  border-color: #FF6B6B;
+}
+
+.primaryButton {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  margin-left: auto;
+}
+
+.printButton:hover,
+.refundButton:hover,
+.primaryButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* ============================================================================
+   LOADING STATE
+   ============================================================================ */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  color: var(--primary);
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+@media (max-width: 1024px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .headerActions {
+    flex-wrap: wrap;
+  }
+  
+  .searchBar {
+    width: 100%;
+  }
+  
+  .statistics {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+  
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .orderManagement {
+    padding: 1rem;
+  }
+  
+  .titleSection h1 {
+    font-size: 1.5rem;
+  }
+  
+  .tableContainer {
+    overflow-x: auto;
+  }
+  
+  .orderTable {
+    min-width: 800px;
+  }
+  
+  .modalContent {
+    width: 95%;
+    margin: 1rem;
+  }
+  
+  .modalFooter {
+    flex-direction: column;
+  }
+  
+  .primaryButton {
+    margin-left: 0;
+  }
+}

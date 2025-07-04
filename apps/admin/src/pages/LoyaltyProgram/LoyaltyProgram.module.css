@@ -1,0 +1,1327 @@
+/**
+ * EATECH - Loyalty Program Styles
+ * Version: 20.0.0
+ * File Path: /src/pages/LoyaltyProgram/LoyaltyProgram.module.css
+ */
+
+/* ============================================================================
+   CONTAINER & LAYOUT
+   ============================================================================ */
+.loyaltyProgram {
+  padding: 2rem;
+  background: var(--bg-primary);
+  min-height: 100vh;
+}
+
+/* ============================================================================
+   HEADER
+   ============================================================================ */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.headerTitle svg {
+  color: var(--primary);
+}
+
+.headerTitle h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.refreshButton:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--primary);
+}
+
+/* ============================================================================
+   TABS
+   ============================================================================ */
+.tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+}
+
+.tabs button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.tabs button:hover {
+  color: var(--text-primary);
+}
+
+.tabs button.active {
+  color: var(--primary);
+}
+
+.tabs button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1rem;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary);
+}
+
+/* ============================================================================
+   OVERVIEW TAB
+   ============================================================================ */
+.overview {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.statCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  transition: all 0.2s;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.statIcon {
+  width: 48px;
+  height: 48px;
+  background: var(--bg-tertiary);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.statContent {
+  flex: 1;
+}
+
+.statContent h3 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.statContent p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.statChange {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--success);
+}
+
+.statSubtext {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.section {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  padding: 1.5rem;
+}
+
+.section h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 1.5rem 0;
+}
+
+/* Tier Distribution */
+.tierDistribution {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.tierCard {
+  background: var(--bg-primary);
+  border: 2px solid;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  transition: all 0.2s;
+}
+
+.tierCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.tierHeader {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.tierIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tierHeader h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.tierHeader p {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.tierStats {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+}
+
+.tierCount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.tierPercentage {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.tierBenefits {
+  border-top: 1px solid var(--border-color);
+  padding-top: 0.75rem;
+}
+
+.tierBenefits p {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin: 0.25rem 0;
+}
+
+/* Popular Rewards */
+.popularRewards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.popularReward {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-primary);
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.popularReward:hover {
+  background: var(--bg-tertiary);
+}
+
+.popularRank {
+  width: 32px;
+  height: 32px;
+  background: var(--bg-tertiary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.popularIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.popularInfo {
+  flex: 1;
+}
+
+.popularInfo h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.popularInfo p {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.popularStats {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* Point Rules */
+.pointRules {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pointRule {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--bg-primary);
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.pointRule:hover {
+  background: var(--bg-tertiary);
+}
+
+.ruleInfo h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.ruleInfo p {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Toggle Switch */
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggleSlider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-tertiary);
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.toggleSlider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+.toggle input:checked + .toggleSlider {
+  background-color: var(--primary);
+}
+
+.toggle input:checked + .toggleSlider:before {
+  transform: translateX(24px);
+}
+
+/* ============================================================================
+   REWARDS TAB
+   ============================================================================ */
+.rewards {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.rewardsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rewardsHeader h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--primary);
+  border: none;
+  border-radius: 0.5rem;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.addButton:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+}
+
+.rewardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.rewardCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.rewardCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.rewardCard.inactive {
+  opacity: 0.6;
+}
+
+.rewardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1rem 0 1rem;
+}
+
+.rewardIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rewardActions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.rewardActions button {
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 0.25rem;
+}
+
+.rewardActions button:hover {
+  background: var(--bg-tertiary);
+  color: var(--primary);
+}
+
+.rewardActions button.danger:hover {
+  color: var(--danger);
+}
+
+.rewardBody {
+  padding: 1rem;
+}
+
+.rewardBody h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.rewardDescription {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+
+.rewardDetails {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.rewardCost,
+.rewardValue {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  background: var(--bg-primary);
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.rewardCost {
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.rewardValue {
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+
+.rewardStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.rewardStats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.label {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tierRestriction {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-primary);
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* ============================================================================
+   MEMBERS TAB
+   ============================================================================ */
+.members {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.membersHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.membersHeader h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.memberControls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.searchBar {
+  position: relative;
+  width: 300px;
+}
+
+.searchBar svg {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+.searchBar input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 3rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.searchBar input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+.filterSelect {
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.exportButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.exportButton:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--primary);
+}
+
+.membersTable {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.membersTable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.membersTable th {
+  background: var(--bg-tertiary);
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.membersTable td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.membersTable tr:last-child td {
+  border-bottom: none;
+}
+
+.membersTable tr:hover {
+  background: var(--bg-primary);
+}
+
+.memberInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.memberAvatar {
+  width: 36px;
+  height: 36px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.memberName {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.memberEmail {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.tierBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.points,
+.lifetime {
+  font-weight: 600;
+}
+
+.memberActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.memberActions button {
+  padding: 0.5rem;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.memberActions button:hover {
+  background: var(--bg-tertiary);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* ============================================================================
+   CAMPAIGNS TAB
+   ============================================================================ */
+.campaigns {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.campaignsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.campaignsHeader h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.campaignsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.campaign {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  transition: all 0.2s;
+}
+
+.campaign:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.campaignIcon {
+  width: 56px;
+  height: 56px;
+  background: var(--bg-tertiary);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.campaignInfo {
+  flex: 1;
+}
+
+.campaignInfo h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.campaignInfo p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0 0 0.75rem 0;
+}
+
+.campaignMeta {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.campaignMeta span {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.campaignStatus {
+  display: flex;
+  align-items: center;
+}
+
+.campaignStatus span {
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.campaignStatus .active {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+}
+
+.campaignStatus .scheduled {
+  background: rgba(33, 150, 243, 0.1);
+  color: #2196F3;
+}
+
+.campaignStatus .draft {
+  background: rgba(156, 39, 176, 0.1);
+  color: #9C27B0;
+}
+
+/* ============================================================================
+   SETTINGS TAB
+   ============================================================================ */
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.settings h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.settingsSection {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  padding: 1.5rem;
+}
+
+.settingsSection h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 1.5rem 0;
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.settingItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.settingItem label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.settingItem input,
+.settingItem select {
+  padding: 0.75rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.notificationSettings {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.checkboxLabel span {
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.settingsActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.saveButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--primary);
+  border: none;
+  border-radius: 0.5rem;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.saveButton:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+}
+
+/* ============================================================================
+   MODAL
+   ============================================================================ */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modalContent {
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease-out;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modalHeader h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modalHeader button {
+  font-size: 2rem;
+  line-height: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: all 0.2s;
+}
+
+.modalHeader button:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.modalBody {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.memberDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.memberStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.memberStatCard {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.memberStatCard h4 {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin: 0 0 0.75rem 0;
+}
+
+.pointsDisplay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.pointsDisplay svg {
+  color: var(--primary);
+}
+
+.pointsDisplay span {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.tierDisplay {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-weight: 600;
+}
+
+.tierProgress {
+  background: var(--bg-primary);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+}
+
+.tierProgress p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0 0 0.75rem 0;
+}
+
+.progressBar {
+  height: 8px;
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progressText {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.memberActions {
+  margin-top: 1rem;
+}
+
+.awardPoints h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 1rem 0;
+}
+
+.pointsForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pointsForm input {
+  padding: 0.75rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.awardButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--primary);
+  border: none;
+  border-radius: 0.5rem;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.awardButton:hover {
+  background: var(--primary-hover);
+}
+
+/* ============================================================================
+   LOADING STATE
+   ============================================================================ */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  color: var(--primary);
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+@media (max-width: 1024px) {
+  .tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .tierDistribution {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+  
+  .rewardsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .memberControls {
+    flex-wrap: wrap;
+  }
+  
+  .searchBar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .loyaltyProgram {
+    padding: 1rem;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .headerTitle h1 {
+    font-size: 1.5rem;
+  }
+  
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .membersTable {
+    overflow-x: auto;
+  }
+  
+  .membersTable table {
+    min-width: 800px;
+  }
+  
+  .modalContent {
+    width: 95%;
+    margin: 1rem;
+  }
+}

@@ -1,0 +1,579 @@
+/**
+ * EATECH - Email Template Editor Styles
+ * Version: 24.0.0
+ * File Path: /apps/admin/src/pages/email-templates/EmailTemplateEditor.module.css
+ */
+
+/* ============================================================================
+   CONTAINER & LAYOUT
+   ============================================================================ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #0A0A0A;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ============================================================================
+   HEADER
+   ============================================================================ */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background-color: #141414;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: transparent;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #999;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.backButton:hover {
+  background-color: #1a1a1a;
+  color: #fff;
+  transform: translateX(-2px);
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+}
+
+.exportButton,
+.saveButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.exportButton {
+  background-color: #1a1a1a;
+  color: #fff;
+  border: 1px solid #2a2a2a;
+}
+
+.exportButton:hover {
+  background-color: #2a2a2a;
+}
+
+.saveButton {
+  background-color: #FF6B6B;
+  color: #fff;
+}
+
+.saveButton:hover {
+  background-color: #FF5252;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.saveButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ============================================================================
+   SETTINGS
+   ============================================================================ */
+
+.settings {
+  padding: 20px 24px;
+  background-color: #141414;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.settingField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settingField label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #999;
+}
+
+.input,
+.select {
+  padding: 10px 14px;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input:focus,
+.select:focus {
+  border-color: #FF6B6B;
+  box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.1);
+}
+
+.input::placeholder {
+  color: #666;
+}
+
+/* ============================================================================
+   MAIN CONTENT
+   ============================================================================ */
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ============================================================================
+   SIDEBAR
+   ============================================================================ */
+
+.sidebar {
+  width: 280px;
+  background-color: #141414;
+  border-right: 1px solid #2a2a2a;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebarTabs {
+  display: flex;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.sidebarTab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background-color: transparent;
+  border: none;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.sidebarTab:hover {
+  color: #999;
+  background-color: #1a1a1a;
+}
+
+.sidebarTab.active {
+  color: #fff;
+}
+
+.sidebarTab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #FF6B6B;
+}
+
+.sidebarInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: rgba(78, 205, 196, 0.1);
+  border-bottom: 1px solid #2a2a2a;
+  font-size: 12px;
+  color: #4ECDC4;
+}
+
+.variablesList,
+.snippetsList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.variableItem,
+.snippetItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.variableItem:hover,
+.snippetItem:hover {
+  background-color: #2a2a2a;
+  border-color: #3a3a3a;
+  transform: translateX(2px);
+}
+
+.variableItem svg,
+.snippetItem svg {
+  color: #666;
+  flex-shrink: 0;
+}
+
+.variableInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.variableName {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.variableKey {
+  font-size: 11px;
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+  color: #666;
+}
+
+/* ============================================================================
+   EDITOR
+   ============================================================================ */
+
+.editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 400px;
+}
+
+.editorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #141414;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.editorHeader h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.helpLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #4ECDC4;
+  text-decoration: none;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.helpLink:hover {
+  color: #45B7AA;
+  transform: translateY(-1px);
+}
+
+.codeEditor {
+  flex: 1;
+  padding: 16px;
+  background-color: #0A0A0A;
+  border: none;
+  color: #fff;
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+}
+
+.codeEditor::selection {
+  background-color: rgba(255, 107, 107, 0.3);
+}
+
+.errors {
+  padding: 12px 16px;
+  background-color: rgba(244, 67, 54, 0.1);
+  border-top: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #F44336;
+  margin-bottom: 4px;
+}
+
+.error:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================================================
+   PREVIEW
+   ============================================================================ */
+
+.preview {
+  width: 600px;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f5;
+  border-left: 1px solid #2a2a2a;
+}
+
+.previewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #141414;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.previewHeader h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.previewControls {
+  display: flex;
+  gap: 4px;
+}
+
+.previewModeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.previewModeButton:hover {
+  background-color: #2a2a2a;
+  color: #999;
+}
+
+.previewModeButton.active {
+  background-color: #FF6B6B;
+  border-color: #FF6B6B;
+  color: #fff;
+}
+
+.previewContent {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: #e0e0e0;
+  overflow: auto;
+}
+
+.previewContent.desktop {
+  padding: 40px;
+}
+
+.previewContent.mobile {
+  padding: 20px;
+}
+
+.previewIframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+}
+
+.desktop .previewIframe {
+  max-width: 600px;
+  min-height: 600px;
+}
+
+.mobile .previewIframe {
+  max-width: 375px;
+  min-height: 667px;
+}
+
+.testEmail {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  background-color: #141414;
+  border-top: 1px solid #2a2a2a;
+}
+
+.testEmailInput {
+  flex: 1;
+  padding: 10px 14px;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+}
+
+.testEmailInput:focus {
+  border-color: #4ECDC4;
+  box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.1);
+}
+
+.sendTestButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #4ECDC4;
+  border: none;
+  border-radius: 8px;
+  color: #0A0A0A;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sendTestButton:hover {
+  background-color: #45B7AA;
+  transform: translateY(-1px);
+}
+
+.sendTestButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ============================================================================
+   LOADING STATE
+   ============================================================================ */
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 16px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid #1a1a1a;
+  border-top-color: #FF6B6B;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading p {
+  font-size: 16px;
+  color: #666;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 1200px) {
+  .sidebar {
+    width: 240px;
+  }
+  
+  .preview {
+    width: 500px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .mainContent {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: 200px;
+    border-right: none;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  
+  .editor {
+    min-width: auto;
+    height: 400px;
+  }
+  
+  .preview {
+    width: 100%;
+    flex: 1;
+    border-left: none;
+    border-top: 1px solid #2a2a2a;
+  }
+}

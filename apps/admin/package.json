@@ -15,7 +15,7 @@
     "@eatech/auth": "workspace:*",
     "@eatech/core": "workspace:*",
     "@eatech/ui": "workspace:*",
-    "firebase": "^10.14.1",
+    "firebase": "10.14.1",
     "framer-motion": "^12.23.0",
     "lucide-react": "^0.344.0",
     "react": "^19.0.0",

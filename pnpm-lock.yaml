@@ -33,7 +33,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       firebase:
-        specifier: ^10.14.1
+        specifier: 10.14.1
         version: 10.14.1
       framer-motion:
         specifier: ^12.23.0

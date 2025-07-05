@@ -1,12 +1,6 @@
-{
+﻿{
   "name": "@eatech/ui",
   "version": "1.0.0",
-  "main": "./src/index.jsx",
-  "module": "./src/index.jsx",
-  "exports": {
-    ".": "./src/index.jsx"
-  },
-  "dependencies": {
-    "react": "^19.0.0"
-  }
+  "private": true,
+  "main": "index.js"
 }

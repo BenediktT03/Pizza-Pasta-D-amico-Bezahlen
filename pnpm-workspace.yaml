@@ -1,8 +1,0 @@
-﻿packages:
-  - 'apps/admin'
-  - 'apps/web'
-  - 'apps/master'
-  - 'apps/landing'
-  - 'apps/kitchen'
-  - 'packages/*'
-  - 'functions'

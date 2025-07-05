@@ -1,33 +1,17 @@
-{
-  "name": "eatech",
-  "version": "26.0.0",
+﻿{
+  "name": "@eatech/monorepo",
+  "version": "3.0.0",
   "private": true,
-  "packageManager": "pnpm@10.12.4",
-  "workspaces": [
-    "apps/*",
-    "packages/*",
-    "functions"
-  ],
+  "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
     "test": "turbo run test",
-    "lint": "turbo run lint",
-    "clean": "turbo run clean",
-    "dev:admin": "pnpm --filter @eatech/admin dev",
-    "dev:web": "pnpm --filter @eatech/web dev",
-    "dev:all": "turbo run dev --parallel",
-    "build:admin": "pnpm --filter @eatech/admin build",
-    "build:web": "pnpm --filter @eatech/web build"
+    "lint": "turbo run lint"
   },
   "devDependencies": {
-    "turbo": "^2.5.4",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5"
-  },
-  "engines": {
-    "node": ">=20.0.0",
-    "npm": ">=10.0.0",
-    "pnpm": ">=10.0.0"
+    "turbo": "^1.10.0",
+    "prettier": "^3.0.0",
+    "eslint": "^8.50.0"
   }
 }

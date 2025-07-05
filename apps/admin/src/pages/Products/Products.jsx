@@ -1,862 +1,1086 @@
 /**
- * EATECH - Admin Products Management
- * Version: 21.0.0 - Vollständige Version mit Firebase CDN
+ * EATECH - Product Management System
+ * Version: 21.0.0
+ * Description: Umfassendes Produktverwaltungssystem mit erweiterten Features
+ * Features: CRUD, Varianten, Allergene, Bulk-Actions, Import/Export, Feature Toggles
+ * Author: EATECH Development Team
+ * Created: 2025-01-07
  * File Path: /apps/admin/src/pages/Products/Products.jsx
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
-  Plus, Search, Filter, Download, Upload, Edit, Trash2, Eye, EyeOff,
-  Package, AlertCircle, Check, X, Loader2, ImagePlus
+  Plus, Search, Filter, Download, Upload, 
+  Edit2, Trash2, Copy, MoreVertical, ChevronDown,
+  Package, AlertCircle, CheckCircle, XCircle,
+  Tag, Star, TrendingUp, Clock, Image,
+  Grid, List, Settings, RefreshCw, Save,
+  Coffee, Pizza, Sandwich, IceCream, Wine,
+  DollarSign, Percent, Calendar, ToggleLeft, ToggleRight
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-hot-toast';
+import { useTenant } from '@eatech/core';
+import ProductModal from '../../components/Products/ProductModal';
+import ProductImportModal from '../../components/Products/ProductImportModal';
+import BulkEditModal from '../../components/Products/BulkEditModal';
+import FeatureToggleModal from '../../components/Products/FeatureToggleModal';
 import styles from './Products.module.css';
 
-// Firebase ist global verfügbar durch index.html
-const TENANT_ID = 'demo-restaurant';
-
 // ============================================================================
-// CUSTOM HOOK für Firebase Products
+// CONSTANTS
 // ============================================================================
-const useFirebaseProducts = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [creating, setCreating] = useState(false);
-  const [updating, setUpdating] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+const VIEW_MODES = {
+  GRID: 'grid',
+  LIST: 'list'
+};
 
-  useEffect(() => {
-    if (typeof firebase === 'undefined') {
-      setError('Firebase nicht geladen');
-      setLoading(false);
-      return;
-    }
+const CATEGORIES = [
+  { id: 'all', label: 'Alle Kategorien', icon: Package },
+  { id: 'starters', label: 'Vorspeisen', icon: Coffee },
+  { id: 'mains', label: 'Hauptgerichte', icon: Pizza },
+  { id: 'desserts', label: 'Desserts', icon: IceCream },
+  { id: 'drinks', label: 'Getränke', icon: Wine },
+  { id: 'sides', label: 'Beilagen', icon: Sandwich }
+];
 
-    console.log('🔥 Verbinde mit Firebase...');
-    const database = firebase.database();
-    const productsRef = database.ref(`tenants/${TENANT_ID}/products`);
-    
-    productsRef.on('value', 
-      (snapshot) => {
-        const items = [];
-        if (snapshot.exists()) {
-          snapshot.forEach((child) => {
-            const data = child.val();
-            items.push({
-              id: child.key,
-              ...data,
-              allergens: data.allergens || [],
-              stock: data.stock || { enabled: false, quantity: 0, lowStockAlert: 10 }
-            });
-          });
-        }
-        console.log(`✅ ${items.length} Produkte geladen`);
-        setProducts(items);
-        setLoading(false);
-        setError(null);
-      },
-      (error) => {
-        console.error('❌ Firebase Fehler:', error);
-        setError(error.message);
-        setLoading(false);
-      }
-    );
+const FILTER_OPTIONS = {
+  status: [
+    { value: 'all', label: 'Alle' },
+    { value: 'active', label: 'Aktiv' },
+    { value: 'inactive', label: 'Inaktiv' },
+    { value: 'out_of_stock', label: 'Ausverkauft' }
+  ],
+  dietary: [
+    { value: 'vegan', label: 'Vegan', color: '#4CAF50' },
+    { value: 'vegetarian', label: 'Vegetarisch', color: '#8BC34A' },
+    { value: 'gluten_free', label: 'Glutenfrei', color: '#FF9800' },
+    { value: 'lactose_free', label: 'Laktosefrei', color: '#03A9F4' }
+  ],
+  special: [
+    { value: 'featured', label: 'Empfohlen' },
+    { value: 'new', label: 'Neu' },
+    { value: 'bestseller', label: 'Bestseller' },
+    { value: 'seasonal', label: 'Saisonal' }
+  ]
+};
 
-    return () => {
-      console.log('🧹 Cleanup Firebase listener');
-      productsRef.off('value');
-    };
-  }, []);
+const BULK_ACTIONS = [
+  { id: 'activate', label: 'Aktivieren', icon: CheckCircle },
+  { id: 'deactivate', label: 'Deaktivieren', icon: XCircle },
+  { id: 'delete', label: 'Löschen', icon: Trash2 },
+  { id: 'export', label: 'Exportieren', icon: Download },
+  { id: 'edit_prices', label: 'Preise anpassen', icon: DollarSign },
+  { id: 'add_tags', label: 'Tags hinzufügen', icon: Tag }
+];
 
-  const createProduct = async (productData) => {
-    setCreating(true);
-    try {
-      const database = firebase.database();
-      const productsRef = database.ref(`tenants/${TENANT_ID}/products`);
-      const newRef = productsRef.push();
-      
-      const product = {
-        ...productData,
-        id: newRef.key,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        tenantId: TENANT_ID
-      };
-      
-      await newRef.set(product);
-      console.log('✅ Produkt erstellt:', product.name);
-      return product;
-    } catch (error) {
-      console.error('❌ Fehler beim Erstellen:', error);
-      throw error;
-    } finally {
-      setCreating(false);
-    }
-  };
-
-  const updateProduct = async (productId, updates) => {
-    setUpdating(true);
-    try {
-      const database = firebase.database();
-      const productRef = database.ref(`tenants/${TENANT_ID}/products/${productId}`);
-      await productRef.update({
-        ...updates,
-        updatedAt: Date.now()
-      });
-      console.log('✅ Produkt aktualisiert:', productId);
-    } catch (error) {
-      console.error('❌ Fehler beim Update:', error);
-      throw error;
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  const deleteProduct = async (productId) => {
-    setDeleting(true);
-    try {
-      const database = firebase.database();
-      const productRef = database.ref(`tenants/${TENANT_ID}/products/${productId}`);
-      await productRef.remove();
-      console.log('✅ Produkt gelöscht:', productId);
-    } catch (error) {
-      console.error('❌ Fehler beim Löschen:', error);
-      throw error;
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  return {
-    products,
-    loading,
-    error,
-    creating,
-    updating,
-    deleting,
-    createProduct,
-    updateProduct,
-    deleteProduct
-  };
+// Mock Feature Toggles (später aus DB)
+const DEFAULT_FEATURE_TOGGLES = {
+  combos: true,
+  aiDescriptions: true,
+  productCloning: true,
+  newBadge: true,
+  bestsellerBadge: true,
+  productTags: true,
+  preparationTime: false,
+  nutritionInfo: true,
+  allergenInfo: true,
+  multipleImages: true,
+  happyHourPricing: false,
+  inventory: false
 };
 
 // ============================================================================
-// HAUPTKOMPONENTE
+// MAIN COMPONENT
 // ============================================================================
 const Products = () => {
-  // Firebase Hook
-  const { 
-    products, 
-    loading, 
-    error, 
-    creating,
-    updating,
-    deleting,
-    createProduct, 
-    updateProduct, 
-    deleteProduct 
-  } = useFirebaseProducts();
-
-  // States
-  const [showAddProduct, setShowAddProduct] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
+  const { tenantId } = useTenant();
+  
+  // State Management
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState(VIEW_MODES.GRID);
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterCategory, setFilterCategory] = useState('all');
+  const [filters, setFilters] = useState({
+    status: 'all',
+    dietary: [],
+    special: []
+  });
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
-
-  // Form State
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    category: 'main',
-    imageUrl: '',
-    available: true,
-    featured: false,
-    ingredients: [],
-    allergens: [],
-    preparationTime: 15,
-    spicyLevel: 0,
-    vegetarian: false,
-    vegan: false,
-    stock: {
-      enabled: false,
-      quantity: 0,
-      lowStockAlert: 10
-    }
+  
+  // Modal States
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showBulkEditModal, setShowBulkEditModal] = useState(false);
+  const [showFeatureToggleModal, setShowFeatureToggleModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [bulkAction, setBulkAction] = useState(null);
+  
+  // Feature Toggles
+  const [featureToggles, setFeatureToggles] = useState(DEFAULT_FEATURE_TOGGLES);
+  
+  // Stats
+  const [stats, setStats] = useState({
+    total: 0,
+    active: 0,
+    inactive: 0,
+    outOfStock: 0,
+    featured: 0,
+    new: 0
   });
 
-  // Kategorien
-  const categories = [
-    { value: 'all', label: 'Alle Kategorien', icon: Package },
-    { value: 'vorspeise', label: 'Vorspeisen' },
-    { value: 'main', label: 'Hauptgerichte' },
-    { value: 'beilage', label: 'Beilagen' },
-    { value: 'dessert', label: 'Desserts' },
-    { value: 'getraenk', label: 'Getränke' },
-    { value: 'spezial', label: 'Spezialitäten' }
-  ];
+  // ============================================================================
+  // EFFECTS & DATA LOADING
+  // ============================================================================
+  useEffect(() => {
+    loadProducts();
+    loadFeatureToggles();
+  }, [tenantId]);
 
-  // Allergene Liste
-  const allergensList = [
-    'Gluten', 'Milch', 'Eier', 'Nüsse', 'Erdnüsse', 
-    'Soja', 'Fisch', 'Krebstiere', 'Sellerie', 'Senf'
-  ];
-
-  // Handler
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
+  const loadProducts = async () => {
     try {
-      const productData = {
-        ...formData,
-        price: parseFloat(formData.price) || 0
-      };
+      setLoading(true);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      if (editingProduct) {
-        await updateProduct(editingProduct.id, productData);
-        setEditingProduct(null);
+      // Mock data
+      const mockProducts = generateMockProducts();
+      setProducts(mockProducts);
+      calculateStats(mockProducts);
+    } catch (error) {
+      toast.error('Fehler beim Laden der Produkte');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadFeatureToggles = async () => {
+    try {
+      // Später aus DB laden
+      const toggles = localStorage.getItem(`featureToggles_${tenantId}`);
+      if (toggles) {
+        setFeatureToggles(JSON.parse(toggles));
+      }
+    } catch (error) {
+      console.error('Error loading feature toggles:', error);
+    }
+  };
+
+  const generateMockProducts = () => {
+    return [
+      {
+        id: '1',
+        name: 'Classic Burger',
+        description: 'Saftiger Beef-Patty mit frischen Zutaten',
+        category: 'mains',
+        price: 18.50,
+        image: '/api/placeholder/300/300',
+        status: 'active',
+        featured: true,
+        isNew: true,
+        isBestseller: false,
+        dietary: ['lactose_free'],
+        allergens: ['gluten', 'egg', 'mustard'],
+        tags: ['#homemade', '#chef-special'],
+        preparationTime: 15,
+        variants: [
+          { name: 'Klein', price: 15.50 },
+          { name: 'Normal', price: 18.50 },
+          { name: 'XL', price: 22.50 }
+        ],
+        modifiers: [
+          { name: 'Extra Käse', price: 2.50 },
+          { name: 'Bacon', price: 3.00 },
+          { name: 'Doppelt Fleisch', price: 6.00 }
+        ],
+        stock: 100,
+        soldCount: 245,
+        rating: 4.8,
+        createdAt: new Date('2024-12-01'),
+        updatedAt: new Date()
+      },
+      {
+        id: '2',
+        name: 'Caesar Salad',
+        description: 'Knackiger Salat mit hausgemachtem Dressing',
+        category: 'starters',
+        price: 14.50,
+        image: '/api/placeholder/300/300',
+        status: 'active',
+        featured: false,
+        isNew: false,
+        isBestseller: true,
+        dietary: ['vegetarian'],
+        allergens: ['gluten', 'egg', 'milk', 'fish'],
+        tags: ['#healthy', '#light'],
+        preparationTime: 10,
+        variants: [
+          { name: 'Klein', price: 11.50 },
+          { name: 'Groß', price: 16.50 }
+        ],
+        modifiers: [
+          { name: 'Extra Poulet', price: 5.00 },
+          { name: 'Extra Parmesan', price: 2.00 },
+          { name: 'Ohne Croutons', price: 0 }
+        ],
+        stock: 50,
+        soldCount: 389,
+        rating: 4.6,
+        createdAt: new Date('2024-11-15'),
+        updatedAt: new Date()
+      },
+      {
+        id: '3',
+        name: 'Tiramisu',
+        description: 'Hausgemachtes italienisches Dessert',
+        category: 'desserts',
+        price: 8.50,
+        image: '/api/placeholder/300/300',
+        status: 'out_of_stock',
+        featured: true,
+        isNew: false,
+        isBestseller: false,
+        dietary: ['vegetarian'],
+        allergens: ['gluten', 'egg', 'milk'],
+        tags: ['#homemade', '#italian'],
+        preparationTime: 5,
+        variants: [],
+        modifiers: [],
+        stock: 0,
+        soldCount: 167,
+        rating: 4.9,
+        createdAt: new Date('2024-10-20'),
+        updatedAt: new Date()
+      }
+    ];
+  };
+
+  const calculateStats = (productList) => {
+    const stats = {
+      total: productList.length,
+      active: productList.filter(p => p.status === 'active').length,
+      inactive: productList.filter(p => p.status === 'inactive').length,
+      outOfStock: productList.filter(p => p.status === 'out_of_stock').length,
+      featured: productList.filter(p => p.featured).length,
+      new: productList.filter(p => p.isNew).length
+    };
+    setStats(stats);
+  };
+
+  // ============================================================================
+  // FILTERING & SORTING
+  // ============================================================================
+  const filteredProducts = useMemo(() => {
+    let filtered = [...products];
+
+    // Category filter
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(p => p.category === selectedCategory);
+    }
+
+    // Search filter
+    if (searchQuery) {
+      filtered = filtered.filter(p => 
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    }
+
+    // Status filter
+    if (filters.status !== 'all') {
+      filtered = filtered.filter(p => p.status === filters.status);
+    }
+
+    // Dietary filters
+    if (filters.dietary.length > 0) {
+      filtered = filtered.filter(p => 
+        filters.dietary.every(diet => p.dietary.includes(diet))
+      );
+    }
+
+    // Special filters
+    if (filters.special.length > 0) {
+      filtered = filtered.filter(p => {
+        return filters.special.every(special => {
+          switch(special) {
+            case 'featured': return p.featured;
+            case 'new': return p.isNew;
+            case 'bestseller': return p.isBestseller;
+            case 'seasonal': return p.tags.includes('#seasonal');
+            default: return true;
+          }
+        });
+      });
+    }
+
+    // Sorting
+    filtered.sort((a, b) => {
+      let compareValue = 0;
+      switch(sortBy) {
+        case 'name':
+          compareValue = a.name.localeCompare(b.name);
+          break;
+        case 'price':
+          compareValue = a.price - b.price;
+          break;
+        case 'soldCount':
+          compareValue = b.soldCount - a.soldCount;
+          break;
+        case 'rating':
+          compareValue = b.rating - a.rating;
+          break;
+        case 'updatedAt':
+          compareValue = new Date(b.updatedAt) - new Date(a.updatedAt);
+          break;
+        default:
+          compareValue = 0;
+      }
+      return sortOrder === 'asc' ? compareValue : -compareValue;
+    });
+
+    return filtered;
+  }, [products, selectedCategory, searchQuery, filters, sortBy, sortOrder]);
+
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
+  const handleProductSelect = (productId) => {
+    setSelectedProducts(prev => {
+      if (prev.includes(productId)) {
+        return prev.filter(id => id !== productId);
       } else {
-        await createProduct(productData);
-      }
-      
-      // Reset form
-      resetForm();
-      setShowAddProduct(false);
-    } catch (error) {
-      console.error('Submit error:', error);
-      alert('Fehler beim Speichern: ' + error.message);
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      price: '',
-      category: 'main',
-      imageUrl: '',
-      available: true,
-      featured: false,
-      ingredients: [],
-      allergens: [],
-      preparationTime: 15,
-      spicyLevel: 0,
-      vegetarian: false,
-      vegan: false,
-      stock: {
-        enabled: false,
-        quantity: 0,
-        lowStockAlert: 10
+        return [...prev, productId];
       }
     });
   };
 
-  const handleEdit = (product) => {
-    setEditingProduct(product);
-    setFormData({
-      ...product,
-      price: product.price.toString()
-    });
-    setShowAddProduct(true);
-  };
-
-  const handleDelete = async (productId) => {
-    if (window.confirm('Produkt wirklich löschen?')) {
-      try {
-        await deleteProduct(productId);
-      } catch (error) {
-        console.error('Delete error:', error);
-        alert('Fehler beim Löschen: ' + error.message);
-      }
+  const handleSelectAll = () => {
+    if (selectedProducts.length === filteredProducts.length) {
+      setSelectedProducts([]);
+    } else {
+      setSelectedProducts(filteredProducts.map(p => p.id));
     }
   };
 
-  const toggleProductAvailability = async (product) => {
+  const handleBulkAction = (actionId) => {
+    if (selectedProducts.length === 0) {
+      toast.error('Bitte wählen Sie mindestens ein Produkt aus');
+      return;
+    }
+
+    switch(actionId) {
+      case 'activate':
+      case 'deactivate':
+        updateProductStatus(actionId === 'activate' ? 'active' : 'inactive');
+        break;
+      case 'delete':
+        deleteProducts();
+        break;
+      case 'export':
+        exportProducts();
+        break;
+      case 'edit_prices':
+      case 'add_tags':
+        setBulkAction(actionId);
+        setShowBulkEditModal(true);
+        break;
+    }
+  };
+
+  const updateProductStatus = async (status) => {
     try {
-      await updateProduct(product.id, { available: !product.available });
+      // API call would go here
+      setProducts(prev => prev.map(p => 
+        selectedProducts.includes(p.id) ? { ...p, status } : p
+      ));
+      toast.success(`${selectedProducts.length} Produkte ${status === 'active' ? 'aktiviert' : 'deaktiviert'}`);
+      setSelectedProducts([]);
     } catch (error) {
-      console.error('Toggle error:', error);
-      alert('Fehler beim Ändern: ' + error.message);
+      toast.error('Fehler beim Aktualisieren der Produkte');
     }
   };
 
-  const handleBulkDelete = async () => {
-    if (selectedProducts.length === 0) return;
-    
-    if (window.confirm(`${selectedProducts.length} Produkte wirklich löschen?`)) {
-      try {
-        await Promise.all(selectedProducts.map(id => deleteProduct(id)));
-        setSelectedProducts([]);
-      } catch (error) {
-        console.error('Bulk delete error:', error);
-        alert('Fehler beim Löschen: ' + error.message);
-      }
+  const deleteProducts = async () => {
+    if (!confirm(`Möchten Sie wirklich ${selectedProducts.length} Produkte löschen?`)) {
+      return;
+    }
+
+    try {
+      setProducts(prev => prev.filter(p => !selectedProducts.includes(p.id)));
+      toast.success(`${selectedProducts.length} Produkte gelöscht`);
+      setSelectedProducts([]);
+    } catch (error) {
+      toast.error('Fehler beim Löschen der Produkte');
     }
   };
 
-  const handleExport = () => {
-    const data = products.map(p => ({
-      Name: p.name,
-      Beschreibung: p.description,
-      Preis: p.price,
-      Kategorie: p.category,
-      Verfügbar: p.available ? 'Ja' : 'Nein',
-      Vorbereitungszeit: p.preparationTime,
-      Vegetarisch: p.vegetarian ? 'Ja' : 'Nein',
-      Vegan: p.vegan ? 'Ja' : 'Nein'
-    }));
-    
-    const csv = [
-      Object.keys(data[0]).join(','),
-      ...data.map(row => Object.values(row).map(v => `"${v}"`).join(','))
-    ].join('\n');
-    
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
+  const exportProducts = () => {
+    const exportData = filteredProducts
+      .filter(p => selectedProducts.includes(p.id))
+      .map(p => ({
+        Name: p.name,
+        Beschreibung: p.description,
+        Kategorie: CATEGORIES.find(c => c.id === p.category)?.label,
+        Preis: p.price,
+        Status: p.status,
+        Verkauft: p.soldCount,
+        Bewertung: p.rating
+      }));
+
+    // Convert to CSV
+    const csv = convertToCSV(exportData);
+    downloadCSV(csv, 'produkte_export.csv');
+    toast.success('Export erfolgreich');
+  };
+
+  const convertToCSV = (data) => {
+    const headers = Object.keys(data[0]).join(',');
+    const rows = data.map(row => Object.values(row).join(','));
+    return [headers, ...rows].join('\n');
+  };
+
+  const downloadCSV = (csv, filename) => {
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `products_export_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = filename;
     a.click();
-    URL.revokeObjectURL(url);
+    window.URL.revokeObjectURL(url);
   };
 
-  // Filter & Sort
-  const filteredProducts = products
-    .filter(product => {
-      if (filterCategory !== 'all' && product.category !== filterCategory) return false;
-      if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      return true;
-    })
-    .sort((a, b) => {
-      let aVal = a[sortBy];
-      let bVal = b[sortBy];
-      
-      if (sortBy === 'price') {
-        aVal = parseFloat(aVal);
-        bVal = parseFloat(bVal);
-      }
-      
-      if (sortOrder === 'asc') {
-        return aVal > bVal ? 1 : -1;
+  const handleProductSave = async (productData) => {
+    try {
+      if (editingProduct) {
+        // Update existing product
+        setProducts(prev => prev.map(p => 
+          p.id === editingProduct.id ? { ...p, ...productData, updatedAt: new Date() } : p
+        ));
+        toast.success('Produkt aktualisiert');
       } else {
-        return aVal < bVal ? 1 : -1;
+        // Create new product
+        const newProduct = {
+          ...productData,
+          id: Date.now().toString(),
+          soldCount: 0,
+          rating: 0,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        setProducts(prev => [...prev, newProduct]);
+        toast.success('Produkt erstellt');
       }
-    });
+      setShowProductModal(false);
+      setEditingProduct(null);
+    } catch (error) {
+      toast.error('Fehler beim Speichern des Produkts');
+    }
+  };
 
-  // Loading State
+  const handleProductClone = async (product) => {
+    try {
+      const clonedProduct = {
+        ...product,
+        id: Date.now().toString(),
+        name: `${product.name} (Kopie)`,
+        soldCount: 0,
+        rating: 0,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      setProducts(prev => [...prev, clonedProduct]);
+      toast.success('Produkt geklont');
+    } catch (error) {
+      toast.error('Fehler beim Klonen des Produkts');
+    }
+  };
+
+  const handleFeatureTogglesSave = (toggles) => {
+    setFeatureToggles(toggles);
+    localStorage.setItem(`featureToggles_${tenantId}`, JSON.stringify(toggles));
+    toast.success('Feature-Einstellungen gespeichert');
+    setShowFeatureToggleModal(false);
+  };
+
+  // ============================================================================
+  // RENDER METHODS
+  // ============================================================================
+  const renderProductCard = (product) => {
+    const isSelected = selectedProducts.includes(product.id);
+    const categoryInfo = CATEGORIES.find(c => c.id === product.category);
+
+    return (
+      <motion.div
+        key={product.id}
+        layout
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className={`${styles.productCard} ${isSelected ? styles.selected : ''}`}
+      >
+        {/* Selection Checkbox */}
+        <div className={styles.selectionOverlay}>
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => handleProductSelect(product.id)}
+            className={styles.selectCheckbox}
+          />
+        </div>
+
+        {/* Product Image */}
+        <div className={styles.productImage}>
+          <img src={product.image} alt={product.name} />
+          
+          {/* Status Badge */}
+          <div className={`${styles.statusBadge} ${styles[product.status]}`}>
+            {product.status === 'active' && <CheckCircle size={14} />}
+            {product.status === 'inactive' && <XCircle size={14} />}
+            {product.status === 'out_of_stock' && <AlertCircle size={14} />}
+            <span>
+              {product.status === 'active' && 'Aktiv'}
+              {product.status === 'inactive' && 'Inaktiv'}
+              {product.status === 'out_of_stock' && 'Ausverkauft'}
+            </span>
+          </div>
+
+          {/* Special Badges */}
+          <div className={styles.specialBadges}>
+            {product.featured && featureToggles.newBadge && (
+              <span className={styles.featuredBadge}>
+                <Star size={12} /> Empfohlen
+              </span>
+            )}
+            {product.isNew && featureToggles.newBadge && (
+              <span className={styles.newBadge}>NEU</span>
+            )}
+            {product.isBestseller && featureToggles.bestsellerBadge && (
+              <span className={styles.bestsellerBadge}>
+                <TrendingUp size={12} /> Bestseller
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Product Info */}
+        <div className={styles.productInfo}>
+          <div className={styles.productHeader}>
+            <h3>{product.name}</h3>
+            <span className={styles.price}>CHF {product.price.toFixed(2)}</span>
+          </div>
+
+          <p className={styles.description}>{product.description}</p>
+
+          {/* Category & Tags */}
+          <div className={styles.productMeta}>
+            <span className={styles.category}>
+              {categoryInfo?.icon && <categoryInfo.icon size={14} />}
+              {categoryInfo?.label}
+            </span>
+            
+            {featureToggles.productTags && product.tags.length > 0 && (
+              <div className={styles.tags}>
+                {product.tags.slice(0, 2).map(tag => (
+                  <span key={tag} className={styles.tag}>
+                    <Tag size={10} /> {tag}
+                  </span>
+                ))}
+                {product.tags.length > 2 && (
+                  <span className={styles.moreTag}>+{product.tags.length - 2}</span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Dietary Info */}
+          {product.dietary.length > 0 && (
+            <div className={styles.dietaryBadges}>
+              {product.dietary.map(diet => {
+                const dietInfo = FILTER_OPTIONS.dietary.find(d => d.value === diet);
+                return (
+                  <span 
+                    key={diet} 
+                    className={styles.dietaryBadge}
+                    style={{ backgroundColor: dietInfo?.color }}
+                  >
+                    {dietInfo?.label}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Stats */}
+          <div className={styles.productStats}>
+            <span><Package size={14} /> {product.soldCount} verkauft</span>
+            {product.rating > 0 && (
+              <span><Star size={14} /> {product.rating}</span>
+            )}
+            {featureToggles.preparationTime && (
+              <span><Clock size={14} /> {product.preparationTime} Min.</span>
+            )}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className={styles.productActions}>
+          <button
+            onClick={() => {
+              setEditingProduct(product);
+              setShowProductModal(true);
+            }}
+            className={styles.editButton}
+          >
+            <Edit2 size={16} />
+          </button>
+          
+          {featureToggles.productCloning && (
+            <button
+              onClick={() => handleProductClone(product)}
+              className={styles.cloneButton}
+            >
+              <Copy size={16} />
+            </button>
+          )}
+          
+          <button className={styles.moreButton}>
+            <MoreVertical size={16} />
+          </button>
+        </div>
+      </motion.div>
+    );
+  };
+
+  const renderListView = () => {
+    return (
+      <div className={styles.listView}>
+        <table className={styles.productTable}>
+          <thead>
+            <tr>
+              <th>
+                <input
+                  type="checkbox"
+                  checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
+                  onChange={handleSelectAll}
+                />
+              </th>
+              <th>Bild</th>
+              <th onClick={() => handleSort('name')}>
+                Name {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </th>
+              <th>Kategorie</th>
+              <th onClick={() => handleSort('price')}>
+                Preis {sortBy === 'price' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </th>
+              <th>Status</th>
+              <th onClick={() => handleSort('soldCount')}>
+                Verkauft {sortBy === 'soldCount' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </th>
+              <th>Aktionen</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredProducts.map(product => (
+              <tr key={product.id} className={selectedProducts.includes(product.id) ? styles.selected : ''}>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={selectedProducts.includes(product.id)}
+                    onChange={() => handleProductSelect(product.id)}
+                  />
+                </td>
+                <td>
+                  <img src={product.image} alt={product.name} className={styles.listImage} />
+                </td>
+                <td>
+                  <div className={styles.listProductInfo}>
+                    <strong>{product.name}</strong>
+                    <span className={styles.listDescription}>{product.description}</span>
+                  </div>
+                </td>
+                <td>{CATEGORIES.find(c => c.id === product.category)?.label}</td>
+                <td>CHF {product.price.toFixed(2)}</td>
+                <td>
+                  <span className={`${styles.statusPill} ${styles[product.status]}`}>
+                    {product.status === 'active' && 'Aktiv'}
+                    {product.status === 'inactive' && 'Inaktiv'}
+                    {product.status === 'out_of_stock' && 'Ausverkauft'}
+                  </span>
+                </td>
+                <td>{product.soldCount}</td>
+                <td>
+                  <div className={styles.listActions}>
+                    <button onClick={() => {
+                      setEditingProduct(product);
+                      setShowProductModal(true);
+                    }}>
+                      <Edit2 size={16} />
+                    </button>
+                    {featureToggles.productCloning && (
+                      <button onClick={() => handleProductClone(product)}>
+                        <Copy size={16} />
+                      </button>
+                    )}
+                    <button>
+                      <MoreVertical size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+  };
+
+  // ============================================================================
+  // MAIN RENDER
+  // ============================================================================
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
-        <Loader2 className={styles.spinner} />
-        <p>Produkte werden geladen...</p>
-      </div>
-    );
-  }
-
-  // Error State
-  if (error && !products.length) {
-    return (
-      <div className={styles.errorContainer}>
-        <AlertCircle className={styles.errorIcon} />
-        <h2>Fehler beim Laden der Produkte</h2>
-        <p>{error}</p>
-        <button onClick={() => window.location.reload()} className={styles.button}>
-          Neu laden
-        </button>
+        <div className={styles.spinner}>
+          <Package size={48} className={styles.spinnerIcon} />
+        </div>
+        <p>Lade Produkte...</p>
       </div>
     );
   }
 
   return (
-    <div className={styles.container}>
-      {/* Status Banner */}
-      <div className={styles.infoBanner} style={{ background: '#065F46', borderColor: '#10B981' }}>
-        ✅ Firebase Echtzeitdaten aktiv
-      </div>
-
+    <div className={styles.products}>
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <h1>Produkte</h1>
-          <span className={styles.productCount}>
-            {filteredProducts.length} von {products.length} Produkten
-          </span>
+          <div className={styles.stats}>
+            <span>{stats.total} gesamt</span>
+            <span className={styles.active}>{stats.active} aktiv</span>
+            {stats.outOfStock > 0 && (
+              <span className={styles.outOfStock}>{stats.outOfStock} ausverkauft</span>
+            )}
+          </div>
         </div>
         
         <div className={styles.headerActions}>
-          <button
-            onClick={() => setShowAddProduct(true)}
-            className={`${styles.button} ${styles.buttonPrimary}`}
-            disabled={creating}
+          <button 
+            onClick={() => setShowFeatureToggleModal(true)}
+            className={styles.featureToggleButton}
           >
-            <Plus /> Neues Produkt
+            <Settings size={20} />
+            <span>Features</span>
           </button>
           
           <button 
-            onClick={handleExport} 
-            className={styles.button} 
-            disabled={!products.length}
+            onClick={() => setShowImportModal(true)}
+            className={styles.importButton}
           >
-            <Download /> Export
+            <Upload size={20} />
+            <span>Importieren</span>
           </button>
           
-          {selectedProducts.length > 0 && (
-            <button
-              onClick={handleBulkDelete}
-              className={`${styles.button} ${styles.buttonDanger}`}
-              disabled={deleting}
-            >
-              <Trash2 /> {selectedProducts.length} löschen
-            </button>
-          )}
+          <button 
+            onClick={() => {
+              setEditingProduct(null);
+              setShowProductModal(true);
+            }}
+            className={styles.addButton}
+          >
+            <Plus size={20} />
+            <span>Neues Produkt</span>
+          </button>
         </div>
       </div>
 
-      {/* Search & Filter Bar */}
-      <div className={styles.searchBar}>
-        <div className={styles.searchInput}>
-          <Search className={styles.searchIcon} />
-          <input
-            type="text"
-            placeholder="Produkte suchen..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        
-        <select 
-          value={filterCategory} 
-          onChange={(e) => setFilterCategory(e.target.value)}
-          className={styles.select}
-        >
-          {categories.map(cat => (
-            <option key={cat.value} value={cat.value}>{cat.label}</option>
-          ))}
-        </select>
-        
-        <button 
-          onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-          className={styles.button}
-        >
-          <Filter /> Sortieren
-        </button>
-      </div>
-
-      {/* Product Grid */}
-      {filteredProducts.length > 0 ? (
-        <div className={styles.productGrid}>
-          {filteredProducts.map(product => (
-            <div key={product.id} className={styles.productCard}>
-              {/* Checkbox */}
-              <input
-                type="checkbox"
-                className={styles.checkbox}
-                checked={selectedProducts.includes(product.id)}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedProducts([...selectedProducts, product.id]);
-                  } else {
-                    setSelectedProducts(selectedProducts.filter(id => id !== product.id));
-                  }
-                }}
-              />
-              
-              {/* Product Image */}
-              <div className={styles.productImage}>
-                {product.imageUrl ? (
-                  <img 
-                    src={product.imageUrl} 
-                    alt={product.name}
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
-                    }}
-                  />
-                ) : null}
-                <div className={styles.imagePlaceholder} style={{display: product.imageUrl ? 'none' : 'flex'}}>
-                  <ImagePlus />
-                </div>
-                
-                {product.featured && (
-                  <span className={styles.featuredBadge}>Featured</span>
-                )}
-              </div>
-              
-              {/* Product Info */}
-              <div className={styles.productInfo}>
-                <h3>{product.name}</h3>
-                <p className={styles.description}>{product.description}</p>
-                
-                <div className={styles.productMeta}>
-                  <span className={styles.price}>CHF {product.price}</span>
-                  <span className={styles.category}>{product.category}</span>
-                  <span className={styles.prepTime}>
-                    {product.preparationTime} Min
-                  </span>
-                </div>
-                
-                {/* Dietary Info */}
-                <div className={styles.dietaryInfo}>
-                  {product.vegetarian && (
-                    <span className={styles.dietBadge}>Vegetarisch</span>
-                  )}
-                  {product.vegan && (
-                    <span className={styles.dietBadge}>Vegan</span>
-                  )}
-                  {product.spicyLevel > 0 && (
-                    <span className={styles.spicyBadge}>
-                      {'🌶️'.repeat(product.spicyLevel)}
-                    </span>
-                  )}
-                </div>
-                
-                {/* Stock Info */}
-                {product.stock?.enabled && (
-                  <div className={styles.stockInfo}>
-                    <span className={product.stock.quantity < product.stock.lowStockAlert ? 
-                      styles.stockLow : styles.stockOk}>
-                      Lager: {product.stock.quantity}
-                    </span>
-                  </div>
-                )}
-              </div>
-              
-              {/* Actions */}
-              <div className={styles.productActions}>
-                <button
-                  onClick={() => toggleProductAvailability(product)}
-                  className={`${styles.iconButton} ${product.available ? styles.active : ''}`}
-                  title={product.available ? 'Verfügbar' : 'Nicht verfügbar'}
-                  disabled={updating}
-                >
-                  {product.available ? <Eye /> : <EyeOff />}
-                </button>
-                
-                <button
-                  onClick={() => handleEdit(product)}
-                  className={styles.iconButton}
-                  title="Bearbeiten"
-                  disabled={updating}
-                >
-                  <Edit />
-                </button>
-                
-                <button
-                  onClick={() => handleDelete(product.id)}
-                  className={`${styles.iconButton} ${styles.danger}`}
-                  title="Löschen"
-                  disabled={deleting}
-                >
-                  <Trash2 />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className={styles.emptyState}>
-          <Package className={styles.emptyIcon} />
-          <h3>Keine Produkte gefunden</h3>
-          <p>
-            {searchQuery || filterCategory !== 'all' 
-              ? 'Versuche deine Filtereinstellungen zu ändern'
-              : 'Erstelle dein erstes Produkt'}
-          </p>
-          {!searchQuery && filterCategory === 'all' && (
-            <button
-              onClick={() => setShowAddProduct(true)}
-              className={`${styles.button} ${styles.buttonPrimary}`}
-            >
-              <Plus /> Erstes Produkt erstellen
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Add/Edit Product Modal */}
-      {showAddProduct && (
-        <div className={styles.modal}>
-          <div className={styles.modalContent}>
-            <div className={styles.modalHeader}>
-              <h2>{editingProduct ? 'Produkt bearbeiten' : 'Neues Produkt'}</h2>
+      {/* Toolbar */}
+      <div className={styles.toolbar}>
+        <div className={styles.toolbarLeft}>
+          {/* Search */}
+          <div className={styles.searchBox}>
+            <Search size={20} />
+            <input
+              type="text"
+              placeholder="Produkte suchen..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
               <button 
-                onClick={() => {
-                  setShowAddProduct(false);
-                  setEditingProduct(null);
-                  resetForm();
-                }}
-                className={styles.closeButton}
+                onClick={() => setSearchQuery('')}
+                className={styles.clearSearch}
               >
-                <X />
+                <XCircle size={16} />
+              </button>
+            )}
+          </div>
+
+          {/* Categories */}
+          <div className={styles.categories}>
+            {CATEGORIES.map(category => (
+              <button
+                key={category.id}
+                onClick={() => setSelectedCategory(category.id)}
+                className={`${styles.categoryButton} ${
+                  selectedCategory === category.id ? styles.active : ''
+                }`}
+              >
+                <category.icon size={16} />
+                <span>{category.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Filter Toggle */}
+          <button 
+            onClick={() => setShowFilters(!showFilters)}
+            className={`${styles.filterToggle} ${showFilters ? styles.active : ''}`}
+          >
+            <Filter size={20} />
+            <span>Filter</span>
+            {(filters.status !== 'all' || filters.dietary.length > 0 || filters.special.length > 0) && (
+              <span className={styles.filterCount}>
+                {(filters.status !== 'all' ? 1 : 0) + filters.dietary.length + filters.special.length}
+              </span>
+            )}
+          </button>
+        </div>
+
+        <div className={styles.toolbarRight}>
+          {/* Bulk Actions */}
+          {selectedProducts.length > 0 && (
+            <div className={styles.bulkActions}>
+              <span>{selectedProducts.length} ausgewählt</span>
+              {BULK_ACTIONS.map(action => (
+                <button
+                  key={action.id}
+                  onClick={() => handleBulkAction(action.id)}
+                  className={styles.bulkActionButton}
+                >
+                  <action.icon size={16} />
+                  <span>{action.label}</span>
+                </button>
+              ))}
+              <button 
+                onClick={() => setSelectedProducts([])}
+                className={styles.clearSelection}
+              >
+                Auswahl aufheben
               </button>
             </div>
-            
-            <form onSubmit={handleSubmit} className={styles.productForm}>
-              {/* Basic Info */}
-              <div className={styles.formSection}>
-                <h3>Grundinformationen</h3>
-                
-                <div className={styles.formGroup}>
-                  <label>Name *</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    required
-                  />
-                </div>
-                
-                <div className={styles.formGroup}>
-                  <label>Beschreibung</label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    rows="3"
-                  />
-                </div>
-                
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label>Preis (CHF) *</label>
-                    <input
-                      type="number"
-                      step="0.05"
-                      min="0"
-                      value={formData.price}
-                      onChange={(e) => setFormData({...formData, price: e.target.value})}
-                      required
-                    />
-                  </div>
-                  
-                  <div className={styles.formGroup}>
-                    <label>Kategorie</label>
-                    <select
-                      value={formData.category}
-                      onChange={(e) => setFormData({...formData, category: e.target.value})}
-                    >
-                      {categories.filter(c => c.value !== 'all').map(cat => (
-                        <option key={cat.value} value={cat.value}>
-                          {cat.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div className={styles.formGroup}>
-                    <label>Zubereitungszeit (Min)</label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={formData.preparationTime}
-                      onChange={(e) => setFormData({...formData, preparationTime: parseInt(e.target.value) || 15})}
-                    />
-                  </div>
-                </div>
-                
-                <div className={styles.formGroup}>
-                  <label>Bild URL</label>
-                  <input
-                    type="url"
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
-                    placeholder="https://..."
-                  />
-                  {formData.imageUrl && (
-                    <div className={styles.imagePreview}>
-                      <img 
-                        src={formData.imageUrl} 
-                        alt="Preview"
-                        onError={(e) => e.target.style.display = 'none'}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Options */}
-              <div className={styles.formSection}>
-                <h3>Optionen</h3>
-                
-                <div className={styles.checkboxGroup}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={formData.available}
-                      onChange={(e) => setFormData({...formData, available: e.target.checked})}
-                    />
-                    Verfügbar
-                  </label>
-                  
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={formData.featured}
-                      onChange={(e) => setFormData({...formData, featured: e.target.checked})}
-                    />
-                    Featured
-                  </label>
-                  
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={formData.vegetarian}
-                      onChange={(e) => setFormData({...formData, vegetarian: e.target.checked})}
-                    />
-                    Vegetarisch
-                  </label>
-                  
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={formData.vegan}
-                      onChange={(e) => setFormData({...formData, vegan: e.target.checked})}
-                    />
-                    Vegan
-                  </label>
-                </div>
-                
-                <div className={styles.formGroup}>
-                  <label>Schärfegrad: {formData.spicyLevel > 0 && '🌶️'.repeat(formData.spicyLevel)}</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="5"
-                    value={formData.spicyLevel}
-                    onChange={(e) => setFormData({...formData, spicyLevel: parseInt(e.target.value)})}
-                    className={styles.rangeInput}
-                  />
-                  <div className={styles.rangeLabels}>
-                    <span>Mild</span>
-                    <span>Mittel</span>
-                    <span>Scharf</span>
-                    <span>Sehr scharf</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Allergene */}
-              <div className={styles.formSection}>
-                <h3>Allergene</h3>
-                <div className={styles.checkboxGroup}>
-                  {allergensList.map(allergen => (
-                    <label key={allergen}>
-                      <input
-                        type="checkbox"
-                        checked={formData.allergens.includes(allergen)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setFormData({
-                              ...formData,
-                              allergens: [...formData.allergens, allergen]
-                            });
-                          } else {
-                            setFormData({
-                              ...formData,
-                              allergens: formData.allergens.filter(a => a !== allergen)
-                            });
-                          }
-                        }}
-                      />
-                      {allergen}
-                    </label>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Lager */}
-              <div className={styles.formSection}>
-                <h3>Lagerverwaltung</h3>
-                
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={formData.stock.enabled}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      stock: {
-                        ...formData.stock,
-                        enabled: e.target.checked
-                      }
-                    })}
-                  />
-                  Lagerverwaltung aktivieren
-                </label>
-                
-                {formData.stock.enabled && (
-                  <div className={styles.formRow}>
-                    <div className={styles.formGroup}>
-                      <label>Lagerbestand</label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={formData.stock.quantity}
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          stock: {
-                            ...formData.stock,
-                            quantity: parseInt(e.target.value) || 0
-                          }
-                        })}
-                      />
-                    </div>
-                    
-                    <div className={styles.formGroup}>
-                      <label>Niedriger Bestand Warnung</label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={formData.stock.lowStockAlert}
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          stock: {
-                            ...formData.stock,
-                            lowStockAlert: parseInt(e.target.value) || 10
-                          }
-                        })}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              {/* Submit Buttons */}
-              <div className={styles.formActions}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAddProduct(false);
-                    setEditingProduct(null);
-                    resetForm();
-                  }}
-                  className={styles.button}
-                >
-                  Abbrechen
-                </button>
-                
-                <button
-                  type="submit"
-                  disabled={creating || updating}
-                  className={`${styles.button} ${styles.buttonPrimary}`}
-                >
-                  {creating || updating ? (
-                    <>
-                      <Loader2 className={styles.spinner} />
-                      Speichern...
-                    </>
-                  ) : (
-                    <>
-                      <Check />
-                      {editingProduct ? 'Aktualisieren' : 'Erstellen'}
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
+          )}
+
+          {/* View Mode Toggle */}
+          <div className={styles.viewModeToggle}>
+            <button
+              onClick={() => setViewMode(VIEW_MODES.GRID)}
+              className={viewMode === VIEW_MODES.GRID ? styles.active : ''}
+            >
+              <Grid size={20} />
+            </button>
+            <button
+              onClick={() => setViewMode(VIEW_MODES.LIST)}
+              className={viewMode === VIEW_MODES.LIST ? styles.active : ''}
+            >
+              <List size={20} />
+            </button>
           </div>
+
+          {/* Refresh */}
+          <button onClick={loadProducts} className={styles.refreshButton}>
+            <RefreshCw size={20} />
+          </button>
         </div>
+      </div>
+
+      {/* Filters Panel */}
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className={styles.filtersPanel}
+          >
+            <div className={styles.filterSection}>
+              <h4>Status</h4>
+              <div className={styles.filterOptions}>
+                {FILTER_OPTIONS.status.map(option => (
+                  <label key={option.value} className={styles.filterOption}>
+                    <input
+                      type="radio"
+                      name="status"
+                      value={option.value}
+                      checked={filters.status === option.value}
+                      onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+                    />
+                    <span>{option.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.filterSection}>
+              <h4>Ernährung</h4>
+              <div className={styles.filterOptions}>
+                {FILTER_OPTIONS.dietary.map(option => (
+                  <label key={option.value} className={styles.filterOption}>
+                    <input
+                      type="checkbox"
+                      value={option.value}
+                      checked={filters.dietary.includes(option.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFilters(prev => ({
+                          ...prev,
+                          dietary: e.target.checked 
+                            ? [...prev.dietary, value]
+                            : prev.dietary.filter(d => d !== value)
+                        }));
+                      }}
+                    />
+                    <span 
+                      className={styles.dietaryLabel}
+                      style={{ backgroundColor: option.color }}
+                    >
+                      {option.label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.filterSection}>
+              <h4>Spezial</h4>
+              <div className={styles.filterOptions}>
+                {FILTER_OPTIONS.special.map(option => (
+                  <label key={option.value} className={styles.filterOption}>
+                    <input
+                      type="checkbox"
+                      value={option.value}
+                      checked={filters.special.includes(option.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFilters(prev => ({
+                          ...prev,
+                          special: e.target.checked 
+                            ? [...prev.special, value]
+                            : prev.special.filter(s => s !== value)
+                        }));
+                      }}
+                    />
+                    <span>{option.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <button 
+              onClick={() => setFilters({ status: 'all', dietary: [], special: [] })}
+              className={styles.clearFilters}
+            >
+              Filter zurücksetzen
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Products Content */}
+      <div className={styles.content}>
+        {filteredProducts.length === 0 ? (
+          <div className={styles.emptyState}>
+            <Package size={64} />
+            <h3>Keine Produkte gefunden</h3>
+            <p>Ändern Sie Ihre Suchkriterien oder fügen Sie neue Produkte hinzu.</p>
+            <button 
+              onClick={() => {
+                setSearchQuery('');
+                setFilters({ status: 'all', dietary: [], special: [] });
+                setSelectedCategory('all');
+              }}
+              className={styles.resetButton}
+            >
+              Filter zurücksetzen
+            </button>
+          </div>
+        ) : (
+          <>
+            {viewMode === VIEW_MODES.GRID ? (
+              <div className={styles.productGrid}>
+                <AnimatePresence>
+                  {filteredProducts.map(product => renderProductCard(product))}
+                </AnimatePresence>
+              </div>
+            ) : (
+              renderListView()
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Modals */}
+      {showProductModal && (
+        <ProductModal
+          product={editingProduct}
+          categories={CATEGORIES}
+          featureToggles={featureToggles}
+          onSave={handleProductSave}
+          onClose={() => {
+            setShowProductModal(false);
+            setEditingProduct(null);
+          }}
+        />
+      )}
+
+      {showImportModal && (
+        <ProductImportModal
+          onImport={(products) => {
+            setProducts(prev => [...prev, ...products]);
+            toast.success(`${products.length} Produkte importiert`);
+            setShowImportModal(false);
+          }}
+          onClose={() => setShowImportModal(false)}
+        />
+      )}
+
+      {showBulkEditModal && (
+        <BulkEditModal
+          action={bulkAction}
+          selectedCount={selectedProducts.length}
+          onSave={(data) => {
+            // Handle bulk edit based on action
+            console.log('Bulk edit data:', data);
+            setShowBulkEditModal(false);
+            setBulkAction(null);
+          }}
+          onClose={() => {
+            setShowBulkEditModal(false);
+            setBulkAction(null);
+          }}
+        />
+      )}
+
+      {showFeatureToggleModal && (
+        <FeatureToggleModal
+          toggles={featureToggles}
+          onSave={handleFeatureTogglesSave}
+          onClose={() => setShowFeatureToggleModal(false)}
+        />
       )}
     </div>
   );

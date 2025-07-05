@@ -72,7 +72,7 @@ jobs:
         run: pnpm --filter @eatech/ui build-storybook
         
       - name: Publish Storybook
-        uses: chromaui/action@v1
+        uses: chromaui/action@v13
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           buildScriptName: build-storybook

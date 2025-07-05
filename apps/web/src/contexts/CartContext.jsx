@@ -1,130 +1,17 @@
 /**
- * EATECH - Cart Context
- * Version: 16.0.0
- * Description: Globale Warenkorb-Verwaltung mit LocalStorage
- * Author: EATECH Development Team
- * Created: 2025-07-05
+ * EATECH Cart Context
+ * Manages shopping cart state and operations
  * File Path: /apps/web/src/contexts/CartContext.jsx
  */
 
-'use client';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { toast } from 'react-hot-toast';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import toast from 'react-hot-toast';
-
+// Create Context
 const CartContext = createContext({});
 
-export const CartProvider = ({ children }) => {
-  const [items, setItems] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
-  
-  // Load cart from localStorage on mount
-  useEffect(() => {
-    const savedCart = localStorage.getItem('eatech-cart');
-    if (savedCart) {
-      try {
-        setItems(JSON.parse(savedCart));
-      } catch (error) {
-        console.error('Error loading cart:', error);
-      }
-    }
-  }, []);
-  
-  // Save cart to localStorage whenever it changes
-  useEffect(() => {
-    if (items.length > 0) {
-      localStorage.setItem('eatech-cart', JSON.stringify(items));
-    } else {
-      localStorage.removeItem('eatech-cart');
-    }
-  }, [items]);
-  
-  const addToCart = (product, quantity = 1) => {
-    setItems(currentItems => {
-      const existingItem = currentItems.find(item => item.id === product.id);
-      
-      if (existingItem) {
-        return currentItems.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
-      }
-      
-      return [...currentItems, { ...product, quantity }];
-    });
-  };
-  
-  const removeFromCart = (productId) => {
-    setItems(currentItems => {
-      const existingItem = currentItems.find(item => item.id === productId);
-      
-      if (existingItem && existingItem.quantity > 1) {
-        return currentItems.map(item =>
-          item.id === productId
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
-        );
-      }
-      
-      return currentItems.filter(item => item.id !== productId);
-    });
-  };
-  
-  const updateQuantity = (productId, quantity) => {
-    if (quantity <= 0) {
-      setItems(currentItems => currentItems.filter(item => item.id !== productId));
-      return;
-    }
-    
-    setItems(currentItems =>
-      currentItems.map(item =>
-        item.id === productId
-          ? { ...item, quantity }
-          : item
-      )
-    );
-  };
-  
-  const clearCart = () => {
-    setItems([]);
-    localStorage.removeItem('eatech-cart');
-    toast.success('Warenkorb geleert');
-  };
-  
-  const getItemQuantity = (productId) => {
-    const item = items.find(item => item.id === productId);
-    return item?.quantity || 0;
-  };
-  
-  const getCartTotal = () => {
-    return items.reduce((total, item) => total + (item.price * item.quantity), 0);
-  };
-  
-  const getItemCount = () => {
-    return items.reduce((count, item) => count + item.quantity, 0);
-  };
-  
-  const value = {
-    items,
-    isOpen,
-    setIsOpen,
-    addToCart,
-    removeFromCart,
-    updateQuantity,
-    clearCart,
-    getItemQuantity,
-    getCartTotal,
-    getItemCount
-  };
-  
-  return (
-    <CartContext.Provider value={value}>
-      {children}
-    </CartContext.Provider>
-  );
-};
-
+// Custom Hook
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
@@ -132,3 +19,251 @@ export const useCart = () => {
   }
   return context;
 };
+
+// Cart Provider Component
+export const CartProvider = ({ children }) => {
+  const [cartItems, setCartItems] = useLocalStorage('eatech_cart', []);
+  const [isOpen, setIsOpen] = useState(false);
+  const [promoCode, setPromoCode] = useState(null);
+  const [notes, setNotes] = useState('');
+
+  // Calculate totals
+  const calculateTotals = useCallback(() => {
+    const subtotal = cartItems.reduce((sum, item) => {
+      let itemPrice = item.price * item.quantity;
+      
+      // Add option prices
+      if (item.options) {
+        Object.entries(item.options).forEach(([groupId, optionIds]) => {
+          const optionIdArray = Array.isArray(optionIds) ? optionIds : [optionIds];
+          optionIdArray.forEach(optionId => {
+            const group = item.product?.options?.find(g => g.id === groupId);
+            const option = group?.items?.find(opt => opt.id === optionId);
+            if (option?.price) {
+              itemPrice += option.price * item.quantity;
+            }
+          });
+        });
+      }
+      
+      return sum + itemPrice;
+    }, 0);
+
+    // Calculate discount
+    let discount = 0;
+    if (promoCode) {
+      if (promoCode.type === 'percentage') {
+        discount = subtotal * (promoCode.value / 100);
+      } else {
+        discount = promoCode.value;
+      }
+      discount = Math.min(discount, subtotal);
+    }
+
+    const total = subtotal - discount;
+
+    return {
+      subtotal,
+      discount,
+      total,
+      itemCount: cartItems.reduce((sum, item) => sum + item.quantity, 0)
+    };
+  }, [cartItems, promoCode]);
+
+  // Add item to cart
+  const addItem = useCallback((product, quantity = 1, options = {}) => {
+    setCartItems(prevItems => {
+      // Check if item with same options already exists
+      const existingItemIndex = prevItems.findIndex(item => 
+        item.id === product.id && 
+        JSON.stringify(item.options) === JSON.stringify(options)
+      );
+
+      if (existingItemIndex > -1) {
+        // Update quantity of existing item
+        const newItems = [...prevItems];
+        newItems[existingItemIndex].quantity += quantity;
+        return newItems;
+      } else {
+        // Add new item
+        const newItem = {
+          ...product,
+          cartId: `${product.id}_${Date.now()}`,
+          quantity,
+          options,
+          addedAt: Date.now()
+        };
+        return [...prevItems, newItem];
+      }
+    });
+
+    toast.success(`${product.name} wurde zum Warenkorb hinzugefügt`, {
+      position: 'bottom-center',
+      duration: 2000
+    });
+  }, [setCartItems]);
+
+  // Update item quantity
+  const updateQuantity = useCallback((cartId, newQuantity) => {
+    if (newQuantity <= 0) {
+      removeItem(cartId);
+      return;
+    }
+
+    setCartItems(prevItems =>
+      prevItems.map(item =>
+        item.cartId === cartId
+          ? { ...item, quantity: newQuantity }
+          : item
+      )
+    );
+  }, [setCartItems]);
+
+  // Remove item from cart
+  const removeItem = useCallback((cartId) => {
+    setCartItems(prevItems => prevItems.filter(item => item.cartId !== cartId));
+    
+    toast.success('Artikel entfernt', {
+      position: 'bottom-center',
+      duration: 2000
+    });
+  }, [setCartItems]);
+
+  // Clear entire cart
+  const clearCart = useCallback(() => {
+    setCartItems([]);
+    setPromoCode(null);
+    setNotes('');
+    
+    toast.success('Warenkorb geleert', {
+      position: 'bottom-center',
+      duration: 2000
+    });
+  }, [setCartItems]);
+
+  // Apply promo code
+  const applyPromoCode = useCallback(async (code) => {
+    // In a real app, this would validate with backend
+    const validCodes = {
+      'WELCOME10': { type: 'percentage', value: 10 },
+      'SAVE5': { type: 'fixed', value: 5 },
+      'STUDENT20': { type: 'percentage', value: 20 }
+    };
+
+    const promo = validCodes[code.toUpperCase()];
+    if (promo) {
+      setPromoCode({ code, ...promo });
+      toast.success('Gutschein angewendet!');
+      return true;
+    } else {
+      toast.error('Ungültiger Gutscheincode');
+      return false;
+    }
+  }, []);
+
+  // Remove promo code
+  const removePromoCode = useCallback(() => {
+    setPromoCode(null);
+    toast.success('Gutschein entfernt');
+  }, []);
+
+  // Get cart item by ID
+  const getItem = useCallback((cartId) => {
+    return cartItems.find(item => item.cartId === cartId);
+  }, [cartItems]);
+
+  // Check if product is in cart
+  const isInCart = useCallback((productId) => {
+    return cartItems.some(item => item.id === productId);
+  }, [cartItems]);
+
+  // Get item quantity in cart
+  const getItemQuantity = useCallback((productId) => {
+    return cartItems
+      .filter(item => item.id === productId)
+      .reduce((sum, item) => sum + item.quantity, 0);
+  }, [cartItems]);
+
+  // Format price
+  const formatPrice = useCallback((price) => {
+    return `CHF ${price.toFixed(2)}`;
+  }, []);
+
+  // Get cart summary for display
+  const getCartSummary = useCallback(() => {
+    const totals = calculateTotals();
+    return {
+      items: cartItems,
+      ...totals,
+      hasItems: cartItems.length > 0,
+      promoCode,
+      notes
+    };
+  }, [cartItems, calculateTotals, promoCode, notes]);
+
+  // Helper methods for common operations
+  const incrementQuantity = useCallback((cartId) => {
+    const item = getItem(cartId);
+    if (item) {
+      updateQuantity(cartId, item.quantity + 1);
+    }
+  }, [getItem, updateQuantity]);
+
+  const decrementQuantity = useCallback((cartId) => {
+    const item = getItem(cartId);
+    if (item) {
+      updateQuantity(cartId, item.quantity - 1);
+    }
+  }, [getItem, updateQuantity]);
+
+  // Get total items count
+  const getTotalItems = useCallback(() => {
+    return cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  }, [cartItems]);
+
+  // Get total price
+  const getTotalPrice = useCallback(() => {
+    return calculateTotals().total;
+  }, [calculateTotals]);
+
+  // Context value
+  const value = {
+    // State
+    cartItems,
+    isOpen,
+    promoCode,
+    notes,
+    
+    // Setters
+    setIsOpen,
+    setNotes,
+    
+    // Actions
+    addItem,
+    updateQuantity,
+    removeItem,
+    clearCart,
+    applyPromoCode,
+    removePromoCode,
+    incrementQuantity,
+    decrementQuantity,
+    
+    // Getters
+    getItem,
+    isInCart,
+    getItemQuantity,
+    formatPrice,
+    getCartSummary,
+    getTotalItems,
+    getTotalPrice,
+    calculateTotals
+  };
+
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+    </CartContext.Provider>
+  );
+};
+
+export default CartContext;

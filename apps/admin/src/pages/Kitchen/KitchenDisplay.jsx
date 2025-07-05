@@ -1,497 +1,502 @@
 /**
- * EATECH - Kitchen Display System (KDS)
- * Real-time order management for kitchen staff
+ * EATECH Kitchen Display System
+ * Real-time kitchen order management
  * File Path: /apps/admin/src/pages/Kitchen/KitchenDisplay.jsx
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import styled from 'styled-components';
 import { 
-  Clock, Timer, CheckCircle, AlertCircle, XCircle,
-  ChefHat, Flame, Pause, Play, Volume2, VolumeX,
-  RefreshCw, Filter, Settings, Bell, TrendingUp,
-  Package, User, MapPin, Phone, MessageSquare
+  Clock, CheckCircle, AlertCircle, Volume2,
+  VolumeX, Maximize2, RefreshCw, Settings
 } from 'lucide-react';
-import './KitchenDisplay.css';
+import { Button, Card, Badge, Modal, Switch } from '@eatech/ui';
+import { useTenant } from '@eatech/core/contexts/TenantContext';
+import { useTenantData } from '@eatech/core/hooks/useTenantData';
+import OrderService from '../../services/OrderService';
+import { formatDistanceToNow } from 'date-fns';
+import { de } from 'date-fns/locale';
 
-// Order Status
-const ORDER_STATUS = {
-  NEW: 'new',
-  ACCEPTED: 'accepted',
-  PREPARING: 'preparing',
-  READY: 'ready',
-  COMPLETED: 'completed',
-  CANCELLED: 'cancelled'
-};
+// Styled Components
+const KitchenContainer = styled.div`
+  padding: ${props => props.fullscreen ? '8px' : '24px'};
+  background: #1a1a1a;
+  min-height: 100vh;
+  color: white;
+`;
 
-// Mock Orders für Demo
-const generateMockOrders = () => {
-  const names = ['Emma Müller', 'Luca Schmidt', 'Mia Wagner', 'Noah Fischer', 'Lea Weber'];
-  const items = [
-    { name: 'Classic Burger', time: 12, emoji: '🍔' },
-    { name: 'Margherita Pizza', time: 15, emoji: '🍕' },
-    { name: 'Caesar Salad', time: 8, emoji: '🥗' },
-    { name: 'Chicken Wings', time: 18, emoji: '🍗' },
-    { name: 'Veggie Wrap', time: 10, emoji: '🌯' },
-    { name: 'Fish & Chips', time: 20, emoji: '🐟' },
-    { name: 'Pasta Carbonara', time: 14, emoji: '🍝' }
-  ];
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 16px 0;
+  border-bottom: 1px solid #333;
+`;
+
+const Title = styled.h1`
+  font-size: ${props => props.fullscreen ? '24px' : '32px'};
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+const Stats = styled.div`
+  display: flex;
+  gap: 24px;
+  align-items: center;
+`;
+
+const StatItem = styled.div`
+  text-align: center;
+`;
+
+const StatValue = styled.div`
+  font-size: 24px;
+  font-weight: 700;
+  color: ${props => props.color || '#fff'};
+`;
+
+const StatLabel = styled.div`
+  font-size: 14px;
+  color: #999;
+  margin-top: 4px;
+`;
+
+const Controls = styled.div`
+  display: flex;
+  gap: 12px;
+  align-items: center;
+`;
+
+const OrdersGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(${props => props.fullscreen ? '280px' : '320px'}, 1fr));
+  gap: ${props => props.fullscreen ? '12px' : '16px'};
+`;
+
+const OrderCard = styled(Card)`
+  background: ${props => {
+    if (props.urgent) return '#4a1d1d';
+    if (props.ready) return '#1d4a1d';
+    return '#2a2a2a';
+  }};
+  border: 2px solid ${props => {
+    if (props.urgent) return '#dc2626';
+    if (props.ready) return '#10b981';
+    return '#444';
+  }};
+  color: white;
+  position: relative;
+  transition: all 0.3s ease;
   
-  return Array.from({ length: 12 }, (_, i) => ({
-    id: `ORD-${1000 + i}`,
-    customerName: names[Math.floor(Math.random() * names.length)],
-    items: Array.from({ length: Math.floor(Math.random() * 3) + 1 }, () => {
-      const item = items[Math.floor(Math.random() * items.length)];
-      return {
-        ...item,
-        quantity: Math.floor(Math.random() * 3) + 1,
-        notes: Math.random() > 0.7 ? 'Ohne Zwiebeln' : null
-      };
-    }),
-    status: i < 3 ? ORDER_STATUS.NEW : 
-            i < 6 ? ORDER_STATUS.ACCEPTED : 
-            i < 9 ? ORDER_STATUS.PREPARING : ORDER_STATUS.READY,
-    orderTime: new Date(Date.now() - (20 - i) * 60000),
-    estimatedTime: 15 + Math.floor(Math.random() * 10),
-    type: Math.random() > 0.5 ? 'dine-in' : 'takeaway',
-    tableNumber: Math.random() > 0.5 ? Math.floor(Math.random() * 20) + 1 : null,
-    priority: i === 0 || i === 3
-  }));
-};
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+`;
 
+const OrderHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 16px;
+`;
+
+const OrderNumber = styled.div`
+  font-size: 20px;
+  font-weight: 700;
+`;
+
+const OrderTable = styled.div`
+  font-size: 16px;
+  color: #ccc;
+  margin-top: 4px;
+`;
+
+const Timer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: ${props => props.large ? '20px' : '16px'};
+  font-weight: 600;
+  color: ${props => {
+    if (props.urgent) return '#ef4444';
+    if (props.warning) return '#f59e0b';
+    return '#10b981';
+  }};
+`;
+
+const ItemsList = styled.div`
+  margin: 16px 0;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+`;
+
+const Item = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 16px;
+  
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+`;
+
+const ItemName = styled.div`
+  flex: 1;
+  font-weight: 500;
+`;
+
+const ItemQuantity = styled.div`
+  font-size: 18px;
+  font-weight: 700;
+  color: #ff6b6b;
+`;
+
+const ItemOptions = styled.div`
+  font-size: 14px;
+  color: #999;
+  margin-top: 4px;
+  font-style: italic;
+`;
+
+const Notes = styled.div`
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 16px 0;
+  font-size: 14px;
+  color: #ffc107;
+`;
+
+const OrderFooter = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+`;
+
+const ActionButton = styled(Button)`
+  flex: 1;
+`;
+
+const SettingsModal = styled(Modal)`
+  .modal-content {
+    background: #2a2a2a;
+    color: white;
+  }
+`;
+
+const SettingRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #444;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const SettingLabel = styled.div`
+  font-size: 16px;
+`;
+
+const SettingDescription = styled.div`
+  font-size: 14px;
+  color: #999;
+  margin-top: 4px;
+`;
+
+// Component
 const KitchenDisplay = () => {
-  const [orders, setOrders] = useState(generateMockOrders());
-  const [selectedView, setSelectedView] = useState('grid'); // grid, list, timeline
+  const { currentTenant } = useTenant();
+  const [fullscreen, setFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [autoAccept, setAutoAccept] = useState(false);
-  const [filter, setFilter] = useState('all');
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const audioRef = useRef(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [settings, setSettings] = useState({
+    autoAccept: false,
+    urgentTime: 15, // minutes
+    warningTime: 10, // minutes
+    refreshInterval: 30 // seconds
+  });
+  
+  const audioRef = useRef(new Audio('/sounds/notification.mp3'));
 
-  // Update clock every second
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // Play sound for new orders
-  const playNotificationSound = () => {
-    if (soundEnabled && audioRef.current) {
-      audioRef.current.play().catch(e => console.log('Audio play failed:', e));
+  // Load active orders
+  const { data: orders, refresh } = useTenantData('orders', {
+    realtime: true,
+    filters: { 
+      status: ['pending', 'preparing'] 
     }
-  };
-
-  // Simulate new orders
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (Math.random() > 0.7) {
-        const newOrder = generateMockOrders()[0];
-        newOrder.id = `ORD-${Date.now()}`;
-        newOrder.orderTime = new Date();
-        setOrders(prev => [newOrder, ...prev]);
-        playNotificationSound();
-      }
-    }, 30000); // Every 30 seconds
-
-    return () => clearInterval(interval);
-  }, [soundEnabled]);
-
-  // Calculate time elapsed
-  const getElapsedTime = (orderTime) => {
-    const elapsed = Math.floor((currentTime - orderTime) / 1000 / 60);
-    return elapsed;
-  };
-
-  // Get time color based on urgency
-  const getTimeColor = (elapsed, estimated) => {
-    const percentage = (elapsed / estimated) * 100;
-    if (percentage > 100) return 'danger';
-    if (percentage > 80) return 'warning';
-    if (percentage > 60) return 'caution';
-    return 'normal';
-  };
-
-  // Update order status
-  const updateOrderStatus = (orderId, newStatus) => {
-    setOrders(prev => prev.map(order => 
-      order.id === orderId ? { ...order, status: newStatus } : order
-    ));
-    
-    if (newStatus === ORDER_STATUS.READY) {
-      playNotificationSound();
-    }
-  };
-
-  // Filter orders
-  const filteredOrders = orders.filter(order => {
-    if (filter === 'all') return order.status !== ORDER_STATUS.COMPLETED;
-    return order.status === filter;
   });
 
-  // Group orders by status
-  const groupedOrders = {
-    new: filteredOrders.filter(o => o.status === ORDER_STATUS.NEW),
-    accepted: filteredOrders.filter(o => o.status === ORDER_STATUS.ACCEPTED),
-    preparing: filteredOrders.filter(o => o.status === ORDER_STATUS.PREPARING),
-    ready: filteredOrders.filter(o => o.status === ORDER_STATUS.READY)
+  // Convert to array and sort
+  const ordersList = orders 
+    ? Object.entries(orders)
+        .map(([id, order]) => ({ id, ...order }))
+        .filter(o => ['pending', 'preparing'].includes(o.status))
+        .sort((a, b) => a.createdAt - b.createdAt)
+    : [];
+
+  // Play notification sound for new orders
+  useEffect(() => {
+    if (soundEnabled && ordersList.some(o => o.status === 'pending')) {
+      audioRef.current.play().catch(e => console.log('Audio play failed:', e));
+    }
+  }, [ordersList.length, soundEnabled]);
+
+  // Auto refresh
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refresh();
+    }, settings.refreshInterval * 1000);
+
+    return () => clearInterval(interval);
+  }, [settings.refreshInterval, refresh]);
+
+  // Toggle fullscreen
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setFullscreen(false);
+    }
   };
 
-  // Stats calculation
+  // Calculate time since order
+  const getMinutesSince = (timestamp) => {
+    return Math.floor((Date.now() - timestamp) / 60000);
+  };
+
+  // Check if order is urgent/warning
+  const getOrderStatus = (order) => {
+    const minutes = getMinutesSince(order.createdAt);
+    return {
+      urgent: minutes >= settings.urgentTime,
+      warning: minutes >= settings.warningTime && minutes < settings.urgentTime,
+      minutes
+    };
+  };
+
+  // Handle order actions
+  const handleAcceptOrder = async (orderId) => {
+    await OrderService.updateOrderStatus(currentTenant.id, orderId, 'preparing');
+  };
+
+  const handleCompleteOrder = async (orderId) => {
+    await OrderService.updateOrderStatus(currentTenant.id, orderId, 'ready');
+  };
+
+  // Calculate stats
   const stats = {
-    avgPrepTime: Math.floor(Math.random() * 5 + 12),
-    ordersPerHour: Math.floor(Math.random() * 10 + 20),
-    activeOrders: filteredOrders.length,
-    readyOrders: groupedOrders.ready.length
+    pending: ordersList.filter(o => o.status === 'pending').length,
+    preparing: ordersList.filter(o => o.status === 'preparing').length,
+    avgTime: ordersList.reduce((acc, o) => acc + getMinutesSince(o.createdAt), 0) / (ordersList.length || 1)
   };
 
   return (
-    <div className="kitchen-display">
-      {/* Hidden audio element */}
-      <audio ref={audioRef} src="/notification.mp3" />
-
-      {/* Header */}
-      <header className="kds-header">
-        <div className="header-left">
-          <h1 className="kds-title">
-            <ChefHat className="title-icon" />
-            Kitchen Display
-          </h1>
-          <div className="stats-row">
-            <div className="stat-item">
-              <Clock size={16} />
-              <span>{currentTime.toLocaleTimeString('de-CH')}</span>
-            </div>
-            <div className="stat-item">
-              <Timer size={16} />
-              <span>Ø {stats.avgPrepTime} Min</span>
-            </div>
-            <div className="stat-item">
-              <TrendingUp size={16} />
-              <span>{stats.ordersPerHour} Orders/h</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="header-controls">
-          <button 
-            className={`control-btn ${soundEnabled ? 'active' : ''}`}
+    <KitchenContainer fullscreen={fullscreen}>
+      <Header>
+        <Title fullscreen={fullscreen}>
+          Kitchen Display
+          <Badge variant={ordersList.length > 0 ? 'danger' : 'success'}>
+            {ordersList.length} Aktiv
+          </Badge>
+        </Title>
+        
+        <Stats>
+          <StatItem>
+            <StatValue color="#3b82f6">{stats.pending}</StatValue>
+            <StatLabel>Neu</StatLabel>
+          </StatItem>
+          <StatItem>
+            <StatValue color="#f59e0b">{stats.preparing}</StatValue>
+            <StatLabel>In Arbeit</StatLabel>
+          </StatItem>
+          <StatItem>
+            <StatValue>{Math.round(stats.avgTime)} Min</StatValue>
+            <StatLabel>Ø Zeit</StatLabel>
+          </StatItem>
+        </Stats>
+        
+        <Controls>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setSoundEnabled(!soundEnabled)}
           >
             {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
-          </button>
-          
-          <button 
-            className={`control-btn ${autoAccept ? 'active' : ''}`}
-            onClick={() => setAutoAccept(!autoAccept)}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleFullscreen}
+          >
+            <Maximize2 size={20} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => refresh()}
           >
             <RefreshCw size={20} />
-            <span>Auto</span>
-          </button>
-
-          <div className="view-toggle">
-            <button 
-              className={`view-btn ${selectedView === 'grid' ? 'active' : ''}`}
-              onClick={() => setSelectedView('grid')}
-            >
-              Grid
-            </button>
-            <button 
-              className={`view-btn ${selectedView === 'list' ? 'active' : ''}`}
-              onClick={() => setSelectedView('list')}
-            >
-              List
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Status Tabs */}
-      <div className="status-tabs">
-        <button
-          className={`status-tab ${filter === 'all' ? 'active' : ''}`}
-          onClick={() => setFilter('all')}
-        >
-          Alle ({filteredOrders.length})
-        </button>
-        <button
-          className={`status-tab new ${filter === 'new' ? 'active' : ''}`}
-          onClick={() => setFilter('new')}
-        >
-          <Bell size={16} />
-          Neu ({groupedOrders.new.length})
-        </button>
-        <button
-          className={`status-tab accepted ${filter === 'accepted' ? 'active' : ''}`}
-          onClick={() => setFilter('accepted')}
-        >
-          Angenommen ({groupedOrders.accepted.length})
-        </button>
-        <button
-          className={`status-tab preparing ${filter === 'preparing' ? 'active' : ''}`}
-          onClick={() => setFilter('preparing')}
-        >
-          <Flame size={16} />
-          In Arbeit ({groupedOrders.preparing.length})
-        </button>
-        <button
-          className={`status-tab ready ${filter === 'ready' ? 'active' : ''}`}
-          onClick={() => setFilter('ready')}
-        >
-          <CheckCircle size={16} />
-          Fertig ({groupedOrders.ready.length})
-        </button>
-      </div>
-
-      {/* Orders Display */}
-      <div className={`orders-container ${selectedView}`}>
-        {filter === 'all' ? (
-          // Kanban view for all orders
-          <div className="kanban-board">
-            {Object.entries(groupedOrders).map(([status, orders]) => (
-              <div key={status} className="kanban-column">
-                <h3 className={`column-header ${status}`}>
-                  {status === 'new' && <Bell size={18} />}
-                  {status === 'accepted' && <Clock size={18} />}
-                  {status === 'preparing' && <Flame size={18} />}
-                  {status === 'ready' && <CheckCircle size={18} />}
-                  {status.charAt(0).toUpperCase() + status.slice(1)} ({orders.length})
-                </h3>
-                <div className="orders-list">
-                  {orders.map(order => (
-                    <OrderCard
-                      key={order.id}
-                      order={order}
-                      currentTime={currentTime}
-                      onStatusUpdate={updateOrderStatus}
-                      onSelect={() => setSelectedOrder(order)}
-                      view={selectedView}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          // Single status view
-          <div className={`orders-${selectedView}`}>
-            {filteredOrders.map(order => (
-              <OrderCard
-                key={order.id}
-                order={order}
-                currentTime={currentTime}
-                onStatusUpdate={updateOrderStatus}
-                onSelect={() => setSelectedOrder(order)}
-                view={selectedView}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Order Detail Modal */}
-      {selectedOrder && (
-        <OrderDetailModal
-          order={selectedOrder}
-          onClose={() => setSelectedOrder(null)}
-          onStatusUpdate={updateOrderStatus}
-        />
-      )}
-    </div>
-  );
-};
-
-// Order Card Component
-const OrderCard = ({ order, currentTime, onStatusUpdate, onSelect, view }) => {
-  const elapsed = getElapsedTime(order.orderTime);
-  const timeColor = getTimeColor(elapsed, order.estimatedTime);
-  
-  const getNextStatus = (currentStatus) => {
-    switch (currentStatus) {
-      case ORDER_STATUS.NEW: return ORDER_STATUS.ACCEPTED;
-      case ORDER_STATUS.ACCEPTED: return ORDER_STATUS.PREPARING;
-      case ORDER_STATUS.PREPARING: return ORDER_STATUS.READY;
-      case ORDER_STATUS.READY: return ORDER_STATUS.COMPLETED;
-      default: return null;
-    }
-  };
-
-  const nextStatus = getNextStatus(order.status);
-
-  return (
-    <div 
-      className={`order-card ${order.status} ${order.priority ? 'priority' : ''} ${timeColor}`}
-      onClick={onSelect}
-    >
-      {/* Header */}
-      <div className="order-header">
-        <div className="order-info">
-          <h4 className="order-number">{order.id}</h4>
-          {order.priority && <span className="priority-badge">PRIORITÄT</span>}
-        </div>
-        <div className={`time-badge ${timeColor}`}>
-          <Timer size={16} />
-          <span>{elapsed} Min</span>
-        </div>
-      </div>
-
-      {/* Customer Info */}
-      <div className="customer-info">
-        <User size={14} />
-        <span>{order.customerName}</span>
-        {order.tableNumber && (
-          <>
-            <span className="separator">•</span>
-            <span>Tisch {order.tableNumber}</span>
-          </>
-        )}
-      </div>
-
-      {/* Items */}
-      <div className="order-items">
-        {order.items.map((item, index) => (
-          <div key={index} className="item">
-            <span className="item-emoji">{item.emoji}</span>
-            <span className="item-quantity">{item.quantity}x</span>
-            <span className="item-name">{item.name}</span>
-            {item.notes && (
-              <span className="item-note">
-                <MessageSquare size={12} />
-                {item.notes}
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Actions */}
-      <div className="order-actions">
-        {order.status === ORDER_STATUS.NEW && (
-          <>
-            <button 
-              className="action-btn reject"
-              onClick={(e) => {
-                e.stopPropagation();
-                onStatusUpdate(order.id, ORDER_STATUS.CANCELLED);
-              }}
-            >
-              <XCircle size={18} />
-              Ablehnen
-            </button>
-            <button 
-              className="action-btn accept"
-              onClick={(e) => {
-                e.stopPropagation();
-                onStatusUpdate(order.id, ORDER_STATUS.ACCEPTED);
-              }}
-            >
-              <CheckCircle size={18} />
-              Annehmen
-            </button>
-          </>
-        )}
-        
-        {order.status === ORDER_STATUS.ACCEPTED && (
-          <button 
-            className="action-btn start"
-            onClick={(e) => {
-              e.stopPropagation();
-              onStatusUpdate(order.id, ORDER_STATUS.PREPARING);
-            }}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowSettings(true)}
           >
-            <Flame size={18} />
-            Starten
-          </button>
-        )}
-        
-        {order.status === ORDER_STATUS.PREPARING && (
-          <button 
-            className="action-btn ready"
-            onClick={(e) => {
-              e.stopPropagation();
-              onStatusUpdate(order.id, ORDER_STATUS.READY);
-            }}
-          >
-            <CheckCircle size={18} />
-            Fertig
-          </button>
-        )}
-        
-        {order.status === ORDER_STATUS.READY && (
-          <button 
-            className="action-btn complete"
-            onClick={(e) => {
-              e.stopPropagation();
-              onStatusUpdate(order.id, ORDER_STATUS.COMPLETED);
-            }}
-          >
-            <Package size={18} />
-            Abgeholt
-          </button>
-        )}
-      </div>
-    </div>
-  );
-};
+            <Settings size={20} />
+          </Button>
+        </Controls>
+      </Header>
 
-// Order Detail Modal
-const OrderDetailModal = ({ order, onClose, onStatusUpdate }) => {
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>Bestellung {order.id}</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
-        </div>
-        
-        <div className="modal-body">
-          <div className="detail-section">
-            <h3>Kundeninformationen</h3>
-            <div className="detail-row">
-              <User size={16} />
-              <span>{order.customerName}</span>
-            </div>
-            {order.tableNumber && (
-              <div className="detail-row">
-                <MapPin size={16} />
-                <span>Tisch {order.tableNumber}</span>
-              </div>
-            )}
-          </div>
-
-          <div className="detail-section">
-            <h3>Bestelldetails</h3>
-            {order.items.map((item, index) => (
-              <div key={index} className="detail-item">
-                <span className="item-emoji">{item.emoji}</span>
-                <span className="item-quantity">{item.quantity}x</span>
-                <span className="item-name">{item.name}</span>
-                <span className="item-time">{item.time} Min</span>
-                {item.notes && (
-                  <div className="item-note-full">
-                    <MessageSquare size={14} />
-                    {item.notes}
+      <OrdersGrid fullscreen={fullscreen}>
+        {ordersList.map(order => {
+          const { urgent, warning, minutes } = getOrderStatus(order);
+          const isReady = order.status === 'preparing';
+          
+          return (
+            <OrderCard 
+              key={order.id} 
+              urgent={urgent && !isReady}
+              ready={isReady}
+            >
+              <Card.Body>
+                <OrderHeader>
+                  <div>
+                    <OrderNumber>#{order.orderNumber}</OrderNumber>
+                    <OrderTable>{order.tableName || 'Takeaway'}</OrderTable>
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
+                  <Timer urgent={urgent} warning={warning} large>
+                    <Clock size={20} />
+                    {minutes} Min
+                  </Timer>
+                </OrderHeader>
 
-          <div className="detail-section">
-            <h3>Zeitverlauf</h3>
-            <div className="timeline">
-              <div className="timeline-item completed">
-                <div className="timeline-marker" />
-                <div className="timeline-content">
-                  <span>Bestellt</span>
-                  <time>{order.orderTime.toLocaleTimeString('de-CH')}</time>
-                </div>
-              </div>
-              {/* Add more timeline items based on status */}
+                <ItemsList>
+                  {order.items.map((item, index) => (
+                    <Item key={index}>
+                      <div style={{ flex: 1 }}>
+                        <ItemName>{item.name}</ItemName>
+                        {item.options && Object.keys(item.options).length > 0 && (
+                          <ItemOptions>Mit Anpassungen</ItemOptions>
+                        )}
+                      </div>
+                      <ItemQuantity>×{item.quantity}</ItemQuantity>
+                    </Item>
+                  ))}
+                </ItemsList>
+
+                {order.notes && (
+                  <Notes>
+                    <AlertCircle size={16} style={{ marginRight: 8 }} />
+                    {order.notes}
+                  </Notes>
+                )}
+
+                <OrderFooter>
+                  {order.status === 'pending' ? (
+                    <ActionButton
+                      variant="primary"
+                      onClick={() => handleAcceptOrder(order.id)}
+                    >
+                      Annehmen
+                    </ActionButton>
+                  ) : (
+                    <ActionButton
+                      variant="success"
+                      onClick={() => handleCompleteOrder(order.id)}
+                      leftIcon={<CheckCircle size={18} />}
+                    >
+                      Fertig
+                    </ActionButton>
+                  )}
+                </OrderFooter>
+              </Card.Body>
+            </OrderCard>
+          );
+        })}
+      </OrdersGrid>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        title="Kitchen Display Einstellungen"
+      >
+        <div style={{ padding: 24 }}>
+          <SettingRow>
+            <div>
+              <SettingLabel>Automatisch annehmen</SettingLabel>
+              <SettingDescription>
+                Neue Bestellungen automatisch in Bearbeitung nehmen
+              </SettingDescription>
             </div>
-          </div>
+            <Switch
+              checked={settings.autoAccept}
+              onChange={(checked) => setSettings({ ...settings, autoAccept: checked })}
+            />
+          </SettingRow>
+          
+          <SettingRow>
+            <div>
+              <SettingLabel>Warnung nach (Minuten)</SettingLabel>
+              <SettingDescription>
+                Bestellung wird gelb markiert
+              </SettingDescription>
+            </div>
+            <input
+              type="number"
+              value={settings.warningTime}
+              onChange={(e) => setSettings({ ...settings, warningTime: parseInt(e.target.value) })}
+              style={{
+                width: 60,
+                padding: 8,
+                background: '#444',
+                border: '1px solid #666',
+                borderRadius: 4,
+                color: 'white',
+                textAlign: 'center'
+              }}
+            />
+          </SettingRow>
+          
+          <SettingRow>
+            <div>
+              <SettingLabel>Dringend nach (Minuten)</SettingLabel>
+              <SettingDescription>
+                Bestellung wird rot markiert
+              </SettingDescription>
+            </div>
+            <input
+              type="number"
+              value={settings.urgentTime}
+              onChange={(e) => setSettings({ ...settings, urgentTime: parseInt(e.target.value) })}
+              style={{
+                width: 60,
+                padding: 8,
+                background: '#444',
+                border: '1px solid #666',
+                borderRadius: 4,
+                color: 'white',
+                textAlign: 'center'
+              }}
+            />
+          </SettingRow>
         </div>
-      </div>
-    </div>
+      </SettingsModal>
+    </KitchenContainer>
   );
 };
 

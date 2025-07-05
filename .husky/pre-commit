@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint-staged for changed files
+pnpm lint-staged
+
+# Run type checking
+pnpm turbo typecheck --filter=[HEAD^1]
+
+# Check for console.log statements
+if git diff --cached --name-only | xargs grep -E "console\.(log|error|warn|info)" --include="*.{js,jsx,ts,tsx}" 2>/dev/null; then
+  echo "❌ Error: Found console statements in staged files"
+  echo "Please remove console statements before committing"
+  exit 1
+fi
+
+# Check for sensitive data
+if git diff --cached --name-only | xargs grep -E "(FIREBASE_|STRIPE_|SECRET_|PRIVATE_|PASSWORD)" --include="*.{js,jsx,ts,tsx,json}" 2>/dev/null; then
+  echo "⚠️  Warning: Possible sensitive data found in staged files"
+  echo "Please ensure no secrets are being committed"
+  read -p "Continue with commit? (y/n) " -n 1 -r
+  echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    exit 1
+  fi
+fi

@@ -4589,3 +4589,8 @@ GESAMT:           █░░░░░░░░░  14%
 **© 2025 EATECH - Revolutionizing Food Ordering in Switzerland 🇨🇭🍔🚀**?w=400 400w,
         ${src}?w=800 800w,
         ${src}
+
+        Wenn du an Dateien Arbeitest und das README.MD befolgst gib mir auch den Kapitel den du Gerade Bearbeitest.
+
+
+                        

@@ -1,0 +1,95 @@
+﻿* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0A0A0A;
+  color: #fff;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+a {
+  color: #FF6B6B;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  width: 100%;
+  padding: 0.75rem;
+  background: #1A1A1A;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #fff;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #FF6B6B;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  background: #FF6B6B;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  background: #FF5252;
+}
+
+.card {
+  background: #141414;
+  border: 1px solid #222;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.page-container {
+  padding: 2rem;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.loading-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #333;
+  border-top-color: #FF6B6B;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

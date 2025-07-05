@@ -1,9 +1,8 @@
 ﻿packages:
   - 'apps/admin'
   - 'apps/web'
+  - 'apps/master'
   - 'apps/landing'
   - 'apps/kitchen'
-  - 'apps/master'
-  # - 'apps/mobile'  # Mobile App ausgeschlossen
   - 'packages/*'
-  - 'services/*'
+  - 'functions'

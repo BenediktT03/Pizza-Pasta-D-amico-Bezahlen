@@ -1,97 +1,46 @@
-/**
- * EATECH - Layout Component with Theme Switcher
- * File Path: /apps/admin/src/components/layout/Layout.jsx
- */
+﻿import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '@contexts/AuthContext';
+import './Layout.css';
 
-import React, { useState } from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
-import { 
-  Home, 
-  Package, 
-  ShoppingCart, 
-  ChefHat, 
-  Users, 
-  BarChart3, 
-  Settings,
-  Menu,
-  X,
-  Bell,
-  User
-} from 'lucide-react';
-import { ThemeSwitcher } from '../theme-system/ThemeSystem';
-import styles from './Layout.module.css';
+const Layout = ({ children }) => {
+  const { logout } = useAuth();
+  const location = useLocation();
 
-const Layout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  
-  const navigation = [
-    { path: '/', icon: Home, label: 'Dashboard' },
-    { path: '/products', icon: Package, label: 'Produkte' },
-    { path: '/orders', icon: ShoppingCart, label: 'Bestellungen' },
-    { path: '/kitchen', icon: ChefHat, label: 'Küche' },
-    { path: '/customers', icon: Users, label: 'Kunden' },
-    { path: '/analytics', icon: BarChart3, label: 'Analytics' },
-    { path: '/settings', icon: Settings, label: 'Einstellungen' }
+  const menuItems = [
+    { path: '/', label: 'Dashboard', icon: '🏠' },
+    { path: '/products', label: 'Produkte', icon: '📦' },
+    { path: '/orders', label: 'Bestellungen', icon: '🛒' },
+    { path: '/kitchen', label: 'Küche', icon: '👨‍🍳' },
+    { path: '/customers', label: 'Kunden', icon: '👥' },
+    { path: '/analytics', label: 'Analytics', icon: '📊' },
+    { path: '/settings', label: 'Einstellungen', icon: '⚙️' }
   ];
-  
+
   return (
-    <div className={styles.layout}>
-      {/* Sidebar */}
-      <aside className={`${styles.sidebar} ${!sidebarOpen ? styles.collapsed : ''}`}>
-        <div className={styles.sidebarHeader}>
-          <h2 className={styles.logo}>EATECH</h2>
-          <button 
-            className={styles.toggleButton}
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+    <div className="layout">
+      <nav className="sidebar">
+        <div className="logo">
+          <h1>EATECH</h1>
         </div>
-        
-        <nav className={styles.navigation}>
-          {navigation.map(({ path, icon: Icon, label }) => (
-            <NavLink
-              key={path}
-              to={path}
-              className={({ isActive }) =>
-                `${styles.navItem} ${isActive ? styles.active : ''}`
-              }
-            >
-              <Icon size={20} />
-              {sidebarOpen && <span>{label}</span>}
-            </NavLink>
+        <ul className="menu">
+          {menuItems.map(item => (
+            <li key={item.path}>
+              <Link 
+                to={item.path} 
+                className={location.pathname === item.path ? 'active' : ''}
+              >
+                <span className="icon">{item.icon}</span>
+                <span>{item.label}</span>
+              </Link>
+            </li>
           ))}
-        </nav>
-      </aside>
-      
-      {/* Main Content */}
-      <div className={styles.mainContent}>
-        {/* Header */}
-        <header className={styles.header}>
-          <div className={styles.headerLeft}>
-            <h1>Demo Restaurant</h1>
-          </div>
-          
-          <div className={styles.headerRight}>
-            <button className={styles.headerButton}>
-              <Bell size={20} />
-            </button>
-            <button className={styles.headerButton}>
-              <User size={20} />
-            </button>
-          </div>
-        </header>
-        
-        {/* Page Content */}
-        <main className={styles.content}>
-          <Outlet />
-        </main>
-        
-        {/* Theme Switcher */}
-        <div className={styles.themeSwitcherContainer}>
-          <ThemeSwitcher />
-        </div>
-      </div>
+        </ul>
+        <button onClick={logout} className="logout-btn">Logout</button>
+      </nav>
+      <main className="content">
+        {children}
+      </main>
     </div>
   );
 };

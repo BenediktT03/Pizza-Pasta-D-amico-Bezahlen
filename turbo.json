@@ -4,15 +4,24 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+      "outputs": ["dist/**", "build/**"],
+      "env": ["VITE_*"]
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": ["VITE_*"]
     },
     "test": {
-      "dependsOn": ["build"]
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"],
+      "cache": false
     },
-    "lint": {}
+    "lint": {
+      "outputs": []
+    },
+    "clean": {
+      "cache": false
+    }
   }
 }

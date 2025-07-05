@@ -1,85 +1,39 @@
-/**
- * EATECH - Authentication Context
- * File Path: /apps/admin/src/contexts/AuthContext.jsx
- */
-
-import React, { createContext, useState, useContext, useEffect } from 'react';
+﻿import React, { createContext, useContext, useState, useEffect } from 'react';
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { auth } from '@config/firebase';
 
 const AuthContext = createContext();
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
+  return context;
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Mock authentication for now
   useEffect(() => {
-    // Simulate checking for existing session
-    const checkAuth = async () => {
-      try {
-        // TODO: Check Firebase Auth
-        const mockUser = {
-          id: 'demo-user',
-          email: 'admin@eatech.ch',
-          name: 'Demo Admin',
-          role: 'admin',
-          tenantId: 'demo-restaurant'
-        };
-        
-        setUser(mockUser);
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error('Auth check failed:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      setLoading(false);
+    });
+    return unsubscribe;
   }, []);
 
   const login = async (email, password) => {
-    // TODO: Implement Firebase Auth login
-    const mockUser = {
-      id: 'demo-user',
-      email,
-      name: 'Demo Admin',
-      role: 'admin',
-      tenantId: 'demo-restaurant'
-    };
-    
-    setUser(mockUser);
-    setIsAuthenticated(true);
-    return mockUser;
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    return result.user;
   };
 
   const logout = async () => {
-    // TODO: Implement Firebase Auth logout
-    setUser(null);
-    setIsAuthenticated(false);
-  };
-
-  const value = {
-    user,
-    loading,
-    isAuthenticated,
-    login,
-    logout
+    await signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-  return context;
-};
-
-export default AuthContext;

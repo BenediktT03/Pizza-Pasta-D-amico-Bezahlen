@@ -1,49 +1,26 @@
 {
-  "name": "eatech-functions",
-  "version": "5.0.0",
-  "description": "EATECH Cloud Functions - Serverless Backend for Multi-Tenant Foodtruck System",
-  "main": "src/index.js",
-  "engines": {
-    "node": "18"
-  },
+  "name": "@eatech/functions",
+  "version": "26.0.0",
+  "private": true,
+  "main": "index.js",
   "scripts": {
+    "build": "echo 'No build needed'",
+    "lint": "eslint .",
     "serve": "firebase emulators:start --only functions",
     "shell": "firebase functions:shell",
-    "start": "npm run shell",
-    "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log",
-    "test": "jest",
-    "lint": "eslint .",
-    "build": "tsc"
+    "deploy": "firebase deploy --only functions"
+  },
+  "engines": {
+    "node": "20"
   },
   "dependencies": {
-    "firebase-admin": "^11.11.0",
-    "firebase-functions": "^4.5.0",
-    "stripe": "^14.10.0",
-    "express": "^4.18.2",
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^5.0.0",
     "cors": "^2.8.5",
-    "nodemailer": "^6.9.7",
-    "twilio": "^4.19.0",
-    "uuid": "^9.0.1",
-    "axios": "^1.6.2",
-    "moment-timezone": "^0.5.43",
-    "jsonwebtoken": "^9.0.2",
-    "bcryptjs": "^2.4.3",
-    "handlebars": "^4.7.8",
-    "qrcode": "^1.5.3",
-    "sharp": "^0.33.1",
-    "csv-parser": "^3.0.0",
-    "xlsx": "^0.18.5"
+    "express": "^4.19.0"
   },
   "devDependencies": {
-    "@types/node": "^20.10.5",
-    "eslint": "^8.55.0",
-    "eslint-config-google": "^0.14.0",
-    "firebase-functions-test": "^3.1.0",
-    "jest": "^29.7.0",
-    "typescript": "^5.3.3"
-  },
-  "private": true,
-  "author": "EATECH Development Team",
-  "license": "MIT"
+    "eslint": "^8.57.0",
+    "firebase-functions-test": "^3.3.0"
+  }
 }

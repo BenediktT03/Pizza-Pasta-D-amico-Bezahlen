@@ -1,16 +1,12 @@
 {
   "name": "eatech",
-  "version": "12.0.0",
+  "version": "26.0.0",
   "private": true,
   "packageManager": "pnpm@10.12.4",
   "workspaces": [
-    "apps/admin",
-    "apps/web",
-    "apps/landing",
-    "apps/kitchen",
-    "apps/master",
+    "apps/*",
     "packages/*",
-    "services/*"
+    "functions"
   ],
   "scripts": {
     "dev": "turbo run dev",
@@ -18,16 +14,20 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "clean": "turbo run clean",
-    "migrate": "node scripts/migrate.js"
+    "dev:admin": "pnpm --filter @eatech/admin dev",
+    "dev:web": "pnpm --filter @eatech/web dev",
+    "dev:all": "turbo run dev --parallel",
+    "build:admin": "pnpm --filter @eatech/admin build",
+    "build:web": "pnpm --filter @eatech/web build"
   },
   "devDependencies": {
     "turbo": "^2.5.4",
     "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.5.0"
+    "prettier": "^3.2.5"
   },
   "engines": {
     "node": ">=20.0.0",
-    "npm": ">=10.0.0"
+    "npm": ">=10.0.0",
+    "pnpm": ">=10.0.0"
   }
 }

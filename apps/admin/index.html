@@ -1,41 +1,23 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="de">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EATECH Admin</title>
-    
-    <!-- Firebase Scripts VOR der App -->
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
-    
-    <!-- Firebase Konfiguration -->
-    <script>
-      // Firebase Config global verfügbar machen
-      window.FIREBASE_CONFIG = {
-        apiKey: "AIzaSyDFBlgWE81iHnACVwOmaU0jL7FV0l_tRmU",
-        authDomain: "eatech-foodtruck.firebaseapp.com",
-        databaseURL: "https://eatech-foodtruck-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "eatech-foodtruck",
-        storageBucket: "eatech-foodtruck.firebasestorage.app",
-        messagingSenderId: "261222802445",
-        appId: "1:261222802445:web:edde22580422fbced22144"
-      };
-      
-      // Firebase initialisieren
-      try {
-        firebase.initializeApp(window.FIREBASE_CONFIG);
-        console.log('✅ Firebase loaded via CDN in index.html');
-      } catch (error) {
-        console.error('❌ Firebase init error in index.html:', error);
-      }
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#FF6B6B" />
+  <link rel="manifest" href="/manifest.json" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <title>EATECH Admin</title>
+  <style>
+    body { margin: 0; background: #0A0A0A; color: #fff; font-family: Inter, sans-serif; }
+    #root { min-height: 100vh; }
+    .loading { display: flex; align-items: center; justify-content: center; height: 100vh; }
+    .spinner { width: 40px; height: 40px; border: 3px solid #333; border-top-color: #FF6B6B; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div id="root"><div class="loading"><div class="spinner"></div></div></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
 </html>

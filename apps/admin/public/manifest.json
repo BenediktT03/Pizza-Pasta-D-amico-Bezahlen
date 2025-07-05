@@ -1,0 +1,33 @@
+{
+  "name": "EATECH Admin - Foodtruck Management",
+  "short_name": "EATECH Admin",
+  "description": "Das ultimative Foodtruck Management System",
+  "theme_color": "#FF6B6B",
+  "background_color": "#0A0A0A",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "food", "productivity"],
+  "screenshots": [
+    {
+      "src": "/screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+﻿.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 250px;
+  background: #141414;
+  border-right: 1px solid #222;
+  padding: 2rem 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  padding: 0 2rem 2rem;
+  border-bottom: 1px solid #222;
+}
+
+.logo h1 {
+  font-size: 1.5rem;
+  color: #FF6B6B;
+  margin: 0;
+}
+
+.menu {
+  list-style: none;
+  padding: 2rem 0;
+  margin: 0;
+  flex: 1;
+}
+
+.menu li a {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 2rem;
+  color: #888;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.menu li a:hover,
+.menu li a.active {
+  background: #1A1A1A;
+  color: #fff;
+}
+
+.menu .icon {
+  margin-right: 1rem;
+  font-size: 1.2rem;
+}
+
+.logout-btn {
+  margin: 0 2rem;
+  padding: 0.75rem;
+  background: #FF6B6B;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.content {
+  flex: 1;
+  padding: 2rem;
+  background: #0A0A0A;
+}

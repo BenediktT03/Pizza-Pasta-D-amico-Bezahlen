@@ -1,4 +1,4 @@
-/**
+﻿/**
  * EATECH - Master Feature Control Panel
  * Version: 13.0.0
  * Description: Zentrale Steuerung aller System-Features mit Live-Toggle,
@@ -119,7 +119,7 @@ const FEATURE_FLAGS = {
     "payment.applePay": {
         id: "payment.applePay",
         name: "Apple Pay",
-        description: "Kontaktlose Zahlungen mit Apple Geräten",
+        description: "Kontaktlose Zahlungen mit Apple GerÃ¤ten",
         enabled: true,
         tier: "pro",
         category: "payment",
@@ -131,7 +131,7 @@ const FEATURE_FLAGS = {
     },
     "payment.crypto": {
         id: "payment.crypto",
-        name: "Kryptowährungen",
+        name: "KryptowÃ¤hrungen",
         description: "Bitcoin, Ethereum und andere Krypto-Zahlungen",
         enabled: false,
         tier: "enterprise",
@@ -160,7 +160,7 @@ const FEATURE_FLAGS = {
     "ai.pricingOptimization": {
         id: "ai.pricingOptimization",
         name: "Dynamische Preisgestaltung",
-        description: "KI-gestützte Preisoptimierung basierend auf Nachfrage",
+        description: "KI-gestÃ¼tzte Preisoptimierung basierend auf Nachfrage",
         enabled: true,
         tier: "enterprise",
         category: "ai",
@@ -297,8 +297,8 @@ const FEATURE_FLAGS = {
     // SECURITY FEATURES
     "security.advancedEncryption": {
         id: "security.advancedEncryption",
-        name: "Erweiterte Verschlüsselung",
-        description: "End-to-End Verschlüsselung für sensible Daten",
+        name: "Erweiterte VerschlÃ¼sselung",
+        description: "End-to-End VerschlÃ¼sselung fÃ¼r sensible Daten",
         enabled: true,
         tier: "enterprise",
         category: "security",
@@ -312,8 +312,8 @@ const FEATURE_FLAGS = {
     // SUSTAINABILITY FEATURES
     "sustainability.carbonTracking": {
         id: "sustainability.carbonTracking",
-        name: "CO₂-Tracking",
-        description: "Überwachung des CO₂-Fußabdrucks",
+        name: "COâ‚‚-Tracking",
+        description: "Ãœberwachung des COâ‚‚-FuÃŸabdrucks",
         enabled: true,
         tier: "pro",
         category: "sustainability",
@@ -326,7 +326,7 @@ const FEATURE_FLAGS = {
     "sustainability.wasteReduction": {
         id: "sustainability.wasteReduction",
         name: "Abfallreduzierung",
-        description: "Tools zur Minimierung von Lebensmittelabfällen",
+        description: "Tools zur Minimierung von LebensmittelabfÃ¤llen",
         enabled: true,
         tier: "pro",
         category: "sustainability",
@@ -358,7 +358,7 @@ const CATEGORIES = {
         label: 'Alle Features', 
         icon: Zap, 
         color: '#6366f1',
-        description: 'Alle verfügbaren System-Features' 
+        description: 'Alle verfÃ¼gbaren System-Features' 
     },
     core: { 
         label: 'Core Features', 
@@ -370,7 +370,7 @@ const CATEGORIES = {
         label: 'AI Features', 
         icon: Brain, 
         color: '#8b5cf6',
-        description: 'Künstliche Intelligenz & ML' 
+        description: 'KÃ¼nstliche Intelligenz & ML' 
     },
     analytics: { 
         label: 'Analytics', 
@@ -419,7 +419,7 @@ const CATEGORIES = {
 const MOCK_TENANTS = [
     { 
         id: 'burger-king-zh', 
-        name: 'Burger King Zürich', 
+        name: 'Burger King ZÃ¼rich', 
         tier: 'enterprise',
         activeFeatures: 18,
         customOverrides: 3 
@@ -433,7 +433,7 @@ const MOCK_TENANTS = [
     },
     { 
         id: 'thai-food-ge', 
-        name: 'Thai Food Genève', 
+        name: 'Thai Food GenÃ¨ve', 
         tier: 'basic',
         activeFeatures: 8,
         customOverrides: 0 
@@ -722,7 +722,7 @@ const FeatureControl = () => {
                     {feature.dependencies.length > 0 && (
                         <div className={styles.dependencies}>
                             <Info size={14} />
-                            <span>{feature.dependencies.length} Abhängigkeiten</span>
+                            <span>{feature.dependencies.length} AbhÃ¤ngigkeiten</span>
                         </div>
                     )}
                 </div>
@@ -746,15 +746,15 @@ const FeatureControl = () => {
                 
                 <div className={styles.featureFooter}>
                     <Clock size={12} />
-                    <span>Geändert: {new Date(feature.lastModified).toLocaleDateString('de-CH')}</span>
-                    <span>•</span>
+                    <span>GeÃ¤ndert: {new Date(feature.lastModified).toLocaleDateString('de-CH')}</span>
+                    <span>â€¢</span>
                     <span>{feature.modifiedBy}</span>
                 </div>
                 
                 {hasPendingChange && (
                     <div className={styles.pendingIndicator}>
                         <AlertCircle size={14} />
-                        Ungespeicherte Änderungen
+                        Ungespeicherte Ã„nderungen
                     </div>
                 )}
             </div>
@@ -782,7 +782,7 @@ const FeatureControl = () => {
                                 onClick={handleSaveChanges}
                             >
                                 <Save size={20} />
-                                Änderungen speichern ({Object.keys(pendingChanges).length})
+                                Ã„nderungen speichern ({Object.keys(pendingChanges).length})
                             </button>
                         )}
                         
@@ -875,7 +875,7 @@ const FeatureControl = () => {
                         onClick={() => setShowFilters(!showFilters)}
                     >
                         <Filter size={20} />
-                        Filter {(tierFilter !== 'all' || statusFilter !== 'all') && '•'}
+                        Filter {(tierFilter !== 'all' || statusFilter !== 'all') && 'â€¢'}
                     </button>
                     
                     <div className={styles.viewModeToggle}>
@@ -918,7 +918,7 @@ const FeatureControl = () => {
                             onClick={() => setShowTenantModal(true)}
                         >
                             <Globe size={20} />
-                            Tenant wählen
+                            Tenant wÃ¤hlen
                         </button>
                     )}
                     
@@ -991,7 +991,7 @@ const FeatureControl = () => {
                             setUsageFilter([0, 100]);
                         }}
                     >
-                        Filter zurücksetzen
+                        Filter zurÃ¼cksetzen
                     </button>
                 </div>
             )}
@@ -1022,7 +1022,7 @@ const FeatureControl = () => {
             {/* Bulk Actions */}
             {bulkActionMode && selectedFeatures.size > 0 && (
                 <div className={styles.bulkActionsBar}>
-                    <span>{selectedFeatures.size} Features ausgewählt</span>
+                    <span>{selectedFeatures.size} Features ausgewÃ¤hlt</span>
                     <div className={styles.bulkActions}>
                         <button onClick={() => handleBulkAction('enable')}>
                             <Unlock size={16} />
@@ -1058,7 +1058,7 @@ const FeatureControl = () => {
                 <div className={styles.modal} onClick={() => setShowTenantModal(false)}>
                     <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                         <div className={styles.modalHeader}>
-                            <h2>Tenant auswählen</h2>
+                            <h2>Tenant auswÃ¤hlen</h2>
                             <button onClick={() => setShowTenantModal(false)}>
                                 <X size={24} />
                             </button>
@@ -1076,7 +1076,7 @@ const FeatureControl = () => {
                                 >
                                     <div>
                                         <h3>{tenant.name}</h3>
-                                        <p>{tenant.id} • {tenant.tier}</p>
+                                        <p>{tenant.id} â€¢ {tenant.tier}</p>
                                     </div>
                                     <div className={styles.tenantStats}>
                                         <span>{tenant.activeFeatures} Features</span>

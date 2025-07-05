@@ -1,28 +1,27 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+﻿import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  server: {
-    port: 3001
-  },
   resolve: {
     alias: {
-      '@': '/src'
+      '@': path.resolve(__dirname, './src'),
+      '@components': path.resolve(__dirname, './src/components'),
+      '@pages': path.resolve(__dirname, './src/pages'),
+      '@hooks': path.resolve(__dirname, './src/hooks'),
+      '@lib': path.resolve(__dirname, './src/lib'),
+      '@contexts': path.resolve(__dirname, './src/contexts'),
+      '@config': path.resolve(__dirname, './src/config'),
+      '@styles': path.resolve(__dirname, './src/styles')
     }
   },
-  optimizeDeps: {
-    include: [
-      'firebase/app',
-      'firebase/database',
-      'firebase/auth',
-      'firebase/storage'
-    ]
+  server: {
+    port: 3000,
+    host: true
   },
   build: {
-    commonjsOptions: {
-      include: [/firebase/, /node_modules/]
-    }
+    outDir: 'dist',
+    sourcemap: false
   }
-})
+});

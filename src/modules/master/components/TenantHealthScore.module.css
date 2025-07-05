@@ -1,0 +1,417 @@
+﻿/**
+ * EATECH - Tenant Health Score Styles
+ * Version: 5.0.0
+ * File Path: /src/modules/master/components/TenantHealthScore.module.css
+ */
+
+/* Container */
+.container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.container:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Loading State */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px;
+  color: #666;
+}
+
+.loadingIcon {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.header h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* Category Badge */
+.categoryBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+}
+
+/* Trend Indicator */
+.trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.trendUp {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.trendDown {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.trendStable {
+  background: #f5f5f5;
+  color: #666;
+}
+
+/* Content */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Score Section */
+.scoreSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Score Ring */
+.scoreRing {
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+
+.progressRing {
+  transition: stroke-dashoffset 1s ease-in-out;
+}
+
+.scoreValue {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.score {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1;
+}
+
+.scoreLabel {
+  display: block;
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* Details Toggle */
+.detailsToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.detailsToggle:hover {
+  background: #eeeeee;
+  border-color: #ccc;
+  color: #333;
+}
+
+/* Metrics */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.metric {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.metric:hover {
+  background: #f0f1f3;
+  transform: translateY(-1px);
+}
+
+.metricSelected {
+  background: #e3f2fd;
+  border: 1px solid #1976d2;
+}
+
+.metricHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #666;
+}
+
+.metricLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.metricScore {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.metricBar {
+  flex: 1;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.metricProgress {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+.metricValue {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  min-width: 30px;
+  text-align: right;
+}
+
+/* Details Section */
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #eee;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Issues */
+.issues h4 {
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.issue {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.issueCritical {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.issueWarning {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.issueContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.issueMessage {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.issueImpact {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+/* Recommendations */
+.recommendations h4 {
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.recommendation {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.recommendation:hover {
+  background: #f0f1f3;
+  transform: translateX(4px);
+}
+
+.recHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.recPriority {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.priorityHigh {
+  background: #ffcdd2;
+  color: #b71c1c;
+}
+
+.priorityMedium {
+  background: #ffe0b2;
+  color: #e65100;
+}
+
+.priorityLow {
+  background: #c8e6c9;
+  color: #1b5e20;
+}
+
+.recImpact {
+  font-size: 0.875rem;
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.recommendation h5 {
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.recommendation p {
+  margin: 0 0 12px 0;
+  font-size: 0.875rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+.recButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.recButton:hover {
+  background: #ff5252;
+  transform: translateY(-1px);
+}
+
+.recButton:active {
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+  
+  .recommendation {
+    padding: 12px;
+  }
+  
+  .recHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}

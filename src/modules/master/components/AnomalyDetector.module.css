@@ -1,0 +1,366 @@
+﻿/**
+ * EATECH - Anomaly Detector Styles
+ * Version: 5.0.0
+ * File Path: /src/modules/master/components/AnomalyDetector.module.css
+ */
+
+/* Container */
+.container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.header h3 {
+  margin: 0 0 4px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+/* Header Actions */
+.headerActions {
+  display: flex;
+  gap: 8px;
+}
+
+.notificationToggle {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e0e0e0;
+  background: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #666;
+}
+
+.notificationToggle:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+  color: #333;
+}
+
+/* Empty State */
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #999;
+  padding: 48px;
+}
+
+.emptyState svg {
+  opacity: 0.3;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.emptyState span {
+  font-size: 0.875rem;
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filterButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  font-size: 0.813rem;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filterButton:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+  color: #333;
+}
+
+.filterButton.active {
+  background: #ff6b6b;
+  border-color: #ff6b6b;
+  color: white;
+}
+
+.filterButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Anomalies List */
+.anomaliesList {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Tenant Group */
+.tenantGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tenantName {
+  margin: 0 0 8px 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Anomaly Item */
+.anomaly {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.anomaly::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: currentColor;
+}
+
+.anomaly:hover {
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Severity Levels */
+.anomaly.severe {
+  background: #ffebee;
+  border-color: #ffcdd2;
+  color: #b71c1c;
+}
+
+.anomaly.warning {
+  background: #fff3e0;
+  border-color: #ffe0b2;
+  color: #e65100;
+}
+
+.anomaly.info {
+  background: #e3f2fd;
+  border-color: #bbdefb;
+  color: #0d47a1;
+}
+
+/* Anomaly Icon */
+.anomalyIcon {
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.anomalyIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Anomaly Content */
+.anomalyContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.anomalyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.anomalyType {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.anomalyTime {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.anomalyMessage {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* Causes */
+.causes {
+  font-size: 0.813rem;
+  opacity: 0.9;
+}
+
+.causes span {
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.causes ul {
+  margin: 4px 0 0 0;
+  padding-left: 20px;
+}
+
+.causes li {
+  margin-bottom: 2px;
+}
+
+/* Anomaly Stats */
+.anomalyStats {
+  display: flex;
+  gap: 16px;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.anomalyStats span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Anomaly Actions */
+.anomalyActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dismissButton {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: currentColor;
+  opacity: 0.6;
+}
+
+.dismissButton:hover {
+  background: rgba(0, 0, 0, 0.1);
+  opacity: 1;
+}
+
+.chevron {
+  opacity: 0.5;
+}
+
+/* Scrollbar */
+.anomaliesList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.anomaliesList::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 3px;
+}
+
+.anomaliesList::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.anomaliesList::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .anomaly {
+    flex-direction: column;
+    padding: 12px;
+  }
+  
+  .anomalyIcon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .anomalyHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .filters {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+}

@@ -1,0 +1,361 @@
+﻿/**
+ * EATECH - Provisions Forecast Styles
+ * Version: 5.0.0
+ * File Path: /src/modules/master/components/ProvisionsForecast.module.css
+ */
+
+/* Container */
+.container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.header h3 {
+  margin: 0 0 4px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.refreshButton,
+.downloadButton {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e0e0e0;
+  background: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #666;
+}
+
+.refreshButton:hover,
+.downloadButton:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+  color: #333;
+}
+
+.refreshButton:active,
+.downloadButton:active {
+  transform: scale(0.95);
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.controls label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #666;
+}
+
+/* Period Selector */
+.periodSelector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.periodButtons {
+  display: flex;
+  gap: 4px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.periodButton {
+  padding: 6px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.periodButton:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.periodButton.active {
+  background: #ff6b6b;
+  color: white;
+}
+
+/* Method Selector */
+.methodSelector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.select {
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: #333;
+  cursor: pointer;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #ff6b6b;
+}
+
+/* Confidence Toggle */
+.confidenceToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.confidenceToggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.confidenceToggle span {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+/* Summary */
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.summaryItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.summaryIcon {
+  width: 40px;
+  height: 40px;
+  padding: 10px;
+  background: white;
+  border-radius: 8px;
+  color: #ff6b6b;
+  flex-shrink: 0;
+}
+
+.summaryItem > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.summaryLabel {
+  font-size: 0.75rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summaryValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.summaryValue.positive {
+  color: #4caf50;
+}
+
+.summaryValue.negative {
+  color: #f44336;
+}
+
+/* Chart Container */
+.chartContainer {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 16px;
+  position: relative;
+}
+
+/* Custom Tooltip */
+.tooltip {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tooltipDate {
+  margin: 0 0 8px 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #333;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.tooltipValue {
+  margin: 0 0 4px 0;
+  font-size: 0.875rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tooltipValue span {
+  color: #666;
+}
+
+.tooltipValue strong {
+  color: #1a1a1a;
+}
+
+.tooltipConfidence {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #999;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Recommendations */
+.recommendations {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.recommendations h4 {
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.recommendation {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  border-left: 3px solid transparent;
+}
+
+.recommendation.prepare {
+  border-left-color: #4caf50;
+}
+
+.recommendation.action {
+  border-left-color: #ff9800;
+}
+
+.recIcon {
+  width: 32px;
+  height: 32px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #666;
+}
+
+.recContent {
+  flex: 1;
+}
+
+.recMessage {
+  margin: 0 0 4px 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.recAction {
+  margin: 0;
+  font-size: 0.813rem;
+  color: #666;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .periodSelector {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .summary {
+    grid-template-columns: 1fr;
+  }
+  
+  .chartContainer {
+    padding: 8px;
+  }
+}

@@ -53,7 +53,7 @@ jobs:
           release-notes: ${{ steps.release.outputs.notes }}
 
       - name: Commit updated files
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v6
         with:
           branch: main
           commit_message: 'chore: release ${{ steps.release.outputs.version }} [skip ci]'

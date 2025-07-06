@@ -5,11 +5,13 @@
  *              Test-Modus, Audit Trail und Emergency Controls
  * Author: EATECH Development Team
  * Created: 2025-01-07
+ * Modified: 2025-01-08 - White Label deaktiviert
  * 
  * Kapitel: Phase 5 - Premium & Master - Feature Flags
+ * File Path: /apps/master/src/pages/FeatureControl/FeatureControl.jsx
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { initializeApp } from 'firebase/app';
 import { 
   getDatabase, 
@@ -114,55 +116,18 @@ import {
   UserCheck,
   UserX,
   UserPlus,
-  Building,
-  Store,
-  MapPin,
-  Compass,
-  Flag,
   Megaphone,
-  Volume2,
-  VolumeX,
-  Wifi,
-  WifiOff,
-  Signal,
-  SignalLow,
-  Battery,
-  BatteryLow,
-  Gauge,
-  Loader2,
-  CheckSquare,
-  Square,
-  ToggleLeft,
-  ToggleRight,
-  SlidersHorizontal,
-  Wrench,
-  Hammer,
-  Sparkles,
-  Flame,
-  Snowflake,
-  Sun,
-  Moon,
-  Cloud,
-  CloudRain,
-  Wind,
-  Thermometer,
-  Droplets,
-  Waves,
-  Mountain,
-  Trees,
-  Flower,
-  Pizza,
-  Soup,
-  Cookie,
-  Apple,
-  Carrot,
-  Fish,
-  Milk,
-  Wheat,
-  Grape,
-  Cherry
+  Target,
+  MapPin,
+  Palette
 } from 'lucide-react';
 import styles from './FeatureControl.module.css';
+
+// Lazy loaded components
+const FeatureDetailsModal = lazy(() => import('./components/FeatureDetailsModal'));
+const AuditLogPanel = lazy(() => import('./components/AuditLogPanel'));
+const TenantOverrides = lazy(() => import('./components/TenantOverrides'));
+const BulkActions = lazy(() => import('./components/BulkActions'));
 
 // ============================================================================
 // FIREBASE CONFIGURATION
@@ -185,13 +150,11 @@ const database = getDatabase(app);
 // ============================================================================
 // CONSTANTS
 // ============================================================================
-
-// Feature Categories
 const FEATURE_CATEGORIES = {
   core: { 
     id: 'core', 
-    name: 'Kern-System', 
-    icon: Shield, 
+    name: 'Kern', 
+    icon: Package, 
     color: '#FF6B6B',
     description: 'Essenzielle Grundfunktionen'
   },
@@ -265,509 +228,720 @@ const FEATURE_CATEGORIES = {
     color: '#00B894',
     description: 'GPS und Standort-Features'
   },
-  events: { 
-    id: 'events', 
-    name: 'Events', 
-    icon: Calendar, 
-    color: '#6C5CE7',
-    description: 'Festival und Event-Modus'
-  },
-  compliance: { 
-    id: 'compliance', 
-    name: 'Compliance', 
-    icon: Shield, 
-    color: '#636E72',
-    description: 'Rechtliche Anforderungen'
-  },
-  performance: { 
-    id: 'performance', 
-    name: 'Performance', 
-    icon: Gauge, 
-    color: '#FD79A8',
-    description: 'Optimierung und Caching'
-  },
-  security: { 
-    id: 'security', 
-    name: 'Sicherheit', 
-    icon: Lock, 
-    color: '#2D3436',
-    description: 'Erweiterte Sicherheit'
-  },
-  experimental: { 
-    id: 'experimental', 
-    name: 'Experimental', 
-    icon: FlaskConical, 
-    color: '#A29BFE',
-    description: 'Beta und Test-Features'
-  }
+  // WHITE LABEL DEAKTIVIERT FÜR V1
+  // whitelabel: { 
+  //   id: 'whitelabel', 
+  //   name: 'White Label', 
+  //   icon: Palette, 
+  //   color: '#A29BFE',
+  //   description: 'Branding und Anpassung - COMING POST V1'
+  // }
 };
 
-// Default Features für neue Tenants
 const DEFAULT_FEATURES = {
-  // Core (Immer aktiv)
-  "core.authentication": true,
-  "core.ordering": true,
-  "core.menu": true,
-  "core.multiTenant": true,
+  // ========== CORE FEATURES ==========
+  multiTenant: {
+    id: 'multiTenant',
+    name: 'Multi-Tenant System',
+    category: 'core',
+    description: 'Mehrere Restaurants auf einer Plattform',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: false,
+      requiresRestart: true
+    },
+    dependencies: [],
+    stats: {
+      activeUsers: 0,
+      usageRate: 100,
+      errorRate: 0
+    }
+  },
   
-  // Basis-Features
-  "payment.basic": true,
-  "payment.cash": true,
-  "notifications.orders": true,
-  "analytics.basic": true,
-  "customer.profiles": true,
-  "menu.categories": true,
-  "menu.search": true,
-  "ordering.cart": true,
-  "ordering.checkout": true,
-  
-  // Trial Features (30 Tage)
-  "analytics.advanced": { trial: true, days: 30 },
-  "ai.recommendations": { trial: true, days: 30 },
-  "loyalty.program": { trial: true, days: 30 },
-  "marketing.campaigns": { trial: true, days: 30 }
+  offlineMode: {
+    id: 'offlineMode',
+    name: 'Offline-Modus',
+    category: 'core',
+    description: '100% Funktionalität ohne Internet',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: false
+    },
+    config: {
+      syncInterval: 30,
+      maxOfflineOrders: 1000
+    }
+  },
+
+  // ========== ORDERING FEATURES ==========
+  qrOrdering: {
+    id: 'qrOrdering',
+    name: 'QR-Code Bestellung',
+    category: 'ordering',
+    description: 'Kontaktlose Bestellung via QR-Code',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    }
+  },
+
+  preOrdering: {
+    id: 'preOrdering',
+    name: 'Vorbestellung',
+    category: 'ordering',
+    description: 'Bestellungen im Voraus aufgeben',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    },
+    config: {
+      maxDaysInAdvance: 7,
+      minHoursNotice: 2
+    }
+  },
+
+  groupOrdering: {
+    id: 'groupOrdering',
+    name: 'Gruppen-Bestellung',
+    category: 'ordering',
+    description: 'Mehrere Personen, eine Rechnung',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    }
+  },
+
+  // ========== PAYMENT FEATURES (OHNE CASH) ==========
+  stripePayment: {
+    id: 'stripePayment',
+    name: 'Stripe Zahlungen',
+    category: 'payment',
+    description: 'Kreditkarten-Zahlungen via Stripe',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    },
+    config: {
+      testMode: false,
+      captureDelay: 0
+    }
+  },
+
+  twintPayment: {
+    id: 'twintPayment',
+    name: 'TWINT Integration',
+    category: 'payment',
+    description: 'Schweizer Mobile Payment',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    }
+  },
+
+  invoicePayment: {
+    id: 'invoicePayment',
+    name: 'Rechnungszahlung',
+    category: 'payment',
+    description: 'Auf Rechnung für B2B Kunden',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    },
+    config: {
+      defaultTerms: 30,
+      requireApproval: true
+    }
+  },
+
+  splitPayment: {
+    id: 'splitPayment',
+    name: 'Rechnung teilen',
+    category: 'payment',
+    description: 'Bestellung auf mehrere Personen aufteilen',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    }
+  },
+
+  // ========== MENU FEATURES ==========
+  dynamicPricing: {
+    id: 'dynamicPricing',
+    name: 'Dynamische Preise',
+    category: 'menu',
+    description: 'Preise nach Tageszeit/Nachfrage',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    },
+    dependencies: ['aiPricing']
+  },
+
+  menuScheduling: {
+    id: 'menuScheduling',
+    name: 'Menü-Zeitplanung',
+    category: 'menu',
+    description: 'Verschiedene Menüs nach Tageszeit',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    }
+  },
+
+  allergenManagement: {
+    id: 'allergenManagement',
+    name: 'Allergen-Verwaltung',
+    category: 'menu',
+    description: 'Detaillierte Allergen-Informationen',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: false
+    }
+  },
+
+  // ========== CUSTOMER FEATURES ==========
+  customerProfiles: {
+    id: 'customerProfiles',
+    name: 'Kundenprofile',
+    category: 'customer',
+    description: 'Gespeicherte Kundendaten und Präferenzen',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    }
+  },
+
+  customerFeedback: {
+    id: 'customerFeedback',
+    name: 'Bewertungen & Feedback',
+    category: 'customer',
+    description: 'Kundenbewertungen sammeln',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    }
+  },
+
+  // ========== ANALYTICS FEATURES ==========
+  realtimeAnalytics: {
+    id: 'realtimeAnalytics',
+    name: 'Echtzeit-Analytics',
+    category: 'analytics',
+    description: 'Live-Daten und Metriken',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    }
+  },
+
+  predictiveAnalytics: {
+    id: 'predictiveAnalytics',
+    name: 'Vorhersage-Analytics',
+    category: 'analytics',
+    description: 'KI-basierte Prognosen',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    },
+    dependencies: ['aiCore']
+  },
+
+  customReports: {
+    id: 'customReports',
+    name: 'Benutzerdefinierte Reports',
+    category: 'analytics',
+    description: 'Eigene Reports erstellen',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    }
+  },
+
+  // ========== MARKETING FEATURES ==========
+  promotions: {
+    id: 'promotions',
+    name: 'Aktionen & Rabatte',
+    category: 'marketing',
+    description: 'Rabattcodes und Sonderaktionen',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    }
+  },
+
+  emailMarketing: {
+    id: 'emailMarketing',
+    name: 'E-Mail Marketing',
+    category: 'marketing',
+    description: 'Newsletter und Kampagnen',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    }
+  },
+
+  socialMediaIntegration: {
+    id: 'socialMediaIntegration',
+    name: 'Social Media Integration',
+    category: 'marketing',
+    description: 'Teilen und Social Login',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    }
+  },
+
+  // ========== AI FEATURES ==========
+  aiCore: {
+    id: 'aiCore',
+    name: 'KI-Kern System',
+    category: 'ai',
+    description: 'Zentrale KI-Engine für alle Features',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: false
+    },
+    config: {
+      model: 'gpt-4',
+      updateInterval: 3600
+    }
+  },
+
+  demandPrediction: {
+    id: 'demandPrediction',
+    name: 'Nachfrage-Vorhersage',
+    category: 'ai',
+    description: 'KI-basierte Bestellprognosen',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    },
+    dependencies: ['aiCore'],
+    config: {
+      accuracy: 85,
+      updateInterval: 3600
+    }
+  },
+
+  priceOptimization: {
+    id: 'priceOptimization',
+    name: 'Preis-Optimierung',
+    category: 'ai',
+    description: 'Dynamische Preisempfehlungen',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    },
+    dependencies: ['aiCore', 'dynamicPricing']
+  },
+
+  emergencyAI: {
+    id: 'emergencyAI',
+    name: 'Notfall-KI',
+    category: 'ai',
+    description: 'Automatische Problemlösung bei Ausfällen',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: false
+    },
+    dependencies: ['aiCore']
+  },
+
+  menuEngineering: {
+    id: 'menuEngineering',
+    name: 'Menü-Engineering KI',
+    category: 'ai',
+    description: 'Optimale Menü-Zusammenstellung',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    },
+    dependencies: ['aiCore', 'predictiveAnalytics']
+  },
+
+  voiceOrdering: {
+    id: 'voiceOrdering',
+    name: 'Sprach-Bestellung',
+    category: 'ai',
+    description: 'Hey EATECH - Sprachgesteuerte Bestellung',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    },
+    dependencies: ['aiCore'],
+    config: {
+      languages: ['de-CH', 'fr-CH', 'it-CH', 'en']
+    }
+  },
+
+  // ========== LOYALTY FEATURES ==========
+  pointsSystem: {
+    id: 'pointsSystem',
+    name: 'Punkte-System',
+    category: 'loyalty',
+    description: '1 CHF = 1 Punkt Belohnungssystem',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    }
+  },
+
+  vipProgram: {
+    id: 'vipProgram',
+    name: 'VIP-Programm',
+    category: 'loyalty',
+    description: 'Stufen-basiertes Treueprogramm',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    },
+    dependencies: ['pointsSystem']
+  },
+
+  referralProgram: {
+    id: 'referralProgram',
+    name: 'Empfehlungs-Programm',
+    category: 'loyalty',
+    description: 'Belohnungen für Weiterempfehlungen',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    }
+  },
+
+  // ========== NOTIFICATION FEATURES ==========
+  pushNotifications: {
+    id: 'pushNotifications',
+    name: 'Push-Benachrichtigungen',
+    category: 'notification',
+    description: 'Web & Mobile Push Notifications',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    }
+  },
+
+  smsNotifications: {
+    id: 'smsNotifications',
+    name: 'SMS-Benachrichtigungen',
+    category: 'notification',
+    description: 'Bestell-Updates per SMS',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    },
+    config: {
+      provider: 'twilio',
+      maxPerDay: 100
+    }
+  },
+
+  emailNotifications: {
+    id: 'emailNotifications',
+    name: 'E-Mail Benachrichtigungen',
+    category: 'notification',
+    description: 'Transaktions-E-Mails',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: false
+    }
+  },
+
+  // ========== LOCATION FEATURES ==========
+  gpsTracking: {
+    id: 'gpsTracking',
+    name: 'GPS-Tracking',
+    category: 'location',
+    description: 'Live-Standort von Foodtrucks',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    }
+  },
+
+  locationIntelligence: {
+    id: 'locationIntelligence',
+    name: 'Standort-Intelligence',
+    category: 'location',
+    description: 'Optimale Standort-Empfehlungen',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    },
+    dependencies: ['aiCore', 'gpsTracking']
+  },
+
+  eventManagement: {
+    id: 'eventManagement',
+    name: 'Event-Management',
+    category: 'location',
+    description: 'Festival und Event-Koordination',
+    masterControl: {
+      globalEnabled: true,
+      canTenantDisable: true
+    }
+  },
+
+  // WHITE LABEL FEATURES - DEAKTIVIERT FÜR V1
+  // customBranding: {
+  //   id: 'customBranding',
+  //   name: 'Custom Branding',
+  //   category: 'whitelabel',
+  //   description: 'Eigenes Logo und Farben - COMING POST V1',
+  //   masterControl: {
+  //     globalEnabled: false,
+  //     canTenantDisable: false
+  //   }
+  // },
+  // customDomain: {
+  //   id: 'customDomain',
+  //   name: 'Eigene Domain',
+  //   category: 'whitelabel',
+  //   description: 'restaurant.ch statt restaurant.eatech.ch - COMING POST V1',
+  //   masterControl: {
+  //     globalEnabled: false,
+  //     canTenantDisable: false
+  //   }
+  // },
+  // customEmails: {
+  //   id: 'customEmails',
+  //   name: 'E-Mail Branding',
+  //   category: 'whitelabel',
+  //   description: 'Eigene E-Mail Templates - COMING POST V1',
+  //   masterControl: {
+  //     globalEnabled: false,
+  //     canTenantDisable: false
+  //   }
+  // }
 };
 
-// Emergency Priority Levels
-const EMERGENCY_PRIORITIES = {
-  1: { // KRITISCH - Bleiben immer an
-    features: ['core.*', 'payment.basic', 'ordering.checkout'],
-    label: 'Kritisch',
-    color: '#FF6B6B'
-  },
-  2: { // WICHTIG - Nur bei extremer Last aus
-    features: ['analytics.*', 'ai.*', 'notifications.marketing'],
-    label: 'Wichtig',
-    color: '#F39C12'
-  },
-  3: { // NICE-TO-HAVE - Zuerst abschalten
-    features: ['loyalty.*', 'marketing.*', 'experimental.*'],
-    label: 'Optional',
-    color: '#95A5A6'
-  }
-};
-
-// Feature Templates
-const FEATURE_TEMPLATES = {
-  minimal: {
-    name: 'Minimal',
-    description: 'Nur essenzielle Features',
-    features: ['core.*', 'payment.basic', 'ordering.*', 'menu.basic']
-  },
-  standard: {
-    name: 'Standard',
-    description: 'Normale Restaurant-Features',
-    features: ['core.*', 'payment.*', 'ordering.*', 'menu.*', 'customer.*', 'analytics.basic']
-  },
-  foodtruck: {
-    name: 'Foodtruck',
-    description: 'Mobile-optimiert mit Standort',
-    features: ['core.*', 'payment.*', 'ordering.*', 'menu.*', 'location.*', 'notifications.*']
-  },
-  event: {
-    name: 'Event/Festival',
-    description: 'Optimiert für hohe Last',
-    features: ['core.*', 'payment.basic', 'ordering.express', 'events.*', 'performance.*']
-  },
-  premium: {
-    name: 'Premium',
-    description: 'Alle Features aktiviert',
-    features: ['*']
-  }
-};
+// ============================================================================
+// LOADING COMPONENT
+// ============================================================================
+const LoadingSpinner = () => (
+  <div className={styles.loadingContainer}>
+    <div className={styles.spinner} />
+  </div>
+);
 
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 const FeatureControl = () => {
   // State Management
-  const [features, setFeatures] = useState({});
-  const [tenants, setTenants] = useState([]);
-  const [auditLog, setAuditLog] = useState([]);
-  const [systemMetrics, setSystemMetrics] = useState({
-    cpu: 0,
-    memory: 0,
-    responseTime: 0,
-    errorRate: 0
-  });
-  
-  // UI State
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [features, setFeatures] = useState(DEFAULT_FEATURES);
+  const [tenants, setTenants] = useState({});
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedTenant, setSelectedTenant] = useState(null);
-  const [showTestMode, setShowTestMode] = useState(false);
-  const [showAuditLog, setShowAuditLog] = useState(false);
-  const [showEmergencyPanel, setShowEmergencyPanel] = useState(false);
-  const [viewMode, setViewMode] = useState('grid'); // grid | list | compact
-  const [selectedFeatures, setSelectedFeatures] = useState(new Set());
-  const [bulkActionMode, setBulkActionMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [editingFeature, setEditingFeature] = useState(null);
-  const [showTutorial, setShowTutorial] = useState(false);
-  
-  // ========================================================================
-  // FIREBASE LISTENERS
-  // ========================================================================
+  const [showAuditLog, setShowAuditLog] = useState(false);
+  const [auditLog, setAuditLog] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [testMode, setTestMode] = useState(false);
+  const [selectedTenants, setSelectedTenants] = useState([]);
+  const [emergencyMode, setEmergencyMode] = useState(false);
+  const [showBulkActions, setShowBulkActions] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState(['core']);
+
+  // ========== EFFECTS ==========
   useEffect(() => {
     const featuresRef = ref(database, 'features');
     const tenantsRef = ref(database, 'tenants');
-    const auditRef = query(ref(database, 'featureAudit'), orderByChild('timestamp'), limitToLast(100));
-    const metricsRef = ref(database, 'systemMetrics/current');
+    const auditRef = query(
+      ref(database, 'featureAudit'),
+      orderByChild('timestamp'),
+      limitToLast(100)
+    );
 
-    // Load features
-    const featuresUnsubscribe = onValue(featuresRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      setFeatures(data);
+    const unsubscribeFeatures = onValue(featuresRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setFeatures(prev => ({ ...DEFAULT_FEATURES, ...snapshot.val() }));
+      }
+      setLoading(false);
     });
 
-    // Load tenants
-    const tenantsUnsubscribe = onValue(tenantsRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      const tenantsList = Object.entries(data).map(([id, tenant]) => ({
-        id,
-        ...tenant
-      }));
-      setTenants(tenantsList);
+    const unsubscribeTenants = onValue(tenantsRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setTenants(snapshot.val());
+      }
     });
 
-    // Load audit log
-    const auditUnsubscribe = onValue(auditRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      const logs = Object.entries(data).map(([id, log]) => ({
-        id,
-        ...log
-      })).reverse();
-      setAuditLog(logs);
+    const unsubscribeAudit = onValue(auditRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const logs = [];
+        snapshot.forEach((child) => {
+          logs.unshift({ id: child.key, ...child.val() });
+        });
+        setAuditLog(logs);
+      }
     });
 
-    // Load system metrics
-    const metricsUnsubscribe = onValue(metricsRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      setSystemMetrics(data);
-      
-      // Auto-trigger emergency mode if needed
-      checkEmergencyConditions(data);
-    });
-
-    setLoading(false);
-
-    // Cleanup
     return () => {
       off(featuresRef);
       off(tenantsRef);
       off(auditRef);
-      off(metricsRef);
     };
   }, []);
 
-  // ========================================================================
-  // EMERGENCY SYSTEM
-  // ========================================================================
-  const checkEmergencyConditions = (metrics) => {
-    // CPU > 90% für 5min
-    if (metrics.cpu > 90 && metrics.cpuHighDuration > 300) {
-      triggerEmergencyMode(3); // Disable Priority 3 features
+  // ========== HANDLERS ==========
+  const handleToggleFeature = useCallback(async (featureId) => {
+    const feature = features[featureId];
+    if (!feature || (!feature.masterControl.canTenantDisable && !feature.masterControl.globalEnabled)) {
+      return;
     }
-    
-    // Memory > 85%
-    if (metrics.memory > 85) {
-      disableFeaturesByPattern(['ai.*']);
-    }
-    
-    // Payment Errors > 5%
-    if (metrics.paymentErrorRate > 5) {
-      enableFallbackPayment();
-    }
-    
-    // Response Time > 3s
-    if (metrics.responseTime > 3000) {
-      pauseAnalytics();
-    }
-  };
 
-  const triggerEmergencyMode = async (priority) => {
-    const featuresToDisable = EMERGENCY_PRIORITIES[priority].features;
-    
+    setSaving(true);
     try {
-      const updates = {};
-      
-      Object.keys(features).forEach(featureKey => {
-        if (matchesPattern(featureKey, featuresToDisable)) {
-          updates[`features/${featureKey}/masterControl/emergencyDisabled`] = true;
-          updates[`features/${featureKey}/masterControl/globalEnabled`] = false;
-        }
-      });
-      
-      await update(ref(database), updates);
-      
-      // Log emergency action
-      await logAuditEntry({
-        action: 'emergency.triggered',
-        priority,
-        reason: 'System overload',
-        featuresAffected: Object.keys(updates).length,
-        automatic: true
-      });
-      
-      // Send notification
-      sendEmergencyNotification(`Emergency Mode aktiviert: Priority ${priority} Features deaktiviert`);
-      
-    } catch (error) {
-      console.error('Emergency mode failed:', error);
-    }
-  };
-
-  // ========================================================================
-  // FEATURE MANAGEMENT
-  // ========================================================================
-  const toggleFeature = async (featureKey, enabled, tenantId = null) => {
-    try {
-      const path = tenantId 
-        ? `features/${featureKey}/tenantControl/${tenantId}/enabled`
-        : `features/${featureKey}/masterControl/globalEnabled`;
-      
-      await set(ref(database, path), enabled);
+      const newState = !feature.masterControl.globalEnabled;
       
       // Check dependencies
-      if (!enabled) {
-        await checkAndDisableDependentFeatures(featureKey, tenantId);
-      }
-      
-      // Log change
-      await logAuditEntry({
-        action: enabled ? 'feature.enabled' : 'feature.disabled',
-        feature: featureKey,
-        tenant: tenantId,
-        changedBy: 'master',
-        previousState: !enabled,
-        newState: enabled
-      });
-      
-    } catch (error) {
-      console.error('Error toggling feature:', error);
-    }
-  };
-
-  const checkAndDisableDependentFeatures = async (featureKey, tenantId) => {
-    const dependentFeatures = Object.entries(features).filter(([key, feature]) => 
-      feature.dependencies?.includes(featureKey)
-    );
-    
-    if (dependentFeatures.length > 0) {
-      const confirmDisable = window.confirm(
-        `Die folgenden Features hängen von ${featureKey} ab und werden auch deaktiviert:\n\n` +
-        dependentFeatures.map(([key]) => `- ${key}`).join('\n') +
-        '\n\nFortfahren?'
-      );
-      
-      if (confirmDisable) {
-        for (const [depKey] of dependentFeatures) {
-          await toggleFeature(depKey, false, tenantId);
+      if (newState && feature.dependencies?.length > 0) {
+        const missingDeps = feature.dependencies.filter(dep => !features[dep]?.masterControl?.globalEnabled);
+        if (missingDeps.length > 0) {
+          alert(`Dieses Feature benötigt: ${missingDeps.join(', ')}`);
+          setSaving(false);
+          return;
         }
       }
-    }
-  };
 
-  // ========================================================================
-  // BATCH OPERATIONS
-  // ========================================================================
-  const applyBatchOperation = async (operation) => {
-    const { action, features, tenants, condition } = operation;
-    
-    try {
-      const updates = {};
-      const affectedCount = { features: 0, tenants: 0 };
-      
-      // Filter tenants based on condition
-      const targetTenants = tenants === 'all' 
-        ? this.tenants 
-        : tenants === 'conditional'
-          ? this.tenants.filter(t => evaluateCondition(t, condition))
-          : this.tenants.filter(t => tenants.includes(t.id));
-      
-      // Apply operation
-      for (const tenant of targetTenants) {
-        for (const featureKey of features) {
-          if (matchesPattern(featureKey, Object.keys(this.features))) {
-            const path = `features/${featureKey}/tenantControl/${tenant.id}/enabled`;
-            updates[path] = action === 'enable';
-            affectedCount.features++;
+      // Update feature state
+      await update(ref(database, `features/${featureId}/masterControl`), {
+        globalEnabled: newState,
+        lastModified: serverTimestamp()
+      });
+
+      // Log action
+      await push(ref(database, 'featureAudit'), {
+        action: newState ? 'enabled' : 'disabled',
+        featureId,
+        featureName: feature.name,
+        user: 'master-admin',
+        timestamp: serverTimestamp(),
+        testMode
+      });
+
+      // Handle dependent features
+      if (!newState) {
+        const dependentFeatures = Object.entries(features).filter(([id, f]) => 
+          f.dependencies?.includes(featureId) && f.masterControl.globalEnabled
+        );
+        
+        if (dependentFeatures.length > 0) {
+          const disable = confirm(`Diese Features hängen davon ab: ${dependentFeatures.map(([,f]) => f.name).join(', ')}. Auch deaktivieren?`);
+          if (disable) {
+            for (const [depId] of dependentFeatures) {
+              await handleToggleFeature(depId);
+            }
           }
         }
-        affectedCount.tenants++;
       }
-      
-      // Execute updates
-      await update(ref(database), updates);
-      
-      // Log batch operation
-      await logAuditEntry({
-        action: 'batch.operation',
-        operation: action,
-        affectedFeatures: affectedCount.features,
-        affectedTenants: affectedCount.tenants,
-        condition: condition || 'none'
-      });
-      
-      alert(`Batch-Operation erfolgreich: ${affectedCount.features} Features bei ${affectedCount.tenants} Tenants ${action === 'enable' ? 'aktiviert' : 'deaktiviert'}`);
-      
-    } catch (error) {
-      console.error('Batch operation failed:', error);
-      alert('Fehler bei Batch-Operation');
-    }
-  };
 
-  // ========================================================================
-  // TEST MODE
-  // ========================================================================
-  const createTestEnvironment = async (tenantId) => {
-    try {
-      const testTenantId = `test-${tenantId || 'master'}-${Date.now()}`;
-      const testFoodtruckId = `truck-test-${Date.now()}`;
-      
-      // Create test tenant
-      await set(ref(database, `tenants/${testTenantId}`), {
-        name: `Test Environment - ${tenantId || 'Master'}`,
-        isTestMode: true,
-        parentTenant: tenantId,
-        created: serverTimestamp(),
-        config: {
-          noRealTransactions: true,
-          autoCleanup: 'daily',
-          sandboxMode: true
-        }
-      });
-      
-      // Create test foodtruck
-      await set(ref(database, `foodtrucks/${testFoodtruckId}`), {
-        name: 'Test Foodtruck',
-        tenantId: testTenantId,
-        isTest: true,
-        location: { lat: 47.3769, lng: 8.5417 } // Zürich
-      });
-      
-      // Create test users
-      const testUsers = [];
-      for (let i = 1; i <= 3; i++) {
-        const userId = `user-test-${Date.now()}-${i}`;
-        await set(ref(database, `users/${userId}`), {
-          name: `Test User ${i}`,
-          email: `test${i}@eatech-test.ch`,
-          isTestUser: true,
-          tenantId: testTenantId
-        });
-        testUsers.push(userId);
+      if (feature.masterControl.requiresRestart) {
+        alert(`Feature "${feature.name}" erfordert einen Neustart aller Dienste.`);
       }
+
+      if (window.Sentry) {
+        window.Sentry.captureMessage(`Feature ${featureId} ${newState ? 'enabled' : 'disabled'}`, 'info');
+      }
+    } catch (error) {
+      console.error('Error toggling feature:', error);
+      alert('Fehler beim Ändern des Feature-Status');
       
-      // Enable all features for testing
+      if (window.Sentry) {
+        window.Sentry.captureException(error);
+      }
+    } finally {
+      setSaving(false);
+    }
+  }, [features, testMode]);
+
+  const handleEmergencyShutdown = useCallback(async () => {
+    if (!confirm('WARNUNG: Dies deaktiviert ALLE Features außer Core-Funktionen. Fortfahren?')) {
+      return;
+    }
+
+    const pin = prompt('Sicherheits-PIN eingeben:');
+    if (pin !== '1234') { // In Produktion: Sicherer PIN
+      alert('Falscher PIN');
+      return;
+    }
+
+    setEmergencyMode(true);
+    setSaving(true);
+
+    try {
       const updates = {};
-      Object.keys(features).forEach(featureKey => {
-        updates[`features/${featureKey}/tenantControl/${testTenantId}/enabled`] = true;
-      });
-      await update(ref(database), updates);
-      
-      // Log test environment creation
-      await logAuditEntry({
-        action: 'test.environment.created',
-        testTenantId,
-        testFoodtruckId,
-        testUsers,
-        parentTenant: tenantId
-      });
-      
-      alert(`Test-Umgebung erstellt!\n\nTenant: ${testTenantId}\nFoodtruck: ${testFoodtruckId}\nTest-User: ${testUsers.length}`);
-      
-      return { testTenantId, testFoodtruckId, testUsers };
-      
-    } catch (error) {
-      console.error('Error creating test environment:', error);
-      alert('Fehler beim Erstellen der Test-Umgebung');
-    }
-  };
-
-  // ========================================================================
-  // HELPER FUNCTIONS
-  // ========================================================================
-  const matchesPattern = (key, patterns) => {
-    return patterns.some(pattern => {
-      if (pattern.endsWith('*')) {
-        return key.startsWith(pattern.slice(0, -1));
-      }
-      return key === pattern;
-    });
-  };
-
-  const evaluateCondition = (tenant, condition) => {
-    switch (condition.type) {
-      case 'location':
-        return tenant.address?.city === condition.value;
-      case 'orderVolume':
-        return tenant.stats?.dailyOrders < condition.value;
-      case 'plan':
-        return tenant.plan === condition.value;
-      default:
-        return true;
-    }
-  };
-
-  const logAuditEntry = async (entry) => {
-    try {
-      await push(ref(database, 'featureAudit'), {
-        ...entry,
-        timestamp: serverTimestamp(),
-        masterId: 'master-001', // Current master ID
-        ip: window.location.hostname,
-        userAgent: navigator.userAgent
-      });
-    } catch (error) {
-      console.error('Error logging audit entry:', error);
-    }
-  };
-
-  const sendEmergencyNotification = async (message) => {
-    // Integration with NotificationCenter
-    console.log('Emergency notification:', message);
-    // TODO: Implement actual notification sending
-  };
-
-  const disableFeaturesByPattern = async (patterns) => {
-    const updates = {};
-    Object.keys(features).forEach(key => {
-      if (matchesPattern(key, patterns)) {
-        updates[`features/${key}/masterControl/globalEnabled`] = false;
-      }
-    });
-    await update(ref(database), updates);
-  };
-
-  const enableFallbackPayment = async () => {
-    await set(ref(database, 'features/payment.basic/masterControl/fallbackMode'), true);
-  };
-
-  const pauseAnalytics = async () => {
-    await set(ref(database, 'features/analytics/masterControl/paused'), true);
-  };
-
-  const exportFeatureConfig = () => {
-    const config = {
-      exportDate: new Date().toISOString(),
-      features,
-      tenantOverrides: {},
-      templates: FEATURE_TEMPLATES,
-      emergencySettings: EMERGENCY_PRIORITIES
-    };
-    
-    // Add tenant overrides
-    tenants.forEach(tenant => {
-      config.tenantOverrides[tenant.id] = {};
-      Object.keys(features).forEach(featureKey => {
-        const override = features[featureKey]?.tenantControl?.[tenant.id];
-        if (override) {
-          config.tenantOverrides[tenant.id][featureKey] = override;
+      Object.entries(features).forEach(([id, feature]) => {
+        if (feature.category !== 'core') {
+          updates[`features/${id}/masterControl/globalEnabled`] = false;
         }
       });
-    });
+
+      await update(ref(database), updates);
+
+      await push(ref(database, 'featureAudit'), {
+        action: 'emergency_shutdown',
+        user: 'master-admin',
+        timestamp: serverTimestamp(),
+        affectedFeatures: Object.keys(updates).length
+      });
+
+      alert('Notfall-Shutdown durchgeführt. Nur Core-Features sind aktiv.');
+    } catch (error) {
+      console.error('Emergency shutdown error:', error);
+      alert('Fehler beim Notfall-Shutdown');
+      
+      if (window.Sentry) {
+        window.Sentry.captureException(error);
+      }
+    } finally {
+      setSaving(false);
+    }
+  }, [features]);
+
+  const handleBulkToggle = useCallback(async (categoryId, enable) => {
+    const categoryFeatures = Object.entries(features).filter(([, f]) => f.category === categoryId);
     
+    setSaving(true);
+    try {
+      const updates = {};
+      categoryFeatures.forEach(([id, feature]) => {
+        if (feature.masterControl.canTenantDisable || !enable) {
+          updates[`features/${id}/masterControl/globalEnabled`] = enable;
+        }
+      });
+
+      await update(ref(database), updates);
+
+      await push(ref(database, 'featureAudit'), {
+        action: 'bulk_toggle',
+        category: categoryId,
+        enabled: enable,
+        user: 'master-admin',
+        timestamp: serverTimestamp(),
+        affectedFeatures: Object.keys(updates).length
+      });
+    } catch (error) {
+      console.error('Bulk toggle error:', error);
+      alert('Fehler beim Bulk-Toggle');
+      
+      if (window.Sentry) {
+        window.Sentry.captureException(error);
+      }
+    } finally {
+      setSaving(false);
+    }
+  }, [features]);
+
+  const handleExportConfig = useCallback(() => {
+    const config = {
+      version: '1.0.0',
+      exportDate: new Date().toISOString(),
+      features: features,
+      testMode: testMode
+    };
+
     const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -775,952 +949,328 @@ const FeatureControl = () => {
     a.download = `eatech-features-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
-  };
+  }, [features, testMode]);
 
-  const applyTemplate = async (templateKey, tenantId) => {
-    const template = FEATURE_TEMPLATES[templateKey];
-    if (!template) return;
-    
-    const confirmApply = window.confirm(
-      `Template "${template.name}" anwenden?\n\n${template.description}\n\nDies wird die aktuellen Feature-Einstellungen überschreiben.`
-    );
-    
-    if (!confirmApply) return;
-    
+  const handleImportConfig = useCallback(async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
     try {
-      const updates = {};
-      
-      // Disable all features first
-      Object.keys(features).forEach(key => {
-        updates[`features/${key}/tenantControl/${tenantId}/enabled`] = false;
-      });
-      
-      // Enable template features
-      Object.keys(features).forEach(key => {
-        if (matchesPattern(key, template.features)) {
-          updates[`features/${key}/tenantControl/${tenantId}/enabled`] = true;
-        }
-      });
-      
-      await update(ref(database), updates);
-      
-      await logAuditEntry({
-        action: 'template.applied',
-        template: templateKey,
-        tenant: tenantId,
-        featuresEnabled: template.features.length
-      });
-      
-      alert(`Template "${template.name}" erfolgreich angewendet!`);
-      
+      const text = await file.text();
+      const config = JSON.parse(text);
+
+      if (!config.features || config.version !== '1.0.0') {
+        throw new Error('Ungültiges Config-Format');
+      }
+
+      if (confirm('Dies überschreibt alle aktuellen Feature-Einstellungen. Fortfahren?')) {
+        await update(ref(database, 'features'), config.features);
+        alert('Konfiguration importiert');
+      }
     } catch (error) {
-      console.error('Error applying template:', error);
-      alert('Fehler beim Anwenden des Templates');
+      console.error('Import error:', error);
+      alert('Fehler beim Import der Konfiguration');
     }
-  };
+  }, []);
 
-  // ========================================================================
-  // COMPUTED VALUES
-  // ========================================================================
+  // ========== COMPUTED VALUES ==========
   const filteredFeatures = useMemo(() => {
-    return Object.entries(features).filter(([key, feature]) => {
-      // Search filter
-      if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase();
-        if (!key.toLowerCase().includes(searchLower) && 
-            !feature.name?.toLowerCase().includes(searchLower) &&
-            !feature.description?.toLowerCase().includes(searchLower)) {
-          return false;
-        }
-      }
-      
-      // Category filter
-      if (selectedCategory !== 'all') {
-        const category = key.split('.')[0];
-        if (category !== selectedCategory) return false;
-      }
-      
-      return true;
+    return Object.values(features).filter(feature => {
+      const matchesCategory = selectedCategory === 'all' || feature.category === selectedCategory;
+      const matchesSearch = feature.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          feature.description.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
     });
-  }, [features, searchTerm, selectedCategory]);
+  }, [features, selectedCategory, searchQuery]);
 
-  const featureStats = useMemo(() => {
-    const stats = {
-      total: Object.keys(features).length,
-      enabled: 0,
-      disabled: 0,
-      trial: 0,
-      byCategory: {}
-    };
+  const stats = useMemo(() => {
+    const total = Object.keys(features).length;
+    const enabled = Object.values(features).filter(f => f.masterControl.globalEnabled).length;
+    const critical = Object.values(features).filter(f => !f.masterControl.canTenantDisable).length;
+    const byCategory = {};
     
-    Object.entries(features).forEach(([key, feature]) => {
-      const category = key.split('.')[0];
-      
-      if (feature.masterControl?.globalEnabled) {
-        stats.enabled++;
-      } else {
-        stats.disabled++;
-      }
-      
-      if (feature.trial?.active) {
-        stats.trial++;
-      }
-      
-      if (!stats.byCategory[category]) {
-        stats.byCategory[category] = { total: 0, enabled: 0 };
-      }
-      stats.byCategory[category].total++;
-      if (feature.masterControl?.globalEnabled) {
-        stats.byCategory[category].enabled++;
-      }
+    Object.values(FEATURE_CATEGORIES).forEach(cat => {
+      const categoryFeatures = Object.values(features).filter(f => f.category === cat.id);
+      byCategory[cat.id] = {
+        total: categoryFeatures.length,
+        enabled: categoryFeatures.filter(f => f.masterControl.globalEnabled).length
+      };
     });
     
-    return stats;
+    return { total, enabled, disabled: total - enabled, critical, byCategory };
   }, [features]);
 
-  // ========================================================================
-  // RENDER
-  // ========================================================================
+  // ========== RENDER ==========
   if (loading) {
     return (
       <div className={styles.loading}>
-        <Loader2 size={48} className={styles.spinner} />
-        <p>Lade Feature Control System...</p>
+        <div className={styles.spinner} />
+        <p>Lade Feature-Konfiguration...</p>
       </div>
     );
   }
 
   return (
-    <div className={styles.featureControl}>
+    <div className={styles.container}>
       {/* Header */}
       <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <h1>
-            <SlidersHorizontal size={28} />
-            Feature Control
-          </h1>
-          <div className={styles.stats}>
-            <div className={styles.statItem}>
-              <span className={styles.statValue}>{featureStats.enabled}</span>
-              <span className={styles.statLabel}>Aktiv</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statValue}>{featureStats.disabled}</span>
-              <span className={styles.statLabel}>Inaktiv</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statValue}>{featureStats.trial}</span>
-              <span className={styles.statLabel}>Trial</span>
-            </div>
+        <div className={styles.headerTop}>
+          <div>
+            <h1>Feature Control Center</h1>
+            <p>Zentrale Verwaltung aller EATECH Features</p>
+          </div>
+          <div className={styles.headerActions}>
+            <button
+              className={`${styles.emergencyButton} ${emergencyMode ? styles.active : ''}`}
+              onClick={handleEmergencyShutdown}
+              disabled={saving}
+            >
+              <AlertTriangle size={20} />
+              Notfall-Shutdown
+            </button>
+            <button
+              className={`${styles.testModeButton} ${testMode ? styles.active : ''}`}
+              onClick={() => setTestMode(!testMode)}
+            >
+              <FlaskConical size={20} />
+              {testMode ? 'Test-Modus' : 'Live-Modus'}
+            </button>
           </div>
         </div>
-        
-        <div className={styles.headerRight}>
-          {/* Emergency Panel Button */}
-          {systemMetrics.cpu > 70 || systemMetrics.memory > 70 ? (
-            <button 
-              className={`${styles.emergencyButton} ${styles.warning}`}
-              onClick={() => setShowEmergencyPanel(true)}
-            >
-              <AlertTriangle size={18} />
-              System Warning
-            </button>
-          ) : null}
-          
-          <button 
-            className={styles.iconButton}
-            onClick={() => setShowTestMode(true)}
-            title="Test-Modus"
+
+        {/* Statistics */}
+        <div className={styles.stats}>
+          <div className={styles.statCard}>
+            <div className={styles.statValue}>{stats.total}</div>
+            <div className={styles.statLabel}>Features Total</div>
+          </div>
+          <div className={`${styles.statCard} ${styles.enabled}`}>
+            <div className={styles.statValue}>{stats.enabled}</div>
+            <div className={styles.statLabel}>Aktiviert</div>
+          </div>
+          <div className={`${styles.statCard} ${styles.disabled}`}>
+            <div className={styles.statValue}>{stats.disabled}</div>
+            <div className={styles.statLabel}>Deaktiviert</div>
+          </div>
+          <div className={`${styles.statCard} ${styles.critical}`}>
+            <div className={styles.statValue}>{stats.critical}</div>
+            <div className={styles.statLabel}>Kritisch</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div className={styles.controls}>
+        <div className={styles.search}>
+          <Search size={20} />
+          <input
+            type="text"
+            placeholder="Features suchen..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        <div className={styles.categoryFilter}>
+          <button
+            className={selectedCategory === 'all' ? styles.active : ''}
+            onClick={() => setSelectedCategory('all')}
           >
-            <TestTube size={20} />
+            Alle
           </button>
-          
-          <button 
+          {Object.values(FEATURE_CATEGORIES).map(category => (
+            <button
+              key={category.id}
+              className={selectedCategory === category.id ? styles.active : ''}
+              onClick={() => setSelectedCategory(category.id)}
+              style={{ '--category-color': category.color }}
+            >
+              <category.icon size={16} />
+              {category.name}
+              <span className={styles.categoryCount}>
+                {stats.byCategory[category.id]?.enabled}/{stats.byCategory[category.id]?.total}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className={styles.actionButtons}>
+          <button
             className={styles.iconButton}
-            onClick={() => setShowAuditLog(true)}
+            onClick={() => setShowBulkActions(!showBulkActions)}
+            title="Bulk-Aktionen"
+          >
+            <Layers size={20} />
+          </button>
+          <button
+            className={styles.iconButton}
+            onClick={handleExportConfig}
+            title="Konfiguration exportieren"
+          >
+            <Download size={20} />
+          </button>
+          <label className={styles.iconButton} title="Konfiguration importieren">
+            <Upload size={20} />
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleImportConfig}
+              style={{ display: 'none' }}
+            />
+          </label>
+          <button
+            className={styles.iconButton}
+            onClick={() => setShowAuditLog(!showAuditLog)}
             title="Audit Log"
           >
             <History size={20} />
           </button>
-          
-          <button 
-            className={styles.iconButton}
-            onClick={exportFeatureConfig}
-            title="Export"
-          >
-            <Download size={20} />
-          </button>
-          
-          <button 
-            className={styles.iconButton}
-            onClick={() => setShowTutorial(true)}
-            title="Tutorial"
-          >
-            <HelpCircle size={20} />
-          </button>
         </div>
       </div>
 
-      {/* System Metrics Bar */}
-      <div className={styles.metricsBar}>
-        <div className={styles.metric}>
-          <Cpu size={16} />
-          <span>CPU: {systemMetrics.cpu}%</span>
-          <div className={styles.metricBar}>
-            <div 
-              className={styles.metricFill} 
-              style={{ 
-                width: `${systemMetrics.cpu}%`,
-                backgroundColor: systemMetrics.cpu > 80 ? '#FF6B6B' : systemMetrics.cpu > 60 ? '#F39C12' : '#10B981'
-              }}
-            />
-          </div>
-        </div>
-        
-        <div className={styles.metric}>
-          <Database size={16} />
-          <span>Memory: {systemMetrics.memory}%</span>
-          <div className={styles.metricBar}>
-            <div 
-              className={styles.metricFill} 
-              style={{ 
-                width: `${systemMetrics.memory}%`,
-                backgroundColor: systemMetrics.memory > 80 ? '#FF6B6B' : systemMetrics.memory > 60 ? '#F39C12' : '#10B981'
-              }}
-            />
-          </div>
-        </div>
-        
-        <div className={styles.metric}>
-          <Activity size={16} />
-          <span>Response: {systemMetrics.responseTime}ms</span>
-          <div className={styles.metricBar}>
-            <div 
-              className={styles.metricFill} 
-              style={{ 
-                width: `${Math.min((systemMetrics.responseTime / 1000) * 100, 100)}%`,
-                backgroundColor: systemMetrics.responseTime > 3000 ? '#FF6B6B' : systemMetrics.responseTime > 1000 ? '#F39C12' : '#10B981'
-              }}
-            />
-          </div>
-        </div>
-        
-        <div className={styles.metric}>
-          <AlertCircle size={16} />
-          <span>Fehler: {systemMetrics.errorRate}%</span>
-          <div className={styles.metricBar}>
-            <div 
-              className={styles.metricFill} 
-              style={{ 
-                width: `${systemMetrics.errorRate}%`,
-                backgroundColor: systemMetrics.errorRate > 5 ? '#FF6B6B' : systemMetrics.errorRate > 2 ? '#F39C12' : '#10B981'
-              }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Filters and Controls */}
-      <div className={styles.controls}>
-        <div className={styles.searchBox}>
-          <Search size={18} />
-          <input
-            type="text"
-            placeholder="Features suchen..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        
-        <div className={styles.categoryFilter}>
-          <select 
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            <option value="all">Alle Kategorien</option>
-            {Object.entries(FEATURE_CATEGORIES).map(([key, category]) => (
-              <option key={key} value={key}>
-                {category.name} ({Object.keys(features).filter(f => f.startsWith(key)).length})
-              </option>
+      {/* Bulk Actions */}
+      {showBulkActions && (
+        <div className={styles.bulkActions}>
+          <h3>Bulk-Aktionen</h3>
+          <div className={styles.bulkActionButtons}>
+            {Object.values(FEATURE_CATEGORIES).map(category => (
+              <div key={category.id} className={styles.bulkActionGroup}>
+                <span>{category.name}:</span>
+                <button
+                  className={styles.bulkEnableButton}
+                  onClick={() => handleBulkToggle(category.id, true)}
+                  disabled={saving}
+                >
+                  Alle aktivieren
+                </button>
+                <button
+                  className={styles.bulkDisableButton}
+                  onClick={() => handleBulkToggle(category.id, false)}
+                  disabled={saving}
+                >
+                  Alle deaktivieren
+                </button>
+              </div>
             ))}
-          </select>
-        </div>
-        
-        <div className={styles.tenantSelector}>
-          <Building size={18} />
-          <select
-            value={selectedTenant?.id || ''}
-            onChange={(e) => {
-              const tenant = tenants.find(t => t.id === e.target.value);
-              setSelectedTenant(tenant);
-            }}
-          >
-            <option value="">Master Control</option>
-            {tenants.map(tenant => (
-              <option key={tenant.id} value={tenant.id}>
-                {tenant.name} ({tenant.plan || 'Standard'})
-              </option>
-            ))}
-          </select>
-        </div>
-        
-        <div className={styles.viewModeButtons}>
-          <button
-            className={`${styles.viewButton} ${viewMode === 'grid' ? styles.active : ''}`}
-            onClick={() => setViewMode('grid')}
-            title="Grid-Ansicht"
-          >
-            <LayoutGrid size={18} />
-          </button>
-          <button
-            className={`${styles.viewButton} ${viewMode === 'list' ? styles.active : ''}`}
-            onClick={() => setViewMode('list')}
-            title="Listen-Ansicht"
-          >
-            <List size={18} />
-          </button>
-          <button
-            className={`${styles.viewButton} ${viewMode === 'compact' ? styles.active : ''}`}
-            onClick={() => setViewMode('compact')}
-            title="Kompakt-Ansicht"
-          >
-            <Grid size={18} />
-          </button>
-        </div>
-        
-        <button
-          className={`${styles.bulkButton} ${bulkActionMode ? styles.active : ''}`}
-          onClick={() => setBulkActionMode(!bulkActionMode)}
-        >
-          <CheckSquare size={18} />
-          Bulk-Modus
-        </button>
-      </div>
-
-      {/* Bulk Actions Bar */}
-      {bulkActionMode && selectedFeatures.size > 0 && (
-        <div className={styles.bulkActionsBar}>
-          <span>{selectedFeatures.size} Features ausgewählt</span>
-          <div className={styles.bulkActions}>
-            <button
-              className={styles.bulkAction}
-              onClick={() => {
-                selectedFeatures.forEach(key => toggleFeature(key, true, selectedTenant?.id));
-                setSelectedFeatures(new Set());
-              }}
-            >
-              <Power size={16} />
-              Aktivieren
-            </button>
-            <button
-              className={styles.bulkAction}
-              onClick={() => {
-                selectedFeatures.forEach(key => toggleFeature(key, false, selectedTenant?.id));
-                setSelectedFeatures(new Set());
-              }}
-            >
-              <Power size={16} />
-              Deaktivieren
-            </button>
-            <button
-              className={styles.bulkAction}
-              onClick={() => setSelectedFeatures(new Set())}
-            >
-              <X size={16} />
-              Abbrechen
-            </button>
           </div>
         </div>
       )}
 
-      {/* Template Bar */}
-      {selectedTenant && (
-        <div className={styles.templateBar}>
-          <span>Templates anwenden:</span>
-          {Object.entries(FEATURE_TEMPLATES).map(([key, template]) => (
-            <button
-              key={key}
-              className={styles.templateButton}
-              onClick={() => applyTemplate(key, selectedTenant.id)}
-              title={template.description}
-            >
-              {template.name}
-            </button>
-          ))}
-        </div>
-      )}
+      {/* Features Grid */}
+      <div className={styles.featuresGrid}>
+        {filteredFeatures.map(feature => {
+          const category = FEATURE_CATEGORIES[feature.category];
+          const isEnabled = feature.masterControl.globalEnabled;
+          const canToggle = testMode || feature.masterControl.canTenantDisable;
 
-      {/* Features Grid/List */}
-      <div className={`${styles.featuresContainer} ${styles[viewMode]}`}>
-        {filteredFeatures.map(([key, feature]) => {
-          const category = key.split('.')[0];
-          const categoryConfig = FEATURE_CATEGORIES[category] || {};
-          const Icon = categoryConfig.icon || Zap;
-          const isEnabled = selectedTenant 
-            ? feature.tenantControl?.[selectedTenant.id]?.enabled ?? feature.masterControl?.globalEnabled
-            : feature.masterControl?.globalEnabled;
-          const hasOverride = selectedTenant && feature.tenantControl?.[selectedTenant.id] !== undefined;
-          const isInTrial = feature.trial?.active;
-          const isSelected = selectedFeatures.has(key);
-          
           return (
             <div 
-              key={key}
-              className={`${styles.featureCard} ${isEnabled ? styles.enabled : ''} ${isSelected ? styles.selected : ''} ${hasOverride ? styles.hasOverride : ''}`}
-              onClick={() => {
-                if (bulkActionMode) {
-                  const newSelected = new Set(selectedFeatures);
-                  if (newSelected.has(key)) {
-                    newSelected.delete(key);
-                  } else {
-                    newSelected.add(key);
-                  }
-                  setSelectedFeatures(newSelected);
-                }
-              }}
+              key={feature.id} 
+              className={`${styles.featureCard} ${isEnabled ? styles.enabled : styles.disabled}`}
+              style={{ '--category-color': category?.color }}
             >
-              {bulkActionMode && (
-                <div className={styles.checkbox}>
-                  {isSelected ? <CheckSquare size={20} /> : <Square size={20} />}
-                </div>
-              )}
-              
               <div className={styles.featureHeader}>
-                <div 
-                  className={styles.featureIcon}
-                  style={{ backgroundColor: `${categoryConfig.color}20`, color: categoryConfig.color }}
+                <div className={styles.featureIcon}>
+                  {category && <category.icon size={24} />}
+                </div>
+                <h3>{feature.name}</h3>
+                <button
+                  className={styles.toggleButton}
+                  onClick={() => handleToggleFeature(feature.id)}
+                  disabled={!canToggle || saving}
+                  title={!canToggle ? 'Kritisches Feature - kann nicht deaktiviert werden' : ''}
                 >
-                  <Icon size={24} />
-                </div>
-                
-                <div className={styles.featureInfo}>
-                  <h3>{feature.name || key}</h3>
-                  <p className={styles.featureKey}>{key}</p>
-                  {feature.description && (
-                    <p className={styles.featureDescription}>{feature.description}</p>
-                  )}
-                </div>
-                
-                <div className={styles.featureActions}>
-                  {isInTrial && (
-                    <div className={styles.trialBadge}>
-                      <Timer size={14} />
-                      Trial
-                    </div>
-                  )}
-                  
-                  {hasOverride && (
-                    <div className={styles.overrideBadge} title="Tenant-spezifische Einstellung">
-                      <User size={14} />
-                    </div>
-                  )}
-                  
-                  <button
-                    className={styles.infoButton}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditingFeature({ key, ...feature });
-                    }}
-                    title="Feature-Details"
-                  >
-                    <Info size={18} />
-                  </button>
-                  
-                  {!bulkActionMode && (
-                    <button
-                      className={`${styles.toggleButton} ${isEnabled ? styles.on : styles.off}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleFeature(key, !isEnabled, selectedTenant?.id);
-                      }}
-                      title={isEnabled ? 'Deaktivieren' : 'Aktivieren'}
-                    >
-                      {isEnabled ? <ToggleRight size={24} /> : <ToggleLeft size={24} />}
-                    </button>
-                  )}
-                </div>
+                  {isEnabled ? <ToggleRight size={24} /> : <ToggleLeft size={24} />}
+                </button>
               </div>
-              
-              {viewMode === 'list' && feature.dependencies?.length > 0 && (
-                <div className={styles.featureDependencies}>
-                  <span>Abhängigkeiten:</span>
+
+              <p className={styles.featureDescription}>{feature.description}</p>
+
+              {feature.dependencies?.length > 0 && (
+                <div className={styles.dependencies}>
+                  <span className={styles.dependencyLabel}>Benötigt:</span>
                   {feature.dependencies.map(dep => (
-                    <span key={dep} className={styles.dependency}>{dep}</span>
+                    <span 
+                      key={dep} 
+                      className={`${styles.dependency} ${features[dep]?.masterControl?.globalEnabled ? styles.satisfied : styles.missing}`}
+                    >
+                      {features[dep]?.name || dep}
+                    </span>
                   ))}
                 </div>
               )}
-              
-              {viewMode === 'list' && feature.stats && (
-                <div className={styles.featureStats}>
-                  <div className={styles.stat}>
-                    <Users size={14} />
-                    <span>{feature.stats.activeUsers || 0} Nutzer</span>
-                  </div>
-                  <div className={styles.stat}>
-                    <Activity size={14} />
-                    <span>{feature.stats.usageRate || 0}% Nutzung</span>
-                  </div>
-                  <div className={styles.stat}>
-                    <TrendingUp size={14} />
-                    <span>{feature.stats.trend || '+0'}% Trend</span>
-                  </div>
-                </div>
-              )}
+
+              <div className={styles.featureFooter}>
+                <span className={styles.categoryTag} style={{ backgroundColor: category?.color }}>
+                  {category?.name}
+                </span>
+                
+                {!feature.masterControl.canTenantDisable && (
+                  <span className={styles.criticalTag}>
+                    <Lock size={14} />
+                    Kritisch
+                  </span>
+                )}
+
+                {feature.masterControl.requiresRestart && (
+                  <span className={styles.restartTag}>
+                    <RefreshCw size={14} />
+                    Neustart
+                  </span>
+                )}
+
+                <button
+                  className={styles.detailsButton}
+                  onClick={() => setEditingFeature(feature)}
+                >
+                  <Settings size={16} />
+                </button>
+              </div>
             </div>
           );
         })}
       </div>
 
-      {/* Feature Details Modal */}
-      {editingFeature && (
-        <div className={styles.modal} onClick={() => setEditingFeature(null)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h2>
-                <Info size={24} />
-                Feature Details: {editingFeature.name || editingFeature.key}
-              </h2>
-              <button 
-                className={styles.closeButton}
-                onClick={() => setEditingFeature(null)}
-              >
-                <X size={24} />
-              </button>
-            </div>
-            
-            <div className={styles.modalBody}>
-              <div className={styles.detailSection}>
-                <h3>Allgemeine Informationen</h3>
-                <div className={styles.detailRow}>
-                  <span>Feature Key:</span>
-                  <code>{editingFeature.key}</code>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Kategorie:</span>
-                  <span>{FEATURE_CATEGORIES[editingFeature.key.split('.')[0]]?.name}</span>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Status:</span>
-                  <span className={editingFeature.masterControl?.globalEnabled ? styles.enabled : styles.disabled}>
-                    {editingFeature.masterControl?.globalEnabled ? 'Aktiv' : 'Inaktiv'}
-                  </span>
-                </div>
-                {editingFeature.description && (
-                  <div className={styles.detailRow}>
-                    <span>Beschreibung:</span>
-                    <span>{editingFeature.description}</span>
-                  </div>
-                )}
-              </div>
-              
-              {editingFeature.dependencies?.length > 0 && (
-                <div className={styles.detailSection}>
-                  <h3>Abhängigkeiten</h3>
-                  <p>Dieses Feature benötigt:</p>
-                  <ul>
-                    {editingFeature.dependencies.map(dep => (
-                      <li key={dep}>
-                        <code>{dep}</code>
-                        {features[dep]?.masterControl?.globalEnabled ? (
-                          <CheckCircle2 size={16} className={styles.enabled} />
-                        ) : (
-                          <XCircle size={16} className={styles.disabled} />
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              
-              {editingFeature.config && (
-                <div className={styles.detailSection}>
-                  <h3>Konfiguration</h3>
-                  <pre>{JSON.stringify(editingFeature.config, null, 2)}</pre>
-                </div>
-              )}
-              
-              {editingFeature.stats && (
-                <div className={styles.detailSection}>
-                  <h3>Statistiken</h3>
-                  <div className={styles.statsGrid}>
-                    <div className={styles.statCard}>
-                      <span className={styles.statLabel}>Aktive Nutzer</span>
-                      <span className={styles.statValue}>{editingFeature.stats.activeUsers || 0}</span>
-                    </div>
-                    <div className={styles.statCard}>
-                      <span className={styles.statLabel}>Nutzungsrate</span>
-                      <span className={styles.statValue}>{editingFeature.stats.usageRate || 0}%</span>
-                    </div>
-                    <div className={styles.statCard}>
-                      <span className={styles.statLabel}>Fehlerrate</span>
-                      <span className={styles.statValue}>{editingFeature.stats.errorRate || 0}%</span>
-                    </div>
-                    <div className={styles.statCard}>
-                      <span className={styles.statLabel}>Avg. Response</span>
-                      <span className={styles.statValue}>{editingFeature.stats.avgResponse || 0}ms</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              <div className={styles.detailSection}>
-                <h3>Tutorial & Hilfe</h3>
-                <p>
-                  {editingFeature.tutorial?.description || 
-                   'Aktiviere dieses Feature um erweiterte Funktionen freizuschalten.'}
-                </p>
-                {editingFeature.tutorial?.steps && (
-                  <ol className={styles.tutorialSteps}>
-                    {editingFeature.tutorial.steps.map((step, index) => (
-                      <li key={index}>{step}</li>
-                    ))}
-                  </ol>
-                )}
-              </div>
-            </div>
-            
-            <div className={styles.modalFooter}>
-              <button 
-                className={styles.primaryButton}
-                onClick={() => {
-                  toggleFeature(editingFeature.key, !editingFeature.masterControl?.globalEnabled);
-                  setEditingFeature(null);
-                }}
-              >
-                {editingFeature.masterControl?.globalEnabled ? 'Deaktivieren' : 'Aktivieren'}
-              </button>
-              <button 
-                className={styles.secondaryButton}
-                onClick={() => setEditingFeature(null)}
-              >
-                Schließen
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Test Mode Modal */}
-      {showTestMode && (
-        <div className={styles.modal} onClick={() => setShowTestMode(false)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h2>
-                <TestTube size={24} />
-                Test-Umgebung erstellen
-              </h2>
-              <button 
-                className={styles.closeButton}
-                onClick={() => setShowTestMode(false)}
-              >
-                <X size={24} />
-              </button>
-            </div>
-            
-            <div className={styles.modalBody}>
-              <div className={styles.testModeInfo}>
-                <AlertCircle size={20} />
-                <p>
-                  Eine Test-Umgebung erstellt einen isolierten Bereich mit:
-                </p>
-                <ul>
-                  <li>Test-Tenant mit allen Features aktiviert</li>
-                  <li>Test-Foodtruck ohne echte Transaktionen</li>
-                  <li>3 Test-User für verschiedene Szenarien</li>
-                  <li>Automatische Bereinigung nach 24 Stunden</li>
-                </ul>
-              </div>
-              
-              <div className={styles.testModeOptions}>
-                <h3>Für wen soll die Test-Umgebung erstellt werden?</h3>
-                <div className={styles.testModeButtons}>
-                  <button
-                    className={styles.testModeButton}
-                    onClick={() => {
-                      createTestEnvironment(null);
-                      setShowTestMode(false);
-                    }}
-                  >
-                    <Shield size={20} />
-                    <span>Master Test-Umgebung</span>
-                    <small>Für System-Tests</small>
-                  </button>
-                  
-                  {selectedTenant && (
-                    <button
-                      className={styles.testModeButton}
-                      onClick={() => {
-                        createTestEnvironment(selectedTenant.id);
-                        setShowTestMode(false);
-                      }}
-                    >
-                      <Building size={20} />
-                      <span>Tenant Test-Umgebung</span>
-                      <small>Für {selectedTenant.name}</small>
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-            
-            <div className={styles.modalFooter}>
-              <button 
-                className={styles.secondaryButton}
-                onClick={() => setShowTestMode(false)}
-              >
-                Abbrechen
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Audit Log Modal */}
+      {/* Modals */}
       {showAuditLog && (
-        <div className={styles.modal} onClick={() => setShowAuditLog(false)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h2>
-                <History size={24} />
-                Feature Audit Log
-              </h2>
-              <button 
-                className={styles.closeButton}
-                onClick={() => setShowAuditLog(false)}
-              >
-                <X size={24} />
-              </button>
-            </div>
-            
-            <div className={styles.modalBody}>
-              <div className={styles.auditLog}>
-                {auditLog.length === 0 ? (
-                  <p className={styles.emptyState}>Keine Einträge vorhanden</p>
-                ) : (
-                  auditLog.map(entry => (
-                    <div key={entry.id} className={styles.auditEntry}>
-                      <div className={styles.auditIcon}>
-                        {entry.action.includes('enabled') && <CheckCircle2 size={20} className={styles.enabled} />}
-                        {entry.action.includes('disabled') && <XCircle size={20} className={styles.disabled} />}
-                        {entry.action.includes('emergency') && <AlertTriangle size={20} className={styles.warning} />}
-                        {entry.action.includes('batch') && <Layers size={20} />}
-                        {entry.action.includes('template') && <Copy size={20} />}
-                        {entry.action.includes('test') && <TestTube size={20} />}
-                      </div>
-                      
-                      <div className={styles.auditContent}>
-                        <div className={styles.auditAction}>
-                          {entry.action === 'feature.enabled' && `Feature aktiviert: ${entry.feature}`}
-                          {entry.action === 'feature.disabled' && `Feature deaktiviert: ${entry.feature}`}
-                          {entry.action === 'emergency.triggered' && `Emergency Mode: Priority ${entry.priority}`}
-                          {entry.action === 'batch.operation' && `Batch-Operation: ${entry.affectedFeatures} Features`}
-                          {entry.action === 'template.applied' && `Template angewendet: ${entry.template}`}
-                          {entry.action === 'test.environment.created' && `Test-Umgebung erstellt`}
-                        </div>
-                        
-                        <div className={styles.auditMeta}>
-                          <span>{entry.changedBy || 'System'}</span>
-                          <span>•</span>
-                          <span>{entry.tenant ? `Tenant: ${entry.tenant}` : 'Global'}</span>
-                          <span>•</span>
-                          <span>{new Date(entry.timestamp).toLocaleString('de-CH')}</span>
-                        </div>
-                        
-                        {entry.reason && (
-                          <div className={styles.auditReason}>
-                            Grund: {entry.reason}
-                          </div>
-                        )}
-                      </div>
-                      
-                      <button
-                        className={styles.rollbackButton}
-                        onClick={() => {
-                          if (window.confirm('Möchten Sie diese Änderung rückgängig machen?')) {
-                            // Implement rollback logic
-                            if (entry.action === 'feature.enabled') {
-                              toggleFeature(entry.feature, false, entry.tenant);
-                            } else if (entry.action === 'feature.disabled') {
-                              toggleFeature(entry.feature, true, entry.tenant);
-                            }
-                          }
-                        }}
-                        title="Rückgängig machen"
-                      >
-                        <RotateCcw size={16} />
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-            
-            <div className={styles.modalFooter}>
-              <button 
-                className={styles.secondaryButton}
-                onClick={() => setShowAuditLog(false)}
-              >
-                Schließen
-              </button>
-            </div>
-          </div>
-        </div>
+        <Suspense fallback={<LoadingSpinner />}>
+          <AuditLogPanel
+            auditLog={auditLog}
+            onClose={() => setShowAuditLog(false)}
+          />
+        </Suspense>
       )}
 
-      {/* Emergency Panel */}
-      {showEmergencyPanel && (
-        <div className={styles.modal} onClick={() => setShowEmergencyPanel(false)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h2 className={styles.emergency}>
-                <AlertTriangle size={24} />
-                Emergency Control Panel
-              </h2>
-              <button 
-                className={styles.closeButton}
-                onClick={() => setShowEmergencyPanel(false)}
-              >
-                <X size={24} />
-              </button>
-            </div>
-            
-            <div className={styles.modalBody}>
-              <div className={styles.emergencyWarning}>
-                <AlertCircle size={20} />
-                <p>
-                  System zeigt Anzeichen von Überlastung. Aktivieren Sie Emergency Mode um nicht-kritische Features zu deaktivieren.
-                </p>
-              </div>
-              
-              <div className={styles.emergencyMetrics}>
-                <div className={styles.emergencyMetric}>
-                  <Cpu size={20} />
-                  <span>CPU</span>
-                  <span className={styles.emergencyValue}>{systemMetrics.cpu}%</span>
-                </div>
-                <div className={styles.emergencyMetric}>
-                  <Database size={20} />
-                  <span>Memory</span>
-                  <span className={styles.emergencyValue}>{systemMetrics.memory}%</span>
-                </div>
-                <div className={styles.emergencyMetric}>
-                  <Activity size={20} />
-                  <span>Response</span>
-                  <span className={styles.emergencyValue}>{systemMetrics.responseTime}ms</span>
-                </div>
-                <div className={styles.emergencyMetric}>
-                  <AlertCircle size={20} />
-                  <span>Errors</span>
-                  <span className={styles.emergencyValue}>{systemMetrics.errorRate}%</span>
-                </div>
-              </div>
-              
-              <div className={styles.emergencyActions}>
-                <h3>Emergency Actions</h3>
-                
-                {Object.entries(EMERGENCY_PRIORITIES).map(([priority, config]) => (
-                  <div key={priority} className={styles.emergencyAction}>
-                    <div 
-                      className={styles.priorityIndicator}
-                      style={{ backgroundColor: config.color }}
-                    />
-                    <div className={styles.emergencyInfo}>
-                      <h4>Priority {priority} - {config.label}</h4>
-                      <p>Deaktiviert: {config.features.join(', ')}</p>
-                    </div>
-                    <button
-                      className={styles.emergencyButton}
-                      onClick={() => {
-                        triggerEmergencyMode(parseInt(priority));
-                        setShowEmergencyPanel(false);
-                      }}
-                    >
-                      <Power size={16} />
-                      Deaktivieren
-                    </button>
-                  </div>
-                ))}
-                
-                <div className={styles.emergencyAction}>
-                  <div 
-                    className={styles.priorityIndicator}
-                    style={{ backgroundColor: '#E74C3C' }}
-                  />
-                  <div className={styles.emergencyInfo}>
-                    <h4>PANIC MODE - Alle nicht-kritischen Features</h4>
-                    <p>Deaktiviert ALLE Features außer Core-Funktionen</p>
-                  </div>
-                  <button
-                    className={`${styles.emergencyButton} ${styles.danger}`}
-                    onClick={() => {
-                      if (window.confirm('WARNUNG: Dies deaktiviert ALLE nicht-essentiellen Features. Fortfahren?')) {
-                        [3, 2].forEach(p => triggerEmergencyMode(p));
-                        setShowEmergencyPanel(false);
-                      }
-                    }}
-                  >
-                    <AlertTriangle size={16} />
-                    PANIC MODE
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            <div className={styles.modalFooter}>
-              <button 
-                className={styles.secondaryButton}
-                onClick={() => setShowEmergencyPanel(false)}
-              >
-                Abbrechen
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Tutorial Overlay */}
-      {showTutorial && (
-        <div className={styles.tutorial}>
-          <div className={styles.tutorialContent}>
-            <h2>Feature Control Tutorial</h2>
-            <div className={styles.tutorialSteps}>
-              <div className={styles.tutorialStep}>
-                <div className={styles.stepNumber}>1</div>
-                <h3>Features aktivieren/deaktivieren</h3>
-                <p>Klicken Sie auf den Toggle-Button um Features ein- oder auszuschalten.</p>
-              </div>
-              <div className={styles.tutorialStep}>
-                <div className={styles.stepNumber}>2</div>
-                <h3>Tenant-spezifische Einstellungen</h3>
-                <p>Wählen Sie einen Tenant aus der Dropdown-Liste um Features nur für diesen zu steuern.</p>
-              </div>
-              <div className={styles.tutorialStep}>
-                <div className={styles.stepNumber}>3</div>
-                <h3>Bulk-Operationen</h3>
-                <p>Aktivieren Sie den Bulk-Modus um mehrere Features gleichzeitig zu bearbeiten.</p>
-              </div>
-              <div className={styles.tutorialStep}>
-                <div className={styles.stepNumber}>4</div>
-                <h3>Templates anwenden</h3>
-                <p>Nutzen Sie vordefinierte Templates um Features schnell zu konfigurieren.</p>
-              </div>
-              <div className={styles.tutorialStep}>
-                <div className={styles.stepNumber}>5</div>
-                <h3>Emergency Control</h3>
-                <p>Bei System-Überlastung können Sie nicht-kritische Features automatisch deaktivieren.</p>
-              </div>
-            </div>
-            <button 
-              className={styles.primaryButton}
-              onClick={() => setShowTutorial(false)}
-            >
-              Tutorial beenden
-            </button>
-          </div>
-        </div>
+      {editingFeature && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <FeatureDetailsModal
+            feature={editingFeature}
+            features={features}
+            tenants={tenants}
+            onClose={() => setEditingFeature(null)}
+            onSave={handleToggleFeature}
+          />
+        </Suspense>
       )}
     </div>
   );
 };
+
+// ============================================================================
+// TOGGLE COMPONENTS
+// ============================================================================
+const ToggleLeft = (props) => (
+  <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect x="1" y="5" width="22" height="14" rx="7" ry="7" />
+    <circle cx="8" cy="12" r="3" fill="currentColor" />
+  </svg>
+);
+
+const ToggleRight = (props) => (
+  <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect x="1" y="5" width="22" height="14" rx="7" ry="7" fill="currentColor" />
+    <circle cx="16" cy="12" r="3" fill="white" />
+  </svg>
+);
 
 export default FeatureControl;

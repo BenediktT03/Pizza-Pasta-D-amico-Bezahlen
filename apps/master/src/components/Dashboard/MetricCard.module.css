@@ -1,0 +1,179 @@
+/**
+ * EATECH Master Metric Card Styles
+ * Version: 1.0.0
+ * 
+ * Author: EATECH Development Team
+ * Created: 2025-01-07
+ * File Path: /apps/master/src/components/Dashboard/MetricCard.module.css
+ */
+
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--primary-color);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.iconContainer {
+  width: 48px;
+  height: 48px;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.iconContainer svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Color Variants */
+.primary .iconContainer {
+  background: var(--primary-light);
+  color: var(--primary-color);
+}
+
+.success .iconContainer {
+  background: var(--success-light);
+  color: var(--success-color);
+}
+
+.warning .iconContainer {
+  background: var(--warning-light);
+  color: var(--warning-color);
+}
+
+.error .iconContainer {
+  background: var(--error-light);
+  color: var(--error-color);
+}
+
+.info .iconContainer {
+  background: var(--info-light);
+  color: var(--info-color);
+}
+
+/* Trend */
+.trend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.trend svg {
+  width: 16px;
+  height: 16px;
+}
+
+.trendUp {
+  color: var(--success-color);
+}
+
+.trendDown {
+  color: var(--error-color);
+}
+
+.change {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.change.up {
+  color: var(--success-color);
+}
+
+.change.down {
+  color: var(--error-color);
+}
+
+/* Content */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.prefix,
+.suffix {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Hover Effects */
+.card:hover .iconContainer {
+  transform: scale(1.1);
+}
+
+/* Card color variants borders */
+.primary::before { background: var(--primary-color); }
+.success::before { background: var(--success-color); }
+.warning::before { background: var(--warning-color); }
+.error::before { background: var(--error-color); }
+.info::before { background: var(--info-color); }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .card {
+    padding: 1rem;
+  }
+
+  .value {
+    font-size: 1.5rem;
+  }
+
+  .prefix,
+  .suffix {
+    font-size: 1rem;
+  }
+}

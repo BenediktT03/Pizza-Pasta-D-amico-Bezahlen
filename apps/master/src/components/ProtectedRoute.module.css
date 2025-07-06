@@ -1,0 +1,79 @@
+/**
+ * EATECH Master Protected Route Styles
+ * Version: 1.0.0
+ * 
+ * Author: EATECH Development Team
+ * Created: 2025-01-07
+ * File Path: /apps/master/src/components/ProtectedRoute.module.css
+ */
+
+.loadingContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #f1f5f9;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  color: #3b82f6;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.loadingContainer p {
+  font-size: 1.125rem;
+  color: #94a3b8;
+}
+
+.unauthorizedContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #f1f5f9;
+  text-align: center;
+  padding: 2rem;
+}
+
+.unauthorizedContainer h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  color: #ef4444;
+}
+
+.unauthorizedContainer p {
+  font-size: 1.25rem;
+  color: #94a3b8;
+  margin-bottom: 2rem;
+}
+
+.unauthorizedContainer button {
+  padding: 0.75rem 2rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.unauthorizedContainer button:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

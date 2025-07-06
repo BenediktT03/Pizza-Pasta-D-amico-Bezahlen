@@ -1,0 +1,575 @@
+/**
+ * EATECH Master Login Styles
+ * Version: 1.0.0
+ * 
+ * Premium Design für Master Control Login
+ * Features: Dark Theme, Animations, Security Indicators
+ * 
+ * Author: EATECH Development Team
+ * Created: 2025-01-07
+ * File Path: /apps/master/src/pages/Login.module.css
+ */
+
+/* ============================================================================
+   CONTAINER & LAYOUT
+   ============================================================================ */
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  position: relative;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ============================================================================
+   SECURITY CHECK SCREENS
+   ============================================================================ */
+.securityCheck,
+.securityFailed {
+  background: rgba(30, 41, 59, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 16px;
+  padding: 3rem;
+  text-align: center;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+}
+
+.shieldIcon {
+  width: 64px;
+  height: 64px;
+  color: #3b82f6;
+  margin-bottom: 1.5rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.alertIcon {
+  width: 64px;
+  height: 64px;
+  color: #ef4444;
+  margin-bottom: 1.5rem;
+}
+
+.securityCheck h2,
+.securityFailed h2 {
+  color: #f1f5f9;
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.securityCheck p,
+.securityFailed p {
+  color: #94a3b8;
+  font-size: 1.125rem;
+  margin-bottom: 2rem;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  color: #3b82f6;
+  animation: spin 1s linear infinite;
+}
+
+.retryButton {
+  padding: 0.75rem 2rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.retryButton:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+}
+
+/* ============================================================================
+   LOGIN BOX
+   ============================================================================ */
+.loginBox {
+  width: 100%;
+  max-width: 480px;
+  background: rgba(30, 41, 59, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 24px;
+  padding: 3rem;
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(59, 130, 246, 0.1);
+  position: relative;
+  z-index: 10;
+  animation: slideIn 0.5s ease-out;
+}
+
+/* ============================================================================
+   HEADER
+   ============================================================================ */
+.header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.logoContainer {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 1.5rem;
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+  color: #3b82f6;
+  filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.5));
+  animation: glow 3s ease-in-out infinite;
+}
+
+.keyIcon {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  width: 32px;
+  height: 32px;
+  color: #fbbf24;
+  background: #1e293b;
+  padding: 4px;
+  border-radius: 50%;
+  animation: rotate 10s linear infinite;
+}
+
+.header h1 {
+  color: #f1f5f9;
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.025em;
+}
+
+.subtitle {
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ============================================================================
+   SECURITY INDICATORS
+   ============================================================================ */
+.securityIndicators {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.indicator {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.checkIcon {
+  width: 16px;
+  height: 16px;
+  color: #10b981;
+}
+
+.fingerprintIcon {
+  width: 16px;
+  height: 16px;
+  color: #3b82f6;
+}
+
+/* ============================================================================
+   FORM
+   ============================================================================ */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.inputGroup label {
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 1rem;
+  width: 20px;
+  height: 20px;
+  color: #64748b;
+  pointer-events: none;
+  transition: color 0.2s;
+}
+
+.inputWrapper:focus-within .inputIcon {
+  color: #3b82f6;
+}
+
+.inputWrapper input {
+  width: 100%;
+  padding: 0.875rem 3rem 0.875rem 3rem;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  color: #f1f5f9;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.inputWrapper input::placeholder {
+  color: #475569;
+}
+
+.inputWrapper input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: rgba(15, 23, 42, 1);
+  box-shadow: 
+    0 0 0 3px rgba(59, 130, 246, 0.1),
+    0 0 20px rgba(59, 130, 246, 0.2);
+}
+
+.inputWrapper input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.errorInput {
+  border-color: #ef4444 !important;
+}
+
+.togglePassword {
+  position: absolute;
+  right: 1rem;
+  padding: 0.25rem;
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.togglePassword:hover {
+  color: #cbd5e1;
+}
+
+.togglePassword svg {
+  width: 20px;
+  height: 20px;
+}
+
+.errorMessage {
+  color: #ef4444;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* ============================================================================
+   MESSAGES & ALERTS
+   ============================================================================ */
+.generalError {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  color: #fca5a5;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.generalError svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.blockTimer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 8px;
+  color: #fde047;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.lockIcon {
+  width: 20px;
+  height: 20px;
+}
+
+/* ============================================================================
+   SUBMIT BUTTON
+   ============================================================================ */
+.submitButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.submitButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.2), 
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.submitButton:hover::before {
+  left: 100%;
+}
+
+.submitButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 10px 15px -3px rgba(59, 130, 246, 0.5),
+    0 0 30px rgba(59, 130, 246, 0.3);
+}
+
+.submitButton:active {
+  transform: translateY(0);
+}
+
+.submitButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.submitButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+.buttonLoader {
+  animation: spin 1s linear infinite;
+}
+
+/* ============================================================================
+   FOOTER
+   ============================================================================ */
+.footer {
+  margin-top: 2rem;
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.securityNote {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.timestamp {
+  color: #475569;
+  font-size: 0.625rem;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+/* ============================================================================
+   BACKGROUND ANIMATION
+   ============================================================================ */
+.backgroundAnimation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #3b82f6;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: float 20s infinite;
+}
+
+.particle:nth-child(1) {
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+  animation-duration: 25s;
+}
+
+.particle:nth-child(2) {
+  top: 60%;
+  left: 70%;
+  animation-delay: 5s;
+  animation-duration: 30s;
+}
+
+.particle:nth-child(3) {
+  top: 80%;
+  left: 30%;
+  animation-delay: 10s;
+  animation-duration: 35s;
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes glow {
+  0%, 100% { 
+    filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.5)); 
+  }
+  50% { 
+    filter: drop-shadow(0 0 50px rgba(59, 130, 246, 0.8)); 
+  }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.3;
+  }
+  33% {
+    transform: translateY(-100px) translateX(100px) scale(1.2);
+    opacity: 0.5;
+  }
+  66% {
+    transform: translateY(-200px) translateX(-100px) scale(0.8);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.3;
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+@media (max-width: 640px) {
+  .loginBox {
+    margin: 1rem;
+    padding: 2rem;
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .logo {
+    width: 64px;
+    height: 64px;
+  }
+
+  .securityIndicators {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .indicator {
+    justify-content: center;
+  }
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+@media print {
+  .container {
+    display: none;
+  }
+}

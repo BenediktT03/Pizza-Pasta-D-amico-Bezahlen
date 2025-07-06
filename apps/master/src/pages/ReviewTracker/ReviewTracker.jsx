@@ -111,92 +111,84 @@ const database = getDatabase(app);
 // ============================================================================
 const POINTS_CONFIG = {
   perCHF: 1,          // 1 CHF = 1 Punkt
-  photoReview: 50,    // Foto hinzufügen
-  textReview: 20,     // Text Review
-  starRating: 5,      // Nur Sterne
-  weeklyLimit: 1,     // Max 1x pro Woche pro Truck
-  redeemThreshold: 1000, // 1000 Punkte = 10% Rabatt
-  redeemDiscount: 10     // 10% Rabatt
+  photoReview: 50,    // Foto-Review
+  criticalFeedback: 30, // Kritisches Feedback
+  milestone: {
+    first: 100,       // Erste Review
+    tenth: 200,       // 10. Review
+    fifty: 500,       // 50. Review
+    hundred: 1000     // 100. Review
+  }
 };
 
-const USER_LEVELS = [
+const LEVEL_SYSTEM = [
   { 
-    id: 'rookie',
-    name: 'Street Food Rookie',
-    icon: '🥄',
-    minPoints: 0,
-    maxPoints: 499,
+    id: 'rookie', 
+    name: 'Food Rookie', 
+    minPoints: 0, 
+    icon: '🍴', 
     color: '#808080',
-    benefits: ['Basis Features']
+    benefits: ['Newsletter', 'Geburtstags-Bonus']
   },
   { 
-    id: 'buddy',
-    name: 'Burger Buddy',
-    icon: '🍔',
-    minPoints: 500,
-    maxPoints: 1999,
-    color: '#CD7F32', // Bronze
-    benefits: ['1h frühere Vorbestellung']
+    id: 'explorer', 
+    name: 'Food Explorer', 
+    minPoints: 500, 
+    icon: '🍕', 
+    color: '#CD7F32',
+    benefits: ['5% Rabatt', 'Early Access']
   },
   { 
-    id: 'champion',
-    name: 'Taco Champion',
-    icon: '🌮',
-    minPoints: 2000,
-    maxPoints: 4999,
-    color: '#C0C0C0', // Silver
-    benefits: ['Beta Features testen']
+    id: 'enthusiast', 
+    name: 'Food Enthusiast', 
+    minPoints: 1500, 
+    icon: '🍔', 
+    color: '#C0C0C0',
+    benefits: ['10% Rabatt', 'Gratis Lieferung']
   },
   { 
-    id: 'maestro',
-    name: 'Pizza Maestro',
-    icon: '🍕',
-    minPoints: 5000,
-    maxPoints: 9999,
-    color: '#FFD700', // Gold
-    benefits: ['2h frühere Vorbestellung', 'Priority Queue']
+    id: 'connoisseur', 
+    name: 'Food Connoisseur', 
+    minPoints: 3000, 
+    icon: '🍽️', 
+    color: '#FFD700',
+    benefits: ['15% Rabatt', 'VIP Events', 'Priority Support']
   },
   { 
-    id: 'nomad',
-    name: 'Gourmet Nomad',
-    icon: '👨‍🍳',
-    minPoints: 10000,
-    maxPoints: null,
-    color: '#E5E4E2', // Platinum
-    benefits: ['VIP Status', '???']
+    id: 'nomad', 
+    name: 'Food Nomad', 
+    minPoints: 5000, 
+    icon: '👨‍🍳', 
+    color: '#E5E4E2',
+    benefits: ['20% Rabatt', 'Personal Chef Session', 'Lifetime Status']
   }
 ];
 
-const SENTIMENT_TYPES = {
-  positive: { icon: Smile, color: '#51CF66', label: 'Positiv' },
-  neutral: { icon: Meh, color: '#FFD93D', label: 'Neutral' },
-  negative: { icon: Frown, color: '#FF6B6B', label: 'Negativ' }
-};
-
-const REVIEW_PLATFORMS = {
-  google: { name: 'Google Reviews', icon: '🔍', color: '#4285F4' },
-  tripadvisor: { name: 'TripAdvisor', icon: '🦉', color: '#00AF87' },
-  facebook: { name: 'Facebook', icon: '👍', color: '#1877F2' },
-  internal: { name: 'EATECH', icon: '🍔', color: '#FF6B6B' }
+const PLATFORM_ICONS = {
+  google: '🌐',
+  internal: '🏠',
+  facebook: '📘',
+  instagram: '📸',
+  tripadvisor: '🦉'
 };
 
 const SWISS_CANTONS = {
   'ZH': { name: 'Zürich', lat: 47.3769, lng: 8.5417 },
   'BE': { name: 'Bern', lat: 46.9480, lng: 7.4474 },
   'LU': { name: 'Luzern', lat: 47.0502, lng: 8.3093 },
-  'UR': { name: 'Uri', lat: 46.8868, lng: 8.6340 },
+  'UR': { name: 'Uri', lat: 46.8868, lng: 8.6348 },
   'SZ': { name: 'Schwyz', lat: 47.0207, lng: 8.6530 },
-  'OW': { name: 'Obwalden', lat: 46.8779, lng: 8.2513 },
-  'NW': { name: 'Nidwalden', lat: 46.9267, lng: 8.3850 },
-  'GL': { name: 'Glarus', lat: 47.0404, lng: 9.0680 },
+  'OW': { name: 'Obwalden', lat: 46.8779, lng: 8.2512 },
+  'NW': { name: 'Nidwalden', lat: 46.9266, lng: 8.3858 },
+  'GL': { name: 'Glarus', lat: 47.0401, lng: 9.0678 },
   'ZG': { name: 'Zug', lat: 47.1662, lng: 8.5156 },
-  'FR': { name: 'Fribourg', lat: 46.8065, lng: 7.1620 },
+  'FR': { name: 'Freiburg', lat: 46.8065, lng: 7.1618 },
   'SO': { name: 'Solothurn', lat: 47.2088, lng: 7.5323 },
   'BS': { name: 'Basel-Stadt', lat: 47.5596, lng: 7.5886 },
-  'BL': { name: 'Basel-Landschaft', lat: 47.4814, lng: 7.7335 },
-  'SH': { name: 'Schaffhausen', lat: 47.6970, lng: 8.6344 },
-  'AR': { name: 'Appenzell Ausserrhoden', lat: 47.3829, lng: 9.2779 },
-  'AI': { name: 'Appenzell Innerrhoden', lat: 47.3167, lng: 9.4167 },
+  'BL': { name: 'Basel-Landschaft', lat: 47.4859, lng: 7.7327 },
+  'SH': { name: 'Schaffhausen', lat: 47.6970, lng: 8.6345 },
+  'AR': { name: 'Appenzell Ausserrhoden', lat: 47.3662, lng: 9.3000 },
+  'AI': { name: 'Appenzell Innerrhoden', lat: 47.3166, lng: 9.4167 },
   'SG': { name: 'St. Gallen', lat: 47.4245, lng: 9.3767 },
   'GR': { name: 'Graubünden', lat: 46.6570, lng: 9.5779 },
   'AG': { name: 'Aargau', lat: 47.3887, lng: 8.0457 },
@@ -252,40 +244,33 @@ const ReviewTracker = () => {
     const reviewsRef = ref(database, 'reviews');
     const usersRef = ref(database, 'users');
     const foodtrucksRef = ref(database, 'foodtrucks');
-    const pointsRef = ref(database, 'points_history');
+    const pointsRef = ref(database, 'pointsHistory');
 
-    // Load reviews
-    const reviewsQuery = query(
-      reviewsRef,
-      orderByChild('timestamp'),
-      limitToLast(5000)
-    );
-
-    const unsubscribeReviews = onValue(reviewsQuery, (snapshot) => {
+    // Listen to reviews
+    const reviewsUnsubscribe = onValue(reviewsRef, (snapshot) => {
       const data = snapshot.val() || {};
       const reviewsList = Object.entries(data).map(([id, review]) => ({
         id,
         ...review,
-        sentiment: analyzeSentiment(review.text || '')
-      })).reverse();
+        sentiment: analyzeSentiment(review.rating, review.text)
+      }));
       setReviews(reviewsList);
       calculateAnalytics(reviewsList);
-      setLoading(false);
     });
 
-    // Load users
-    const unsubscribeUsers = onValue(usersRef, (snapshot) => {
+    // Listen to users
+    const usersUnsubscribe = onValue(usersRef, (snapshot) => {
       const data = snapshot.val() || {};
       const usersList = Object.entries(data).map(([id, user]) => ({
         id,
         ...user,
-        level: calculateUserLevel(user.points || 0)
+        level: calculateLevel(user.totalPoints || 0)
       }));
       setUsers(usersList);
     });
 
-    // Load foodtrucks
-    const unsubscribeFoodtrucks = onValue(foodtrucksRef, (snapshot) => {
+    // Listen to foodtrucks
+    const foodtrucksUnsubscribe = onValue(foodtrucksRef, (snapshot) => {
       const data = snapshot.val() || {};
       const foodtrucksList = Object.entries(data).map(([id, truck]) => ({
         id,
@@ -294,312 +279,194 @@ const ReviewTracker = () => {
       setFoodtrucks(foodtrucksList);
     });
 
-    // Load points history
-    const pointsQuery = query(
-      pointsRef,
-      orderByChild('timestamp'),
-      limitToLast(1000)
-    );
-
-    const unsubscribePoints = onValue(pointsQuery, (snapshot) => {
+    // Listen to points history
+    const pointsUnsubscribe = onValue(pointsRef, (snapshot) => {
       const data = snapshot.val() || {};
-      const pointsList = Object.entries(data).map(([id, points]) => ({
+      const pointsList = Object.entries(data).map(([id, point]) => ({
         id,
-        ...points
+        ...point
       }));
       setPointsHistory(pointsList);
     });
 
+    setLoading(false);
+
+    // Cleanup
     return () => {
-      unsubscribeReviews();
-      unsubscribeUsers();
-      unsubscribeFoodtrucks();
-      unsubscribePoints();
+      off(reviewsRef);
+      off(usersRef);
+      off(foodtrucksRef);
+      off(pointsRef);
     };
   }, []);
 
   // ========================================================================
-  // SENTIMENT ANALYSIS
+  // HELPER FUNCTIONS
   // ========================================================================
-  const analyzeSentiment = (text) => {
-    if (!text) return 'neutral';
+  const analyzeSentiment = (rating, text) => {
+    // Simple sentiment analysis based on rating and keywords
+    if (rating >= 4) return 'positive';
+    if (rating <= 2) return 'negative';
     
-    const positiveWords = [
-      'super', 'toll', 'lecker', 'fantastisch', 'ausgezeichnet', 'perfekt',
-      'délicieux', 'magnifique', 'excellent', 'parfait',
-      'ottimo', 'buonissimo', 'fantastico', 'perfetto',
-      'great', 'amazing', 'perfect', 'delicious', 'excellent'
-    ];
+    // For neutral ratings, check text
+    const positiveWords = ['lecker', 'super', 'toll', 'gut', 'empfehlen', 'fantastisch'];
+    const negativeWords = ['schlecht', 'kalt', 'lange', 'enttäuscht', 'teuer', 'nie wieder'];
     
-    const negativeWords = [
-      'schlecht', 'kalt', 'langsam', 'teuer', 'enttäuscht',
-      'mauvais', 'froid', 'lent', 'cher', 'déçu',
-      'cattivo', 'freddo', 'lento', 'caro', 'deluso',
-      'bad', 'cold', 'slow', 'expensive', 'disappointed'
-    ];
+    const textLower = (text || '').toLowerCase();
+    const positiveCount = positiveWords.filter(word => textLower.includes(word)).length;
+    const negativeCount = negativeWords.filter(word => textLower.includes(word)).length;
     
-    const lowerText = text.toLowerCase();
-    let score = 0;
-    
-    positiveWords.forEach(word => {
-      if (lowerText.includes(word)) score += 1;
-    });
-    
-    negativeWords.forEach(word => {
-      if (lowerText.includes(word)) score -= 1;
-    });
-    
-    if (score > 0) return 'positive';
-    if (score < 0) return 'negative';
+    if (positiveCount > negativeCount) return 'positive';
+    if (negativeCount > positiveCount) return 'negative';
     return 'neutral';
   };
 
-  // ========================================================================
-  // ANALYTICS CALCULATIONS
-  // ========================================================================
-  const calculateAnalytics = (reviewsList) => {
-    const stats = {
-      totalReviews: reviewsList.length,
-      averageRating: 0,
-      sentimentBreakdown: { positive: 0, neutral: 0, negative: 0 },
-      platformBreakdown: {},
-      cantonStats: {},
-      topReviewers: [],
-      trendingFoodtrucks: [],
-      criticalReviews: [],
-      pointsDistributed: 0,
-      redemptionsProcessed: 0
-    };
-
-    // Calculate averages and breakdowns
-    let totalRating = 0;
-    const userReviewCounts = {};
-    const foodtruckReviewCounts = {};
-    const cantonRatings = {};
-
-    reviewsList.forEach(review => {
-      // Rating average
-      totalRating += review.rating || 0;
-      
-      // Sentiment breakdown
-      stats.sentimentBreakdown[review.sentiment]++;
-      
-      // Platform breakdown
-      const platform = review.platform || 'internal';
-      stats.platformBreakdown[platform] = (stats.platformBreakdown[platform] || 0) + 1;
-      
-      // User counts for top reviewers
-      if (!userReviewCounts[review.userId]) {
-        userReviewCounts[review.userId] = { count: 0, userId: review.userId };
-      }
-      userReviewCounts[review.userId].count++;
-      
-      // Foodtruck counts for trending
-      if (!foodtruckReviewCounts[review.foodtruckId]) {
-        foodtruckReviewCounts[review.foodtruckId] = { 
-          count: 0, 
-          totalRating: 0, 
-          foodtruckId: review.foodtruckId 
-        };
-      }
-      foodtruckReviewCounts[review.foodtruckId].count++;
-      foodtruckReviewCounts[review.foodtruckId].totalRating += review.rating || 0;
-      
-      // Canton stats
-      const canton = review.canton || 'unknown';
-      if (!cantonRatings[canton]) {
-        cantonRatings[canton] = { 
-          count: 0, 
-          totalRating: 0, 
-          positive: 0, 
-          negative: 0 
-        };
-      }
-      cantonRatings[canton].count++;
-      cantonRatings[canton].totalRating += review.rating || 0;
-      if (review.sentiment === 'positive') cantonRatings[canton].positive++;
-      if (review.sentiment === 'negative') cantonRatings[canton].negative++;
-      
-      // Critical reviews (negative with rating <= 2)
-      if (review.sentiment === 'negative' && review.rating <= 2) {
-        stats.criticalReviews.push(review);
-      }
-      
-      // Points distributed
-      stats.pointsDistributed += review.pointsAwarded || 0;
-    });
-
-    // Calculate final values
-    stats.averageRating = stats.totalReviews > 0 
-      ? (totalRating / stats.totalReviews).toFixed(1) 
-      : 0;
-
-    // Top reviewers
-    stats.topReviewers = Object.values(userReviewCounts)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
-
-    // Trending foodtrucks (most reviews in last 7 days)
-    const lastWeek = new Date();
-    lastWeek.setDate(lastWeek.getDate() - 7);
-    
-    stats.trendingFoodtrucks = Object.values(foodtruckReviewCounts)
-      .map(truck => ({
-        ...truck,
-        avgRating: truck.count > 0 ? (truck.totalRating / truck.count).toFixed(1) : 0
-      }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
-
-    // Canton stats with averages
-    Object.entries(cantonRatings).forEach(([canton, data]) => {
-      stats.cantonStats[canton] = {
-        ...data,
-        avgRating: data.count > 0 ? (data.totalRating / data.count).toFixed(1) : 0,
-        sentimentScore: data.count > 0 
-          ? ((data.positive - data.negative) / data.count * 100).toFixed(0)
-          : 0
-      };
-    });
-
-    // Sort critical reviews by recency
-    stats.criticalReviews = stats.criticalReviews
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, 20);
-
-    setAnalytics(stats);
-  };
-
-  // ========================================================================
-  // USER LEVEL CALCULATION
-  // ========================================================================
-  const calculateUserLevel = (points) => {
-    for (const level of USER_LEVELS) {
-      if (points >= level.minPoints && (level.maxPoints === null || points <= level.maxPoints)) {
-        return level;
+  const calculateLevel = (points) => {
+    for (let i = LEVEL_SYSTEM.length - 1; i >= 0; i--) {
+      if (points >= LEVEL_SYSTEM[i].minPoints) {
+        return LEVEL_SYSTEM[i];
       }
     }
-    return USER_LEVELS[0];
+    return LEVEL_SYSTEM[0];
+  };
+
+  const calculateAnalytics = (reviewsList) => {
+    const totalReviews = reviewsList.length;
+    const totalRating = reviewsList.reduce((sum, r) => sum + (r.rating || 0), 0);
+    const averageRating = totalReviews > 0 ? (totalRating / totalReviews).toFixed(1) : 0;
+
+    // Sentiment breakdown
+    const sentimentBreakdown = reviewsList.reduce((acc, review) => {
+      acc[review.sentiment] = (acc[review.sentiment] || 0) + 1;
+      return acc;
+    }, { positive: 0, neutral: 0, negative: 0 });
+
+    // Platform breakdown
+    const platformBreakdown = reviewsList.reduce((acc, review) => {
+      acc[review.platform] = (acc[review.platform] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Canton stats
+    const cantonStats = reviewsList.reduce((acc, review) => {
+      if (review.canton) {
+        acc[review.canton] = (acc[review.canton] || 0) + 1;
+      }
+      return acc;
+    }, {});
+
+    // Top reviewers (by review count)
+    const reviewerCounts = reviewsList.reduce((acc, review) => {
+      if (review.userId) {
+        acc[review.userId] = (acc[review.userId] || 0) + 1;
+      }
+      return acc;
+    }, {});
+
+    const topReviewers = Object.entries(reviewerCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([userId, count]) => ({ userId, count }));
+
+    // Critical reviews (rating <= 2)
+    const criticalReviews = reviewsList
+      .filter(r => r.rating <= 2)
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .slice(0, 10);
+
+    // Points distributed
+    const pointsDistributed = pointsHistory.reduce((sum, p) => sum + (p.points || 0), 0);
+
+    setAnalytics({
+      totalReviews,
+      averageRating,
+      sentimentBreakdown,
+      platformBreakdown,
+      cantonStats,
+      topReviewers,
+      criticalReviews,
+      pointsDistributed,
+      redemptionsProcessed: pointsHistory.filter(p => p.type === 'redemption').length
+    });
   };
 
   // ========================================================================
-  // POINTS MANAGEMENT
+  // ACTION HANDLERS
   // ========================================================================
-  const awardPoints = async (userId, reviewId, type, amount) => {
+  const awardPoints = async (review, points, reason) => {
     try {
-      // Check weekly limit
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
+      // Update user points
+      const userRef = ref(database, `users/${review.userId}`);
+      const userSnapshot = await get(userRef);
+      const userData = userSnapshot.val() || {};
+      const currentPoints = userData.totalPoints || 0;
       
-      const userReviewsThisWeek = reviews.filter(r => 
-        r.userId === userId && 
-        r.foodtruckId === reviews.find(rev => rev.id === reviewId)?.foodtruckId &&
-        new Date(r.timestamp) > weekAgo
-      );
-      
-      if (userReviewsThisWeek.length >= POINTS_CONFIG.weeklyLimit) {
-        alert('Wöchentliches Limit erreicht für diesen Foodtruck!');
-        return;
-      }
-
-      // Award points
-      const pointsEntry = {
-        userId,
-        reviewId,
-        type,
-        amount,
-        timestamp: serverTimestamp()
-      };
-
-      await push(ref(database, 'points_history'), pointsEntry);
-      
-      // Update user total points
-      const userRef = ref(database, `users/${userId}`);
       await update(userRef, {
-        points: (users.find(u => u.id === userId)?.points || 0) + amount
+        totalPoints: currentPoints + points,
+        lastPointsUpdate: serverTimestamp()
       });
 
-      // Update review
-      await update(ref(database, `reviews/${reviewId}`), {
-        pointsAwarded: amount
+      // Add to points history
+      const pointsRef = ref(database, 'pointsHistory');
+      await push(pointsRef, {
+        userId: review.userId,
+        reviewId: review.id,
+        points,
+        reason,
+        timestamp: serverTimestamp(),
+        type: 'award'
       });
 
-      alert(`${amount} Punkte vergeben!`);
+      // Mark review as rewarded
+      const reviewRef = ref(database, `reviews/${review.id}`);
+      await update(reviewRef, {
+        pointsAwarded: points,
+        pointsAwardedAt: serverTimestamp()
+      });
+
+      alert(`${points} Punkte vergeben!`);
     } catch (error) {
       console.error('Error awarding points:', error);
       alert('Fehler beim Vergeben der Punkte');
     }
   };
 
-  const redeemPoints = async (userId, amount) => {
-    const user = users.find(u => u.id === userId);
-    if (!user || user.points < amount) {
-      alert('Nicht genügend Punkte!');
-      return;
-    }
-
+  const handleSentimentOverride = async (reviewId, newSentiment) => {
     try {
-      // Create redemption record
-      const redemption = {
-        userId,
-        amount,
-        discount: POINTS_CONFIG.redeemDiscount,
-        timestamp: serverTimestamp(),
-        status: 'pending'
-      };
-
-      await push(ref(database, 'redemptions'), redemption);
-      
-      // Deduct points
-      await update(ref(database, `users/${userId}`), {
-        points: user.points - amount
+      const reviewRef = ref(database, `reviews/${reviewId}`);
+      await update(reviewRef, {
+        sentiment: newSentiment,
+        sentimentOverride: true,
+        sentimentUpdatedAt: serverTimestamp()
       });
-
-      alert(`${POINTS_CONFIG.redeemDiscount}% Rabatt-Code generiert!`);
+      setShowSentimentModal(false);
+      alert('Sentiment erfolgreich aktualisiert');
     } catch (error) {
-      console.error('Error redeeming points:', error);
-      alert('Fehler beim Einlösen der Punkte');
+      console.error('Error updating sentiment:', error);
+      alert('Fehler beim Aktualisieren des Sentiments');
     }
   };
 
-  // ========================================================================
-  // REVIEW ACTIONS
-  // ========================================================================
-  const flagReview = async (reviewId, reason) => {
-    try {
-      await update(ref(database, `reviews/${reviewId}`), {
-        flagged: true,
-        flagReason: reason,
-        flaggedAt: serverTimestamp()
-      });
-      alert('Review wurde gemeldet');
-    } catch (error) {
-      console.error('Error flagging review:', error);
-      alert('Fehler beim Melden der Review');
-    }
-  };
-
-  const sendReviewRequest = async (orderId) => {
-    // This would trigger a notification after 15 minutes
-    // Connected to NotificationCenter
-    const notification = {
-      type: 'review_request',
-      orderId,
-      scheduledFor: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
-      channels: ['push', 'email']
+  const exportAnalytics = () => {
+    const data = {
+      exportDate: new Date().toISOString(),
+      analytics,
+      reviews: filteredReviews,
+      filters
     };
-    
-    await push(ref(database, 'scheduled_notifications'), notification);
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `eatech-reviews-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   // ========================================================================
-  // UI HELPERS
+  // FILTER LOGIC
   // ========================================================================
-  const formatTimestamp = (timestamp) => {
-    if (!timestamp) return '-';
-    return new Date(timestamp).toLocaleString('de-CH');
-  };
-
   const getDateRangeFilter = () => {
     const now = new Date();
     const ranges = {
@@ -710,26 +577,20 @@ const ReviewTracker = () => {
           onClick={() => setActiveView('users')}
         >
           <Users size={18} />
-          Benutzer
+          Users & Levels
         </button>
         <button 
-          className={`${styles.tab} ${activeView === 'sentiment' ? styles.active : ''}`}
-          onClick={() => setActiveView('sentiment')}
+          className={`${styles.tab} ${activeView === 'points' ? styles.active : ''}`}
+          onClick={() => setActiveView('points')}
         >
-          <TrendingUp size={18} />
-          Sentiment
-        </button>
-        <button 
-          className={`${styles.tab} ${activeView === 'rewards' ? styles.active : ''}`}
-          onClick={() => setActiveView('rewards')}
-        >
-          <Gift size={18} />
-          Rewards
+          <Award size={18} />
+          Points History
         </button>
       </div>
 
       {/* Content Area */}
       <div className={styles.content}>
+        {/* Dashboard View */}
         {activeView === 'dashboard' && (
           <div className={styles.dashboard}>
             {/* Sentiment Overview */}
@@ -739,15 +600,21 @@ const ReviewTracker = () => {
                 <div className={styles.sentimentBars}>
                   {Object.entries(analytics.sentimentBreakdown).map(([sentiment, count]) => {
                     const percentage = analytics.totalReviews > 0 
-                      ? (count / analytics.totalReviews * 100).toFixed(1)
+                      ? Math.round((count / analytics.totalReviews) * 100) 
                       : 0;
-                    const config = SENTIMENT_TYPES[sentiment];
+                    const colors = {
+                      positive: '#51CF66',
+                      neutral: '#FFD93D',
+                      negative: '#FF6B6B'
+                    };
                     
                     return (
                       <div key={sentiment} className={styles.sentimentBar}>
                         <div className={styles.sentimentHeader}>
-                          <config.icon size={20} style={{ color: config.color }} />
-                          <span>{config.label}</span>
+                          {sentiment === 'positive' && <Smile size={20} />}
+                          {sentiment === 'neutral' && <Meh size={20} />}
+                          {sentiment === 'negative' && <Frown size={20} />}
+                          <span>{sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}</span>
                           <span className={styles.sentimentCount}>{count}</span>
                         </div>
                         <div className={styles.barContainer}>
@@ -755,11 +622,11 @@ const ReviewTracker = () => {
                             className={styles.barFill}
                             style={{ 
                               width: `${percentage}%`,
-                              backgroundColor: config.color
+                              backgroundColor: colors[sentiment]
                             }}
                           />
                         </div>
-                        <span className={styles.percentage}>{percentage}%</span>
+                        <div className={styles.percentage}>{percentage}%</div>
                       </div>
                     );
                   })}
@@ -769,18 +636,19 @@ const ReviewTracker = () => {
 
             {/* Platform Breakdown */}
             <div className={styles.platformBreakdown}>
-              <h2>Review Plattformen</h2>
+              <h2>Platform Verteilung</h2>
               <div className={styles.platformGrid}>
                 {Object.entries(analytics.platformBreakdown).map(([platform, count]) => {
-                  const config = REVIEW_PLATFORMS[platform] || REVIEW_PLATFORMS.internal;
                   const percentage = analytics.totalReviews > 0
-                    ? (count / analytics.totalReviews * 100).toFixed(1)
+                    ? Math.round((count / analytics.totalReviews) * 100)
                     : 0;
-
+                  
                   return (
                     <div key={platform} className={styles.platformCard}>
-                      <div className={styles.platformIcon}>{config.icon}</div>
-                      <div className={styles.platformName}>{config.name}</div>
+                      <div className={styles.platformIcon}>
+                        {PLATFORM_ICONS[platform] || '📱'}
+                      </div>
+                      <div className={styles.platformName}>{platform}</div>
                       <div className={styles.platformCount}>{count}</div>
                       <div className={styles.platformPercentage}>{percentage}%</div>
                     </div>
@@ -793,26 +661,26 @@ const ReviewTracker = () => {
             <div className={styles.topReviewers}>
               <h2>
                 <Trophy size={20} />
-                Top Reviewers
+                Top Reviewer
               </h2>
               <div className={styles.reviewerList}>
                 {analytics.topReviewers.map((reviewer, index) => {
                   const user = users.find(u => u.id === reviewer.userId);
                   if (!user) return null;
-
+                  
                   return (
                     <div key={reviewer.userId} className={styles.reviewerItem}>
                       <div className={styles.reviewerRank}>#{index + 1}</div>
                       <div className={styles.reviewerInfo}>
-                        <div className={styles.reviewerName}>{user.name}</div>
+                        <div className={styles.reviewerName}>{user.name || 'Unbekannt'}</div>
                         <div className={styles.reviewerLevel}>
                           <span className={styles.levelIcon}>{user.level?.icon}</span>
-                          <span className={styles.levelName}>{user.level?.name}</span>
+                          <span>{user.level?.name}</span>
                         </div>
                       </div>
                       <div className={styles.reviewerStats}>
                         <div className={styles.reviewCount}>{reviewer.count} Reviews</div>
-                        <div className={styles.reviewPoints}>{user.points} Punkte</div>
+                        <div className={styles.pointsCount}>{user.totalPoints || 0} Punkte</div>
                       </div>
                     </div>
                   );
@@ -820,88 +688,45 @@ const ReviewTracker = () => {
               </div>
             </div>
 
-            {/* Trending Foodtrucks */}
-            <div className={styles.trendingTrucks}>
+            {/* Critical Reviews */}
+            <div className={styles.criticalReviews}>
               <h2>
-                <Flame size={20} />
-                Trending Foodtrucks
+                <AlertCircle size={20} />
+                Kritische Reviews
               </h2>
-              <div className={styles.truckList}>
-                {analytics.trendingFoodtrucks.map((truck, index) => {
-                  const foodtruck = foodtrucks.find(f => f.id === truck.foodtruckId);
-                  if (!foodtruck) return null;
-
-                  return (
-                    <div key={truck.foodtruckId} className={styles.truckItem}>
-                      <div className={styles.truckRank}>
-                        {index < 3 && <Medal size={20} style={{ color: ['#FFD700', '#C0C0C0', '#CD7F32'][index] }} />}
-                        #{index + 1}
+              <div className={styles.criticalList}>
+                {analytics.criticalReviews.map(review => (
+                  <div key={review.id} className={styles.criticalItem}>
+                    <div className={styles.criticalHeader}>
+                      <div className={styles.criticalRating}>
+                        {'⭐'.repeat(review.rating)}
+                        <span className={styles.ratingNumber}>({review.rating})</span>
                       </div>
-                      <div className={styles.truckInfo}>
-                        <div className={styles.truckName}>{foodtruck.name}</div>
-                        <div className={styles.truckType}>{foodtruck.type}</div>
-                      </div>
-                      <div className={styles.truckStats}>
-                        <div className={styles.truckReviews}>{truck.count} Reviews</div>
-                        <div className={styles.truckRating}>⭐ {truck.avgRating}</div>
-                      </div>
-                      <div className={styles.truckTrend}>
-                        <TrendingUp size={16} color="#51CF66" />
+                      <div className={styles.criticalDate}>
+                        {new Date(review.timestamp).toLocaleDateString('de-CH')}
                       </div>
                     </div>
-                  );
-                })}
+                    <div className={styles.criticalText}>{review.text}</div>
+                    <div className={styles.criticalFooter}>
+                      <div className={styles.criticalTruck}>
+                        <Truck size={14} />
+                        {review.foodtruckName || 'Unbekannt'}
+                      </div>
+                      <button 
+                        className={styles.respondButton}
+                        onClick={() => setSelectedReview(review)}
+                      >
+                        Antworten
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-
-            {/* Critical Reviews Alert */}
-            {analytics.criticalReviews.length > 0 && (
-              <div className={styles.criticalReviews}>
-                <h2>
-                  <AlertCircle size={20} color="#FF6B6B" />
-                  Kritische Reviews (Sofort reagieren!)
-                </h2>
-                <div className={styles.criticalList}>
-                  {analytics.criticalReviews.slice(0, 5).map(review => {
-                    const foodtruck = foodtrucks.find(f => f.id === review.foodtruckId);
-                    
-                    return (
-                      <div key={review.id} className={styles.criticalItem}>
-                        <div className={styles.criticalHeader}>
-                          <span className={styles.criticalRating}>
-                            {'⭐'.repeat(review.rating)}
-                          </span>
-                          <span className={styles.criticalTruck}>{foodtruck?.name}</span>
-                          <span className={styles.criticalTime}>
-                            {formatTimestamp(review.timestamp)}
-                          </span>
-                        </div>
-                        <div className={styles.criticalText}>{review.text}</div>
-                        <div className={styles.criticalActions}>
-                          <button 
-                            className={styles.respondButton}
-                            onClick={() => setSelectedReview(review)}
-                          >
-                            <MessageSquare size={14} />
-                            Antworten
-                          </button>
-                          <button 
-                            className={styles.flagButton}
-                            onClick={() => flagReview(review.id, 'needs_attention')}
-                          >
-                            <Flag size={14} />
-                            Markieren
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
         )}
 
+        {/* Reviews List View */}
         {activeView === 'reviews' && (
           <div className={styles.reviewsList}>
             {/* Filters */}
@@ -910,60 +735,49 @@ const ReviewTracker = () => {
                 <Search size={18} />
                 <input
                   type="text"
-                  placeholder="Suche in Reviews..."
+                  placeholder="Suche nach Text, User oder Foodtruck..."
                   value={filters.search}
-                  onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                  onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                 />
               </div>
               
-              <select
-                value={filters.dateRange}
-                onChange={(e) => setFilters(prev => ({ ...prev, dateRange: e.target.value }))}
+              <select 
                 className={styles.filterSelect}
+                value={filters.dateRange}
+                onChange={(e) => setFilters({ ...filters, dateRange: e.target.value })}
               >
                 <option value="today">Heute</option>
                 <option value="week">Diese Woche</option>
                 <option value="month">Dieser Monat</option>
                 <option value="year">Dieses Jahr</option>
               </select>
-
-              <select
-                value={filters.sentiment}
-                onChange={(e) => setFilters(prev => ({ ...prev, sentiment: e.target.value }))}
+              
+              <select 
                 className={styles.filterSelect}
+                value={filters.sentiment}
+                onChange={(e) => setFilters({ ...filters, sentiment: e.target.value })}
               >
                 <option value="all">Alle Sentiments</option>
-                {Object.entries(SENTIMENT_TYPES).map(([key, config]) => (
-                  <option key={key} value={key}>{config.label}</option>
-                ))}
+                <option value="positive">Positiv</option>
+                <option value="neutral">Neutral</option>
+                <option value="negative">Negativ</option>
               </select>
-
-              <select
-                value={filters.platform}
-                onChange={(e) => setFilters(prev => ({ ...prev, platform: e.target.value }))}
+              
+              <select 
                 className={styles.filterSelect}
+                value={filters.platform}
+                onChange={(e) => setFilters({ ...filters, platform: e.target.value })}
               >
                 <option value="all">Alle Plattformen</option>
-                {Object.entries(REVIEW_PLATFORMS).map(([key, config]) => (
-                  <option key={key} value={key}>{config.name}</option>
+                {Object.keys(PLATFORM_ICONS).map(platform => (
+                  <option key={platform} value={platform}>{platform}</option>
                 ))}
               </select>
-
-              <select
-                value={filters.canton}
-                onChange={(e) => setFilters(prev => ({ ...prev, canton: e.target.value }))}
+              
+              <select 
                 className={styles.filterSelect}
-              >
-                <option value="all">Alle Kantone</option>
-                {Object.entries(SWISS_CANTONS).map(([key, config]) => (
-                  <option key={key} value={key}>{config.name}</option>
-                ))}
-              </select>
-
-              <select
                 value={filters.hasPhoto}
-                onChange={(e) => setFilters(prev => ({ ...prev, hasPhoto: e.target.value }))}
-                className={styles.filterSelect}
+                onChange={(e) => setFilters({ ...filters, hasPhoto: e.target.value })}
               >
                 <option value="all">Mit/Ohne Foto</option>
                 <option value="yes">Mit Foto</option>
@@ -974,76 +788,80 @@ const ReviewTracker = () => {
             {/* Reviews Grid */}
             <div className={styles.reviewsGrid}>
               {filteredReviews.map(review => {
-                const user = users.find(u => u.id === review.userId);
-                const foodtruck = foodtrucks.find(f => f.id === review.foodtruckId);
-                const sentimentConfig = SENTIMENT_TYPES[review.sentiment];
-
+                const sentimentColors = {
+                  positive: '#51CF66',
+                  neutral: '#FFD93D',
+                  negative: '#FF6B6B'
+                };
+                
                 return (
                   <div key={review.id} className={styles.reviewCard}>
                     <div className={styles.reviewHeader}>
                       <div className={styles.reviewUser}>
-                        <span className={styles.userName}>{user?.name || 'Unknown'}</span>
-                        <span className={styles.userLevel}>
-                          {user?.level?.icon} {user?.level?.name}
-                        </span>
+                        <div className={styles.userName}>{review.userName || 'Anonym'}</div>
+                        <div className={styles.userLevel}>
+                          {review.userId && users.find(u => u.id === review.userId)?.level?.icon}
+                          {review.userId && users.find(u => u.id === review.userId)?.level?.name}
+                        </div>
                       </div>
                       <div className={styles.reviewMeta}>
                         <span className={styles.reviewPlatform}>
-                          {REVIEW_PLATFORMS[review.platform]?.icon}
+                          {PLATFORM_ICONS[review.platform]}
                         </span>
-                        <span className={styles.reviewTime}>
-                          {formatTimestamp(review.timestamp)}
-                        </span>
+                        <span>{new Date(review.timestamp).toLocaleDateString('de-CH')}</span>
                       </div>
                     </div>
-
+                    
                     <div className={styles.reviewContent}>
                       <div className={styles.reviewRating}>
-                        {'⭐'.repeat(review.rating || 0)}
-                        <span className={styles.ratingNumber}>({review.rating}/5)</span>
+                        {'⭐'.repeat(review.rating)}
+                        <span className={styles.ratingNumber}>({review.rating})</span>
                       </div>
+                      
                       <div className={styles.reviewTruck}>
                         <Truck size={14} />
-                        {foodtruck?.name || 'Unknown Truck'}
+                        {review.foodtruckName || 'Unbekannt'}
                       </div>
+                      
                       {review.photoUrl && (
                         <div className={styles.reviewPhoto}>
-                          <Camera size={16} />
                           <img src={review.photoUrl} alt="Review" />
+                          <Camera size={16} />
                         </div>
                       )}
-                      <div className={styles.reviewText}>{review.text}</div>
+                      
+                      <p className={styles.reviewText}>{review.text}</p>
                     </div>
-
+                    
                     <div className={styles.reviewFooter}>
-                      <div className={styles.sentimentBadge} style={{ backgroundColor: sentimentConfig.color }}>
-                        <sentimentConfig.icon size={16} />
-                        {sentimentConfig.label}
+                      <div 
+                        className={styles.sentimentBadge}
+                        style={{ backgroundColor: sentimentColors[review.sentiment] }}
+                      >
+                        {review.sentiment === 'positive' && <ThumbsUp size={14} />}
+                        {review.sentiment === 'neutral' && <Meh size={14} />}
+                        {review.sentiment === 'negative' && <ThumbsDown size={14} />}
+                        {review.sentiment}
                       </div>
                       
                       <div className={styles.reviewActions}>
                         {!review.pointsAwarded && (
-                          <button
+                          <button 
                             className={styles.awardPointsBtn}
                             onClick={() => {
-                              const points = (review.photoUrl ? POINTS_CONFIG.photoReview : 0) +
-                                            (review.text ? POINTS_CONFIG.textReview : 0) +
-                                            POINTS_CONFIG.starRating;
-                              awardPoints(review.userId, review.id, 'review', points);
+                              const points = review.photoUrl ? POINTS_CONFIG.photoReview : 20;
+                              awardPoints(review, points, 'Review Belohnung');
                             }}
                           >
-                            <Gift size={14} />
-                            {(review.photoUrl ? POINTS_CONFIG.photoReview : 0) +
-                             (review.text ? POINTS_CONFIG.textReview : 0) +
-                             POINTS_CONFIG.starRating} Punkte
+                            <Gift size={16} />
+                            Punkte vergeben
                           </button>
                         )}
-                        
                         {review.pointsAwarded && (
-                          <span className={styles.pointsAwarded}>
-                            <CheckCircle size={14} />
+                          <div className={styles.pointsAwarded}>
+                            <CheckCircle size={16} />
                             {review.pointsAwarded} Punkte vergeben
-                          </span>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -1054,17 +872,19 @@ const ReviewTracker = () => {
           </div>
         )}
 
+        {/* Users & Levels View */}
         {activeView === 'users' && (
           <div className={styles.usersView}>
+            {/* Level Overview */}
             <div className={styles.levelOverview}>
-              <h2>Level Übersicht</h2>
+              <h2>Level System Übersicht</h2>
               <div className={styles.levelGrid}>
-                {USER_LEVELS.map(level => {
+                {LEVEL_SYSTEM.map(level => {
                   const usersInLevel = users.filter(u => u.level?.id === level.id).length;
                   const percentage = users.length > 0 
-                    ? (usersInLevel / users.length * 100).toFixed(1)
+                    ? Math.round((usersInLevel / users.length) * 100)
                     : 0;
-
+                  
                   return (
                     <div 
                       key={level.id} 
@@ -1073,20 +893,20 @@ const ReviewTracker = () => {
                     >
                       <div className={styles.levelIcon}>{level.icon}</div>
                       <div className={styles.levelName}>{level.name}</div>
-                      <div className={styles.levelRange}>
-                        {level.minPoints} - {level.maxPoints || '∞'} Punkte
+                      <div className={styles.levelRequirement}>
+                        Ab {level.minPoints} Punkten
                       </div>
-                      <div className={styles.levelUsers}>
-                        <Users size={16} />
-                        {usersInLevel} Benutzer ({percentage}%)
+                      <div className={styles.levelStats}>
+                        <div className={styles.userCount}>{usersInLevel} Users</div>
+                        <div className={styles.levelPercentage}>{percentage}%</div>
                       </div>
                       <div className={styles.levelBenefits}>
-                        <h4>Vorteile:</h4>
-                        <ul>
-                          {level.benefits.map((benefit, idx) => (
-                            <li key={idx}>{benefit}</li>
-                          ))}
-                        </ul>
+                        {level.benefits.map((benefit, index) => (
+                          <div key={index} className={styles.benefit}>
+                            <CheckCircle size={12} />
+                            {benefit}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   );
@@ -1094,317 +914,167 @@ const ReviewTracker = () => {
               </div>
             </div>
 
-            <div className={styles.usersTable}>
-              <h2>Benutzer Rankings</h2>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Rang</th>
-                    <th>Benutzer</th>
-                    <th>Level</th>
-                    <th>Punkte</th>
-                    <th>Reviews</th>
-                    <th>Durchschnitt</th>
-                    <th>Aktionen</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users
-                    .sort((a, b) => (b.points || 0) - (a.points || 0))
-                    .map((user, index) => {
-                      const userReviews = reviews.filter(r => r.userId === user.id);
-                      const avgRating = userReviews.length > 0
-                        ? (userReviews.reduce((sum, r) => sum + (r.rating || 0), 0) / userReviews.length).toFixed(1)
-                        : '-';
-
-                      return (
-                        <tr key={user.id}>
-                          <td>
-                            {index < 3 && (
-                              <Trophy size={16} style={{ 
-                                color: ['#FFD700', '#C0C0C0', '#CD7F32'][index] 
-                              }} />
-                            )}
-                            #{index + 1}
-                          </td>
-                          <td>{user.name}</td>
-                          <td>
-                            <span className={styles.levelBadge}>
-                              {user.level?.icon} {user.level?.name}
-                            </span>
-                          </td>
-                          <td className={styles.points}>{user.points || 0}</td>
-                          <td>{userReviews.length}</td>
-                          <td>⭐ {avgRating}</td>
-                          <td>
-                            <div className={styles.userActions}>
-                              <button
-                                className={styles.viewBtn}
-                                onClick={() => {/* Show user details */}}
-                              >
-                                <Eye size={14} />
-                              </button>
-                              {user.points >= POINTS_CONFIG.redeemThreshold && (
-                                <button
-                                  className={styles.redeemBtn}
-                                  onClick={() => redeemPoints(user.id, POINTS_CONFIG.redeemThreshold)}
-                                >
-                                  <Gift size={14} />
-                                  Einlösen
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {activeView === 'sentiment' && (
-          <div className={styles.sentimentView}>
-            <div className={styles.sentimentTrends}>
-              <h2>Sentiment Trends</h2>
-              {/* Here would be a line chart showing sentiment over time */}
-              <div className={styles.trendChart}>
-                <p>Sentiment Trend Chart (Implementation needed)</p>
-              </div>
-            </div>
-
-            <div className={styles.aiInsights}>
-              <h2>
-                <Sparkles size={20} />
-                AI Insights
-              </h2>
-              <div className={styles.insightsList}>
-                <div className={styles.insightCard}>
-                  <div className={styles.insightIcon}>
-                    <TrendingDown size={24} color="#FF6B6B" />
-                  </div>
-                  <div className={styles.insightContent}>
-                    <h3>Pizza-Qualität sinkt</h3>
-                    <p>15% mehr negative Reviews für Pizza-Trucks in den letzten 2 Wochen</p>
-                    <div className={styles.insightActions}>
-                      <button className={styles.investigateBtn}>
-                        <Search size={14} />
-                        Untersuchen
-                      </button>
-                    </div>
-                  </div>
+            {/* Users List */}
+            <div className={styles.usersList}>
+              <h2>Alle Nutzer</h2>
+              <div className={styles.usersTable}>
+                <div className={styles.tableHeader}>
+                  <div>Name</div>
+                  <div>Level</div>
+                  <div>Punkte</div>
+                  <div>Reviews</div>
+                  <div>Registriert</div>
+                  <div>Aktionen</div>
                 </div>
-
-                <div className={styles.insightCard}>
-                  <div className={styles.insightIcon}>
-                    <TrendingUp size={24} color="#51CF66" />
-                  </div>
-                  <div className={styles.insightContent}>
-                    <h3>Burger im Aufwind</h3>
-                    <p>Burger-Trucks erhalten 25% mehr positive Reviews</p>
-                  </div>
-                </div>
-
-                <div className={styles.insightCard}>
-                  <div className={styles.insightIcon}>
-                    <MapPin size={24} color="#FFD93D" />
-                  </div>
-                  <div className={styles.insightContent}>
-                    <h3>Zürich dominiert</h3>
-                    <p>40% aller Reviews kommen aus dem Kanton Zürich</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.wordCloud}>
-              <h2>Häufigste Wörter</h2>
-              {/* Word cloud visualization would go here */}
-              <div className={styles.wordCloudContainer}>
-                <p>Word Cloud (Implementation needed)</p>
+                {users
+                  .sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0))
+                  .map(user => {
+                    const userReviews = reviews.filter(r => r.userId === user.id);
+                    
+                    return (
+                      <div key={user.id} className={styles.userRow}>
+                        <div className={styles.userName}>
+                          {user.name || 'Unbekannt'}
+                        </div>
+                        <div className={styles.userLevel}>
+                          <span className={styles.levelIcon}>{user.level?.icon}</span>
+                          <span>{user.level?.name}</span>
+                        </div>
+                        <div className={styles.userPoints}>
+                          {user.totalPoints || 0}
+                        </div>
+                        <div className={styles.userReviews}>
+                          {userReviews.length}
+                        </div>
+                        <div className={styles.userDate}>
+                          {user.createdAt 
+                            ? new Date(user.createdAt).toLocaleDateString('de-CH')
+                            : '-'
+                          }
+                        </div>
+                        <div className={styles.userActions}>
+                          <button 
+                            className={styles.actionButton}
+                            title="Punkte hinzufügen"
+                          >
+                            <Plus size={16} />
+                          </button>
+                          <button 
+                            className={styles.actionButton}
+                            title="Details anzeigen"
+                          >
+                            <Eye size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           </div>
         )}
 
-        {activeView === 'rewards' && (
-          <div className={styles.rewardsView}>
-            <div className={styles.pointsOverview}>
-              <h2>Punkte System</h2>
-              <div className={styles.pointsGrid}>
-                <div className={styles.pointsCard}>
-                  <div className={styles.pointsIcon}>
-                    <DollarSign size={24} />
-                  </div>
-                  <div className={styles.pointsValue}>{POINTS_CONFIG.perCHF}</div>
-                  <div className={styles.pointsLabel}>Punkt pro CHF</div>
+        {/* Points History View */}
+        {activeView === 'points' && (
+          <div className={styles.pointsView}>
+            <h2>Punkte Historie</h2>
+            <div className={styles.pointsStats}>
+              <div className={styles.pointsStat}>
+                <div className={styles.statIcon}>
+                  <Gift size={24} />
                 </div>
-                <div className={styles.pointsCard}>
-                  <div className={styles.pointsIcon}>
-                    <Camera size={24} />
-                  </div>
-                  <div className={styles.pointsValue}>{POINTS_CONFIG.photoReview}</div>
-                  <div className={styles.pointsLabel}>Punkte für Foto</div>
+                <div className={styles.statInfo}>
+                  <div className={styles.statValue}>{analytics.pointsDistributed}</div>
+                  <div className={styles.statLabel}>Punkte vergeben</div>
                 </div>
-                <div className={styles.pointsCard}>
-                  <div className={styles.pointsIcon}>
-                    <MessageSquare size={24} />
-                  </div>
-                  <div className={styles.pointsValue}>{POINTS_CONFIG.textReview}</div>
-                  <div className={styles.pointsLabel}>Punkte für Text</div>
+              </div>
+              <div className={styles.pointsStat}>
+                <div className={styles.statIcon}>
+                  <ShoppingBag size={24} />
                 </div>
-                <div className={styles.pointsCard}>
-                  <div className={styles.pointsIcon}>
-                    <Star size={24} />
+                <div className={styles.statInfo}>
+                  <div className={styles.statValue}>{analytics.redemptionsProcessed}</div>
+                  <div className={styles.statLabel}>Einlösungen</div>
+                </div>
+              </div>
+              <div className={styles.pointsStat}>
+                <div className={styles.statIcon}>
+                  <TrendingUp size={24} />
+                </div>
+                <div className={styles.statInfo}>
+                  <div className={styles.statValue}>
+                    {pointsHistory.length > 0
+                      ? Math.round(analytics.pointsDistributed / pointsHistory.length)
+                      : 0
+                    }
                   </div>
-                  <div className={styles.pointsValue}>{POINTS_CONFIG.starRating}</div>
-                  <div className={styles.pointsLabel}>Punkte für Sterne</div>
+                  <div className={styles.statLabel}>⌀ Punkte pro Transaktion</div>
                 </div>
               </div>
             </div>
-
-            <div className={styles.redemptionInfo}>
-              <h2>Einlösung</h2>
-              <div className={styles.redemptionCard}>
-                <div className={styles.redemptionIcon}>
-                  <Gift size={48} />
-                </div>
-                <div className={styles.redemptionContent}>
-                  <h3>{POINTS_CONFIG.redeemThreshold} Punkte = {POINTS_CONFIG.redeemDiscount}% Rabatt</h3>
-                  <p>Auf die nächste Bestellung</p>
-                </div>
-              </div>
-            </div>
-
+            
             <div className={styles.pointsHistory}>
-              <h2>Letzte Punkte-Transaktionen</h2>
+              <div className={styles.historyHeader}>
+                <h3>Letzte Transaktionen</h3>
+                <select className={styles.filterSelect}>
+                  <option value="all">Alle Typen</option>
+                  <option value="award">Vergaben</option>
+                  <option value="redemption">Einlösungen</option>
+                </select>
+              </div>
+              
               <div className={styles.historyList}>
-                {pointsHistory.slice(0, 20).map(transaction => {
-                  const user = users.find(u => u.id === transaction.userId);
-                  
-                  return (
-                    <div key={transaction.id} className={styles.historyItem}>
-                      <div className={styles.historyUser}>
-                        {user?.name || 'Unknown'}
+                {pointsHistory
+                  .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                  .slice(0, 50)
+                  .map(transaction => {
+                    const user = users.find(u => u.id === transaction.userId);
+                    
+                    return (
+                      <div key={transaction.id} className={styles.historyItem}>
+                        <div className={styles.historyIcon}>
+                          {transaction.type === 'award' ? (
+                            <Gift size={20} color="#51CF66" />
+                          ) : (
+                            <ShoppingBag size={20} color="#FF6B6B" />
+                          )}
+                        </div>
+                        <div className={styles.historyInfo}>
+                          <div className={styles.historyUser}>
+                            {user?.name || 'Unbekannt'}
+                          </div>
+                          <div className={styles.historyReason}>
+                            {transaction.reason}
+                          </div>
+                        </div>
+                        <div className={styles.historyPoints}>
+                          {transaction.type === 'award' ? '+' : '-'}
+                          {transaction.points} Punkte
+                        </div>
+                        <div className={styles.historyDate}>
+                          {new Date(transaction.timestamp).toLocaleDateString('de-CH')}
+                        </div>
                       </div>
-                      <div className={styles.historyType}>
-                        {transaction.type}
-                      </div>
-                      <div className={styles.historyAmount}>
-                        +{transaction.amount} Punkte
-                      </div>
-                      <div className={styles.historyTime}>
-                        {formatTimestamp(transaction.timestamp)}
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
               </div>
             </div>
           </div>
         )}
       </div>
-
-      {/* Review Map Modal */}
-      {showMapModal && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.mapModal}>
-            <div className={styles.modalHeader}>
-              <h2>
-                <Map size={24} />
-                Review Heatmap Schweiz
-              </h2>
-              <button 
-                className={styles.closeButton}
-                onClick={() => setShowMapModal(false)}
-              >
-                <X size={24} />
-              </button>
-            </div>
-            <div className={styles.modalBody}>
-              {/* SVG Switzerland Map with canton coloring based on sentiment */}
-              <div className={styles.mapContainer}>
-                <svg viewBox="0 0 1000 700" className={styles.switzerlandMap}>
-                  {/* Simplified - would need actual canton paths */}
-                  {Object.entries(analytics.cantonStats).map(([canton, stats]) => {
-                    const cantonInfo = SWISS_CANTONS[canton];
-                    if (!cantonInfo) return null;
-                    
-                    // Color based on sentiment score
-                    const sentimentScore = parseInt(stats.sentimentScore);
-                    let color = '#808080'; // neutral
-                    if (sentimentScore > 20) color = '#51CF66'; // positive
-                    if (sentimentScore < -20) color = '#FF6B6B'; // negative
-                    
-                    return (
-                      <g key={canton}>
-                        <circle
-                          cx={cantonInfo.lng * 50 + 200}
-                          cy={700 - cantonInfo.lat * 10}
-                          r={Math.sqrt(stats.count) * 5}
-                          fill={color}
-                          opacity={0.7}
-                          className={styles.cantonCircle}
-                        />
-                        <text
-                          x={cantonInfo.lng * 50 + 200}
-                          y={700 - cantonInfo.lat * 10}
-                          textAnchor="middle"
-                          className={styles.cantonLabel}
-                        >
-                          {canton}
-                        </text>
-                      </g>
-                    );
-                  })}
-                </svg>
-              </div>
-              
-              <div className={styles.mapLegend}>
-                <h3>Legende</h3>
-                <div className={styles.legendItem}>
-                  <div className={styles.legendColor} style={{ backgroundColor: '#51CF66' }} />
-                  <span>Positiv (Sentiment Score > 20)</span>
-                </div>
-                <div className={styles.legendItem}>
-                  <div className={styles.legendColor} style={{ backgroundColor: '#808080' }} />
-                  <span>Neutral</span>
-                </div>
-                <div className={styles.legendItem}>
-                  <div className={styles.legendColor} style={{ backgroundColor: '#FF6B6B' }} />
-                  <span>Negativ (Sentiment Score < -20)</span>
-                </div>
-              </div>
-
-              <div className={styles.cantonStats}>
-                <h3>Kanton Statistiken</h3>
-                <div className={styles.cantonGrid}>
-                  {Object.entries(analytics.cantonStats)
-                    .sort((a, b) => b[1].count - a[1].count)
-                    .slice(0, 10)
-                    .map(([canton, stats]) => (
-                      <div key={canton} className={styles.cantonStat}>
-                        <div className={styles.cantonName}>
-                          {SWISS_CANTONS[canton]?.name || canton}
-                        </div>
-                        <div className={styles.cantonMetrics}>
-                          <span>{stats.count} Reviews</span>
-                          <span>⭐ {stats.avgRating}</span>
-                          <span>
-                            {stats.sentimentScore > 0 ? '+' : ''}{stats.sentimentScore}% Sentiment
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
+
+// ============================================================================
+// MISSING IMPORTS
+// ============================================================================
+// Hinweis: Die folgenden Icons werden im Code verwendet, aber waren nicht in den 
+// ursprünglichen Imports:
+// - Plus (von lucide-react)
+// - ShoppingBag (von lucide-react)
+
+// Fügen Sie diese zu den Imports am Anfang der Datei hinzu:
+import { Plus, ShoppingBag } from 'lucide-react';
 
 export default ReviewTracker;

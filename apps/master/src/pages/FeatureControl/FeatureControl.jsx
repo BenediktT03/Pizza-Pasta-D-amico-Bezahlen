@@ -1,1218 +1,1726 @@
 ﻿/**
- * EATECH - Master Feature Control Panel
- * Version: 13.0.0
- * Description: Zentrale Steuerung aller System-Features mit Live-Toggle,
- *              Tenant-spezifischen Overrides und Echtzeit-Analytics
+ * EATECH - Feature Control System
+ * Version: 1.0.0
+ * Description: Zentrales Feature Management mit hierarchischer Kontrolle,
+ *              Test-Modus, Audit Trail und Emergency Controls
  * Author: EATECH Development Team
- * Created: 2025-01-04
- * File Path: /apps/master/src/pages/FeatureControl/FeatureControl.jsx
+ * Created: 2025-01-07
+ * 
+ * Kapitel: Phase 5 - Premium & Master - Feature Flags
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { initializeApp } from 'firebase/app';
 import { 
-    Search, 
-    Shield, 
-    Zap, 
-    Brain, 
-    TrendingUp, 
-    Package, 
-    Users, 
-    Leaf, 
-    Truck, 
-    Settings, 
-    Filter, 
-    ChevronRight, 
-    Power, 
-    AlertCircle, 
-    CheckCircle2, 
-    Info,
-    Download,
-    Upload,
-    RefreshCw,
-    Save,
-    X,
-    BarChart3,
-    Clock,
-    Globe,
-    Lock,
-    Unlock,
-    Copy,
-    Edit,
-    Trash2,
-    Plus
+  getDatabase, 
+  ref, 
+  onValue, 
+  update,
+  set,
+  push,
+  serverTimestamp,
+  off,
+  query,
+  orderByChild,
+  limitToLast
+} from 'firebase/database';
+import {
+  Search,
+  Shield,
+  Zap,
+  Brain,
+  TrendingUp,
+  Package,
+  Users,
+  Leaf,
+  Truck,
+  Settings,
+  Filter,
+  ChevronRight,
+  Power,
+  AlertCircle,
+  CheckCircle2,
+  Info,
+  Download,
+  Upload,
+  RefreshCw,
+  Save,
+  X,
+  BarChart3,
+  Clock,
+  Globe,
+  Lock,
+  Unlock,
+  Copy,
+  Edit,
+  Trash2,
+  Plus,
+  Activity,
+  Bell,
+  DollarSign,
+  Heart,
+  MessageSquare,
+  ShoppingCart,
+  Utensils,
+  Coffee,
+  Timer,
+  Map,
+  Calendar,
+  Award,
+  Gift,
+  Star,
+  Navigation,
+  Smartphone,
+  Monitor,
+  Server,
+  Database,
+  Cpu,
+  AlertTriangle,
+  XCircle,
+  PlayCircle,
+  PauseCircle,
+  Eye,
+  EyeOff,
+  HelpCircle,
+  BookOpen,
+  Video,
+  FileText,
+  Code,
+  Terminal,
+  Bug,
+  TestTube,
+  FlaskConical,
+  Beaker,
+  History,
+  RotateCcw,
+  ChevronDown,
+  ChevronUp,
+  MoreVertical,
+  Hash,
+  Percent,
+  BarChart,
+  PieChart,
+  TrendingDown,
+  Wallet,
+  CreditCard,
+  Banknote,
+  Receipt,
+  Calculator,
+  Layers,
+  Grid,
+  List,
+  LayoutGrid,
+  Columns,
+  UserCheck,
+  UserX,
+  UserPlus,
+  Building,
+  Store,
+  MapPin,
+  Compass,
+  Flag,
+  Megaphone,
+  Volume2,
+  VolumeX,
+  Wifi,
+  WifiOff,
+  Signal,
+  SignalLow,
+  Battery,
+  BatteryLow,
+  Gauge,
+  Loader2,
+  CheckSquare,
+  Square,
+  ToggleLeft,
+  ToggleRight,
+  SlidersHorizontal,
+  Wrench,
+  Hammer,
+  Sparkles,
+  Flame,
+  Snowflake,
+  Sun,
+  Moon,
+  Cloud,
+  CloudRain,
+  Wind,
+  Thermometer,
+  Droplets,
+  Waves,
+  Mountain,
+  Trees,
+  Flower,
+  Pizza,
+  Soup,
+  Cookie,
+  Apple,
+  Carrot,
+  Fish,
+  Milk,
+  Wheat,
+  Grape,
+  Cherry
 } from 'lucide-react';
 import styles from './FeatureControl.module.css';
 
 // ============================================================================
-// MOCK DATA & CONSTANTS
+// FIREBASE CONFIGURATION
+// ============================================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyDFBlgWE81iHnACVwOmaU0jL7FV0l_tRmU",
+  authDomain: "eatech-foodtruck.firebaseapp.com",
+  databaseURL: "https://eatech-foodtruck-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "eatech-foodtruck",
+  storageBucket: "eatech-foodtruck.firebasestorage.app",
+  messagingSenderId: "261222802445",
+  appId: "1:261222802445:web:edde22580422fbced22144",
+  measurementId: "G-N0KHWJG9KP"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
+// ============================================================================
+// CONSTANTS
 // ============================================================================
 
-const FEATURE_FLAGS = {
-    // CORE FEATURES
-    "core.multiTenant": {
-        id: "core.multiTenant",
-        name: "Multi-Tenant System",
-        description: "Mehrere Restaurants auf einer Plattform verwalten",
-        enabled: true,
-        tier: "basic",
-        category: "core",
-        dependencies: [],
-        activeTenantsCount: 127,
-        usagePercentage: 95,
-        lastModified: "2025-01-03T14:22:00Z",
-        modifiedBy: "admin@eatech.ch"
-    },
-    "core.authentication": {
-        id: "core.authentication",
-        name: "Authentifizierung",
-        description: "Sichere Benutzeranmeldung und -verwaltung",
-        enabled: true,
-        tier: "basic",
-        category: "core",
-        dependencies: [],
-        activeTenantsCount: 127,
-        usagePercentage: 100,
-        lastModified: "2025-01-01T09:00:00Z",
-        modifiedBy: "system"
-    },
-    "core.ordering": {
-        id: "core.ordering",
-        name: "Bestellsystem",
-        description: "Grundlegendes Bestellmanagement",
-        enabled: true,
-        tier: "basic",
-        category: "core",
-        dependencies: ["core.authentication"],
-        activeTenantsCount: 127,
-        usagePercentage: 100,
-        lastModified: "2025-01-02T11:30:00Z",
-        modifiedBy: "admin@eatech.ch"
-    },
-    
-    // PAYMENT FEATURES
-    "payment.stripe": {
-        id: "payment.stripe",
-        name: "Stripe Payments",
-        description: "Kreditkarten- und SEPA-Zahlungen",
-        enabled: true,
-        tier: "basic",
-        category: "payment",
-        dependencies: ["core.ordering"],
-        activeTenantsCount: 98,
-        usagePercentage: 77,
-        lastModified: "2025-01-03T16:45:00Z",
-        modifiedBy: "payment-team@eatech.ch"
-    },
-    "payment.twint": {
-        id: "payment.twint",
-        name: "TWINT",
-        description: "Schweizer Mobile Payment",
-        enabled: true,
-        tier: "basic",
-        category: "payment",
-        dependencies: ["core.ordering"],
-        activeTenantsCount: 112,
-        usagePercentage: 88,
-        lastModified: "2025-01-03T16:45:00Z",
-        modifiedBy: "payment-team@eatech.ch"
-    },
-    "payment.applePay": {
-        id: "payment.applePay",
-        name: "Apple Pay",
-        description: "Kontaktlose Zahlungen mit Apple GerÃ¤ten",
-        enabled: true,
-        tier: "pro",
-        category: "payment",
-        dependencies: ["payment.stripe"],
-        activeTenantsCount: 45,
-        usagePercentage: 35,
-        lastModified: "2025-01-03T16:45:00Z",
-        modifiedBy: "payment-team@eatech.ch"
-    },
-    "payment.crypto": {
-        id: "payment.crypto",
-        name: "KryptowÃ¤hrungen",
-        description: "Bitcoin, Ethereum und andere Krypto-Zahlungen",
-        enabled: false,
-        tier: "enterprise",
-        category: "payment",
-        dependencies: ["core.ordering", "security.advancedEncryption"],
-        activeTenantsCount: 3,
-        usagePercentage: 2,
-        lastModified: "2025-01-04T08:00:00Z",
-        modifiedBy: "cto@eatech.ch"
-    },
-    
-    // AI FEATURES
-    "ai.menuRecommendations": {
-        id: "ai.menuRecommendations",
-        name: "AI Menu-Empfehlungen",
-        description: "Personalisierte Empfehlungen basierend auf Kundenverhalten",
-        enabled: true,
-        tier: "pro",
-        category: "ai",
-        dependencies: ["analytics.basicReports", "customer.basicProfiles"],
-        activeTenantsCount: 67,
-        usagePercentage: 53,
-        lastModified: "2025-01-03T10:15:00Z",
-        modifiedBy: "ai-team@eatech.ch"
-    },
-    "ai.pricingOptimization": {
-        id: "ai.pricingOptimization",
-        name: "Dynamische Preisgestaltung",
-        description: "KI-gestÃ¼tzte Preisoptimierung basierend auf Nachfrage",
-        enabled: true,
-        tier: "enterprise",
-        category: "ai",
-        dependencies: ["ai.demandForecasting", "analytics.advancedDashboard"],
-        activeTenantsCount: 12,
-        usagePercentage: 9,
-        lastModified: "2025-01-02T14:20:00Z",
-        modifiedBy: "ai-team@eatech.ch"
-    },
-    "ai.chatbot": {
-        id: "ai.chatbot",
-        name: "AI Chatbot",
-        description: "24/7 Kundenservice mit KI",
-        enabled: true,
-        tier: "pro",
-        category: "ai",
-        dependencies: ["core.authentication"],
-        activeTenantsCount: 89,
-        usagePercentage: 70,
-        lastModified: "2025-01-03T09:00:00Z",
-        modifiedBy: "ai-team@eatech.ch"
-    },
-    "ai.voiceOrdering": {
-        id: "ai.voiceOrdering",
-        name: "Sprachbestellung",
-        description: "Bestellungen per Sprachbefehl aufgeben",
-        enabled: true,
-        tier: "pro",
-        category: "ai",
-        dependencies: ["ai.chatbot", "core.ordering"],
-        activeTenantsCount: 34,
-        usagePercentage: 27,
-        lastModified: "2025-01-04T11:00:00Z",
-        modifiedBy: "innovation@eatech.ch"
-    },
-    "ai.demandForecasting": {
-        id: "ai.demandForecasting",
-        name: "Nachfrageprognose",
-        description: "KI-basierte Vorhersage von Bestellvolumen",
-        enabled: true,
-        tier: "enterprise",
-        category: "ai",
-        dependencies: ["analytics.advancedDashboard"],
-        activeTenantsCount: 23,
-        usagePercentage: 18,
-        lastModified: "2025-01-02T13:30:00Z",
-        modifiedBy: "ai-team@eatech.ch"
-    },
-    
-    // ANALYTICS FEATURES
-    "analytics.basicReports": {
-        id: "analytics.basicReports",
-        name: "Basis-Berichte",
-        description: "Grundlegende Umsatz- und Bestellberichte",
-        enabled: true,
-        tier: "basic",
-        category: "analytics",
-        dependencies: [],
-        activeTenantsCount: 127,
-        usagePercentage: 100,
-        lastModified: "2025-01-01T09:00:00Z",
-        modifiedBy: "system"
-    },
-    "analytics.advancedDashboard": {
-        id: "analytics.advancedDashboard",
-        name: "Erweitertes Dashboard",
-        description: "Detaillierte Analysen und Visualisierungen",
-        enabled: true,
-        tier: "pro",
-        category: "analytics",
-        dependencies: ["analytics.basicReports"],
-        activeTenantsCount: 78,
-        usagePercentage: 61,
-        lastModified: "2025-01-03T15:00:00Z",
-        modifiedBy: "analytics@eatech.ch"
-    },
-    "analytics.realtimeMetrics": {
-        id: "analytics.realtimeMetrics",
-        name: "Echtzeit-Metriken",
-        description: "Live-Daten und Benachrichtigungen",
-        enabled: true,
-        tier: "pro",
-        category: "analytics",
-        dependencies: ["analytics.advancedDashboard"],
-        activeTenantsCount: 56,
-        usagePercentage: 44,
-        lastModified: "2025-01-03T15:00:00Z",
-        modifiedBy: "analytics@eatech.ch"
-    },
-    
-    // MARKETING FEATURES
-    "marketing.loyaltyProgram": {
-        id: "marketing.loyaltyProgram",
-        name: "Treueprogramm",
-        description: "Punkte sammeln und Belohnungen erhalten",
-        enabled: true,
-        tier: "pro",
-        category: "marketing",
-        dependencies: ["customer.basicProfiles"],
-        activeTenantsCount: 92,
-        usagePercentage: 72,
-        lastModified: "2025-01-02T10:00:00Z",
-        modifiedBy: "marketing@eatech.ch"
-    },
-    "marketing.emailCampaigns": {
-        id: "marketing.emailCampaigns",
-        name: "E-Mail Marketing",
-        description: "Automatisierte E-Mail-Kampagnen",
-        enabled: true,
-        tier: "pro",
-        category: "marketing",
-        dependencies: ["customer.basicProfiles", "analytics.basicReports"],
-        activeTenantsCount: 65,
-        usagePercentage: 51,
-        lastModified: "2025-01-02T10:00:00Z",
-        modifiedBy: "marketing@eatech.ch"
-    },
-    
-    // CUSTOMER FEATURES
-    "customer.basicProfiles": {
-        id: "customer.basicProfiles",
-        name: "Kundenprofile",
-        description: "Grundlegende Kundenverwaltung",
-        enabled: true,
-        tier: "basic",
-        category: "customer",
-        dependencies: ["core.authentication"],
-        activeTenantsCount: 127,
-        usagePercentage: 100,
-        lastModified: "2025-01-01T09:00:00Z",
-        modifiedBy: "system"
-    },
-    
-    // SECURITY FEATURES
-    "security.advancedEncryption": {
-        id: "security.advancedEncryption",
-        name: "Erweiterte VerschlÃ¼sselung",
-        description: "End-to-End VerschlÃ¼sselung fÃ¼r sensible Daten",
-        enabled: true,
-        tier: "enterprise",
-        category: "security",
-        dependencies: [],
-        activeTenantsCount: 45,
-        usagePercentage: 35,
-        lastModified: "2025-01-01T09:00:00Z",
-        modifiedBy: "security@eatech.ch"
-    },
-    
-    // SUSTAINABILITY FEATURES
-    "sustainability.carbonTracking": {
-        id: "sustainability.carbonTracking",
-        name: "COâ‚‚-Tracking",
-        description: "Ãœberwachung des COâ‚‚-FuÃŸabdrucks",
-        enabled: true,
-        tier: "pro",
-        category: "sustainability",
-        dependencies: ["analytics.basicReports"],
-        activeTenantsCount: 43,
-        usagePercentage: 34,
-        lastModified: "2025-01-03T12:00:00Z",
-        modifiedBy: "sustainability@eatech.ch"
-    },
-    "sustainability.wasteReduction": {
-        id: "sustainability.wasteReduction",
-        name: "Abfallreduzierung",
-        description: "Tools zur Minimierung von LebensmittelabfÃ¤llen",
-        enabled: true,
-        tier: "pro",
-        category: "sustainability",
-        dependencies: ["inventory.basicTracking"],
-        activeTenantsCount: 38,
-        usagePercentage: 30,
-        lastModified: "2025-01-03T12:00:00Z",
-        modifiedBy: "sustainability@eatech.ch"
-    },
-    
-    // INVENTORY FEATURES
-    "inventory.basicTracking": {
-        id: "inventory.basicTracking",
-        name: "Bestandsverwaltung",
-        description: "Grundlegende Lagerverwaltung",
-        enabled: true,
-        tier: "basic",
-        category: "inventory",
-        dependencies: [],
-        activeTenantsCount: 105,
-        usagePercentage: 83,
-        lastModified: "2025-01-02T08:00:00Z",
-        modifiedBy: "ops@eatech.ch"
-    }
+// Feature Categories
+const FEATURE_CATEGORIES = {
+  core: { 
+    id: 'core', 
+    name: 'Kern-System', 
+    icon: Shield, 
+    color: '#FF6B6B',
+    description: 'Essenzielle Grundfunktionen'
+  },
+  ordering: { 
+    id: 'ordering', 
+    name: 'Bestellung', 
+    icon: ShoppingCart, 
+    color: '#4ECDC4',
+    description: 'Bestell- und Checkout-Prozess'
+  },
+  payment: { 
+    id: 'payment', 
+    name: 'Zahlung', 
+    icon: CreditCard, 
+    color: '#45B7D1',
+    description: 'Zahlungsmethoden und Abwicklung'
+  },
+  menu: { 
+    id: 'menu', 
+    name: 'Speisekarte', 
+    icon: Utensils, 
+    color: '#96CEB4',
+    description: 'Menü-Verwaltung und Darstellung'
+  },
+  customer: { 
+    id: 'customer', 
+    name: 'Kunden', 
+    icon: Users, 
+    color: '#FECA57',
+    description: 'Kundenverwaltung und Profile'
+  },
+  analytics: { 
+    id: 'analytics', 
+    name: 'Analytics', 
+    icon: BarChart3, 
+    color: '#FF6B9D',
+    description: 'Berichte und Auswertungen'
+  },
+  marketing: { 
+    id: 'marketing', 
+    name: 'Marketing', 
+    icon: Megaphone, 
+    color: '#C44569',
+    description: 'Promotions und Kampagnen'
+  },
+  ai: { 
+    id: 'ai', 
+    name: 'KI & ML', 
+    icon: Brain, 
+    color: '#786FA6',
+    description: 'Künstliche Intelligenz Features'
+  },
+  loyalty: { 
+    id: 'loyalty', 
+    name: 'Treue', 
+    icon: Heart, 
+    color: '#F8B500',
+    description: 'Punkte und Belohnungen'
+  },
+  notification: { 
+    id: 'notification', 
+    name: 'Benachrichtigungen', 
+    icon: Bell, 
+    color: '#303952',
+    description: 'Push, Email, SMS'
+  },
+  location: { 
+    id: 'location', 
+    name: 'Standort', 
+    icon: MapPin, 
+    color: '#00B894',
+    description: 'GPS und Standort-Features'
+  },
+  events: { 
+    id: 'events', 
+    name: 'Events', 
+    icon: Calendar, 
+    color: '#6C5CE7',
+    description: 'Festival und Event-Modus'
+  },
+  compliance: { 
+    id: 'compliance', 
+    name: 'Compliance', 
+    icon: Shield, 
+    color: '#636E72',
+    description: 'Rechtliche Anforderungen'
+  },
+  performance: { 
+    id: 'performance', 
+    name: 'Performance', 
+    icon: Gauge, 
+    color: '#FD79A8',
+    description: 'Optimierung und Caching'
+  },
+  security: { 
+    id: 'security', 
+    name: 'Sicherheit', 
+    icon: Lock, 
+    color: '#2D3436',
+    description: 'Erweiterte Sicherheit'
+  },
+  experimental: { 
+    id: 'experimental', 
+    name: 'Experimental', 
+    icon: FlaskConical, 
+    color: '#A29BFE',
+    description: 'Beta und Test-Features'
+  }
 };
 
-const CATEGORIES = {
-    all: { 
-        label: 'Alle Features', 
-        icon: Zap, 
-        color: '#6366f1',
-        description: 'Alle verfÃ¼gbaren System-Features' 
-    },
-    core: { 
-        label: 'Core Features', 
-        icon: Shield, 
-        color: '#3b82f6',
-        description: 'Grundlegende Systemfunktionen' 
-    },
-    ai: { 
-        label: 'AI Features', 
-        icon: Brain, 
-        color: '#8b5cf6',
-        description: 'KÃ¼nstliche Intelligenz & ML' 
-    },
-    analytics: { 
-        label: 'Analytics', 
-        icon: TrendingUp, 
-        color: '#10b981',
-        description: 'Datenanalyse & Reporting' 
-    },
-    payment: { 
-        label: 'Payment', 
-        icon: Package, 
-        color: '#f59e0b',
-        description: 'Zahlungsmethoden & Processing' 
-    },
-    marketing: { 
-        label: 'Marketing', 
-        icon: Users, 
-        color: '#ec4899',
-        description: 'Marketing & Kundenbindung' 
-    },
-    sustainability: { 
-        label: 'Nachhaltigkeit', 
-        icon: Leaf, 
-        color: '#84cc16',
-        description: 'Umwelt & Nachhaltigkeit' 
-    },
-    security: { 
-        label: 'Security', 
-        icon: Lock, 
-        color: '#ef4444',
-        description: 'Sicherheit & Datenschutz' 
-    },
-    customer: { 
-        label: 'Customer', 
-        icon: Users, 
-        color: '#06b6d4',
-        description: 'Kundenverwaltung' 
-    },
-    inventory: { 
-        label: 'Inventory', 
-        icon: Package, 
-        color: '#a855f7',
-        description: 'Bestandsverwaltung' 
-    }
+// Default Features für neue Tenants
+const DEFAULT_FEATURES = {
+  // Core (Immer aktiv)
+  "core.authentication": true,
+  "core.ordering": true,
+  "core.menu": true,
+  "core.multiTenant": true,
+  
+  // Basis-Features
+  "payment.basic": true,
+  "payment.cash": true,
+  "notifications.orders": true,
+  "analytics.basic": true,
+  "customer.profiles": true,
+  "menu.categories": true,
+  "menu.search": true,
+  "ordering.cart": true,
+  "ordering.checkout": true,
+  
+  // Trial Features (30 Tage)
+  "analytics.advanced": { trial: true, days: 30 },
+  "ai.recommendations": { trial: true, days: 30 },
+  "loyalty.program": { trial: true, days: 30 },
+  "marketing.campaigns": { trial: true, days: 30 }
 };
 
-const MOCK_TENANTS = [
-    { 
-        id: 'burger-king-zh', 
-        name: 'Burger King ZÃ¼rich', 
-        tier: 'enterprise',
-        activeFeatures: 18,
-        customOverrides: 3 
-    },
-    { 
-        id: 'pizza-express-be', 
-        name: 'Pizza Express Bern', 
-        tier: 'pro',
-        activeFeatures: 12,
-        customOverrides: 1 
-    },
-    { 
-        id: 'thai-food-ge', 
-        name: 'Thai Food GenÃ¨ve', 
-        tier: 'basic',
-        activeFeatures: 8,
-        customOverrides: 0 
-    },
-    { 
-        id: 'veggie-delight-bs', 
-        name: 'Veggie Delight Basel', 
-        tier: 'pro',
-        activeFeatures: 14,
-        customOverrides: 2 
-    }
-];
+// Emergency Priority Levels
+const EMERGENCY_PRIORITIES = {
+  1: { // KRITISCH - Bleiben immer an
+    features: ['core.*', 'payment.basic', 'ordering.checkout'],
+    label: 'Kritisch',
+    color: '#FF6B6B'
+  },
+  2: { // WICHTIG - Nur bei extremer Last aus
+    features: ['analytics.*', 'ai.*', 'notifications.marketing'],
+    label: 'Wichtig',
+    color: '#F39C12'
+  },
+  3: { // NICE-TO-HAVE - Zuerst abschalten
+    features: ['loyalty.*', 'marketing.*', 'experimental.*'],
+    label: 'Optional',
+    color: '#95A5A6'
+  }
+};
+
+// Feature Templates
+const FEATURE_TEMPLATES = {
+  minimal: {
+    name: 'Minimal',
+    description: 'Nur essenzielle Features',
+    features: ['core.*', 'payment.basic', 'ordering.*', 'menu.basic']
+  },
+  standard: {
+    name: 'Standard',
+    description: 'Normale Restaurant-Features',
+    features: ['core.*', 'payment.*', 'ordering.*', 'menu.*', 'customer.*', 'analytics.basic']
+  },
+  foodtruck: {
+    name: 'Foodtruck',
+    description: 'Mobile-optimiert mit Standort',
+    features: ['core.*', 'payment.*', 'ordering.*', 'menu.*', 'location.*', 'notifications.*']
+  },
+  event: {
+    name: 'Event/Festival',
+    description: 'Optimiert für hohe Last',
+    features: ['core.*', 'payment.basic', 'ordering.express', 'events.*', 'performance.*']
+  },
+  premium: {
+    name: 'Premium',
+    description: 'Alle Features aktiviert',
+    features: ['*']
+  }
+};
 
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
-
 const FeatureControl = () => {
-    // State Management
-    const [features, setFeatures] = useState(FEATURE_FLAGS);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('all');
-    const [selectedTenant, setSelectedTenant] = useState(null);
-    const [showFilters, setShowFilters] = useState(false);
-    const [viewMode, setViewMode] = useState('grid'); // grid | list | compact
-    const [selectedFeatures, setSelectedFeatures] = useState(new Set());
-    const [bulkActionMode, setBulkActionMode] = useState(false);
-    const [showStats, setShowStats] = useState(true);
-    const [pendingChanges, setPendingChanges] = useState({});
-    const [showTenantModal, setShowTenantModal] = useState(false);
-    const [editingFeature, setEditingFeature] = useState(null);
-    
-    // Filters
-    const [tierFilter, setTierFilter] = useState('all');
-    const [statusFilter, setStatusFilter] = useState('all');
-    const [usageFilter, setUsageFilter] = useState([0, 100]);
+  // State Management
+  const [features, setFeatures] = useState({});
+  const [tenants, setTenants] = useState([]);
+  const [auditLog, setAuditLog] = useState([]);
+  const [systemMetrics, setSystemMetrics] = useState({
+    cpu: 0,
+    memory: 0,
+    responseTime: 0,
+    errorRate: 0
+  });
+  
+  // UI State
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedTenant, setSelectedTenant] = useState(null);
+  const [showTestMode, setShowTestMode] = useState(false);
+  const [showAuditLog, setShowAuditLog] = useState(false);
+  const [showEmergencyPanel, setShowEmergencyPanel] = useState(false);
+  const [viewMode, setViewMode] = useState('grid'); // grid | list | compact
+  const [selectedFeatures, setSelectedFeatures] = useState(new Set());
+  const [bulkActionMode, setBulkActionMode] = useState(false);
+  const [editingFeature, setEditingFeature] = useState(null);
+  const [showTutorial, setShowTutorial] = useState(false);
+  
+  // ========================================================================
+  // FIREBASE LISTENERS
+  // ========================================================================
+  useEffect(() => {
+    const featuresRef = ref(database, 'features');
+    const tenantsRef = ref(database, 'tenants');
+    const auditRef = query(ref(database, 'featureAudit'), orderByChild('timestamp'), limitToLast(100));
+    const metricsRef = ref(database, 'systemMetrics/current');
 
-    // ========================================================================
-    // COMPUTED VALUES
-    // ========================================================================
-    
-    const filteredFeatures = useMemo(() => {
-        return Object.entries(features).filter(([key, feature]) => {
-            // Search filter
-            const matchesSearch = 
-                key.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                feature.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                feature.description.toLowerCase().includes(searchTerm.toLowerCase());
-            
-            // Category filter
-            const matchesCategory = selectedCategory === 'all' || feature.category === selectedCategory;
-            
-            // Tier filter
-            const matchesTier = tierFilter === 'all' || feature.tier === tierFilter;
-            
-            // Status filter
-            const matchesStatus = 
-                statusFilter === 'all' ||
-                (statusFilter === 'enabled' && feature.enabled) ||
-                (statusFilter === 'disabled' && !feature.enabled);
-            
-            // Usage filter
-            const matchesUsage = 
-                feature.usagePercentage >= usageFilter[0] && 
-                feature.usagePercentage <= usageFilter[1];
-            
-            return matchesSearch && matchesCategory && matchesTier && matchesStatus && matchesUsage;
-        });
-    }, [features, searchTerm, selectedCategory, tierFilter, statusFilter, usageFilter]);
+    // Load features
+    const featuresUnsubscribe = onValue(featuresRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      setFeatures(data);
+    });
 
-    const categoryStats = useMemo(() => {
-        const stats = {};
-        Object.values(features).forEach(feature => {
-            if (!stats[feature.category]) {
-                stats[feature.category] = {
-                    total: 0,
-                    enabled: 0,
-                    usage: 0
-                };
-            }
-            stats[feature.category].total++;
-            if (feature.enabled) stats[feature.category].enabled++;
-            stats[feature.category].usage += feature.usagePercentage;
-        });
-        
-        // Calculate averages
-        Object.keys(stats).forEach(cat => {
-            stats[cat].usage = Math.round(stats[cat].usage / stats[cat].total);
-        });
-        
-        return stats;
-    }, [features]);
+    // Load tenants
+    const tenantsUnsubscribe = onValue(tenantsRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      const tenantsList = Object.entries(data).map(([id, tenant]) => ({
+        id,
+        ...tenant
+      }));
+      setTenants(tenantsList);
+    });
 
-    const globalStats = useMemo(() => {
-        const total = Object.keys(features).length;
-        const enabled = Object.values(features).filter(f => f.enabled).length;
-        const avgUsage = Math.round(
-            Object.values(features).reduce((sum, f) => sum + f.usagePercentage, 0) / total
-        );
-        const activeTenantsTotal = new Set(
-            Object.values(features).flatMap(f => 
-                Array(f.activeTenantsCount).fill(0).map((_, i) => `tenant-${i}`)
-            )
-        ).size;
-        
-        return { total, enabled, avgUsage, activeTenantsTotal };
-    }, [features]);
+    // Load audit log
+    const auditUnsubscribe = onValue(auditRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      const logs = Object.entries(data).map(([id, log]) => ({
+        id,
+        ...log
+      })).reverse();
+      setAuditLog(logs);
+    });
 
-    // ========================================================================
-    // HANDLERS
-    // ========================================================================
-    
-    const handleFeatureToggle = useCallback((featureKey, enabled) => {
-        // Check dependencies
-        if (enabled) {
-            const feature = features[featureKey];
-            const missingDeps = feature.dependencies.filter(dep => !features[dep]?.enabled);
-            
-            if (missingDeps.length > 0) {
-                alert(`Cannot enable ${feature.name}. Missing dependencies: ${missingDeps.join(', ')}`);
-                return;
-            }
-        } else {
-            // Check if other features depend on this
-            const dependents = Object.entries(features).filter(([key, f]) => 
-                f.dependencies.includes(featureKey) && f.enabled
-            );
-            
-            if (dependents.length > 0) {
-                const dependentNames = dependents.map(([_, f]) => f.name).join(', ');
-                if (!confirm(`Disabling ${features[featureKey].name} will also disable: ${dependentNames}. Continue?`)) {
-                    return;
-                }
-                
-                // Disable dependent features
-                dependents.forEach(([key, _]) => {
-                    setFeatures(prev => ({
-                        ...prev,
-                        [key]: { ...prev[key], enabled: false }
-                    }));
-                });
-            }
-        }
-        
-        // Update feature
-        setFeatures(prev => ({
-            ...prev,
-            [featureKey]: {
-                ...prev[featureKey],
-                enabled,
-                lastModified: new Date().toISOString(),
-                modifiedBy: 'current-user@eatech.ch'
-            }
-        }));
-        
-        // Track pending changes
-        setPendingChanges(prev => ({
-            ...prev,
-            [featureKey]: { enabled }
-        }));
-    }, [features]);
+    // Load system metrics
+    const metricsUnsubscribe = onValue(metricsRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      setSystemMetrics(data);
+      
+      // Auto-trigger emergency mode if needed
+      checkEmergencyConditions(data);
+    });
 
-    const handleBulkAction = useCallback((action) => {
-        const selectedFeatureKeys = Array.from(selectedFeatures);
-        
-        switch(action) {
-            case 'enable':
-                selectedFeatureKeys.forEach(key => handleFeatureToggle(key, true));
-                break;
-            case 'disable':
-                selectedFeatureKeys.forEach(key => handleFeatureToggle(key, false));
-                break;
-            case 'export':
-                exportFeatures(selectedFeatureKeys);
-                break;
-        }
-        
-        setSelectedFeatures(new Set());
-        setBulkActionMode(false);
-    }, [selectedFeatures, handleFeatureToggle]);
+    setLoading(false);
 
-    const exportFeatures = useCallback((featureKeys = null) => {
-        const dataToExport = featureKeys 
-            ? featureKeys.map(key => ({ [key]: features[key] }))
-            : features;
-        
-        const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { 
-            type: 'application/json' 
-        });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `eatech-features-${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-    }, [features]);
-
-    const handleSaveChanges = useCallback(() => {
-        // Here you would save to backend
-        console.log('Saving changes:', pendingChanges);
-        alert('Changes saved successfully!');
-        setPendingChanges({});
-    }, [pendingChanges]);
-
-    const handleTenantOverride = useCallback((tenantId, featureKey, enabled) => {
-        // Handle tenant-specific feature override
-        console.log(`Override for tenant ${tenantId}: ${featureKey} = ${enabled}`);
-        // This would update tenant-specific settings in the backend
-    }, []);
-
-    // ========================================================================
-    // RENDER HELPERS
-    // ========================================================================
-    
-    const renderFeatureCard = (key, feature) => {
-        const isSelected = selectedFeatures.has(key);
-        const hasPendingChange = pendingChanges[key] !== undefined;
-        const Icon = CATEGORIES[feature.category]?.icon || Zap;
-        
-        return (
-            <div 
-                key={key}
-                className={`${styles.featureCard} ${isSelected ? styles.selected : ''} ${hasPendingChange ? styles.pending : ''}`}
-                onClick={() => bulkActionMode && setSelectedFeatures(prev => {
-                    const newSet = new Set(prev);
-                    if (newSet.has(key)) {
-                        newSet.delete(key);
-                    } else {
-                        newSet.add(key);
-                    }
-                    return newSet;
-                })}
-            >
-                {bulkActionMode && (
-                    <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => {}}
-                        className={styles.checkbox}
-                        onClick={(e) => e.stopPropagation()}
-                    />
-                )}
-                
-                <div className={styles.featureHeader}>
-                    <div className={styles.featureInfo}>
-                        <div className={styles.featureIcon} style={{ backgroundColor: `${CATEGORIES[feature.category]?.color}20` }}>
-                            <Icon size={20} style={{ color: CATEGORIES[feature.category]?.color }} />
-                        </div>
-                        <div>
-                            <h3>{feature.name}</h3>
-                            <p className={styles.featureKey}>{key}</p>
-                        </div>
-                    </div>
-                    
-                    <div className={styles.featureActions}>
-                        <button
-                            className={`${styles.toggleButton} ${feature.enabled ? styles.enabled : styles.disabled}`}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleFeatureToggle(key, !feature.enabled);
-                            }}
-                            disabled={bulkActionMode}
-                        >
-                            <Power size={16} />
-                            {feature.enabled ? 'Aktiv' : 'Inaktiv'}
-                        </button>
-                        
-                        <button
-                            className={styles.iconButton}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingFeature({ key, ...feature });
-                            }}
-                        >
-                            <Edit size={16} />
-                        </button>
-                    </div>
-                </div>
-                
-                <p className={styles.description}>{feature.description}</p>
-                
-                <div className={styles.featureMeta}>
-                    <span className={`${styles.tier} ${styles[feature.tier]}`}>
-                        {feature.tier}
-                    </span>
-                    
-                    {feature.dependencies.length > 0 && (
-                        <div className={styles.dependencies}>
-                            <Info size={14} />
-                            <span>{feature.dependencies.length} AbhÃ¤ngigkeiten</span>
-                        </div>
-                    )}
-                </div>
-                
-                <div className={styles.featureStats}>
-                    <div className={styles.stat}>
-                        <span className={styles.statLabel}>Aktive Tenants</span>
-                        <span className={styles.statValue}>{feature.activeTenantsCount}</span>
-                    </div>
-                    <div className={styles.stat}>
-                        <span className={styles.statLabel}>Nutzung</span>
-                        <div className={styles.usageBar}>
-                            <div 
-                                className={styles.usageProgress} 
-                                style={{ width: `${feature.usagePercentage}%` }}
-                            />
-                        </div>
-                        <span className={styles.statValue}>{feature.usagePercentage}%</span>
-                    </div>
-                </div>
-                
-                <div className={styles.featureFooter}>
-                    <Clock size={12} />
-                    <span>GeÃ¤ndert: {new Date(feature.lastModified).toLocaleDateString('de-CH')}</span>
-                    <span>â€¢</span>
-                    <span>{feature.modifiedBy}</span>
-                </div>
-                
-                {hasPendingChange && (
-                    <div className={styles.pendingIndicator}>
-                        <AlertCircle size={14} />
-                        Ungespeicherte Ã„nderungen
-                    </div>
-                )}
-            </div>
-        );
+    // Cleanup
+    return () => {
+      off(featuresRef);
+      off(tenantsRef);
+      off(auditRef);
+      off(metricsRef);
     };
+  }, []);
 
-    // ========================================================================
-    // MAIN RENDER
-    // ========================================================================
+  // ========================================================================
+  // EMERGENCY SYSTEM
+  // ========================================================================
+  const checkEmergencyConditions = (metrics) => {
+    // CPU > 90% für 5min
+    if (metrics.cpu > 90 && metrics.cpuHighDuration > 300) {
+      triggerEmergencyMode(3); // Disable Priority 3 features
+    }
     
+    // Memory > 85%
+    if (metrics.memory > 85) {
+      disableFeaturesByPattern(['ai.*']);
+    }
+    
+    // Payment Errors > 5%
+    if (metrics.paymentErrorRate > 5) {
+      enableFallbackPayment();
+    }
+    
+    // Response Time > 3s
+    if (metrics.responseTime > 3000) {
+      pauseAnalytics();
+    }
+  };
+
+  const triggerEmergencyMode = async (priority) => {
+    const featuresToDisable = EMERGENCY_PRIORITIES[priority].features;
+    
+    try {
+      const updates = {};
+      
+      Object.keys(features).forEach(featureKey => {
+        if (matchesPattern(featureKey, featuresToDisable)) {
+          updates[`features/${featureKey}/masterControl/emergencyDisabled`] = true;
+          updates[`features/${featureKey}/masterControl/globalEnabled`] = false;
+        }
+      });
+      
+      await update(ref(database), updates);
+      
+      // Log emergency action
+      await logAuditEntry({
+        action: 'emergency.triggered',
+        priority,
+        reason: 'System overload',
+        featuresAffected: Object.keys(updates).length,
+        automatic: true
+      });
+      
+      // Send notification
+      sendEmergencyNotification(`Emergency Mode aktiviert: Priority ${priority} Features deaktiviert`);
+      
+    } catch (error) {
+      console.error('Emergency mode failed:', error);
+    }
+  };
+
+  // ========================================================================
+  // FEATURE MANAGEMENT
+  // ========================================================================
+  const toggleFeature = async (featureKey, enabled, tenantId = null) => {
+    try {
+      const path = tenantId 
+        ? `features/${featureKey}/tenantControl/${tenantId}/enabled`
+        : `features/${featureKey}/masterControl/globalEnabled`;
+      
+      await set(ref(database, path), enabled);
+      
+      // Check dependencies
+      if (!enabled) {
+        await checkAndDisableDependentFeatures(featureKey, tenantId);
+      }
+      
+      // Log change
+      await logAuditEntry({
+        action: enabled ? 'feature.enabled' : 'feature.disabled',
+        feature: featureKey,
+        tenant: tenantId,
+        changedBy: 'master',
+        previousState: !enabled,
+        newState: enabled
+      });
+      
+    } catch (error) {
+      console.error('Error toggling feature:', error);
+    }
+  };
+
+  const checkAndDisableDependentFeatures = async (featureKey, tenantId) => {
+    const dependentFeatures = Object.entries(features).filter(([key, feature]) => 
+      feature.dependencies?.includes(featureKey)
+    );
+    
+    if (dependentFeatures.length > 0) {
+      const confirmDisable = window.confirm(
+        `Die folgenden Features hängen von ${featureKey} ab und werden auch deaktiviert:\n\n` +
+        dependentFeatures.map(([key]) => `- ${key}`).join('\n') +
+        '\n\nFortfahren?'
+      );
+      
+      if (confirmDisable) {
+        for (const [depKey] of dependentFeatures) {
+          await toggleFeature(depKey, false, tenantId);
+        }
+      }
+    }
+  };
+
+  // ========================================================================
+  // BATCH OPERATIONS
+  // ========================================================================
+  const applyBatchOperation = async (operation) => {
+    const { action, features, tenants, condition } = operation;
+    
+    try {
+      const updates = {};
+      const affectedCount = { features: 0, tenants: 0 };
+      
+      // Filter tenants based on condition
+      const targetTenants = tenants === 'all' 
+        ? this.tenants 
+        : tenants === 'conditional'
+          ? this.tenants.filter(t => evaluateCondition(t, condition))
+          : this.tenants.filter(t => tenants.includes(t.id));
+      
+      // Apply operation
+      for (const tenant of targetTenants) {
+        for (const featureKey of features) {
+          if (matchesPattern(featureKey, Object.keys(this.features))) {
+            const path = `features/${featureKey}/tenantControl/${tenant.id}/enabled`;
+            updates[path] = action === 'enable';
+            affectedCount.features++;
+          }
+        }
+        affectedCount.tenants++;
+      }
+      
+      // Execute updates
+      await update(ref(database), updates);
+      
+      // Log batch operation
+      await logAuditEntry({
+        action: 'batch.operation',
+        operation: action,
+        affectedFeatures: affectedCount.features,
+        affectedTenants: affectedCount.tenants,
+        condition: condition || 'none'
+      });
+      
+      alert(`Batch-Operation erfolgreich: ${affectedCount.features} Features bei ${affectedCount.tenants} Tenants ${action === 'enable' ? 'aktiviert' : 'deaktiviert'}`);
+      
+    } catch (error) {
+      console.error('Batch operation failed:', error);
+      alert('Fehler bei Batch-Operation');
+    }
+  };
+
+  // ========================================================================
+  // TEST MODE
+  // ========================================================================
+  const createTestEnvironment = async (tenantId) => {
+    try {
+      const testTenantId = `test-${tenantId || 'master'}-${Date.now()}`;
+      const testFoodtruckId = `truck-test-${Date.now()}`;
+      
+      // Create test tenant
+      await set(ref(database, `tenants/${testTenantId}`), {
+        name: `Test Environment - ${tenantId || 'Master'}`,
+        isTestMode: true,
+        parentTenant: tenantId,
+        created: serverTimestamp(),
+        config: {
+          noRealTransactions: true,
+          autoCleanup: 'daily',
+          sandboxMode: true
+        }
+      });
+      
+      // Create test foodtruck
+      await set(ref(database, `foodtrucks/${testFoodtruckId}`), {
+        name: 'Test Foodtruck',
+        tenantId: testTenantId,
+        isTest: true,
+        location: { lat: 47.3769, lng: 8.5417 } // Zürich
+      });
+      
+      // Create test users
+      const testUsers = [];
+      for (let i = 1; i <= 3; i++) {
+        const userId = `user-test-${Date.now()}-${i}`;
+        await set(ref(database, `users/${userId}`), {
+          name: `Test User ${i}`,
+          email: `test${i}@eatech-test.ch`,
+          isTestUser: true,
+          tenantId: testTenantId
+        });
+        testUsers.push(userId);
+      }
+      
+      // Enable all features for testing
+      const updates = {};
+      Object.keys(features).forEach(featureKey => {
+        updates[`features/${featureKey}/tenantControl/${testTenantId}/enabled`] = true;
+      });
+      await update(ref(database), updates);
+      
+      // Log test environment creation
+      await logAuditEntry({
+        action: 'test.environment.created',
+        testTenantId,
+        testFoodtruckId,
+        testUsers,
+        parentTenant: tenantId
+      });
+      
+      alert(`Test-Umgebung erstellt!\n\nTenant: ${testTenantId}\nFoodtruck: ${testFoodtruckId}\nTest-User: ${testUsers.length}`);
+      
+      return { testTenantId, testFoodtruckId, testUsers };
+      
+    } catch (error) {
+      console.error('Error creating test environment:', error);
+      alert('Fehler beim Erstellen der Test-Umgebung');
+    }
+  };
+
+  // ========================================================================
+  // HELPER FUNCTIONS
+  // ========================================================================
+  const matchesPattern = (key, patterns) => {
+    return patterns.some(pattern => {
+      if (pattern.endsWith('*')) {
+        return key.startsWith(pattern.slice(0, -1));
+      }
+      return key === pattern;
+    });
+  };
+
+  const evaluateCondition = (tenant, condition) => {
+    switch (condition.type) {
+      case 'location':
+        return tenant.address?.city === condition.value;
+      case 'orderVolume':
+        return tenant.stats?.dailyOrders < condition.value;
+      case 'plan':
+        return tenant.plan === condition.value;
+      default:
+        return true;
+    }
+  };
+
+  const logAuditEntry = async (entry) => {
+    try {
+      await push(ref(database, 'featureAudit'), {
+        ...entry,
+        timestamp: serverTimestamp(),
+        masterId: 'master-001', // Current master ID
+        ip: window.location.hostname,
+        userAgent: navigator.userAgent
+      });
+    } catch (error) {
+      console.error('Error logging audit entry:', error);
+    }
+  };
+
+  const sendEmergencyNotification = async (message) => {
+    // Integration with NotificationCenter
+    console.log('Emergency notification:', message);
+    // TODO: Implement actual notification sending
+  };
+
+  const disableFeaturesByPattern = async (patterns) => {
+    const updates = {};
+    Object.keys(features).forEach(key => {
+      if (matchesPattern(key, patterns)) {
+        updates[`features/${key}/masterControl/globalEnabled`] = false;
+      }
+    });
+    await update(ref(database), updates);
+  };
+
+  const enableFallbackPayment = async () => {
+    await set(ref(database, 'features/payment.basic/masterControl/fallbackMode'), true);
+  };
+
+  const pauseAnalytics = async () => {
+    await set(ref(database, 'features/analytics/masterControl/paused'), true);
+  };
+
+  const exportFeatureConfig = () => {
+    const config = {
+      exportDate: new Date().toISOString(),
+      features,
+      tenantOverrides: {},
+      templates: FEATURE_TEMPLATES,
+      emergencySettings: EMERGENCY_PRIORITIES
+    };
+    
+    // Add tenant overrides
+    tenants.forEach(tenant => {
+      config.tenantOverrides[tenant.id] = {};
+      Object.keys(features).forEach(featureKey => {
+        const override = features[featureKey]?.tenantControl?.[tenant.id];
+        if (override) {
+          config.tenantOverrides[tenant.id][featureKey] = override;
+        }
+      });
+    });
+    
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `eatech-features-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const applyTemplate = async (templateKey, tenantId) => {
+    const template = FEATURE_TEMPLATES[templateKey];
+    if (!template) return;
+    
+    const confirmApply = window.confirm(
+      `Template "${template.name}" anwenden?\n\n${template.description}\n\nDies wird die aktuellen Feature-Einstellungen überschreiben.`
+    );
+    
+    if (!confirmApply) return;
+    
+    try {
+      const updates = {};
+      
+      // Disable all features first
+      Object.keys(features).forEach(key => {
+        updates[`features/${key}/tenantControl/${tenantId}/enabled`] = false;
+      });
+      
+      // Enable template features
+      Object.keys(features).forEach(key => {
+        if (matchesPattern(key, template.features)) {
+          updates[`features/${key}/tenantControl/${tenantId}/enabled`] = true;
+        }
+      });
+      
+      await update(ref(database), updates);
+      
+      await logAuditEntry({
+        action: 'template.applied',
+        template: templateKey,
+        tenant: tenantId,
+        featuresEnabled: template.features.length
+      });
+      
+      alert(`Template "${template.name}" erfolgreich angewendet!`);
+      
+    } catch (error) {
+      console.error('Error applying template:', error);
+      alert('Fehler beim Anwenden des Templates');
+    }
+  };
+
+  // ========================================================================
+  // COMPUTED VALUES
+  // ========================================================================
+  const filteredFeatures = useMemo(() => {
+    return Object.entries(features).filter(([key, feature]) => {
+      // Search filter
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        if (!key.toLowerCase().includes(searchLower) && 
+            !feature.name?.toLowerCase().includes(searchLower) &&
+            !feature.description?.toLowerCase().includes(searchLower)) {
+          return false;
+        }
+      }
+      
+      // Category filter
+      if (selectedCategory !== 'all') {
+        const category = key.split('.')[0];
+        if (category !== selectedCategory) return false;
+      }
+      
+      return true;
+    });
+  }, [features, searchTerm, selectedCategory]);
+
+  const featureStats = useMemo(() => {
+    const stats = {
+      total: Object.keys(features).length,
+      enabled: 0,
+      disabled: 0,
+      trial: 0,
+      byCategory: {}
+    };
+    
+    Object.entries(features).forEach(([key, feature]) => {
+      const category = key.split('.')[0];
+      
+      if (feature.masterControl?.globalEnabled) {
+        stats.enabled++;
+      } else {
+        stats.disabled++;
+      }
+      
+      if (feature.trial?.active) {
+        stats.trial++;
+      }
+      
+      if (!stats.byCategory[category]) {
+        stats.byCategory[category] = { total: 0, enabled: 0 };
+      }
+      stats.byCategory[category].total++;
+      if (feature.masterControl?.globalEnabled) {
+        stats.byCategory[category].enabled++;
+      }
+    });
+    
+    return stats;
+  }, [features]);
+
+  // ========================================================================
+  // RENDER
+  // ========================================================================
+  if (loading) {
     return (
-        <div className={styles.container}>
-            {/* Header */}
-            <div className={styles.header}>
-                <div className={styles.headerContent}>
-                    <div>
-                        <h1>Feature Control Center</h1>
-                        <p>Verwalte alle EATECH-Features global oder pro Tenant</p>
-                    </div>
-                    
-                    <div className={styles.headerActions}>
-                        {Object.keys(pendingChanges).length > 0 && (
-                            <button 
-                                className={styles.saveButton}
-                                onClick={handleSaveChanges}
-                            >
-                                <Save size={20} />
-                                Ã„nderungen speichern ({Object.keys(pendingChanges).length})
-                            </button>
-                        )}
-                        
-                        <button 
-                            className={styles.iconButton}
-                            onClick={() => window.location.reload()}
-                        >
-                            <RefreshCw size={20} />
-                        </button>
-                        
-                        <button 
-                            className={styles.iconButton}
-                            onClick={() => exportFeatures()}
-                        >
-                            <Download size={20} />
-                        </button>
-                    </div>
-                </div>
+      <div className={styles.loading}>
+        <Loader2 size={48} className={styles.spinner} />
+        <p>Lade Feature Control System...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.featureControl}>
+      {/* Header */}
+      <div className={styles.header}>
+        <div className={styles.headerLeft}>
+          <h1>
+            <SlidersHorizontal size={28} />
+            Feature Control
+          </h1>
+          <div className={styles.stats}>
+            <div className={styles.statItem}>
+              <span className={styles.statValue}>{featureStats.enabled}</span>
+              <span className={styles.statLabel}>Aktiv</span>
             </div>
+            <div className={styles.statItem}>
+              <span className={styles.statValue}>{featureStats.disabled}</span>
+              <span className={styles.statLabel}>Inaktiv</span>
+            </div>
+            <div className={styles.statItem}>
+              <span className={styles.statValue}>{featureStats.trial}</span>
+              <span className={styles.statLabel}>Trial</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className={styles.headerRight}>
+          {/* Emergency Panel Button */}
+          {systemMetrics.cpu > 70 || systemMetrics.memory > 70 ? (
+            <button 
+              className={`${styles.emergencyButton} ${styles.warning}`}
+              onClick={() => setShowEmergencyPanel(true)}
+            >
+              <AlertTriangle size={18} />
+              System Warning
+            </button>
+          ) : null}
+          
+          <button 
+            className={styles.iconButton}
+            onClick={() => setShowTestMode(true)}
+            title="Test-Modus"
+          >
+            <TestTube size={20} />
+          </button>
+          
+          <button 
+            className={styles.iconButton}
+            onClick={() => setShowAuditLog(true)}
+            title="Audit Log"
+          >
+            <History size={20} />
+          </button>
+          
+          <button 
+            className={styles.iconButton}
+            onClick={exportFeatureConfig}
+            title="Export"
+          >
+            <Download size={20} />
+          </button>
+          
+          <button 
+            className={styles.iconButton}
+            onClick={() => setShowTutorial(true)}
+            title="Tutorial"
+          >
+            <HelpCircle size={20} />
+          </button>
+        </div>
+      </div>
 
-            {/* Global Stats */}
-            {showStats && (
-                <div className={styles.statsGrid}>
-                    <div className={styles.statCard}>
-                        <div className={styles.statIcon}>
-                            <Zap size={24} />
-                        </div>
-                        <div>
-                            <h3>{globalStats.total}</h3>
-                            <p>Features Total</p>
-                        </div>
-                    </div>
-                    
-                    <div className={styles.statCard}>
-                        <div className={styles.statIcon} style={{ backgroundColor: '#10b98120' }}>
-                            <CheckCircle2 size={24} style={{ color: '#10b981' }} />
-                        </div>
-                        <div>
-                            <h3>{globalStats.enabled}</h3>
-                            <p>Aktiv ({Math.round(globalStats.enabled / globalStats.total * 100)}%)</p>
-                        </div>
-                    </div>
-                    
-                    <div className={styles.statCard}>
-                        <div className={styles.statIcon} style={{ backgroundColor: '#6366f120' }}>
-                            <BarChart3 size={24} style={{ color: '#6366f1' }} />
-                        </div>
-                        <div>
-                            <h3>{globalStats.avgUsage}%</h3>
-                            <p>Durchschn. Nutzung</p>
-                        </div>
-                    </div>
-                    
-                    <div className={styles.statCard}>
-                        <div className={styles.statIcon} style={{ backgroundColor: '#f59e0b20' }}>
-                            <Globe size={24} style={{ color: '#f59e0b' }} />
-                        </div>
-                        <div>
-                            <h3>{globalStats.activeTenantsTotal}</h3>
-                            <p>Aktive Tenants</p>
-                        </div>
-                    </div>
+      {/* System Metrics Bar */}
+      <div className={styles.metricsBar}>
+        <div className={styles.metric}>
+          <Cpu size={16} />
+          <span>CPU: {systemMetrics.cpu}%</span>
+          <div className={styles.metricBar}>
+            <div 
+              className={styles.metricFill} 
+              style={{ 
+                width: `${systemMetrics.cpu}%`,
+                backgroundColor: systemMetrics.cpu > 80 ? '#FF6B6B' : systemMetrics.cpu > 60 ? '#F39C12' : '#10B981'
+              }}
+            />
+          </div>
+        </div>
+        
+        <div className={styles.metric}>
+          <Database size={16} />
+          <span>Memory: {systemMetrics.memory}%</span>
+          <div className={styles.metricBar}>
+            <div 
+              className={styles.metricFill} 
+              style={{ 
+                width: `${systemMetrics.memory}%`,
+                backgroundColor: systemMetrics.memory > 80 ? '#FF6B6B' : systemMetrics.memory > 60 ? '#F39C12' : '#10B981'
+              }}
+            />
+          </div>
+        </div>
+        
+        <div className={styles.metric}>
+          <Activity size={16} />
+          <span>Response: {systemMetrics.responseTime}ms</span>
+          <div className={styles.metricBar}>
+            <div 
+              className={styles.metricFill} 
+              style={{ 
+                width: `${Math.min((systemMetrics.responseTime / 1000) * 100, 100)}%`,
+                backgroundColor: systemMetrics.responseTime > 3000 ? '#FF6B6B' : systemMetrics.responseTime > 1000 ? '#F39C12' : '#10B981'
+              }}
+            />
+          </div>
+        </div>
+        
+        <div className={styles.metric}>
+          <AlertCircle size={16} />
+          <span>Fehler: {systemMetrics.errorRate}%</span>
+          <div className={styles.metricBar}>
+            <div 
+              className={styles.metricFill} 
+              style={{ 
+                width: `${systemMetrics.errorRate}%`,
+                backgroundColor: systemMetrics.errorRate > 5 ? '#FF6B6B' : systemMetrics.errorRate > 2 ? '#F39C12' : '#10B981'
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Filters and Controls */}
+      <div className={styles.controls}>
+        <div className={styles.searchBox}>
+          <Search size={18} />
+          <input
+            type="text"
+            placeholder="Features suchen..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        
+        <div className={styles.categoryFilter}>
+          <select 
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+          >
+            <option value="all">Alle Kategorien</option>
+            {Object.entries(FEATURE_CATEGORIES).map(([key, category]) => (
+              <option key={key} value={key}>
+                {category.name} ({Object.keys(features).filter(f => f.startsWith(key)).length})
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        <div className={styles.tenantSelector}>
+          <Building size={18} />
+          <select
+            value={selectedTenant?.id || ''}
+            onChange={(e) => {
+              const tenant = tenants.find(t => t.id === e.target.value);
+              setSelectedTenant(tenant);
+            }}
+          >
+            <option value="">Master Control</option>
+            {tenants.map(tenant => (
+              <option key={tenant.id} value={tenant.id}>
+                {tenant.name} ({tenant.plan || 'Standard'})
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        <div className={styles.viewModeButtons}>
+          <button
+            className={`${styles.viewButton} ${viewMode === 'grid' ? styles.active : ''}`}
+            onClick={() => setViewMode('grid')}
+            title="Grid-Ansicht"
+          >
+            <LayoutGrid size={18} />
+          </button>
+          <button
+            className={`${styles.viewButton} ${viewMode === 'list' ? styles.active : ''}`}
+            onClick={() => setViewMode('list')}
+            title="Listen-Ansicht"
+          >
+            <List size={18} />
+          </button>
+          <button
+            className={`${styles.viewButton} ${viewMode === 'compact' ? styles.active : ''}`}
+            onClick={() => setViewMode('compact')}
+            title="Kompakt-Ansicht"
+          >
+            <Grid size={18} />
+          </button>
+        </div>
+        
+        <button
+          className={`${styles.bulkButton} ${bulkActionMode ? styles.active : ''}`}
+          onClick={() => setBulkActionMode(!bulkActionMode)}
+        >
+          <CheckSquare size={18} />
+          Bulk-Modus
+        </button>
+      </div>
+
+      {/* Bulk Actions Bar */}
+      {bulkActionMode && selectedFeatures.size > 0 && (
+        <div className={styles.bulkActionsBar}>
+          <span>{selectedFeatures.size} Features ausgewählt</span>
+          <div className={styles.bulkActions}>
+            <button
+              className={styles.bulkAction}
+              onClick={() => {
+                selectedFeatures.forEach(key => toggleFeature(key, true, selectedTenant?.id));
+                setSelectedFeatures(new Set());
+              }}
+            >
+              <Power size={16} />
+              Aktivieren
+            </button>
+            <button
+              className={styles.bulkAction}
+              onClick={() => {
+                selectedFeatures.forEach(key => toggleFeature(key, false, selectedTenant?.id));
+                setSelectedFeatures(new Set());
+              }}
+            >
+              <Power size={16} />
+              Deaktivieren
+            </button>
+            <button
+              className={styles.bulkAction}
+              onClick={() => setSelectedFeatures(new Set())}
+            >
+              <X size={16} />
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Template Bar */}
+      {selectedTenant && (
+        <div className={styles.templateBar}>
+          <span>Templates anwenden:</span>
+          {Object.entries(FEATURE_TEMPLATES).map(([key, template]) => (
+            <button
+              key={key}
+              className={styles.templateButton}
+              onClick={() => applyTemplate(key, selectedTenant.id)}
+              title={template.description}
+            >
+              {template.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Features Grid/List */}
+      <div className={`${styles.featuresContainer} ${styles[viewMode]}`}>
+        {filteredFeatures.map(([key, feature]) => {
+          const category = key.split('.')[0];
+          const categoryConfig = FEATURE_CATEGORIES[category] || {};
+          const Icon = categoryConfig.icon || Zap;
+          const isEnabled = selectedTenant 
+            ? feature.tenantControl?.[selectedTenant.id]?.enabled ?? feature.masterControl?.globalEnabled
+            : feature.masterControl?.globalEnabled;
+          const hasOverride = selectedTenant && feature.tenantControl?.[selectedTenant.id] !== undefined;
+          const isInTrial = feature.trial?.active;
+          const isSelected = selectedFeatures.has(key);
+          
+          return (
+            <div 
+              key={key}
+              className={`${styles.featureCard} ${isEnabled ? styles.enabled : ''} ${isSelected ? styles.selected : ''} ${hasOverride ? styles.hasOverride : ''}`}
+              onClick={() => {
+                if (bulkActionMode) {
+                  const newSelected = new Set(selectedFeatures);
+                  if (newSelected.has(key)) {
+                    newSelected.delete(key);
+                  } else {
+                    newSelected.add(key);
+                  }
+                  setSelectedFeatures(newSelected);
+                }
+              }}
+            >
+              {bulkActionMode && (
+                <div className={styles.checkbox}>
+                  {isSelected ? <CheckSquare size={20} /> : <Square size={20} />}
                 </div>
-            )}
-
-            {/* Controls */}
-            <div className={styles.controls}>
-                <div className={styles.controlsLeft}>
-                    <div className={styles.searchContainer}>
-                        <Search size={20} />
-                        <input
-                            type="text"
-                            placeholder="Feature suchen..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className={styles.searchInput}
-                        />
-                        {searchTerm && (
-                            <button 
-                                className={styles.clearButton}
-                                onClick={() => setSearchTerm('')}
-                            >
-                                <X size={16} />
-                            </button>
-                        )}
-                    </div>
-                    
-                    <button
-                        className={`${styles.filterButton} ${showFilters ? styles.active : ''}`}
-                        onClick={() => setShowFilters(!showFilters)}
-                    >
-                        <Filter size={20} />
-                        Filter {(tierFilter !== 'all' || statusFilter !== 'all') && 'â€¢'}
-                    </button>
-                    
-                    <div className={styles.viewModeToggle}>
-                        <button
-                            className={viewMode === 'grid' ? styles.active : ''}
-                            onClick={() => setViewMode('grid')}
-                        >
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                                <rect x="1" y="1" width="6" height="6" />
-                                <rect x="9" y="1" width="6" height="6" />
-                                <rect x="1" y="9" width="6" height="6" />
-                                <rect x="9" y="9" width="6" height="6" />
-                            </svg>
-                        </button>
-                        <button
-                            className={viewMode === 'list' ? styles.active : ''}
-                            onClick={() => setViewMode('list')}
-                        >
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                                <rect x="1" y="2" width="14" height="2" />
-                                <rect x="1" y="7" width="14" height="2" />
-                                <rect x="1" y="12" width="14" height="2" />
-                            </svg>
-                        </button>
-                    </div>
+              )}
+              
+              <div className={styles.featureHeader}>
+                <div 
+                  className={styles.featureIcon}
+                  style={{ backgroundColor: `${categoryConfig.color}20`, color: categoryConfig.color }}
+                >
+                  <Icon size={24} />
                 </div>
                 
-                <div className={styles.controlsRight}>
-                    {selectedTenant ? (
-                        <div className={styles.tenantSelector}>
-                            <Globe size={16} />
-                            <span>{selectedTenant.name}</span>
-                            <button onClick={() => setSelectedTenant(null)}>
-                                <X size={16} />
-                            </button>
-                        </div>
-                    ) : (
-                        <button
-                            className={styles.tenantButton}
-                            onClick={() => setShowTenantModal(true)}
-                        >
-                            <Globe size={20} />
-                            Tenant wÃ¤hlen
-                        </button>
-                    )}
-                    
+                <div className={styles.featureInfo}>
+                  <h3>{feature.name || key}</h3>
+                  <p className={styles.featureKey}>{key}</p>
+                  {feature.description && (
+                    <p className={styles.featureDescription}>{feature.description}</p>
+                  )}
+                </div>
+                
+                <div className={styles.featureActions}>
+                  {isInTrial && (
+                    <div className={styles.trialBadge}>
+                      <Timer size={14} />
+                      Trial
+                    </div>
+                  )}
+                  
+                  {hasOverride && (
+                    <div className={styles.overrideBadge} title="Tenant-spezifische Einstellung">
+                      <User size={14} />
+                    </div>
+                  )}
+                  
+                  <button
+                    className={styles.infoButton}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingFeature({ key, ...feature });
+                    }}
+                    title="Feature-Details"
+                  >
+                    <Info size={18} />
+                  </button>
+                  
+                  {!bulkActionMode && (
                     <button
-                        className={`${styles.bulkButton} ${bulkActionMode ? styles.active : ''}`}
-                        onClick={() => {
-                            setBulkActionMode(!bulkActionMode);
-                            setSelectedFeatures(new Set());
-                        }}
+                      className={`${styles.toggleButton} ${isEnabled ? styles.on : styles.off}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFeature(key, !isEnabled, selectedTenant?.id);
+                      }}
+                      title={isEnabled ? 'Deaktivieren' : 'Aktivieren'}
                     >
-                        {bulkActionMode ? 'Abbrechen' : 'Bulk-Aktionen'}
+                      {isEnabled ? <ToggleRight size={24} /> : <ToggleLeft size={24} />}
                     </button>
+                  )}
                 </div>
+              </div>
+              
+              {viewMode === 'list' && feature.dependencies?.length > 0 && (
+                <div className={styles.featureDependencies}>
+                  <span>Abhängigkeiten:</span>
+                  {feature.dependencies.map(dep => (
+                    <span key={dep} className={styles.dependency}>{dep}</span>
+                  ))}
+                </div>
+              )}
+              
+              {viewMode === 'list' && feature.stats && (
+                <div className={styles.featureStats}>
+                  <div className={styles.stat}>
+                    <Users size={14} />
+                    <span>{feature.stats.activeUsers || 0} Nutzer</span>
+                  </div>
+                  <div className={styles.stat}>
+                    <Activity size={14} />
+                    <span>{feature.stats.usageRate || 0}% Nutzung</span>
+                  </div>
+                  <div className={styles.stat}>
+                    <TrendingUp size={14} />
+                    <span>{feature.stats.trend || '+0'}% Trend</span>
+                  </div>
+                </div>
+              )}
             </div>
+          );
+        })}
+      </div>
 
-            {/* Filters */}
-            {showFilters && (
-                <div className={styles.filterBar}>
-                    <div className={styles.filterGroup}>
-                        <label>Tier</label>
-                        <select 
-                            value={tierFilter}
-                            onChange={(e) => setTierFilter(e.target.value)}
-                        >
-                            <option value="all">Alle</option>
-                            <option value="basic">Basic</option>
-                            <option value="pro">Pro</option>
-                            <option value="enterprise">Enterprise</option>
-                        </select>
-                    </div>
-                    
-                    <div className={styles.filterGroup}>
-                        <label>Status</label>
-                        <select 
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                        >
-                            <option value="all">Alle</option>
-                            <option value="enabled">Aktiviert</option>
-                            <option value="disabled">Deaktiviert</option>
-                        </select>
-                    </div>
-                    
-                    <div className={styles.filterGroup}>
-                        <label>Nutzung</label>
-                        <div className={styles.rangeFilter}>
-                            <input
-                                type="range"
-                                min="0"
-                                max="100"
-                                value={usageFilter[0]}
-                                onChange={(e) => setUsageFilter([parseInt(e.target.value), usageFilter[1]])}
-                            />
-                            <span>{usageFilter[0]}% - {usageFilter[1]}%</span>
-                            <input
-                                type="range"
-                                min="0"
-                                max="100"
-                                value={usageFilter[1]}
-                                onChange={(e) => setUsageFilter([usageFilter[0], parseInt(e.target.value)])}
-                            />
-                        </div>
-                    </div>
-                    
-                    <button
-                        className={styles.resetFilters}
-                        onClick={() => {
-                            setTierFilter('all');
-                            setStatusFilter('all');
-                            setUsageFilter([0, 100]);
-                        }}
-                    >
-                        Filter zurÃ¼cksetzen
-                    </button>
-                </div>
-            )}
-
-            {/* Category Tabs */}
-            <div className={styles.categoryTabs}>
-                {Object.entries(CATEGORIES).map(([key, category]) => {
-                    const Icon = category.icon;
-                    const stats = categoryStats[key];
-                    const count = key === 'all' 
-                        ? Object.keys(features).length 
-                        : stats?.total || 0;
-                    
-                    return (
-                        <button
-                            key={key}
-                            className={`${styles.categoryTab} ${selectedCategory === key ? styles.active : ''}`}
-                            onClick={() => setSelectedCategory(key)}
-                        >
-                            <Icon size={18} />
-                            <span>{category.label}</span>
-                            <span className={styles.badge}>{count}</span>
-                        </button>
-                    );
-                })}
+      {/* Feature Details Modal */}
+      {editingFeature && (
+        <div className={styles.modal} onClick={() => setEditingFeature(null)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>
+                <Info size={24} />
+                Feature Details: {editingFeature.name || editingFeature.key}
+              </h2>
+              <button 
+                className={styles.closeButton}
+                onClick={() => setEditingFeature(null)}
+              >
+                <X size={24} />
+              </button>
             </div>
-
-            {/* Bulk Actions */}
-            {bulkActionMode && selectedFeatures.size > 0 && (
-                <div className={styles.bulkActionsBar}>
-                    <span>{selectedFeatures.size} Features ausgewÃ¤hlt</span>
-                    <div className={styles.bulkActions}>
-                        <button onClick={() => handleBulkAction('enable')}>
-                            <Unlock size={16} />
-                            Aktivieren
-                        </button>
-                        <button onClick={() => handleBulkAction('disable')}>
-                            <Lock size={16} />
-                            Deaktivieren
-                        </button>
-                        <button onClick={() => handleBulkAction('export')}>
-                            <Download size={16} />
-                            Exportieren
-                        </button>
-                    </div>
+            
+            <div className={styles.modalBody}>
+              <div className={styles.detailSection}>
+                <h3>Allgemeine Informationen</h3>
+                <div className={styles.detailRow}>
+                  <span>Feature Key:</span>
+                  <code>{editingFeature.key}</code>
                 </div>
-            )}
-
-            {/* Features Grid */}
-            <div className={`${styles.featuresGrid} ${styles[viewMode]}`}>
-                {filteredFeatures.length === 0 ? (
-                    <div className={styles.emptyState}>
-                        <Search size={48} />
-                        <h3>Keine Features gefunden</h3>
-                        <p>Versuche deine Suchkriterien anzupassen</p>
-                    </div>
-                ) : (
-                    filteredFeatures.map(([key, feature]) => renderFeatureCard(key, feature))
+                <div className={styles.detailRow}>
+                  <span>Kategorie:</span>
+                  <span>{FEATURE_CATEGORIES[editingFeature.key.split('.')[0]]?.name}</span>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Status:</span>
+                  <span className={editingFeature.masterControl?.globalEnabled ? styles.enabled : styles.disabled}>
+                    {editingFeature.masterControl?.globalEnabled ? 'Aktiv' : 'Inaktiv'}
+                  </span>
+                </div>
+                {editingFeature.description && (
+                  <div className={styles.detailRow}>
+                    <span>Beschreibung:</span>
+                    <span>{editingFeature.description}</span>
+                  </div>
                 )}
+              </div>
+              
+              {editingFeature.dependencies?.length > 0 && (
+                <div className={styles.detailSection}>
+                  <h3>Abhängigkeiten</h3>
+                  <p>Dieses Feature benötigt:</p>
+                  <ul>
+                    {editingFeature.dependencies.map(dep => (
+                      <li key={dep}>
+                        <code>{dep}</code>
+                        {features[dep]?.masterControl?.globalEnabled ? (
+                          <CheckCircle2 size={16} className={styles.enabled} />
+                        ) : (
+                          <XCircle size={16} className={styles.disabled} />
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {editingFeature.config && (
+                <div className={styles.detailSection}>
+                  <h3>Konfiguration</h3>
+                  <pre>{JSON.stringify(editingFeature.config, null, 2)}</pre>
+                </div>
+              )}
+              
+              {editingFeature.stats && (
+                <div className={styles.detailSection}>
+                  <h3>Statistiken</h3>
+                  <div className={styles.statsGrid}>
+                    <div className={styles.statCard}>
+                      <span className={styles.statLabel}>Aktive Nutzer</span>
+                      <span className={styles.statValue}>{editingFeature.stats.activeUsers || 0}</span>
+                    </div>
+                    <div className={styles.statCard}>
+                      <span className={styles.statLabel}>Nutzungsrate</span>
+                      <span className={styles.statValue}>{editingFeature.stats.usageRate || 0}%</span>
+                    </div>
+                    <div className={styles.statCard}>
+                      <span className={styles.statLabel}>Fehlerrate</span>
+                      <span className={styles.statValue}>{editingFeature.stats.errorRate || 0}%</span>
+                    </div>
+                    <div className={styles.statCard}>
+                      <span className={styles.statLabel}>Avg. Response</span>
+                      <span className={styles.statValue}>{editingFeature.stats.avgResponse || 0}ms</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div className={styles.detailSection}>
+                <h3>Tutorial & Hilfe</h3>
+                <p>
+                  {editingFeature.tutorial?.description || 
+                   'Aktiviere dieses Feature um erweiterte Funktionen freizuschalten.'}
+                </p>
+                {editingFeature.tutorial?.steps && (
+                  <ol className={styles.tutorialSteps}>
+                    {editingFeature.tutorial.steps.map((step, index) => (
+                      <li key={index}>{step}</li>
+                    ))}
+                  </ol>
+                )}
+              </div>
             </div>
-
-            {/* Tenant Modal */}
-            {showTenantModal && (
-                <div className={styles.modal} onClick={() => setShowTenantModal(false)}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h2>Tenant auswÃ¤hlen</h2>
-                            <button onClick={() => setShowTenantModal(false)}>
-                                <X size={24} />
-                            </button>
-                        </div>
-                        
-                        <div className={styles.tenantList}>
-                            {MOCK_TENANTS.map(tenant => (
-                                <div 
-                                    key={tenant.id}
-                                    className={styles.tenantItem}
-                                    onClick={() => {
-                                        setSelectedTenant(tenant);
-                                        setShowTenantModal(false);
-                                    }}
-                                >
-                                    <div>
-                                        <h3>{tenant.name}</h3>
-                                        <p>{tenant.id} â€¢ {tenant.tier}</p>
-                                    </div>
-                                    <div className={styles.tenantStats}>
-                                        <span>{tenant.activeFeatures} Features</span>
-                                        <span>{tenant.customOverrides} Overrides</span>
-                                    </div>
-                                    <ChevronRight size={20} />
-                                </div>
-                            ))}
-                        </div>
-                        
-                        <div className={styles.modalFooter}>
-                            <button className={styles.addTenantButton}>
-                                <Plus size={20} />
-                                Neuer Tenant
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Feature Edit Modal */}
-            {editingFeature && (
-                <div className={styles.modal} onClick={() => setEditingFeature(null)}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h2>Feature bearbeiten</h2>
-                            <button onClick={() => setEditingFeature(null)}>
-                                <X size={24} />
-                            </button>
-                        </div>
-                        
-                        <div className={styles.editForm}>
-                            <div className={styles.formGroup}>
-                                <label>Feature Key</label>
-                                <input type="text" value={editingFeature.key} disabled />
-                            </div>
-                            
-                            <div className={styles.formGroup}>
-                                <label>Name</label>
-                                <input 
-                                    type="text" 
-                                    value={editingFeature.name}
-                                    onChange={(e) => setEditingFeature({
-                                        ...editingFeature,
-                                        name: e.target.value
-                                    })}
-                                />
-                            </div>
-                            
-                            <div className={styles.formGroup}>
-                                <label>Beschreibung</label>
-                                <textarea 
-                                    value={editingFeature.description}
-                                    onChange={(e) => setEditingFeature({
-                                        ...editingFeature,
-                                        description: e.target.value
-                                    })}
-                                    rows="3"
-                                />
-                            </div>
-                            
-                            <div className={styles.formGroup}>
-                                <label>Tier</label>
-                                <select 
-                                    value={editingFeature.tier}
-                                    onChange={(e) => setEditingFeature({
-                                        ...editingFeature,
-                                        tier: e.target.value
-                                    })}
-                                >
-                                    <option value="basic">Basic</option>
-                                    <option value="pro">Pro</option>
-                                    <option value="enterprise">Enterprise</option>
-                                </select>
-                            </div>
-                            
-                            <div className={styles.formGroup}>
-                                <label>Dependencies</label>
-                                <div className={styles.dependencyList}>
-                                    {editingFeature.dependencies.map((dep, index) => (
-                                        <div key={index} className={styles.dependencyItem}>
-                                            <span>{dep}</span>
-                                            <button onClick={() => {
-                                                const newDeps = [...editingFeature.dependencies];
-                                                newDeps.splice(index, 1);
-                                                setEditingFeature({
-                                                    ...editingFeature,
-                                                    dependencies: newDeps
-                                                });
-                                            }}>
-                                                <X size={16} />
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div className={styles.modalFooter}>
-                            <button 
-                                className={styles.cancelButton}
-                                onClick={() => setEditingFeature(null)}
-                            >
-                                Abbrechen
-                            </button>
-                            <button 
-                                className={styles.saveButton}
-                                onClick={() => {
-                                    // Save feature changes
-                                    setFeatures(prev => ({
-                                        ...prev,
-                                        [editingFeature.key]: {
-                                            ...prev[editingFeature.key],
-                                            name: editingFeature.name,
-                                            description: editingFeature.description,
-                                            tier: editingFeature.tier,
-                                            dependencies: editingFeature.dependencies,
-                                            lastModified: new Date().toISOString(),
-                                            modifiedBy: 'current-user@eatech.ch'
-                                        }
-                                    }));
-                                    setPendingChanges(prev => ({
-                                        ...prev,
-                                        [editingFeature.key]: { ...editingFeature }
-                                    }));
-                                    setEditingFeature(null);
-                                }}
-                            >
-                                Speichern
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            
+            <div className={styles.modalFooter}>
+              <button 
+                className={styles.primaryButton}
+                onClick={() => {
+                  toggleFeature(editingFeature.key, !editingFeature.masterControl?.globalEnabled);
+                  setEditingFeature(null);
+                }}
+              >
+                {editingFeature.masterControl?.globalEnabled ? 'Deaktivieren' : 'Aktivieren'}
+              </button>
+              <button 
+                className={styles.secondaryButton}
+                onClick={() => setEditingFeature(null)}
+              >
+                Schließen
+              </button>
+            </div>
+          </div>
         </div>
-    );
+      )}
+
+      {/* Test Mode Modal */}
+      {showTestMode && (
+        <div className={styles.modal} onClick={() => setShowTestMode(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>
+                <TestTube size={24} />
+                Test-Umgebung erstellen
+              </h2>
+              <button 
+                className={styles.closeButton}
+                onClick={() => setShowTestMode(false)}
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className={styles.modalBody}>
+              <div className={styles.testModeInfo}>
+                <AlertCircle size={20} />
+                <p>
+                  Eine Test-Umgebung erstellt einen isolierten Bereich mit:
+                </p>
+                <ul>
+                  <li>Test-Tenant mit allen Features aktiviert</li>
+                  <li>Test-Foodtruck ohne echte Transaktionen</li>
+                  <li>3 Test-User für verschiedene Szenarien</li>
+                  <li>Automatische Bereinigung nach 24 Stunden</li>
+                </ul>
+              </div>
+              
+              <div className={styles.testModeOptions}>
+                <h3>Für wen soll die Test-Umgebung erstellt werden?</h3>
+                <div className={styles.testModeButtons}>
+                  <button
+                    className={styles.testModeButton}
+                    onClick={() => {
+                      createTestEnvironment(null);
+                      setShowTestMode(false);
+                    }}
+                  >
+                    <Shield size={20} />
+                    <span>Master Test-Umgebung</span>
+                    <small>Für System-Tests</small>
+                  </button>
+                  
+                  {selectedTenant && (
+                    <button
+                      className={styles.testModeButton}
+                      onClick={() => {
+                        createTestEnvironment(selectedTenant.id);
+                        setShowTestMode(false);
+                      }}
+                    >
+                      <Building size={20} />
+                      <span>Tenant Test-Umgebung</span>
+                      <small>Für {selectedTenant.name}</small>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            <div className={styles.modalFooter}>
+              <button 
+                className={styles.secondaryButton}
+                onClick={() => setShowTestMode(false)}
+              >
+                Abbrechen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Audit Log Modal */}
+      {showAuditLog && (
+        <div className={styles.modal} onClick={() => setShowAuditLog(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>
+                <History size={24} />
+                Feature Audit Log
+              </h2>
+              <button 
+                className={styles.closeButton}
+                onClick={() => setShowAuditLog(false)}
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className={styles.modalBody}>
+              <div className={styles.auditLog}>
+                {auditLog.length === 0 ? (
+                  <p className={styles.emptyState}>Keine Einträge vorhanden</p>
+                ) : (
+                  auditLog.map(entry => (
+                    <div key={entry.id} className={styles.auditEntry}>
+                      <div className={styles.auditIcon}>
+                        {entry.action.includes('enabled') && <CheckCircle2 size={20} className={styles.enabled} />}
+                        {entry.action.includes('disabled') && <XCircle size={20} className={styles.disabled} />}
+                        {entry.action.includes('emergency') && <AlertTriangle size={20} className={styles.warning} />}
+                        {entry.action.includes('batch') && <Layers size={20} />}
+                        {entry.action.includes('template') && <Copy size={20} />}
+                        {entry.action.includes('test') && <TestTube size={20} />}
+                      </div>
+                      
+                      <div className={styles.auditContent}>
+                        <div className={styles.auditAction}>
+                          {entry.action === 'feature.enabled' && `Feature aktiviert: ${entry.feature}`}
+                          {entry.action === 'feature.disabled' && `Feature deaktiviert: ${entry.feature}`}
+                          {entry.action === 'emergency.triggered' && `Emergency Mode: Priority ${entry.priority}`}
+                          {entry.action === 'batch.operation' && `Batch-Operation: ${entry.affectedFeatures} Features`}
+                          {entry.action === 'template.applied' && `Template angewendet: ${entry.template}`}
+                          {entry.action === 'test.environment.created' && `Test-Umgebung erstellt`}
+                        </div>
+                        
+                        <div className={styles.auditMeta}>
+                          <span>{entry.changedBy || 'System'}</span>
+                          <span>•</span>
+                          <span>{entry.tenant ? `Tenant: ${entry.tenant}` : 'Global'}</span>
+                          <span>•</span>
+                          <span>{new Date(entry.timestamp).toLocaleString('de-CH')}</span>
+                        </div>
+                        
+                        {entry.reason && (
+                          <div className={styles.auditReason}>
+                            Grund: {entry.reason}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <button
+                        className={styles.rollbackButton}
+                        onClick={() => {
+                          if (window.confirm('Möchten Sie diese Änderung rückgängig machen?')) {
+                            // Implement rollback logic
+                            if (entry.action === 'feature.enabled') {
+                              toggleFeature(entry.feature, false, entry.tenant);
+                            } else if (entry.action === 'feature.disabled') {
+                              toggleFeature(entry.feature, true, entry.tenant);
+                            }
+                          }
+                        }}
+                        title="Rückgängig machen"
+                      >
+                        <RotateCcw size={16} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+            
+            <div className={styles.modalFooter}>
+              <button 
+                className={styles.secondaryButton}
+                onClick={() => setShowAuditLog(false)}
+              >
+                Schließen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Emergency Panel */}
+      {showEmergencyPanel && (
+        <div className={styles.modal} onClick={() => setShowEmergencyPanel(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.emergency}>
+                <AlertTriangle size={24} />
+                Emergency Control Panel
+              </h2>
+              <button 
+                className={styles.closeButton}
+                onClick={() => setShowEmergencyPanel(false)}
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className={styles.modalBody}>
+              <div className={styles.emergencyWarning}>
+                <AlertCircle size={20} />
+                <p>
+                  System zeigt Anzeichen von Überlastung. Aktivieren Sie Emergency Mode um nicht-kritische Features zu deaktivieren.
+                </p>
+              </div>
+              
+              <div className={styles.emergencyMetrics}>
+                <div className={styles.emergencyMetric}>
+                  <Cpu size={20} />
+                  <span>CPU</span>
+                  <span className={styles.emergencyValue}>{systemMetrics.cpu}%</span>
+                </div>
+                <div className={styles.emergencyMetric}>
+                  <Database size={20} />
+                  <span>Memory</span>
+                  <span className={styles.emergencyValue}>{systemMetrics.memory}%</span>
+                </div>
+                <div className={styles.emergencyMetric}>
+                  <Activity size={20} />
+                  <span>Response</span>
+                  <span className={styles.emergencyValue}>{systemMetrics.responseTime}ms</span>
+                </div>
+                <div className={styles.emergencyMetric}>
+                  <AlertCircle size={20} />
+                  <span>Errors</span>
+                  <span className={styles.emergencyValue}>{systemMetrics.errorRate}%</span>
+                </div>
+              </div>
+              
+              <div className={styles.emergencyActions}>
+                <h3>Emergency Actions</h3>
+                
+                {Object.entries(EMERGENCY_PRIORITIES).map(([priority, config]) => (
+                  <div key={priority} className={styles.emergencyAction}>
+                    <div 
+                      className={styles.priorityIndicator}
+                      style={{ backgroundColor: config.color }}
+                    />
+                    <div className={styles.emergencyInfo}>
+                      <h4>Priority {priority} - {config.label}</h4>
+                      <p>Deaktiviert: {config.features.join(', ')}</p>
+                    </div>
+                    <button
+                      className={styles.emergencyButton}
+                      onClick={() => {
+                        triggerEmergencyMode(parseInt(priority));
+                        setShowEmergencyPanel(false);
+                      }}
+                    >
+                      <Power size={16} />
+                      Deaktivieren
+                    </button>
+                  </div>
+                ))}
+                
+                <div className={styles.emergencyAction}>
+                  <div 
+                    className={styles.priorityIndicator}
+                    style={{ backgroundColor: '#E74C3C' }}
+                  />
+                  <div className={styles.emergencyInfo}>
+                    <h4>PANIC MODE - Alle nicht-kritischen Features</h4>
+                    <p>Deaktiviert ALLE Features außer Core-Funktionen</p>
+                  </div>
+                  <button
+                    className={`${styles.emergencyButton} ${styles.danger}`}
+                    onClick={() => {
+                      if (window.confirm('WARNUNG: Dies deaktiviert ALLE nicht-essentiellen Features. Fortfahren?')) {
+                        [3, 2].forEach(p => triggerEmergencyMode(p));
+                        setShowEmergencyPanel(false);
+                      }
+                    }}
+                  >
+                    <AlertTriangle size={16} />
+                    PANIC MODE
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div className={styles.modalFooter}>
+              <button 
+                className={styles.secondaryButton}
+                onClick={() => setShowEmergencyPanel(false)}
+              >
+                Abbrechen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tutorial Overlay */}
+      {showTutorial && (
+        <div className={styles.tutorial}>
+          <div className={styles.tutorialContent}>
+            <h2>Feature Control Tutorial</h2>
+            <div className={styles.tutorialSteps}>
+              <div className={styles.tutorialStep}>
+                <div className={styles.stepNumber}>1</div>
+                <h3>Features aktivieren/deaktivieren</h3>
+                <p>Klicken Sie auf den Toggle-Button um Features ein- oder auszuschalten.</p>
+              </div>
+              <div className={styles.tutorialStep}>
+                <div className={styles.stepNumber}>2</div>
+                <h3>Tenant-spezifische Einstellungen</h3>
+                <p>Wählen Sie einen Tenant aus der Dropdown-Liste um Features nur für diesen zu steuern.</p>
+              </div>
+              <div className={styles.tutorialStep}>
+                <div className={styles.stepNumber}>3</div>
+                <h3>Bulk-Operationen</h3>
+                <p>Aktivieren Sie den Bulk-Modus um mehrere Features gleichzeitig zu bearbeiten.</p>
+              </div>
+              <div className={styles.tutorialStep}>
+                <div className={styles.stepNumber}>4</div>
+                <h3>Templates anwenden</h3>
+                <p>Nutzen Sie vordefinierte Templates um Features schnell zu konfigurieren.</p>
+              </div>
+              <div className={styles.tutorialStep}>
+                <div className={styles.stepNumber}>5</div>
+                <h3>Emergency Control</h3>
+                <p>Bei System-Überlastung können Sie nicht-kritische Features automatisch deaktivieren.</p>
+              </div>
+            </div>
+            <button 
+              className={styles.primaryButton}
+              onClick={() => setShowTutorial(false)}
+            >
+              Tutorial beenden
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default FeatureControl;

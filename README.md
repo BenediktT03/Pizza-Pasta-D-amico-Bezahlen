@@ -5194,4 +5194,106 @@ Dashboard Widgets - Live-Metriken aller Systeme
 Export Functions - CSV/PDF Reports
 Batch Operations - Bulk Actions für Effizienz
 
-                        
+                        ## 🔧 AKTUELLE ENTWICKLUNG (2025-01-07)
+
+### System Monitoring Dashboard - In Entwicklung
+
+**Entwickler:** Claude (Anthropic)
+**Status:** Bereit zur Implementierung
+**Dateipfad:** `/apps/master/src/pages/SystemMonitoring/SystemMonitoring.jsx`
+
+#### Geplante Features:
+
+**1. Core Monitoring Features:**
+- ✅ Real-time Firebase Performance Metrics
+- ✅ Server Health (CPU, Memory, Disk, Response Time)
+- ✅ Database Performance Tracking
+- ✅ API Endpoint Monitoring
+- ✅ Business Metrics (Orders/Min, Revenue, Success Rates)
+
+**2. Visualization:**
+- ✅ Echtzeit-Graphen (Line & Area Charts)
+- ✅ Heatmaps für Geo-Daten
+- ✅ Status-Dashboard mit Ampel-System
+- ✅ 3D Schweiz-Karte für regionale Metriken
+
+**3. Alert System:**
+- ✅ Kritische Alerts (P1): Payment >5% Fehler, API <95% Uptime
+- ✅ Hohe Priorität (P2): CPU >80%, Memory >85%, Response >3s
+- ✅ Mittlere Priorität (P3): Disk >80%, Cache <70%
+- ✅ Eskalationskette mit Auto-Actions
+
+**4. Automatische Aktionen:**
+- ✅ Auto-Scaling bei hoher Last
+- ✅ Feature-Abschaltung bei Überlastung (Integration mit FeatureControl)
+- ✅ Fallback-Aktivierung bei Fehlern
+- ✅ Performance-basierte Feature-Empfehlungen
+
+**5. Tenant Features:**
+- ✅ Eigenes Metrics Dashboard für jeden Tenant
+- ✅ Performance-Vergleiche
+- ✅ Custom Alert-Einstellungen
+- ❌ Public Status Page (nicht implementiert)
+
+**6. Reporting:**
+- ✅ Transparency Reports (Quarterly)
+- ✅ Uptime & Incident Reports
+- ✅ Performance Improvements Tracking
+- ✅ 90 Tage Daten-Retention
+
+**7. Intelligente Features:**
+- ✅ Baseline Learning (Normal-Werte pro Tenant)
+- ✅ Monitoring Presets (Rush Hour, Night, Event Mode)
+- ✅ Predictive Maintenance
+- ✅ Calendar Integration für proaktives Scaling
+- ✅ Multi-Region Ready
+
+**8. Optimierungen:**
+- ✅ Request Sampling (1:10 normal, 1:1 bei Problemen)
+- ✅ Monitoring Budget (max 5% CPU für Monitoring selbst)
+- ✅ Alert Fatigue Prevention (Cooldown, Grouping)
+- ✅ Dead Man's Switch für Monitoring-Ausfall
+
+#### Technische Details:
+
+**Datenquellen:**
+- Firebase Performance Monitoring (kostenlos)
+- Firebase Analytics (kostenlos)
+- Google Cloud Monitoring (kostenlos bis Limit)
+- Custom Metrics via Firebase Functions
+
+**Dependencies:**
+- recharts (für Charts)
+- three.js (für 3D Visualisierung)
+- Firebase SDK
+- lucide-react (Icons)
+
+#### Implementierungs-Checkliste:
+
+- [ ] SystemMonitoring.jsx erstellen
+- [ ] SystemMonitoring.module.css erstellen
+- [ ] Firebase Performance SDK einbinden
+- [ ] Cloud Monitoring API aktivieren
+- [ ] Metric Collection Service implementieren
+- [ ] Alert Service mit NotificationCenter verbinden
+- [ ] Auto-Scaling Logic in Cloud Functions
+- [ ] Feature Control Integration
+- [ ] Tenant Dashboard Views
+- [ ] Transparency Report Generator
+- [ ] Testing mit echten Metriken
+- [ ] Documentation aktualisieren
+
+#### Falls Entwicklung unterbrochen wird:
+
+1. **Nächster Schritt:** SystemMonitoring.jsx mit Basis-Layout erstellen
+2. **Wichtigste Features zuerst:** Real-time Metrics, Basic Alerts, Charts
+3. **Integration Points:** FeatureControl.jsx, NotificationCenter.jsx
+4. **Test-Daten:** Nutze Firebase Emulator für lokale Entwicklung
+
+#### Notizen:
+- System ist vorbereitet für Multi-Region Support
+- Alle Monitoring-Features sind kostenlos (Firebase/GCP Free Tier)
+- Performance-Impact des Monitorings selbst wird überwacht
+- Automatische Feature-Abschaltung bei Überlastung implementiert
+
+---

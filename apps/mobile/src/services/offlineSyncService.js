@@ -1,45 +1,110 @@
 /**
- * EATECH Mobile App - Offline Sync Service
- * Version: 25.0.0
- * Description: Offline-First Synchronisierung für die EATECH Admin App
+ * EATECH - Offline Service
+ * Version: 5.2.0
+ * Description: Comprehensive Offline Management mit Smart Sync & Lazy Loading
  * Author: EATECH Development Team
- * Created: 2025-01-07
- * File Path: /apps/mobile/src/services/offlineSyncService.js
+ * Modified: 2025-01-08
+ * File Path: /apps/mobile/src/services/OfflineService.js
+ * 
+ * Features: Smart caching, offline queue, sync strategies, conflict resolution
  */
 
-// ============================================================================
-// IMPORTS
-// ============================================================================
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import NetInfo from '@react-native-community/netinfo';
-import * as FileSystem from 'expo-file-system';
-import * as BackgroundFetch from 'expo-background-fetch';
-import * as TaskManager from 'expo-task-manager';
-import { Platform } from 'react-native';
+import NetInfo from '@react-native-netinfo/netinfo';
+import { EventEmitter } from 'events';
 
-// Config
-import { EATECH_CONFIG } from '../config/constants';
+// Lazy loaded utilities
+const storageUtils = () => import('../utils/StorageUtils');
+const networkUtils = () => import('../utils/NetworkUtils');
+const encryptionUtils = () => import('../utils/EncryptionUtils');
+const compressionUtils = () => import('../utils/CompressionUtils');
+const validationUtils = () => import('../utils/ValidationUtils');
 
-// Utils
-import { generateUUID, hashObject } from '../utils/helpers';
+// Lazy loaded services
+const apiService = () => import('./APIService');
+const authService = () => import('./AuthService');
+const cacheService = () => import('./CacheService');
+const syncService = () => import('./SyncService');
+const analyticsService = () => import('./AnalyticsService');
 
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-const SYNC_TASK_NAME = 'EATECH_BACKGROUND_SYNC';
-const OFFLINE_QUEUE_KEY = 'offline_queue';
-const CACHE_PREFIX = 'cache_';
-const SYNC_STATUS_KEY = 'sync_status';
+// Storage keys
+const STORAGE_KEYS = {
+  OFFLINE_QUEUE: '@eatech:offline_queue',
+  CACHED_DATA: '@eatech:cached_data',
+  SYNC_METADATA: '@eatech:sync_metadata',
+  OFFLINE_CONFIG: '@eatech:offline_config',
+  CONFLICT_RESOLUTION: '@eatech:conflict_resolution'
+};
 
-// ============================================================================
-// OFFLINE SYNC SERVICE
-// ============================================================================
-class OfflineSyncService {
-  constructor() {
+// Sync strategies
+export const SYNC_STRATEGIES = {
+  IMMEDIATE: 'immediate',           // Sync as soon as online
+  SCHEDULED: 'scheduled',           // Sync at specific intervals
+  MANUAL: 'manual',                // User-triggered sync
+  INTELLIGENT: 'intelligent',      // AI-driven sync optimization
+  BACKGROUND: 'background'          // Background sync when app inactive
+};
+
+// Conflict resolution strategies
+export const CONFLICT_RESOLUTION = {
+  CLIENT_WINS: 'client_wins',       // Local changes override server
+  SERVER_WINS: 'server_wins',       // Server changes override local
+  MERGE: 'merge',                   // Attempt to merge changes
+  USER_CHOICE: 'user_choice',       // Let user decide
+  TIMESTAMP: 'timestamp'            // Latest timestamp wins
+};
+
+// Data priorities
+export const DATA_PRIORITIES = {
+  CRITICAL: 1,    // User orders, payments
+  HIGH: 2,        // Menu updates, user preferences
+  MEDIUM: 3,      // Analytics, reviews
+  LOW: 4          // Cache warming, preloading
+};
+
+class OfflineService extends EventEmitter {
+  constructor(options = {}) {
+    super();
+    
+    this.options = {
+      maxQueueSize: 1000,
+      maxCacheSize: 50 * 1024 * 1024, // 50MB
+      syncStrategy: SYNC_STRATEGIES.INTELLIGENT,
+      conflictResolution: CONFLICT_RESOLUTION.TIMESTAMP,
+      enableEncryption: true,
+      enableCompression: true,
+      syncInterval: 30000, // 30 seconds
+      retryAttempts: 3,
+      retryDelay: 2000,
+      batchSize: 10,
+      ...options
+    };
+    
+    // State
     this.isOnline = true;
-    this.syncInProgress = false;
-    this.queue = [];
-    this.cacheDir = `${FileSystem.documentDirectory}offline_cache/`;
+    this.isInitialized = false;
+    this.isSyncing = false;
+    this.offlineQueue = [];
+    this.cachedData = new Map();
+    this.syncMetadata = new Map();
+    this.pendingOperations = new Map();
+    this.lastSyncTime = null;
+    this.networkSubscription = null;
+    this.syncInterval = null;
+    
+    // Lazy loaded services
+    this.apiService = null;
+    this.authService = null;
+    this.cacheService = null;
+    this.syncService = null;
+    this.analyticsService = null;
+    this.storageUtils = null;
+    this.networkUtils = null;
+    this.encryptionUtils = null;
+    this.compressionUtils = null;
+    this.validationUtils = null;
+    
+    this.initialize();
   }
 
   // ============================================================================
@@ -47,437 +112,779 @@ class OfflineSyncService {
   // ============================================================================
   async initialize() {
     try {
-      // Create cache directory
-      await this.ensureCacheDirectory();
-
-      // Load offline queue
-      await this.loadQueue();
-
-      // Setup network listener
-      this.setupNetworkListener();
-
-      // Setup background sync
-      await this.setupBackgroundSync();
-
-      // Initial sync if online
-      const networkState = await NetInfo.fetch();
-      if (networkState.isConnected) {
-        this.syncOfflineData();
+      await this.initializeLazyServices();
+      await this.loadPersistedData();
+      await this.setupNetworkMonitoring();
+      await this.setupSyncStrategy();
+      
+      this.isInitialized = true;
+      this.emit('initialized');
+      
+      // Track analytics
+      if (this.analyticsService) {
+        this.analyticsService.trackEvent('offline_service_initialized', {
+          queue_size: this.offlineQueue.length,
+          cache_size: this.cachedData.size,
+          sync_strategy: this.options.syncStrategy
+        });
       }
-
-      console.log('Offline sync service initialized');
+      
     } catch (error) {
-      console.error('Error initializing offline sync:', error);
+      console.error('Failed to initialize offline service:', error);
+      this.emit('initialization_error', error);
     }
   }
 
-  // ============================================================================
-  // CACHE MANAGEMENT
-  // ============================================================================
-  async ensureCacheDirectory() {
-    const dirInfo = await FileSystem.getInfoAsync(this.cacheDir);
-    if (!dirInfo.exists) {
-      await FileSystem.makeDirectoryAsync(this.cacheDir, { intermediates: true });
-    }
-  }
-
-  async cacheData(key, data, ttl = EATECH_CONFIG.OFFLINE.CACHE_DURATION) {
+  async initializeLazyServices() {
     try {
-      const cacheEntry = {
-        data,
-        timestamp: Date.now(),
-        ttl,
-        hash: hashObject(data),
-      };
-
-      // Store in AsyncStorage for quick access
-      await AsyncStorage.setItem(`${CACHE_PREFIX}${key}`, JSON.stringify(cacheEntry));
-
-      // Store in file system for larger data
-      const filePath = `${this.cacheDir}${key}.json`;
-      await FileSystem.writeAsStringAsync(filePath, JSON.stringify(cacheEntry));
-
-      console.log(`Cached data for key: ${key}`);
+      // Initialize utilities
+      this.storageUtils = await storageUtils();
+      this.networkUtils = await networkUtils();
+      this.encryptionUtils = await encryptionUtils();
+      this.compressionUtils = await compressionUtils();
+      this.validationUtils = await validationUtils();
+      
+      // Initialize services
+      const APIService = await apiService();
+      this.apiService = new APIService.default();
+      
+      const AuthService = await authService();
+      this.authService = new AuthService.default();
+      
+      const CacheService = await cacheService();
+      this.cacheService = new CacheService.default('offline_cache');
+      
+      const SyncService = await syncService();
+      this.syncService = new SyncService.default();
+      
+      const AnalyticsService = await analyticsService();
+      this.analyticsService = new AnalyticsService.default();
+      
     } catch (error) {
-      console.error('Error caching data:', error);
+      console.error('Failed to initialize lazy services:', error);
+      throw error;
+    }
+  }
+
+  async loadPersistedData() {
+    try {
+      // Load offline queue
+      const queueData = await AsyncStorage.getItem(STORAGE_KEYS.OFFLINE_QUEUE);
+      if (queueData) {
+        this.offlineQueue = JSON.parse(queueData);
+      }
+      
+      // Load cached data
+      const cachedData = await AsyncStorage.getItem(STORAGE_KEYS.CACHED_DATA);
+      if (cachedData) {
+        const parsed = JSON.parse(cachedData);
+        this.cachedData = new Map(parsed);
+      }
+      
+      // Load sync metadata
+      const syncMetadata = await AsyncStorage.getItem(STORAGE_KEYS.SYNC_METADATA);
+      if (syncMetadata) {
+        const parsed = JSON.parse(syncMetadata);
+        this.syncMetadata = new Map(parsed);
+        this.lastSyncTime = parsed.lastSyncTime ? new Date(parsed.lastSyncTime) : null;
+      }
+      
+    } catch (error) {
+      console.error('Failed to load persisted data:', error);
+    }
+  }
+
+  async setupNetworkMonitoring() {
+    this.networkSubscription = NetInfo.addEventListener(state => {
+      this.handleNetworkChange(state);
+    });
+    
+    // Get initial network state
+    const networkState = await NetInfo.fetch();
+    this.handleNetworkChange(networkState);
+  }
+
+  async setupSyncStrategy() {
+    switch (this.options.syncStrategy) {
+      case SYNC_STRATEGIES.SCHEDULED:
+        this.setupScheduledSync();
+        break;
+      case SYNC_STRATEGIES.INTELLIGENT:
+        this.setupIntelligentSync();
+        break;
+      case SYNC_STRATEGIES.BACKGROUND:
+        this.setupBackgroundSync();
+        break;
+      default:
+        // IMMEDIATE and MANUAL don't need setup
+        break;
+    }
+  }
+
+  // ============================================================================
+  // NETWORK MONITORING
+  // ============================================================================
+  handleNetworkChange(networkState) {
+    const wasOnline = this.isOnline;
+    this.isOnline = networkState.isConnected && networkState.isInternetReachable;
+    
+    if (!wasOnline && this.isOnline) {
+      this.handleGoingOnline();
+    } else if (wasOnline && !this.isOnline) {
+      this.handleGoingOffline();
+    }
+    
+    this.emit('network_state_changed', {
+      isOnline: this.isOnline,
+      networkState: networkState
+    });
+  }
+
+  async handleGoingOnline() {
+    this.emit('went_online');
+    
+    // Start sync based on strategy
+    if (this.options.syncStrategy === SYNC_STRATEGIES.IMMEDIATE) {
+      await this.syncOfflineQueue();
+    }
+    
+    // Track analytics
+    if (this.analyticsService) {
+      this.analyticsService.trackEvent('network_online', {
+        queue_size: this.offlineQueue.length,
+        offline_duration: this.getOfflineDuration()
+      });
+    }
+  }
+
+  handleGoingOffline() {
+    this.emit('went_offline');
+    
+    // Cancel ongoing sync
+    this.cancelSync();
+    
+    // Track analytics
+    if (this.analyticsService) {
+      this.analyticsService.trackEvent('network_offline', {
+        last_sync: this.lastSyncTime?.toISOString()
+      });
+    }
+  }
+
+  // ============================================================================
+  // OFFLINE QUEUE MANAGEMENT
+  // ============================================================================
+  async addToOfflineQueue(operation) {
+    try {
+      const queueItem = {
+        id: this.generateOperationId(),
+        operation: operation,
+        timestamp: new Date().toISOString(),
+        priority: operation.priority || DATA_PRIORITIES.MEDIUM,
+        attempts: 0,
+        maxAttempts: this.options.retryAttempts,
+        data: operation.data,
+        metadata: {
+          userAgent: 'EATECH Mobile',
+          version: '3.0.0',
+          platform: 'react-native'
+        }
+      };
+      
+      // Encrypt sensitive data if enabled
+      if (this.options.enableEncryption && this.encryptionUtils) {
+        queueItem.data = await this.encryptionUtils.encrypt(queueItem.data);
+        queueItem.encrypted = true;
+      }
+      
+      // Compress data if enabled
+      if (this.options.enableCompression && this.compressionUtils) {
+        queueItem.data = await this.compressionUtils.compress(queueItem.data);
+        queueItem.compressed = true;
+      }
+      
+      // Add to queue with priority sorting
+      this.offlineQueue.push(queueItem);
+      this.sortQueueByPriority();
+      
+      // Enforce queue size limit
+      if (this.offlineQueue.length > this.options.maxQueueSize) {
+        // Remove oldest, lowest priority items
+        this.offlineQueue = this.offlineQueue
+          .sort((a, b) => a.priority - b.priority || new Date(a.timestamp) - new Date(b.timestamp))
+          .slice(-this.options.maxQueueSize);
+      }
+      
+      // Persist queue
+      await this.persistOfflineQueue();
+      
+      this.emit('operation_queued', queueItem);
+      
+      // Attempt immediate sync if online
+      if (this.isOnline && this.options.syncStrategy === SYNC_STRATEGIES.IMMEDIATE) {
+        this.syncOfflineQueue();
+      }
+      
+      return queueItem.id;
+    } catch (error) {
+      console.error('Failed to add operation to offline queue:', error);
+      throw error;
+    }
+  }
+
+  async removeFromOfflineQueue(operationId) {
+    const index = this.offlineQueue.findIndex(item => item.id === operationId);
+    
+    if (index !== -1) {
+      const removed = this.offlineQueue.splice(index, 1)[0];
+      await this.persistOfflineQueue();
+      this.emit('operation_removed', removed);
+      return removed;
+    }
+    
+    return null;
+  }
+
+  sortQueueByPriority() {
+    this.offlineQueue.sort((a, b) => {
+      // Sort by priority first (lower number = higher priority)
+      if (a.priority !== b.priority) {
+        return a.priority - b.priority;
+      }
+      // Then by timestamp (older first)
+      return new Date(a.timestamp) - new Date(b.timestamp);
+    });
+  }
+
+  async persistOfflineQueue() {
+    try {
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.OFFLINE_QUEUE,
+        JSON.stringify(this.offlineQueue)
+      );
+    } catch (error) {
+      console.error('Failed to persist offline queue:', error);
+    }
+  }
+
+  // ============================================================================
+  // CACHING
+  // ============================================================================
+  async cacheData(key, data, options = {}) {
+    try {
+      const cacheItem = {
+        data: data,
+        timestamp: new Date().toISOString(),
+        ttl: options.ttl || 3600000, // 1 hour default
+        priority: options.priority || DATA_PRIORITIES.MEDIUM,
+        version: options.version || 1,
+        checksum: await this.generateChecksum(data)
+      };
+      
+      // Encrypt if enabled
+      if (this.options.enableEncryption && this.encryptionUtils) {
+        cacheItem.data = await this.encryptionUtils.encrypt(cacheItem.data);
+        cacheItem.encrypted = true;
+      }
+      
+      // Compress if enabled
+      if (this.options.enableCompression && this.compressionUtils) {
+        cacheItem.data = await this.compressionUtils.compress(cacheItem.data);
+        cacheItem.compressed = true;
+      }
+      
+      this.cachedData.set(key, cacheItem);
+      
+      // Enforce cache size limit
+      await this.enforceCacheLimit();
+      
+      // Persist cache
+      await this.persistCachedData();
+      
+      this.emit('data_cached', { key, size: JSON.stringify(data).length });
+      
+    } catch (error) {
+      console.error('Failed to cache data:', error);
+      throw error;
     }
   }
 
   async getCachedData(key) {
     try {
-      // Try AsyncStorage first
-      let cacheEntry = await AsyncStorage.getItem(`${CACHE_PREFIX}${key}`);
+      const cacheItem = this.cachedData.get(key);
       
-      // Fallback to file system
-      if (!cacheEntry) {
-        const filePath = `${this.cacheDir}${key}.json`;
-        const fileInfo = await FileSystem.getInfoAsync(filePath);
-        
-        if (fileInfo.exists) {
-          cacheEntry = await FileSystem.readAsStringAsync(filePath);
-        }
-      }
-
-      if (!cacheEntry) return null;
-
-      const entry = JSON.parse(cacheEntry);
-      
-      // Check if cache is still valid
-      const isExpired = Date.now() - entry.timestamp > entry.ttl;
-      if (isExpired) {
-        await this.removeCachedData(key);
+      if (!cacheItem) {
         return null;
       }
-
-      return entry.data;
+      
+      // Check TTL
+      const age = Date.now() - new Date(cacheItem.timestamp).getTime();
+      if (age > cacheItem.ttl) {
+        this.cachedData.delete(key);
+        await this.persistCachedData();
+        return null;
+      }
+      
+      let data = cacheItem.data;
+      
+      // Decompress if needed
+      if (cacheItem.compressed && this.compressionUtils) {
+        data = await this.compressionUtils.decompress(data);
+      }
+      
+      // Decrypt if needed
+      if (cacheItem.encrypted && this.encryptionUtils) {
+        data = await this.encryptionUtils.decrypt(data);
+      }
+      
+      // Validate checksum
+      if (cacheItem.checksum) {
+        const currentChecksum = await this.generateChecksum(data);
+        if (currentChecksum !== cacheItem.checksum) {
+          console.warn('Cache data checksum mismatch, removing:', key);
+          this.cachedData.delete(key);
+          await this.persistCachedData();
+          return null;
+        }
+      }
+      
+      this.emit('cache_hit', { key });
+      return data;
+      
     } catch (error) {
-      console.error('Error getting cached data:', error);
+      console.error('Failed to get cached data:', error);
+      this.cachedData.delete(key);
       return null;
     }
   }
 
-  async removeCachedData(key) {
-    try {
-      // Remove from AsyncStorage
-      await AsyncStorage.removeItem(`${CACHE_PREFIX}${key}`);
-
-      // Remove from file system
-      const filePath = `${this.cacheDir}${key}.json`;
-      await FileSystem.deleteAsync(filePath, { idempotent: true });
-    } catch (error) {
-      console.error('Error removing cached data:', error);
-    }
-  }
-
-  async clearAllCache() {
-    try {
-      // Clear AsyncStorage cache
-      const keys = await AsyncStorage.getAllKeys();
-      const cacheKeys = keys.filter(key => key.startsWith(CACHE_PREFIX));
-      await AsyncStorage.multiRemove(cacheKeys);
-
-      // Clear file system cache
-      await FileSystem.deleteAsync(this.cacheDir, { idempotent: true });
-      await this.ensureCacheDirectory();
-
-      console.log('All cache cleared');
-    } catch (error) {
-      console.error('Error clearing cache:', error);
-    }
-  }
-
-  async getCacheSize() {
-    try {
-      const dirInfo = await FileSystem.getInfoAsync(this.cacheDir);
-      if (!dirInfo.exists) return 0;
-
-      const files = await FileSystem.readDirectoryAsync(this.cacheDir);
-      let totalSize = 0;
-
-      for (const file of files) {
-        const fileInfo = await FileSystem.getInfoAsync(`${this.cacheDir}${file}`);
-        totalSize += fileInfo.size || 0;
+  async invalidateCache(pattern) {
+    const keysToRemove = [];
+    
+    for (const [key] of this.cachedData) {
+      if (pattern instanceof RegExp) {
+        if (pattern.test(key)) {
+          keysToRemove.push(key);
+        }
+      } else if (typeof pattern === 'string') {
+        if (key.includes(pattern)) {
+          keysToRemove.push(key);
+        }
       }
-
-      return totalSize;
-    } catch (error) {
-      console.error('Error getting cache size:', error);
-      return 0;
+    }
+    
+    keysToRemove.forEach(key => {
+      this.cachedData.delete(key);
+    });
+    
+    if (keysToRemove.length > 0) {
+      await this.persistCachedData();
+      this.emit('cache_invalidated', { keys: keysToRemove });
     }
   }
 
-  // ============================================================================
-  // QUEUE MANAGEMENT
-  // ============================================================================
-  async loadQueue() {
-    try {
-      const queueData = await AsyncStorage.getItem(OFFLINE_QUEUE_KEY);
-      this.queue = queueData ? JSON.parse(queueData) : [];
-      console.log(`Loaded ${this.queue.length} items from offline queue`);
-    } catch (error) {
-      console.error('Error loading queue:', error);
-      this.queue = [];
-    }
-  }
-
-  async saveQueue() {
-    try {
-      await AsyncStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(this.queue));
-    } catch (error) {
-      console.error('Error saving queue:', error);
-    }
-  }
-
-  async addToQueue(action) {
-    try {
-      // Check queue size limit
-      if (this.queue.length >= EATECH_CONFIG.OFFLINE.MAX_QUEUE_SIZE) {
-        console.warn('Offline queue is full, removing oldest item');
-        this.queue.shift();
+  async enforceCacheLimit() {
+    const currentSize = this.calculateCacheSize();
+    
+    if (currentSize > this.options.maxCacheSize) {
+      // Remove items starting with lowest priority and oldest timestamp
+      const sortedEntries = Array.from(this.cachedData.entries())
+        .sort(([, a], [, b]) => {
+          if (a.priority !== b.priority) {
+            return b.priority - a.priority; // Higher priority number = lower priority
+          }
+          return new Date(a.timestamp) - new Date(b.timestamp); // Older first
+        });
+      
+      while (this.calculateCacheSize() > this.options.maxCacheSize * 0.8) {
+        if (sortedEntries.length === 0) break;
+        
+        const [key] = sortedEntries.shift();
+        this.cachedData.delete(key);
       }
-
-      const queueItem = {
-        id: generateUUID(),
-        timestamp: Date.now(),
-        action,
-        retries: 0,
-        status: 'pending',
-      };
-
-      this.queue.push(queueItem);
-      await this.saveQueue();
-
-      console.log('Added to offline queue:', queueItem.id);
-      return queueItem.id;
-    } catch (error) {
-      console.error('Error adding to queue:', error);
-      return null;
     }
   }
 
-  async removeFromQueue(id) {
-    this.queue = this.queue.filter(item => item.id !== id);
-    await this.saveQueue();
+  calculateCacheSize() {
+    let size = 0;
+    for (const [, item] of this.cachedData) {
+      size += JSON.stringify(item).length;
+    }
+    return size;
   }
 
-  async updateQueueItem(id, updates) {
-    const index = this.queue.findIndex(item => item.id === id);
-    if (index !== -1) {
-      this.queue[index] = { ...this.queue[index], ...updates };
-      await this.saveQueue();
+  async persistCachedData() {
+    try {
+      const serializable = Array.from(this.cachedData.entries());
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.CACHED_DATA,
+        JSON.stringify(serializable)
+      );
+    } catch (error) {
+      console.error('Failed to persist cached data:', error);
     }
   }
 
   // ============================================================================
   // SYNC OPERATIONS
   // ============================================================================
-  async syncOfflineData() {
-    if (this.syncInProgress || !this.isOnline) {
-      console.log('Sync already in progress or offline');
+  async syncOfflineQueue() {
+    if (this.isSyncing || !this.isOnline || this.offlineQueue.length === 0) {
       return;
     }
-
-    this.syncInProgress = true;
-    const syncStatus = {
-      started: Date.now(),
-      processed: 0,
-      succeeded: 0,
-      failed: 0,
-      errors: [],
-    };
-
+    
+    this.isSyncing = true;
+    this.emit('sync_started', { queue_size: this.offlineQueue.length });
+    
     try {
-      console.log(`Starting sync of ${this.queue.length} items`);
-
-      // Process queue items
-      for (const item of [...this.queue]) {
-        if (!this.isOnline) break;
-
-        try {
-          await this.processQueueItem(item);
-          await this.removeFromQueue(item.id);
-          syncStatus.succeeded++;
-        } catch (error) {
-          console.error(`Error processing queue item ${item.id}:`, error);
-          
-          item.retries++;
-          item.lastError = error.message;
-          
-          if (item.retries >= 3) {
-            item.status = 'failed';
-            syncStatus.errors.push({
-              id: item.id,
-              error: error.message,
-            });
-          }
-          
-          await this.updateQueueItem(item.id, item);
-          syncStatus.failed++;
-        }
-        
-        syncStatus.processed++;
+      const batches = this.createSyncBatches();
+      
+      for (const batch of batches) {
+        await this.processBatch(batch);
       }
-
-      // Save sync status
-      syncStatus.completed = Date.now();
-      await AsyncStorage.setItem(SYNC_STATUS_KEY, JSON.stringify(syncStatus));
-
-      console.log('Sync completed:', syncStatus);
+      
+      this.lastSyncTime = new Date();
+      await this.persistSyncMetadata();
+      
+      this.emit('sync_completed', {
+        operations_synced: this.offlineQueue.length,
+        duration: Date.now() - this.lastSyncTime.getTime()
+      });
+      
     } catch (error) {
-      console.error('Error during sync:', error);
+      console.error('Sync failed:', error);
+      this.emit('sync_failed', error);
     } finally {
-      this.syncInProgress = false;
+      this.isSyncing = false;
     }
+  }
+
+  createSyncBatches() {
+    const batches = [];
+    const sortedQueue = [...this.offlineQueue].sort((a, b) => a.priority - b.priority);
+    
+    for (let i = 0; i < sortedQueue.length; i += this.options.batchSize) {
+      batches.push(sortedQueue.slice(i, i + this.options.batchSize));
+    }
+    
+    return batches;
+  }
+
+  async processBatch(batch) {
+    const promises = batch.map(item => this.processQueueItem(item));
+    const results = await Promise.allSettled(promises);
+    
+    results.forEach((result, index) => {
+      const item = batch[index];
+      
+      if (result.status === 'fulfilled') {
+        this.removeFromOfflineQueue(item.id);
+        this.emit('operation_synced', item);
+      } else {
+        this.handleSyncFailure(item, result.reason);
+      }
+    });
   }
 
   async processQueueItem(item) {
-    const { action } = item;
+    try {
+      item.attempts++;
+      
+      let data = item.data;
+      
+      // Decrypt if needed
+      if (item.encrypted && this.encryptionUtils) {
+        data = await this.encryptionUtils.decrypt(data);
+      }
+      
+      // Decompress if needed
+      if (item.compressed && this.compressionUtils) {
+        data = await this.compressionUtils.decompress(data);
+      }
+      
+      // Validate data
+      if (this.validationUtils) {
+        await this.validationUtils.validate(data, item.operation.schema);
+      }
+      
+      // Execute operation
+      const result = await this.executeOperation(item.operation, data);
+      
+      // Handle conflicts if any
+      if (result.conflict) {
+        await this.handleConflict(item, result);
+      }
+      
+      return result;
+      
+    } catch (error) {
+      console.error(`Failed to process queue item ${item.id}:`, error);
+      throw error;
+    }
+  }
 
-    switch (action.type) {
-      case 'CREATE_ORDER':
-        return this.syncCreateOrder(action.payload);
-      
-      case 'UPDATE_ORDER':
-        return this.syncUpdateOrder(action.payload);
-      
-      case 'UPDATE_INVENTORY':
-        return this.syncUpdateInventory(action.payload);
-      
-      case 'UPDATE_PRODUCT':
-        return this.syncUpdateProduct(action.payload);
-      
-      case 'UPDATE_SETTINGS':
-        return this.syncUpdateSettings(action.payload);
-      
-      default:
-        throw new Error(`Unknown action type: ${action.type}`);
+  async executeOperation(operation, data) {
+    const { method, endpoint, headers = {} } = operation;
+    
+    // Add authentication headers
+    if (this.authService) {
+      const authHeaders = await this.authService.getAuthHeaders();
+      Object.assign(headers, authHeaders);
+    }
+    
+    // Execute API call
+    return await this.apiService.request({
+      method,
+      url: endpoint,
+      data,
+      headers,
+      timeout: 30000
+    });
+  }
+
+  async handleSyncFailure(item, error) {
+    if (item.attempts >= item.maxAttempts) {
+      // Move to dead letter queue
+      this.emit('operation_failed', { item, error });
+      await this.removeFromOfflineQueue(item.id);
+    } else {
+      // Schedule retry with exponential backoff
+      const delay = this.options.retryDelay * Math.pow(2, item.attempts - 1);
+      setTimeout(() => {
+        this.emit('operation_retry', { item, delay });
+      }, delay);
     }
   }
 
   // ============================================================================
-  // SYNC HANDLERS
+  // CONFLICT RESOLUTION
   // ============================================================================
-  async syncCreateOrder(orderData) {
-    // Implementation would call the actual API
-    console.log('Syncing create order:', orderData);
-    // return api.createOrder(orderData);
+  async handleConflict(item, result) {
+    const strategy = this.options.conflictResolution;
+    
+    switch (strategy) {
+      case CONFLICT_RESOLUTION.CLIENT_WINS:
+        return await this.resolveClientWins(item, result);
+      
+      case CONFLICT_RESOLUTION.SERVER_WINS:
+        return await this.resolveServerWins(item, result);
+      
+      case CONFLICT_RESOLUTION.MERGE:
+        return await this.resolveMerge(item, result);
+      
+      case CONFLICT_RESOLUTION.TIMESTAMP:
+        return await this.resolveTimestamp(item, result);
+      
+      case CONFLICT_RESOLUTION.USER_CHOICE:
+        return await this.resolveUserChoice(item, result);
+      
+      default:
+        throw new Error(`Unknown conflict resolution strategy: ${strategy}`);
+    }
   }
 
-  async syncUpdateOrder(updateData) {
-    console.log('Syncing update order:', updateData);
-    // return api.updateOrder(updateData.id, updateData.updates);
+  async resolveClientWins(item, result) {
+    // Force push client data
+    return await this.executeOperation({
+      ...item.operation,
+      force: true
+    }, item.data);
   }
 
-  async syncUpdateInventory(inventoryData) {
-    console.log('Syncing update inventory:', inventoryData);
-    // return api.updateInventory(inventoryData);
+  async resolveServerWins(item, result) {
+    // Accept server version and discard local changes
+    await this.cacheData(item.operation.cacheKey, result.serverData);
+    return result;
   }
 
-  async syncUpdateProduct(productData) {
-    console.log('Syncing update product:', productData);
-    // return api.updateProduct(productData.id, productData.updates);
+  async resolveMerge(item, result) {
+    // Attempt to merge local and server data
+    const mergedData = await this.mergeData(item.data, result.serverData);
+    return await this.executeOperation(item.operation, mergedData);
   }
 
-  async syncUpdateSettings(settingsData) {
-    console.log('Syncing update settings:', settingsData);
-    // return api.updateSettings(settingsData);
+  async resolveTimestamp(item, result) {
+    const clientTime = new Date(item.timestamp);
+    const serverTime = new Date(result.serverTimestamp);
+    
+    if (clientTime > serverTime) {
+      return await this.resolveClientWins(item, result);
+    } else {
+      return await this.resolveServerWins(item, result);
+    }
   }
 
-  // ============================================================================
-  // NETWORK MONITORING
-  // ============================================================================
-  setupNetworkListener() {
-    NetInfo.addEventListener(state => {
-      const wasOffline = !this.isOnline;
-      this.isOnline = state.isConnected;
-
-      console.log(`Network status: ${this.isOnline ? 'Online' : 'Offline'}`);
-
-      // Trigger sync when coming back online
-      if (wasOffline && this.isOnline) {
-        console.log('Network restored, triggering sync');
-        this.syncOfflineData();
+  async resolveUserChoice(item, result) {
+    // Emit event for UI to handle
+    this.emit('conflict_requires_resolution', {
+      item,
+      result,
+      resolve: (choice) => {
+        switch (choice) {
+          case 'client':
+            return this.resolveClientWins(item, result);
+          case 'server':
+            return this.resolveServerWins(item, result);
+          case 'merge':
+            return this.resolveMerge(item, result);
+        }
       }
     });
   }
 
   // ============================================================================
-  // BACKGROUND SYNC
+  // SYNC STRATEGIES
   // ============================================================================
-  async setupBackgroundSync() {
-    if (Platform.OS === 'web') return;
-
-    try {
-      // Define the background fetch task
-      TaskManager.defineTask(SYNC_TASK_NAME, async () => {
-        try {
-          const networkState = await NetInfo.fetch();
-          
-          if (networkState.isConnected) {
-            await this.syncOfflineData();
-            return BackgroundFetch.BackgroundFetchResult.NewData;
-          }
-          
-          return BackgroundFetch.BackgroundFetchResult.NoData;
-        } catch (error) {
-          console.error('Background sync error:', error);
-          return BackgroundFetch.BackgroundFetchResult.Failed;
-        }
-      });
-
-      // Register background fetch task
-      await BackgroundFetch.registerTaskAsync(SYNC_TASK_NAME, {
-        minimumInterval: EATECH_CONFIG.OFFLINE.SYNC_INTERVAL / 1000, // Convert to seconds
-        stopOnTerminate: false,
-        startOnBoot: true,
-      });
-
-      console.log('Background sync registered');
-    } catch (error) {
-      console.error('Error setting up background sync:', error);
-    }
+  setupScheduledSync() {
+    this.syncInterval = setInterval(() => {
+      if (this.isOnline) {
+        this.syncOfflineQueue();
+      }
+    }, this.options.syncInterval);
   }
 
-  async unregisterBackgroundSync() {
-    try {
-      await BackgroundFetch.unregisterTaskAsync(SYNC_TASK_NAME);
-      console.log('Background sync unregistered');
-    } catch (error) {
-      console.error('Error unregistering background sync:', error);
+  setupIntelligentSync() {
+    // AI-driven sync based on network conditions, battery, user behavior
+    // Implementation would analyze patterns and optimize sync timing
+    this.setupScheduledSync(); // Fallback to scheduled for now
+  }
+
+  setupBackgroundSync() {
+    // Setup background task for syncing
+    // Implementation would depend on React Native background tasks
+    this.setupScheduledSync(); // Fallback to scheduled for now
+  }
+
+  cancelSync() {
+    if (this.syncInterval) {
+      clearInterval(this.syncInterval);
+      this.syncInterval = null;
     }
+    this.isSyncing = false;
   }
 
   // ============================================================================
-  // STATUS & STATISTICS
+  // UTILITY METHODS
   // ============================================================================
-  async getSyncStatus() {
+  generateOperationId() {
+    return `op_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  async generateChecksum(data) {
+    // Simple checksum implementation
+    const str = JSON.stringify(data);
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return hash.toString();
+  }
+
+  async mergeData(localData, serverData) {
+    // Basic merge implementation - would need to be more sophisticated
+    return { ...serverData, ...localData };
+  }
+
+  getOfflineDuration() {
+    return this.lastSyncTime ? Date.now() - this.lastSyncTime.getTime() : 0;
+  }
+
+  async persistSyncMetadata() {
     try {
-      const status = await AsyncStorage.getItem(SYNC_STATUS_KEY);
-      return status ? JSON.parse(status) : null;
+      const metadata = {
+        lastSyncTime: this.lastSyncTime?.toISOString(),
+        syncMetadata: Array.from(this.syncMetadata.entries())
+      };
+      
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.SYNC_METADATA,
+        JSON.stringify(metadata)
+      );
     } catch (error) {
-      console.error('Error getting sync status:', error);
-      return null;
+      console.error('Failed to persist sync metadata:', error);
     }
   }
 
-  getQueueStatus() {
-    return {
-      count: this.queue.length,
-      pending: this.queue.filter(item => item.status === 'pending').length,
-      failed: this.queue.filter(item => item.status === 'failed').length,
-      oldest: this.queue.length > 0 ? new Date(this.queue[0].timestamp) : null,
-    };
+  // ============================================================================
+  // PUBLIC API
+  // ============================================================================
+  async executeOfflineOperation(operation) {
+    if (this.isOnline) {
+      try {
+        return await this.executeOperation(operation, operation.data);
+      } catch (error) {
+        // If online execution fails, queue for later
+        return await this.addToOfflineQueue(operation);
+      }
+    } else {
+      return await this.addToOfflineQueue(operation);
+    }
+  }
+
+  async forcSync() {
+    if (this.isOnline) {
+      return await this.syncOfflineQueue();
+    }
+    throw new Error('Cannot sync while offline');
+  }
+
+  getQueueSize() {
+    return this.offlineQueue.length;
+  }
+
+  getCacheSize() {
+    return this.cachedData.size;
+  }
+
+  isOnlineMode() {
+    return this.isOnline;
+  }
+
+  isSyncInProgress() {
+    return this.isSyncing;
+  }
+
+  getLastSyncTime() {
+    return this.lastSyncTime;
+  }
+
+  async clearOfflineData() {
+    this.offlineQueue = [];
+    this.cachedData.clear();
+    this.syncMetadata.clear();
+    
+    await Promise.all([
+      AsyncStorage.removeItem(STORAGE_KEYS.OFFLINE_QUEUE),
+      AsyncStorage.removeItem(STORAGE_KEYS.CACHED_DATA),
+      AsyncStorage.removeItem(STORAGE_KEYS.SYNC_METADATA)
+    ]);
+    
+    this.emit('offline_data_cleared');
+  }
+
+  // ============================================================================
+  // CLEANUP
+  // ============================================================================
+  async cleanup() {
+    try {
+      this.cancelSync();
+      
+      if (this.networkSubscription) {
+        this.networkSubscription();
+      }
+      
+      await this.persistOfflineQueue();
+      await this.persistCachedData();
+      await this.persistSyncMetadata();
+      
+      this.removeAllListeners();
+      
+    } catch (error) {
+      console.error('Failed to cleanup offline service:', error);
+    }
   }
 }
 
-// ============================================================================
-// SINGLETON INSTANCE
-// ============================================================================
-const offlineSyncService = new OfflineSyncService();
-
-// ============================================================================
-// EXPORT FUNCTIONS
-// ============================================================================
-export const initializeOfflineSync = async () => {
-  return await offlineSyncService.initialize();
-};
-
-export const offlineCache = {
-  set: (key, data, ttl) => offlineSyncService.cacheData(key, data, ttl),
-  get: (key) => offlineSyncService.getCachedData(key),
-  remove: (key) => offlineSyncService.removeCachedData(key),
-  clear: () => offlineSyncService.clearAllCache(),
-  getSize: () => offlineSyncService.getCacheSize(),
-};
-
-export const offlineQueue = {
-  add: (action) => offlineSyncService.addToQueue(action),
-  sync: () => offlineSyncService.syncOfflineData(),
-  getStatus: () => offlineSyncService.getQueueStatus(),
-};
-
-// ============================================================================
-// EXPORT
-// ============================================================================
-export { offlineSyncService };
-export default offlineSyncService;
+export default OfflineService;

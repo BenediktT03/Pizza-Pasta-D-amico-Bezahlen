@@ -1,0 +1,297 @@
+/**
+ * EATECH - Live Metrics Styles
+ * Version: 1.0.0
+ * Description: Styles für die Live Metrics Komponente
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * 
+ * File Path: /apps/master/src/components/Dashboard/LiveMetrics.module.css
+ */
+
+/* ============================================================================
+   CONTAINER
+   ============================================================================ */
+.liveMetrics {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.liveMetrics.compact {
+  padding: 16px;
+  gap: 16px;
+}
+
+/* ============================================================================
+   HEADER
+   ============================================================================ */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.header h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.header h3 svg {
+  color: #f59e0b;
+}
+
+.updateInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.updateInfo svg {
+  color: #9ca3af;
+}
+
+/* ============================================================================
+   METRICS GRID
+   ============================================================================ */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.compact .metricsGrid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* ============================================================================
+   METRIC DISPLAY
+   ============================================================================ */
+.metricDisplay {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.metricDisplay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #e5e7eb;
+  transition: all 0.3s;
+}
+
+.metricDisplay.normal::before {
+  background: #10b981;
+}
+
+.metricDisplay.warning::before {
+  background: #f59e0b;
+}
+
+.metricDisplay.critical::before {
+  background: #ef4444;
+  animation: pulse 2s infinite;
+}
+
+.metricDisplay:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.metricHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.metricLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metricIcon {
+  color: #9ca3af;
+  opacity: 0.5;
+}
+
+.metricValue {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.compact .value {
+  font-size: 20px;
+}
+
+.warning .value {
+  color: #f59e0b;
+}
+
+.critical .value {
+  color: #ef4444;
+}
+
+.unit {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.metricTrend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.metricTrend svg {
+  width: 12px;
+  height: 12px;
+}
+
+.trendUp {
+  color: #10b981;
+}
+
+.trendDown {
+  color: #ef4444;
+}
+
+/* ============================================================================
+   SPARKLINE
+   ============================================================================ */
+.sparklineContainer {
+  height: 40px;
+  margin: 0 -4px;
+}
+
+.compact .sparklineContainer {
+  height: 30px;
+}
+
+.sparkline {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ============================================================================
+   FOOTER
+   ============================================================================ */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.refreshRate {
+  font-weight: 500;
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.8);
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 768px) {
+  .metricsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .metricDisplay {
+    padding: 12px;
+  }
+  
+  .value {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .liveMetrics {
+    padding: 16px;
+  }
+  
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .header h3 {
+    font-size: 14px;
+  }
+  
+  .footer {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+}

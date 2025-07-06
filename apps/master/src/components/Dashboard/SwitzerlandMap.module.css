@@ -1,0 +1,242 @@
+/**
+ * EATECH - Switzerland Map Styles
+ * Version: 1.0.0
+ * Description: Styles für die interaktive Schweiz-Karte
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * 
+ * File Path: /apps/master/src/components/Dashboard/SwitzerlandMap.module.css
+ */
+
+/* ============================================================================
+   MAP CONTAINER
+   ============================================================================ */
+.mapContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* ============================================================================
+   SVG MAP
+   ============================================================================ */
+.map {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ============================================================================
+   GRID
+   ============================================================================ */
+.grid {
+  pointer-events: none;
+}
+
+/* ============================================================================
+   CANTONS
+   ============================================================================ */
+.canton {
+  transition: all 0.2s ease-out;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.canton:hover {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+  opacity: 0.9;
+}
+
+.cantonLabel {
+  font-size: 11px;
+  font-weight: 600;
+  fill: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+  user-select: none;
+}
+
+.cantonCount {
+  font-size: 10px;
+  font-weight: 500;
+  fill: #6b7280;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ============================================================================
+   LAKES
+   ============================================================================ */
+.lakes {
+  pointer-events: none;
+}
+
+/* ============================================================================
+   TOOLTIP
+   ============================================================================ */
+.tooltip {
+  position: absolute;
+  background: #1f2937;
+  color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  z-index: 100;
+  animation: fadeIn 0.2s ease-out;
+  white-space: nowrap;
+}
+
+.tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #1f2937;
+}
+
+.tooltip h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tooltipContent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+}
+
+.tooltipRow span {
+  color: #9ca3af;
+}
+
+.tooltipRow strong {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.growth {
+  color: #10b981 !important;
+}
+
+/* ============================================================================
+   MAP CONTROLS
+   ============================================================================ */
+.mapControls {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.zoomButton {
+  width: 36px;
+  height: 36px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.zoomButton:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.zoomButton:active {
+  transform: translateY(0);
+}
+
+.zoomButton svg {
+  color: #6b7280;
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -90%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 768px) {
+  .mapContainer {
+    min-height: 300px;
+  }
+  
+  .cantonLabel {
+    font-size: 10px;
+  }
+  
+  .cantonCount {
+    font-size: 9px;
+  }
+  
+  .tooltip {
+    font-size: 11px;
+    padding: 8px 12px;
+  }
+  
+  .tooltip h4 {
+    font-size: 12px;
+  }
+  
+  .mapControls {
+    bottom: 8px;
+    right: 8px;
+  }
+  
+  .zoomButton {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cantonLabel {
+    font-size: 8px;
+  }
+  
+  .cantonCount {
+    display: none;
+  }
+}

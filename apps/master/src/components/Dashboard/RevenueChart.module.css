@@ -1,0 +1,377 @@
+/**
+ * EATECH - Revenue Chart Styles
+ * Version: 1.0.0
+ * Description: Styles für die Revenue Chart Komponente
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * 
+ * File Path: /apps/master/src/components/Dashboard/RevenueChart.module.css
+ */
+
+/* ============================================================================
+   CONTAINER
+   ============================================================================ */
+.revenueChart {
+  background: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* ============================================================================
+   HEADER
+   ============================================================================ */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.headerLeft h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.totalRevenue {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.growthPositive,
+.growthNegative {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.growthPositive {
+  color: #10b981;
+}
+
+.growthNegative {
+  color: #ef4444;
+}
+
+.growthPositive svg,
+.growthNegative svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================================================
+   CONTROLS
+   ============================================================================ */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.periodSelector {
+  display: flex;
+  background: #f3f4f6;
+  padding: 2px;
+  border-radius: 8px;
+}
+
+.periodSelector button {
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.periodSelector button:hover {
+  color: #374151;
+}
+
+.periodSelector button.active {
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.exportButton {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.exportButton:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+/* ============================================================================
+   METRIC TOGGLES
+   ============================================================================ */
+.metricToggles {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+  flex-wrap: wrap;
+}
+
+.metricToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.metricToggle:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.metricToggle.disabled {
+  opacity: 0.5;
+}
+
+.metricToggle.disabled .metricColor {
+  opacity: 0.3;
+}
+
+.metricColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.metricToggle svg {
+  width: 14px;
+  height: 14px;
+  color: #6b7280;
+  margin-left: 4px;
+}
+
+/* ============================================================================
+   CHART CONTAINER
+   ============================================================================ */
+.chartContainer {
+  position: relative;
+  width: 100%;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.chart {
+  display: block;
+  width: 100%;
+  cursor: crosshair;
+}
+
+/* ============================================================================
+   CHART ELEMENTS
+   ============================================================================ */
+.grid line {
+  stroke: #e5e7eb;
+  stroke-width: 1;
+}
+
+.axisLabel {
+  font-size: 11px;
+  fill: #6b7280;
+  user-select: none;
+}
+
+.dataPoint {
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.dataPoint:hover {
+  r: 6;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* ============================================================================
+   TOOLTIP
+   ============================================================================ */
+.tooltip {
+  position: absolute;
+  background: #1f2937;
+  color: #ffffff;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  z-index: 100;
+  transform: translate(-50%, -100%);
+  animation: fadeIn 0.2s ease-out;
+  white-space: nowrap;
+}
+
+.tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #1f2937;
+}
+
+.tooltipDate {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tooltipContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  font-size: 11px;
+}
+
+.tooltipRow span {
+  font-weight: 500;
+}
+
+.tooltipRow strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -90%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .headerLeft {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .periodSelector {
+    flex: 1;
+  }
+  
+  .periodSelector button {
+    flex: 1;
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  
+  .metricToggles {
+    gap: 8px;
+  }
+  
+  .metricToggle {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  
+  .chartContainer {
+    padding: 8px;
+  }
+  
+  .axisLabel {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .totalRevenue {
+    font-size: 18px;
+  }
+  
+  .metricToggle span:not(.metricColor) {
+    display: none;
+  }
+  
+  .tooltip {
+    font-size: 11px;
+    padding: 8px;
+  }
+}

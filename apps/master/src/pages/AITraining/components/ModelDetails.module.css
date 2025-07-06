@@ -1,0 +1,1450 @@
+/**
+ * EATECH - Model Details Styles
+ * Version: 1.0.0
+ * Description: Styles für die Model Details Ansicht
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * 
+ * File Path: /apps/master/src/pages/AITraining/components/ModelDetails.module.css
+ */
+
+/* ============================================================================
+   MODAL BASE
+   ============================================================================ */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 95%;
+  max-width: 1100px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s ease-out;
+}
+
+/* ============================================================================
+   MODAL HEADER
+   ============================================================================ */
+.modalHeader {
+  padding: 24px 32px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f9fafb;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.modelIcon {
+  color: #3b82f6;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.titleSection h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.editButton {
+  padding: 6px;
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.editButton:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.editHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.editInput {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  padding: 8px 12px;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  background: #ffffff;
+  min-width: 300px;
+}
+
+.editInput:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.editActions {
+  display: flex;
+  gap: 8px;
+}
+
+.saveButton,
+.cancelButton {
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.saveButton {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.saveButton:hover {
+  background: #059669;
+}
+
+.cancelButton {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.cancelButton:hover {
+  background: #dc2626;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: #6b7280;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.closeButton:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+/* ============================================================================
+   INFO BAR
+   ============================================================================ */
+.infoBar {
+  padding: 16px 32px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.infoItem svg {
+  color: #9ca3af;
+}
+
+/* ============================================================================
+   TABS
+   ============================================================================ */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 32px;
+  background: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+  overflow-x: auto;
+}
+
+.tabs button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tabs button:hover {
+  color: #374151;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.tabs button.activeTab {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+  background: #ffffff;
+}
+
+/* ============================================================================
+   MODAL CONTENT
+   ============================================================================ */
+.modalContent {
+  flex: 1;
+  padding: 32px;
+  overflow-y: auto;
+  background: #ffffff;
+}
+
+/* ============================================================================
+   OVERVIEW CONTENT
+   ============================================================================ */
+.overviewContent {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.descriptionSection h3,
+.metricsSection h3,
+.hyperparametersSection h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px 0;
+}
+
+.descriptionSection p {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.editTextarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #111827;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.editTextarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ============================================================================
+   METRICS GRID
+   ============================================================================ */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.metricCard {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.metricCard:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.metricLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metricValue {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+}
+
+.metricBenchmark {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #6b7280;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.improved {
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.degraded {
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ============================================================================
+   HYPERPARAMETERS
+   ============================================================================ */
+.hyperparametersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.hyperparameterItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.paramName {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.paramValue {
+  font-size: 14px;
+  color: #111827;
+  font-weight: 600;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+/* ============================================================================
+   ACTIONS
+   ============================================================================ */
+.actionsSection {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.actionButton:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================================================
+   EVALUATION CONTENT
+   ============================================================================ */
+.evaluationContent {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.evaluationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.evaluationHeader h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.evaluationMeta {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Confusion Matrix */
+.confusionMatrixSection h4,
+.featureImportanceSection h4,
+.detailedMetricsSection h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px 0;
+}
+
+.confusionMatrix {
+  overflow-x: auto;
+}
+
+.confusionMatrix table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.confusionMatrix th,
+.confusionMatrix td {
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+.confusionMatrix th {
+  background: #f3f4f6;
+  font-weight: 600;
+  color: #374151;
+}
+
+.confusionMatrix td {
+  color: #6b7280;
+}
+
+.confusionMatrix td.correct {
+  background: #d1fae5;
+  color: #065f46;
+  font-weight: 600;
+}
+
+/* Feature Importance */
+.featureImportanceChart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.featureBar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.featureInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.featureName {
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.featureValue {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.featureBarTrack {
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.featureBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 4px;
+  transition: width 0.5s ease-out;
+}
+
+/* Metrics Table */
+.metricsTable {
+  overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.metricsTable table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+}
+
+.metricsTable th,
+.metricsTable td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+.metricsTable th {
+  background: #f3f4f6;
+  font-weight: 600;
+  color: #374151;
+}
+
+.metricsTable td {
+  color: #6b7280;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+/* ============================================================================
+   DEPLOYMENT CONTENT
+   ============================================================================ */
+.deploymentContent {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.deploymentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.deploymentHeader h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.deployAllButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.deployAllButton:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.deploymentGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Deployment Card */
+.deploymentCard {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: all 0.2s;
+}
+
+.deploymentCard:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.deploymentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.deploymentInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.deploymentInfo h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.deploymentStatus {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.deploymentDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.deploymentStat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.deploymentStat span {
+  color: #6b7280;
+}
+
+.deploymentStat strong {
+  color: #111827;
+  font-weight: 500;
+}
+
+.deploymentEndpoint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #1f2937;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.deploymentEndpoint code {
+  flex: 1;
+  font-size: 12px;
+  color: #e5e7eb;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.copyButton {
+  padding: 4px;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.copyButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e5e7eb;
+}
+
+.deploymentEmpty {
+  text-align: center;
+  padding: 20px;
+}
+
+.deploymentEmpty p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.manageButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.manageButton:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  transform: translateX(2px);
+}
+
+/* Deployment History */
+.deploymentHistory {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.deploymentHistory h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px 0;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.historyItem {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.historyIcon {
+  width: 32px;
+  height: 32px;
+  background: #e0e7ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3730a3;
+  flex-shrink: 0;
+}
+
+.historyInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.historyAction {
+  font-size: 14px;
+  color: #111827;
+  font-weight: 500;
+}
+
+.historyTime {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ============================================================================
+   API CONTENT
+   ============================================================================ */
+.apiContent {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.apiEndpointsSection h3,
+.apiKeysSection h3,
+.exampleSection h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px 0;
+}
+
+/* Endpoints List */
+.endpointsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.endpoint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.endpointMethod {
+  padding: 4px 8px;
+  background: #3b82f6;
+  color: #ffffff;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 45px;
+  text-align: center;
+}
+
+.endpointPath {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+.endpointPath code {
+  flex: 1;
+  font-size: 13px;
+  color: #374151;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+/* API Keys */
+.apiKeysHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.createKeyButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.createKeyButton:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.apiKeysList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* API Key Row */
+.apiKeyRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.apiKeyRow:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.apiKeyInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.apiKeyName {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.activeIcon {
+  color: #10b981;
+}
+
+.inactiveIcon {
+  color: #ef4444;
+}
+
+.apiKeyMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.apiKeyValue {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.apiKeyValue code {
+  font-size: 12px;
+  font-family: 'Monaco', 'Consolas', monospace;
+  color: #374151;
+}
+
+.toggleKeyButton {
+  padding: 4px 8px;
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggleKeyButton:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.apiKeyActions {
+  display: flex;
+  gap: 8px;
+}
+
+.toggleButton {
+  padding: 6px 12px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggleButton:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.deleteButton {
+  padding: 6px;
+  background: none;
+  border: 1px solid #fee2e2;
+  border-radius: 6px;
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.deleteButton:hover {
+  background: #fee2e2;
+  border-color: #fecaca;
+}
+
+/* Code Block */
+.codeBlock {
+  position: relative;
+  background: #1f2937;
+  border-radius: 8px;
+  padding: 20px;
+  overflow-x: auto;
+}
+
+.codeBlock pre {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #e5e7eb;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.copyCodeButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #e5e7eb;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copyCodeButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================================================
+   MONITORING CONTENT
+   ============================================================================ */
+.monitoringContent {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.monitoringHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.monitoringHeader h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.refreshIndicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.spinning {
+  animation: spin 2s linear infinite;
+}
+
+/* Performance Grid */
+.performanceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.performanceCard {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.2s;
+}
+
+.performanceCard:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.performanceHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.performanceValue {
+  font-size: 32px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+}
+
+.performanceTrend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #10b981;
+}
+
+.performanceTrend svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Usage Chart */
+.usageChartSection {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.usageChartSection h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px 0;
+}
+
+.usageChart {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+/* Recent Predictions */
+.recentPredictionsSection {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.recentPredictionsSection h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px 0;
+}
+
+.predictionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.predictionItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.predictionTime {
+  color: #6b7280;
+  min-width: 80px;
+}
+
+.predictionResult {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.confidence {
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.predictionLatency {
+  color: #10b981;
+  font-weight: 500;
+}
+
+/* ============================================================================
+   SUB MODAL
+   ============================================================================ */
+.subModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.subModalContent {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease-out;
+}
+
+.subModalContent h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 20px 0;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.formGroup input[type="text"] {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #111827;
+  transition: all 0.2s;
+}
+
+.formGroup input[type="text"]:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.permissionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.permissionItem {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.permissionItem:hover {
+  background: #f3f4f6;
+}
+
+.permissionItem input {
+  cursor: pointer;
+}
+
+.permissionItem div {
+  flex: 1;
+}
+
+.permissionItem span {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  display: block;
+}
+
+.permissionItem p {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 2px 0 0 0;
+}
+
+.subModalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.subModalActions button {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.subModalActions button:first-child {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.subModalActions button:first-child:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.primaryButton {
+  background: #3b82f6;
+  border: none;
+  color: #ffffff;
+}
+
+.primaryButton:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 768px) {
+  .modal {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+  
+  .modalHeader,
+  .modalContent {
+    padding: 20px;
+  }
+  
+  .infoBar {
+    padding: 12px 20px;
+    gap: 16px;
+  }
+  
+  .tabs {
+    padding: 0 20px;
+  }
+  
+  .tabs button {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+  
+  .metricsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .deploymentGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .performanceGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .apiKeyRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .apiKeyValue {
+    order: -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .metricsGrid,
+  .performanceGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .tabs button span {
+    display: none;
+  }
+  
+  .hyperparametersGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .predictionItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+/* Plus icon missing */
+.Plus::before { content: '+'; }

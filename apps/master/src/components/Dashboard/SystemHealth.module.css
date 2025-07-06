@@ -1,0 +1,557 @@
+/**
+ * EATECH - System Health Styles
+ * Version: 1.0.0
+ * Description: Styles für die System Health Komponente
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * 
+ * File Path: /apps/master/src/components/Dashboard/SystemHealth.module.css
+ */
+
+/* ============================================================================
+   CONTAINER
+   ============================================================================ */
+.systemHealth {
+  background: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: 100%;
+}
+
+.systemHealth.compact {
+  gap: 16px;
+}
+
+/* ============================================================================
+   HEADER
+   ============================================================================ */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.headerLeft h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.overallStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 12px;
+  background: currentColor;
+  border-radius: 20px;
+}
+
+.overallStatus svg,
+.overallStatus span {
+  color: #ffffff;
+  mix-blend-mode: screen;
+  filter: invert(1);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.updateTime {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.refreshButton {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.refreshButton:hover:not(:disabled) {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.refreshButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.refreshButton.spinning svg {
+  animation: spin 1s linear infinite;
+}
+
+/* ============================================================================
+   SUMMARY
+   ============================================================================ */
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.summaryValue {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.summaryLabel {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ============================================================================
+   SERVICES GRID
+   ============================================================================ */
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.compact .servicesGrid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* ============================================================================
+   SERVICE CARD
+   ============================================================================ */
+.serviceCard {
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.serviceCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: #e5e7eb;
+  transition: all 0.3s;
+}
+
+.serviceCard.operational::before {
+  background: #10b981;
+}
+
+.serviceCard.degraded::before {
+  background: #f59e0b;
+}
+
+.serviceCard.outage::before {
+  background: #ef4444;
+  animation: pulse 2s infinite;
+}
+
+.serviceCard.maintenance::before {
+  background: #8b5cf6;
+}
+
+.serviceCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.serviceCard.operational:hover {
+  border-color: #10b981;
+}
+
+.serviceCard.degraded:hover {
+  border-color: #f59e0b;
+}
+
+.serviceCard.outage:hover {
+  border-color: #ef4444;
+}
+
+.serviceHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.serviceIcon {
+  width: 48px;
+  height: 48px;
+  background: #ffffff;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.serviceInfo {
+  flex: 1;
+}
+
+.serviceInfo h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 4px 0;
+}
+
+.serviceInfo p {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.statusIndicator {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  animation: pulse 2s infinite;
+}
+
+/* ============================================================================
+   SERVICE METRICS
+   ============================================================================ */
+.serviceMetrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metricLabel {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.metricValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* ============================================================================
+   LOAD BAR
+   ============================================================================ */
+.loadBar {
+  margin-bottom: 12px;
+}
+
+.loadLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.loadTrack {
+  width: 100%;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.loadFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease-out;
+}
+
+/* ============================================================================
+   INCIDENT INFO
+   ============================================================================ */
+.incidentInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #fef3c7;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #92400e;
+  margin-bottom: 12px;
+}
+
+.incidentInfo svg {
+  color: #f59e0b;
+}
+
+/* ============================================================================
+   ENDPOINTS
+   ============================================================================ */
+.endpoints {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.endpoint {
+  font-size: 10px;
+  padding: 2px 6px;
+  background: #e0e7ff;
+  color: #4c1d95;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* ============================================================================
+   REGIONS SECTION
+   ============================================================================ */
+.regionsSection {
+  padding-top: 24px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.regionsSection h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px 0;
+}
+
+.regionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.regionCard {
+  padding: 12px 16px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.regionCard:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.regionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.regionHeader svg {
+  color: #6b7280;
+}
+
+.regionHeader span {
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.regionMetrics {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.latency {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.latency .healthy {
+  color: #10b981;
+}
+
+.latency .warning {
+  color: #f59e0b;
+}
+
+.regionStatus {
+  display: flex;
+  align-items: center;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+/* ============================================================================
+   QUICK ACTIONS
+   ============================================================================ */
+.quickActions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  padding-top: 20px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.actionButton:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.actionButton svg {
+  color: #6b7280;
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .summary {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .servicesGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .serviceMetrics {
+    grid-template-columns: repeat(3, 1fr);
+    font-size: 11px;
+  }
+  
+  .regionsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .quickActions {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .overallStatus {
+    font-size: 12px;
+    padding: 2px 8px;
+  }
+  
+  .summaryValue {
+    font-size: 20px;
+  }
+  
+  .serviceCard {
+    padding: 16px;
+  }
+  
+  .serviceIcon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .regionsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .quickActions {
+    grid-template-columns: 1fr;
+  }
+}

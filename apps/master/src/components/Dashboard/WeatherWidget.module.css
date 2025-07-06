@@ -1,0 +1,542 @@
+/**
+ * EATECH - Weather Widget Styles
+ * Version: 1.0.0
+ * Description: Styles für das Weather Widget
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * 
+ * File Path: /apps/master/src/components/Dashboard/WeatherWidget.module.css
+ */
+
+/* ============================================================================
+   WIDGET CONTAINER
+   ============================================================================ */
+.weatherWidget {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: all 0.3s;
+}
+
+.weatherWidget.expanded {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* ============================================================================
+   LOADING STATE
+   ============================================================================ */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  gap: 12px;
+}
+
+.loading svg {
+  color: #6b7280;
+}
+
+.loading span {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+/* ============================================================================
+   HEADER
+   ============================================================================ */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.header h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.header h3 svg {
+  color: #f59e0b;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.locationSelect {
+  padding: 6px 12px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.locationSelect:hover {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+.locationSelect:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.refreshButton {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.refreshButton:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.refreshButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================================
+   CURRENT WEATHER
+   ============================================================================ */
+.currentWeather {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.locationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.location svg {
+  color: #6b7280;
+}
+
+.updateTime {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.mainWeather {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.weatherIcon {
+  flex-shrink: 0;
+}
+
+.temperature {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tempValue {
+  font-size: 36px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+}
+
+.tempFeels {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.condition {
+  flex: 1;
+  text-align: right;
+}
+
+.condition span {
+  font-size: 16px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.weatherDetails {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #374151;
+}
+
+.detailItem svg {
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.precipitationAlert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #1e40af;
+}
+
+.precipitationAlert svg {
+  color: #3b82f6;
+}
+
+/* ============================================================================
+   SUN TIMES
+   ============================================================================ */
+.sunTimes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 16px;
+  background: #fef3c7;
+  border-radius: 8px;
+}
+
+.sunTime {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.sunTime svg {
+  color: #f59e0b;
+}
+
+.sunTime span {
+  font-size: 11px;
+  color: #92400e;
+}
+
+.sunTime strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: #78350f;
+}
+
+/* ============================================================================
+   FORECAST
+   ============================================================================ */
+.forecast {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.forecast h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.forecastDays {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.forecastDay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.forecastDay:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.dayName {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.tempRange {
+  display: flex;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.tempHigh {
+  font-weight: 600;
+  color: #111827;
+}
+
+.tempLow {
+  color: #9ca3af;
+}
+
+.rainChance {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #3b82f6;
+}
+
+/* ============================================================================
+   BUSINESS IMPACT
+   ============================================================================ */
+.businessImpact {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.businessImpact h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.impactLevel {
+  padding: 12px;
+  border: 2px solid;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.impactHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.impactLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.impactValue {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.impactDescription {
+  font-size: 12px;
+  color: #374151;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.recommendations {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recommendations h5 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.recommendations ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recommendations li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.recommendations li svg {
+  color: #9ca3af;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ============================================================================
+   EXPAND BUTTON
+   ============================================================================ */
+.expandButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.expandButton:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.expandButton svg {
+  transition: transform 0.2s;
+}
+
+.expandButton svg.rotated {
+  transform: rotate(90deg);
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 768px) {
+  .weatherWidget {
+    padding: 16px;
+  }
+  
+  .mainWeather {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .condition {
+    text-align: center;
+  }
+  
+  .weatherDetails {
+    grid-template-columns: 1fr;
+  }
+  
+  .forecastDays {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .forecastDays .forecastDay:nth-child(n+4) {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .headerActions {
+    justify-content: space-between;
+  }
+  
+  .tempValue {
+    font-size: 28px;
+  }
+  
+  .sunTimes {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .sunTime {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
+}

@@ -1,804 +1,942 @@
 /**
- * EATECH - Order Management System
- * Version: 20.0.0
- * Description: Umfassendes Bestellverwaltungssystem mit Echtzeit-Updates
- * Features: Bestellübersicht, Statusverwaltung, Filterung, Export, Refunds
- * File Path: /src/pages/OrderManagement/OrderManagement.jsx
+ * EATECH - Order Management Component
+ * Version: 8.4.0
+ * Description: Real-time Order Management Dashboard mit Lazy Loading & Advanced Features
+ * Author: EATECH Development Team
+ * Modified: 2025-01-08
+ * File Path: /apps/admin/src/pages/OrderManagement/OrderManagement.jsx
+ * 
+ * Features: Real-time orders, kitchen display, delivery tracking, analytics
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Search, Filter, Download, RefreshCw, 
-  ChevronDown, ChevronUp, MoreVertical,
-  Package, Clock, CheckCircle, XCircle,
-  AlertCircle, Phone, Mail, MapPin,
-  CreditCard, DollarSign, FileText,
-  Calendar, TrendingUp, Users, Printer,
-  Eye, Edit, Trash2, RotateCcw, Send
+  ShoppingCart, Clock, CheckCircle, XCircle, AlertCircle,
+  Truck, User, MapPin, Phone, Mail, MessageSquare,
+  Filter, Search, MoreVertical, RefreshCw, Download,
+  Calendar, DollarSign, Package, Utensils, Timer,
+  Play, Pause, Check, X, Edit, Printer, Eye,
+  ChefHat, Navigation, Star, Flag, Zap, Activity,
+  BarChart3, TrendingUp, TrendingDown, Wifi, WifiOff
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
-import { mockOrders } from '../../data/mockData';
-import styles from './OrderManagement.module.css';
 
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-const ORDER_STATUSES = {
-  PENDING: { label: 'Ausstehend', color: '#FFA500', icon: Clock },
-  CONFIRMED: { label: 'Bestätigt', color: '#2196F3', icon: Package },
-  PREPARING: { label: 'In Zubereitung', color: '#9C27B0', icon: Package },
-  READY: { label: 'Fertig', color: '#4CAF50', icon: CheckCircle },
-  DELIVERED: { label: 'Geliefert', color: '#4CAF50', icon: CheckCircle },
-  CANCELLED: { label: 'Storniert', color: '#F44336', icon: XCircle },
-  REFUNDED: { label: 'Erstattet', color: '#FF9800', icon: RotateCcw }
+// Hooks & Contexts
+import { useAuth } from '../../hooks/useAuth';
+import { useTenant } from '../../hooks/useTenant';
+import { useRealtimeOrders } from '../../hooks/useRealtimeOrders';
+
+// Lazy loaded components
+const OrderCard = lazy(() => import('./components/OrderCard'));
+const OrderDetailsModal = lazy(() => import('./components/OrderDetailsModal'));
+const KitchenDisplay = lazy(() => import('./components/KitchenDisplay'));
+const DeliveryTracker = lazy(() => import('./components/DeliveryTracker'));
+const OrderFilters = lazy(() => import('./components/OrderFilters'));
+const OrderStats = lazy(() => import('./components/OrderStats'));
+const OrderTimeline = lazy(() => import('./components/OrderTimeline'));
+const BulkActions = lazy(() => import('./components/BulkActions'));
+const OrderExporter = lazy(() => import('./components/OrderExporter'));
+const CustomerInfo = lazy(() => import('./components/CustomerInfo'));
+const PaymentDetails = lazy(() => import('./components/PaymentDetails'));
+const OrderNotes = lazy(() => import('./components/OrderNotes'));
+const EstimationTool = lazy(() => import('./components/EstimationTool'));
+const OrderAnalytics = lazy(() => import('./components/OrderAnalytics'));
+
+// Lazy loaded services
+const orderService = () => import('../../services/orderService');
+const realtimeService = () => import('../../services/realtimeService');
+const notificationService = () => import('../../services/notificationService');
+const printService = () => import('../../services/printService');
+const analyticsService = () => import('../../services/analyticsService');
+const soundService = () => import('../../services/soundService');
+
+// Lazy loaded utilities
+const dateUtils = () => import('../../utils/dateUtils');
+const formattersUtils = () => import('../../utils/formattersUtils');
+const validationUtils = () => import('../../utils/validationUtils');
+const calculationUtils = () => import('../../utils/calculationUtils');
+
+// Order statuses
+export const ORDER_STATUSES = {
+  PENDING: 'pending',
+  CONFIRMED: 'confirmed',
+  PREPARING: 'preparing',
+  READY: 'ready',
+  OUT_FOR_DELIVERY: 'out_for_delivery',
+  DELIVERED: 'delivered',
+  CANCELLED: 'cancelled',
+  REFUNDED: 'refunded'
 };
 
-const PAYMENT_METHODS = {
-  CARD: { label: 'Kreditkarte', icon: CreditCard },
-  CASH: { label: 'Bargeld', icon: DollarSign },
-  TWINT: { label: 'TWINT', icon: CreditCard },
-  INVOICE: { label: 'Rechnung', icon: FileText }
+// Order types
+export const ORDER_TYPES = {
+  PICKUP: 'pickup',
+  DELIVERY: 'delivery',
+  DINE_IN: 'dine_in'
 };
 
-const TIME_FILTERS = {
-  TODAY: 'Heute',
-  YESTERDAY: 'Gestern',
-  LAST_7_DAYS: 'Letzte 7 Tage',
-  LAST_30_DAYS: 'Letzte 30 Tage',
-  CUSTOM: 'Zeitraum wählen'
+// Priority levels
+export const PRIORITY_LEVELS = {
+  LOW: 1,
+  NORMAL: 2,
+  HIGH: 3,
+  URGENT: 4
 };
 
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
+// View modes
+export const VIEW_MODES = {
+  GRID: 'grid',
+  LIST: 'list',
+  KITCHEN: 'kitchen',
+  DELIVERY: 'delivery',
+  ANALYTICS: 'analytics'
+};
+
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center p-8">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+);
+
 const OrderManagement = () => {
-  // State Management
+  // ============================================================================
+  // STATE
+  // ============================================================================
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedOrders, setSelectedOrders] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  const [timeFilter, setTimeFilter] = useState('TODAY');
-  const [showFilters, setShowFilters] = useState(false);
-  const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' });
-  const [viewMode, setViewMode] = useState('table'); // table | cards
+  const [filteredOrders, setFilteredOrders] = useState([]);
+  const [selectedOrders, setSelectedOrders] = useState(new Set());
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [viewMode, setViewMode] = useState(VIEW_MODES.GRID);
+  const [filters, setFilters] = useState({
+    status: 'all',
+    type: 'all',
+    priority: 'all',
+    timeRange: 'today',
+    searchTerm: '',
+    assignedTo: 'all'
+  });
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortDirection, setSortDirection] = useState('desc');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
   const [showBulkActions, setShowBulkActions] = useState(false);
+  const [showExporter, setShowExporter] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showEstimationTool, setShowEstimationTool] = useState(false);
+  const [isKitchenMode, setIsKitchenMode] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [refreshInterval] = useState(30000); // 30 seconds
+  const [stats, setStats] = useState({});
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
-  // Load Orders
+  // Hooks
+  const { user } = useAuth();
+  const { tenant } = useTenant();
+  const { 
+    orders: realtimeOrders, 
+    isConnected: realtimeConnected,
+    subscribe,
+    unsubscribe 
+  } = useRealtimeOrders();
+
+  // Refs
+  const refreshIntervalRef = useRef(null);
+  const soundsRef = useRef({});
+
+  // Lazy loaded services refs
+  const orderServiceRef = useRef(null);
+  const realtimeServiceRef = useRef(null);
+  const notificationServiceRef = useRef(null);
+  const printServiceRef = useRef(null);
+  const analyticsServiceRef = useRef(null);
+  const soundServiceRef = useRef(null);
+  const dateUtilsRef = useRef(null);
+  const formattersRef = useRef(null);
+  const validationUtilsRef = useRef(null);
+  const calculationUtilsRef = useRef(null);
+
+  // ============================================================================
+  // LAZY LOADING SETUP
+  // ============================================================================
   useEffect(() => {
-    loadOrders();
-    // Real-time updates simulation
-    const interval = setInterval(loadOrders, 30000); // Update every 30s
-    return () => clearInterval(interval);
+    const initializeLazyServices = async () => {
+      try {
+        // Initialize utilities
+        dateUtilsRef.current = await dateUtils();
+        formattersRef.current = await formattersUtils();
+        validationUtilsRef.current = await validationUtils();
+        calculationUtilsRef.current = await calculationUtils();
+
+        // Initialize services
+        const OrderService = await orderService();
+        orderServiceRef.current = new OrderService.default();
+
+        const RealtimeService = await realtimeService();
+        realtimeServiceRef.current = new RealtimeService.default();
+
+        const NotificationService = await notificationService();
+        notificationServiceRef.current = new NotificationService.default();
+
+        const PrintService = await printService();
+        printServiceRef.current = new PrintService.default();
+
+        const AnalyticsService = await analyticsService();
+        analyticsServiceRef.current = new AnalyticsService.default();
+
+        const SoundService = await soundService();
+        soundServiceRef.current = new SoundService.default();
+
+        // Load initial data
+        await loadOrders();
+        await loadStats();
+        setupRealtimeSubscriptions();
+        setupSounds();
+
+      } catch (error) {
+        console.error('Failed to initialize order management services:', error);
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeLazyServices();
   }, []);
 
-  const loadOrders = async () => {
+  // ============================================================================
+  // DATA LOADING
+  // ============================================================================
+  const loadOrders = useCallback(async () => {
+    if (!orderServiceRef.current) return;
+
     try {
-      setLoading(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setOrders(mockOrders);
+      setIsLoading(true);
+      const orderData = await orderServiceRef.current.getOrders({
+        filters,
+        sort: { [sortBy]: sortDirection },
+        limit: 100
+      });
+      
+      setOrders(orderData);
+      
+      // Track analytics
+      if (analyticsServiceRef.current) {
+        analyticsServiceRef.current.trackEvent('orders_loaded', {
+          count: orderData.length,
+          filters: filters,
+          view_mode: viewMode
+        });
+      }
+
     } catch (error) {
-      toast.error('Fehler beim Laden der Bestellungen');
+      console.error('Failed to load orders:', error);
+      setError(error.message);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  };
+  }, [filters, sortBy, sortDirection, viewMode]);
 
-  // Filter & Sort Orders
-  const filteredOrders = useMemo(() => {
-    let filtered = [...orders];
+  const loadStats = useCallback(async () => {
+    if (!orderServiceRef.current) return;
 
-    // Search filter
-    if (searchTerm) {
+    try {
+      const statsData = await orderServiceRef.current.getOrderStats({
+        timeRange: filters.timeRange
+      });
+      setStats(statsData);
+    } catch (error) {
+      console.error('Failed to load stats:', error);
+    }
+  }, [filters.timeRange]);
+
+  const setupRealtimeSubscriptions = useCallback(() => {
+    if (!realtimeServiceRef.current) return;
+
+    // Subscribe to new orders
+    subscribe('new_order', (order) => {
+      setOrders(prev => [order, ...prev]);
+      showNewOrderNotification(order);
+      playNewOrderSound();
+    });
+
+    // Subscribe to order status updates
+    subscribe('order_status_changed', (update) => {
+      setOrders(prev => prev.map(order => 
+        order.id === update.orderId 
+          ? { ...order, status: update.status, updatedAt: new Date().toISOString() }
+          : order
+      ));
+      
+      showStatusUpdateNotification(update);
+    });
+
+    // Subscribe to order cancellations
+    subscribe('order_cancelled', (update) => {
+      setOrders(prev => prev.map(order => 
+        order.id === update.orderId 
+          ? { ...order, status: ORDER_STATUSES.CANCELLED, cancelReason: update.reason }
+          : order
+      ));
+      
+      showCancellationNotification(update);
+    });
+
+  }, [subscribe]);
+
+  const setupSounds = useCallback(async () => {
+    if (!soundServiceRef.current) return;
+
+    try {
+      soundsRef.current = {
+        newOrder: await soundServiceRef.current.loadSound('/sounds/new-order.mp3'),
+        orderReady: await soundServiceRef.current.loadSound('/sounds/order-ready.mp3'),
+        orderCancelled: await soundServiceRef.current.loadSound('/sounds/order-cancelled.mp3')
+      };
+    } catch (error) {
+      console.error('Failed to load sounds:', error);
+    }
+  }, []);
+
+  // ============================================================================
+  // FILTERING & SORTING
+  // ============================================================================
+  useEffect(() => {
+    const filtered = filterAndSortOrders(orders);
+    setFilteredOrders(filtered);
+  }, [orders, filters, sortBy, sortDirection]);
+
+  const filterAndSortOrders = useCallback((orderList) => {
+    let filtered = [...orderList];
+
+    // Apply filters
+    if (filters.status !== 'all') {
+      filtered = filtered.filter(order => order.status === filters.status);
+    }
+
+    if (filters.type !== 'all') {
+      filtered = filtered.filter(order => order.type === filters.type);
+    }
+
+    if (filters.priority !== 'all') {
+      filtered = filtered.filter(order => order.priority === filters.priority);
+    }
+
+    if (filters.assignedTo !== 'all') {
+      filtered = filtered.filter(order => order.assignedTo === filters.assignedTo);
+    }
+
+    if (filters.searchTerm) {
+      const searchTerm = filters.searchTerm.toLowerCase();
       filtered = filtered.filter(order => 
-        order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.customer.phone.includes(searchTerm)
+        order.orderNumber.toLowerCase().includes(searchTerm) ||
+        order.customer.name.toLowerCase().includes(searchTerm) ||
+        order.customer.email.toLowerCase().includes(searchTerm) ||
+        order.items.some(item => item.name.toLowerCase().includes(searchTerm))
       );
     }
 
-    // Status filter
-    if (statusFilter !== 'ALL') {
-      filtered = filtered.filter(order => order.status === statusFilter);
+    // Apply time range filter
+    if (filters.timeRange !== 'all' && dateUtilsRef.current) {
+      const timeFilter = dateUtilsRef.current.getTimeRangeFilter(filters.timeRange);
+      filtered = filtered.filter(order => 
+        new Date(order.createdAt) >= timeFilter.start &&
+        new Date(order.createdAt) <= timeFilter.end
+      );
     }
 
-    // Time filter
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
-    switch (timeFilter) {
-      case 'TODAY':
-        filtered = filtered.filter(order => 
-          new Date(order.createdAt) >= today
-        );
-        break;
-      case 'YESTERDAY':
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-        filtered = filtered.filter(order => {
-          const orderDate = new Date(order.createdAt);
-          return orderDate >= yesterday && orderDate < today;
-        });
-        break;
-      case 'LAST_7_DAYS':
-        const week = new Date(today);
-        week.setDate(week.getDate() - 7);
-        filtered = filtered.filter(order => 
-          new Date(order.createdAt) >= week
-        );
-        break;
-      case 'LAST_30_DAYS':
-        const month = new Date(today);
-        month.setDate(month.getDate() - 30);
-        filtered = filtered.filter(order => 
-          new Date(order.createdAt) >= month
-        );
-        break;
-    }
-
-    // Sorting
+    // Apply sorting
     filtered.sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
-      
-      if (sortConfig.direction === 'asc') {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
+      let aValue = a[sortBy];
+      let bValue = b[sortBy];
+
+      // Handle nested properties
+      if (sortBy.includes('.')) {
+        const keys = sortBy.split('.');
+        aValue = keys.reduce((obj, key) => obj?.[key], a);
+        bValue = keys.reduce((obj, key) => obj?.[key], b);
       }
+
+      // Handle different data types
+      if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+
+      if (aValue < bValue) {
+        return sortDirection === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortDirection === 'asc' ? 1 : -1;
+      }
+      return 0;
     });
 
     return filtered;
-  }, [orders, searchTerm, statusFilter, timeFilter, sortConfig]);
+  }, [filters, sortBy, sortDirection]);
 
-  // Statistics
-  const statistics = useMemo(() => {
-    const stats = {
-      total: filteredOrders.length,
-      revenue: filteredOrders.reduce((sum, order) => sum + order.total, 0),
-      avgOrderValue: 0,
-      statusCounts: {}
-    };
+  const handleFilterChange = useCallback((newFilters) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  }, []);
 
-    stats.avgOrderValue = stats.total > 0 ? stats.revenue / stats.total : 0;
-
-    Object.keys(ORDER_STATUSES).forEach(status => {
-      stats.statusCounts[status] = filteredOrders.filter(
-        order => order.status === status
-      ).length;
-    });
-
-    return stats;
-  }, [filteredOrders]);
-
-  // Handlers
-  const handleSort = (key) => {
-    setSortConfig(prev => ({
-      key,
-      direction: prev.key === key && prev.direction === 'desc' ? 'asc' : 'desc'
-    }));
-  };
-
-  const handleSelectOrder = (orderId) => {
-    setSelectedOrders(prev => 
-      prev.includes(orderId) 
-        ? prev.filter(id => id !== orderId)
-        : [...prev, orderId]
-    );
-  };
-
-  const handleSelectAll = () => {
-    if (selectedOrders.length === filteredOrders.length) {
-      setSelectedOrders([]);
+  const handleSortChange = useCallback((field) => {
+    if (sortBy === field) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
     } else {
-      setSelectedOrders(filteredOrders.map(order => order.id));
+      setSortBy(field);
+      setSortDirection('asc');
     }
-  };
+  }, [sortBy]);
 
-  const handleStatusChange = async (orderId, newStatus) => {
-    try {
-      // Update order status
-      setOrders(prev => prev.map(order => 
-        order.id === orderId ? { ...order, status: newStatus } : order
-      ));
-      toast.success('Status erfolgreich aktualisiert');
-    } catch (error) {
-      toast.error('Fehler beim Statusupdate');
-    }
-  };
+  // ============================================================================
+  // ORDER ACTIONS
+  // ============================================================================
+  const handleOrderStatusChange = useCallback(async (orderId, newStatus, options = {}) => {
+    if (!orderServiceRef.current) return;
 
-  const handleBulkStatusChange = async (newStatus) => {
     try {
+      await orderServiceRef.current.updateOrderStatus(orderId, newStatus, {
+        reason: options.reason,
+        estimatedTime: options.estimatedTime,
+        notes: options.notes
+      });
+
+      // Update local state
       setOrders(prev => prev.map(order => 
-        selectedOrders.includes(order.id) 
-          ? { ...order, status: newStatus } 
+        order.id === orderId 
+          ? { ...order, status: newStatus, updatedAt: new Date().toISOString() }
           : order
       ));
-      setSelectedOrders([]);
-      toast.success(`${selectedOrders.length} Bestellungen aktualisiert`);
+
+      // Show notification
+      if (notificationServiceRef.current) {
+        notificationServiceRef.current.showSuccess(
+          `Order ${orderId} status updated to ${newStatus}`
+        );
+      }
+
+      // Play sound
+      if (newStatus === ORDER_STATUSES.READY && soundsRef.current.orderReady) {
+        soundsRef.current.orderReady.play();
+      }
+
+      // Track analytics
+      if (analyticsServiceRef.current) {
+        analyticsServiceRef.current.trackEvent('order_status_changed', {
+          order_id: orderId,
+          old_status: orders.find(o => o.id === orderId)?.status,
+          new_status: newStatus,
+          user_id: user?.uid
+        });
+      }
+
     } catch (error) {
-      toast.error('Fehler beim Bulk-Update');
-    }
-  };
-
-  const handleExport = () => {
-    const csv = convertToCSV(filteredOrders);
-    downloadCSV(csv, `bestellungen_${new Date().toISOString().split('T')[0]}.csv`);
-    toast.success('Export erfolgreich');
-  };
-
-  const handlePrintOrder = (order) => {
-    window.print(); // Simplified - in production use proper print styling
-    toast.success('Druckauftrag gesendet');
-  };
-
-  const handleRefund = async (orderId) => {
-    if (window.confirm('Möchten Sie diese Bestellung wirklich erstatten?')) {
-      try {
-        // Process refund
-        await handleStatusChange(orderId, 'REFUNDED');
-        toast.success('Erstattung erfolgreich durchgeführt');
-      } catch (error) {
-        toast.error('Fehler bei der Erstattung');
+      console.error('Failed to update order status:', error);
+      if (notificationServiceRef.current) {
+        notificationServiceRef.current.showError('Failed to update order status');
       }
     }
-  };
+  }, [orders, user?.uid]);
+
+  const handleOrderAssignment = useCallback(async (orderId, assignedTo) => {
+    if (!orderServiceRef.current) return;
+
+    try {
+      await orderServiceRef.current.assignOrder(orderId, assignedTo);
+
+      setOrders(prev => prev.map(order => 
+        order.id === orderId 
+          ? { ...order, assignedTo, updatedAt: new Date().toISOString() }
+          : order
+      ));
+
+      if (notificationServiceRef.current) {
+        notificationServiceRef.current.showSuccess(`Order assigned to ${assignedTo}`);
+      }
+
+    } catch (error) {
+      console.error('Failed to assign order:', error);
+    }
+  }, []);
+
+  const handleOrderCancel = useCallback(async (orderId, reason) => {
+    if (!orderServiceRef.current) return;
+
+    try {
+      await orderServiceRef.current.cancelOrder(orderId, reason);
+
+      setOrders(prev => prev.map(order => 
+        order.id === orderId 
+          ? { 
+              ...order, 
+              status: ORDER_STATUSES.CANCELLED, 
+              cancelReason: reason,
+              updatedAt: new Date().toISOString() 
+            }
+          : order
+      ));
+
+      // Play sound
+      if (soundsRef.current.orderCancelled) {
+        soundsRef.current.orderCancelled.play();
+      }
+
+    } catch (error) {
+      console.error('Failed to cancel order:', error);
+    }
+  }, []);
+
+  const handlePrintOrder = useCallback(async (orderId) => {
+    if (!printServiceRef.current) return;
+
+    try {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      await printServiceRef.current.printKitchenTicket(order);
+
+      if (notificationServiceRef.current) {
+        notificationServiceRef.current.showSuccess('Kitchen ticket printed');
+      }
+
+    } catch (error) {
+      console.error('Failed to print order:', error);
+    }
+  }, [orders]);
 
   // ============================================================================
-  // RENDER FUNCTIONS
+  // BULK ACTIONS
   // ============================================================================
-  const renderStatistics = () => (
-    <div className={styles.statistics}>
-      <div className={styles.statCard}>
-        <Package className={styles.statIcon} />
-        <div className={styles.statContent}>
-          <h3>{statistics.total}</h3>
-          <p>Bestellungen</p>
-        </div>
+  const handleBulkStatusUpdate = useCallback(async (orderIds, newStatus) => {
+    const updates = orderIds.map(id => handleOrderStatusChange(id, newStatus));
+    await Promise.all(updates);
+    setSelectedOrders(new Set());
+  }, [handleOrderStatusChange]);
+
+  const handleBulkAssignment = useCallback(async (orderIds, assignedTo) => {
+    const updates = orderIds.map(id => handleOrderAssignment(id, assignedTo));
+    await Promise.all(updates);
+    setSelectedOrders(new Set());
+  }, [handleOrderAssignment]);
+
+  const handleBulkPrint = useCallback(async (orderIds) => {
+    const prints = orderIds.map(id => handlePrintOrder(id));
+    await Promise.all(prints);
+    setSelectedOrders(new Set());
+  }, [handlePrintOrder]);
+
+  // ============================================================================
+  // NOTIFICATIONS & SOUNDS
+  // ============================================================================
+  const showNewOrderNotification = useCallback((order) => {
+    if (!notificationServiceRef.current) return;
+
+    notificationServiceRef.current.showInfo(
+      `New order #${order.orderNumber}`,
+      {
+        description: `${order.customer.name} - ${formattersRef.current?.formatPrice(order.total)}`,
+        action: 'View',
+        onClick: () => setSelectedOrder(order)
+      }
+    );
+  }, []);
+
+  const showStatusUpdateNotification = useCallback((update) => {
+    if (!notificationServiceRef.current) return;
+
+    notificationServiceRef.current.showInfo(
+      `Order #${update.orderNumber} ${update.status}`,
+      { duration: 3000 }
+    );
+  }, []);
+
+  const showCancellationNotification = useCallback((update) => {
+    if (!notificationServiceRef.current) return;
+
+    notificationServiceRef.current.showWarning(
+      `Order #${update.orderNumber} cancelled`,
+      { description: update.reason }
+    );
+  }, []);
+
+  const playNewOrderSound = useCallback(() => {
+    if (soundsRef.current.newOrder && tenant?.settings?.enableSounds) {
+      soundsRef.current.newOrder.play();
+    }
+  }, [tenant?.settings?.enableSounds]);
+
+  // ============================================================================
+  // AUTO REFRESH
+  // ============================================================================
+  useEffect(() => {
+    if (autoRefresh) {
+      refreshIntervalRef.current = setInterval(() => {
+        if (!realtimeConnected) {
+          loadOrders();
+        }
+        loadStats();
+      }, refreshInterval);
+    } else {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+    }
+
+    return () => {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+    };
+  }, [autoRefresh, refreshInterval, realtimeConnected, loadOrders, loadStats]);
+
+  // ============================================================================
+  // COMPUTED VALUES
+  // ============================================================================
+  const ordersByStatus = useMemo(() => {
+    return filteredOrders.reduce((acc, order) => {
+      acc[order.status] = (acc[order.status] || 0) + 1;
+      return acc;
+    }, {});
+  }, [filteredOrders]);
+
+  const selectedOrdersArray = useMemo(() => {
+    return Array.from(selectedOrders);
+  }, [selectedOrders]);
+
+  const canBulkUpdate = useMemo(() => {
+    return selectedOrders.size > 0;
+  }, [selectedOrders.size]);
+
+  const urgentOrders = useMemo(() => {
+    return filteredOrders.filter(order => 
+      order.priority === PRIORITY_LEVELS.URGENT ||
+      (order.estimatedReadyTime && new Date(order.estimatedReadyTime) < new Date())
+    );
+  }, [filteredOrders]);
+
+  // ============================================================================
+  // RENDER HELPERS
+  // ============================================================================
+  const renderHeader = () => (
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Order Management</h1>
+        <p className="text-gray-600">
+          {filteredOrders.length} orders • {Object.keys(ordersByStatus).length} statuses
+          {!realtimeConnected && (
+            <span className="ml-2 text-red-500 flex items-center gap-1">
+              <WifiOff className="w-4 h-4" />
+              Offline
+            </span>
+          )}
+        </p>
       </div>
-      
-      <div className={styles.statCard}>
-        <DollarSign className={styles.statIcon} />
-        <div className={styles.statContent}>
-          <h3>CHF {statistics.revenue.toFixed(2)}</h3>
-          <p>Gesamtumsatz</p>
+
+      <div className="flex items-center gap-2">
+        {/* View Mode Toggle */}
+        <div className="flex items-center bg-gray-100 rounded-lg p-1">
+          {Object.values(VIEW_MODES).map(mode => (
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                viewMode === mode
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {mode.charAt(0).toUpperCase() + mode.slice(1)}
+            </button>
+          ))}
         </div>
-      </div>
-      
-      <div className={styles.statCard}>
-        <TrendingUp className={styles.statIcon} />
-        <div className={styles.statContent}>
-          <h3>CHF {statistics.avgOrderValue.toFixed(2)}</h3>
-          <p>Ø Bestellwert</p>
-        </div>
-      </div>
-      
-      <div className={styles.statCard}>
-        <Users className={styles.statIcon} />
-        <div className={styles.statContent}>
-          <h3>{statistics.statusCounts.PENDING || 0}</h3>
-          <p>Offene Bestellungen</p>
-        </div>
+
+        {/* Action Buttons */}
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          title="Filters"
+        >
+          <Filter className="w-5 h-5" />
+        </button>
+
+        <button
+          onClick={() => setAutoRefresh(!autoRefresh)}
+          className={`p-2 border rounded-lg transition-colors ${
+            autoRefresh 
+              ? 'bg-green-100 border-green-300 text-green-700' 
+              : 'bg-white border-gray-300 hover:bg-gray-50'
+          }`}
+          title="Auto Refresh"
+        >
+          <RefreshCw className={`w-5 h-5 ${autoRefresh ? 'animate-spin' : ''}`} />
+        </button>
+
+        <button
+          onClick={() => setShowAnalytics(true)}
+          className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          title="Analytics"
+        >
+          <BarChart3 className="w-5 h-5" />
+        </button>
+
+        <button
+          onClick={() => setShowExporter(true)}
+          className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          title="Export"
+        >
+          <Download className="w-5 h-5" />
+        </button>
       </div>
     </div>
+  );
+
+  const renderStats = () => (
+    <Suspense fallback={<div className="h-20 bg-gray-100 rounded-lg animate-pulse"></div>}>
+      <OrderStats
+        stats={stats}
+        ordersByStatus={ordersByStatus}
+        urgentCount={urgentOrders.length}
+        isOnline={realtimeConnected}
+      />
+    </Suspense>
   );
 
   const renderFilters = () => (
-    <div className={`${styles.filters} ${showFilters ? styles.show : ''}`}>
-      <div className={styles.filterGroup}>
-        <label>Status</label>
-        <select 
-          value={statusFilter} 
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className={styles.filterSelect}
+    <AnimatePresence>
+      {showFilters && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="mb-6"
         >
-          <option value="ALL">Alle Status</option>
-          {Object.entries(ORDER_STATUSES).map(([key, value]) => (
-            <option key={key} value={key}>{value.label}</option>
-          ))}
-        </select>
-      </div>
-      
-      <div className={styles.filterGroup}>
-        <label>Zeitraum</label>
-        <select 
-          value={timeFilter} 
-          onChange={(e) => setTimeFilter(e.target.value)}
-          className={styles.filterSelect}
-        >
-          {Object.entries(TIME_FILTERS).map(([key, value]) => (
-            <option key={key} value={key}>{value}</option>
-          ))}
-        </select>
-      </div>
-      
-      <div className={styles.filterGroup}>
-        <label>Ansicht</label>
-        <div className={styles.viewToggle}>
-          <button 
-            className={viewMode === 'table' ? styles.active : ''}
-            onClick={() => setViewMode('table')}
-          >
-            Tabelle
-          </button>
-          <button 
-            className={viewMode === 'cards' ? styles.active : ''}
-            onClick={() => setViewMode('cards')}
-          >
-            Karten
-          </button>
-        </div>
-      </div>
-    </div>
+          <Suspense fallback={<LoadingSpinner />}>
+            <OrderFilters
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onClear={() => setFilters({
+                status: 'all',
+                type: 'all',
+                priority: 'all',
+                timeRange: 'today',
+                searchTerm: '',
+                assignedTo: 'all'
+              })}
+            />
+          </Suspense>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 
-  const renderTableView = () => (
-    <div className={styles.tableContainer}>
-      <table className={styles.orderTable}>
-        <thead>
-          <tr>
-            <th>
-              <input 
-                type="checkbox" 
-                checked={selectedOrders.length === filteredOrders.length && filteredOrders.length > 0}
-                onChange={handleSelectAll}
-              />
-            </th>
-            <th onClick={() => handleSort('id')}>
-              Bestell-Nr. {sortConfig.key === 'id' && (
-                sortConfig.direction === 'asc' ? <ChevronUp /> : <ChevronDown />
-              )}
-            </th>
-            <th onClick={() => handleSort('createdAt')}>
-              Datum {sortConfig.key === 'createdAt' && (
-                sortConfig.direction === 'asc' ? <ChevronUp /> : <ChevronDown />
-              )}
-            </th>
-            <th>Kunde</th>
-            <th>Artikel</th>
-            <th onClick={() => handleSort('total')}>
-              Betrag {sortConfig.key === 'total' && (
-                sortConfig.direction === 'asc' ? <ChevronUp /> : <ChevronDown />
-              )}
-            </th>
-            <th>Zahlung</th>
-            <th>Status</th>
-            <th>Aktionen</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredOrders.map(order => (
-            <tr key={order.id} className={selectedOrders.includes(order.id) ? styles.selected : ''}>
-              <td>
-                <input 
-                  type="checkbox" 
-                  checked={selectedOrders.includes(order.id)}
-                  onChange={() => handleSelectOrder(order.id)}
-                />
-              </td>
-              <td className={styles.orderId}>#{order.id}</td>
-              <td>{new Date(order.createdAt).toLocaleString('de-CH')}</td>
-              <td>
-                <div className={styles.customerInfo}>
-                  <div>{order.customer.name}</div>
-                  <div className={styles.customerContact}>
-                    <Phone size={12} /> {order.customer.phone}
-                  </div>
-                </div>
-              </td>
-              <td>{order.items.length} Artikel</td>
-              <td className={styles.amount}>CHF {order.total.toFixed(2)}</td>
-              <td>
-                <div className={styles.paymentMethod}>
-                  {React.createElement(PAYMENT_METHODS[order.paymentMethod].icon, { size: 16 })}
-                  {PAYMENT_METHODS[order.paymentMethod].label}
-                </div>
-              </td>
-              <td>
-                <span 
-                  className={styles.statusBadge}
-                  style={{ backgroundColor: ORDER_STATUSES[order.status].color }}
-                >
-                  {React.createElement(ORDER_STATUSES[order.status].icon, { size: 14 })}
-                  {ORDER_STATUSES[order.status].label}
-                </span>
-              </td>
-              <td>
-                <div className={styles.actions}>
-                  <button 
-                    className={styles.actionButton}
-                    onClick={() => {
-                      setSelectedOrder(order);
-                      setShowOrderModal(true);
-                    }}
-                    title="Details anzeigen"
-                  >
-                    <Eye size={16} />
-                  </button>
-                  <button 
-                    className={styles.actionButton}
-                    onClick={() => handlePrintOrder(order)}
-                    title="Drucken"
-                  >
-                    <Printer size={16} />
-                  </button>
-                  <div className={styles.dropdown}>
-                    <button className={styles.actionButton}>
-                      <MoreVertical size={16} />
-                    </button>
-                    <div className={styles.dropdownContent}>
-                      <button onClick={() => handleStatusChange(order.id, 'CONFIRMED')}>
-                        <CheckCircle size={16} /> Bestätigen
-                      </button>
-                      <button onClick={() => handleStatusChange(order.id, 'READY')}>
-                        <Package size={16} /> Als fertig markieren
-                      </button>
-                      <button onClick={() => handleStatusChange(order.id, 'CANCELLED')}>
-                        <XCircle size={16} /> Stornieren
-                      </button>
-                      <button onClick={() => handleRefund(order.id)}>
-                        <RotateCcw size={16} /> Erstatten
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+  const renderBulkActions = () => (
+    <AnimatePresence>
+      {canBulkUpdate && (
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 50 }}
+          className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50"
+        >
+          <Suspense fallback={null}>
+            <BulkActions
+              selectedCount={selectedOrders.size}
+              onStatusUpdate={handleBulkStatusUpdate}
+              onAssignment={handleBulkAssignment}
+              onPrint={handleBulkPrint}
+              onCancel={() => setSelectedOrders(new Set())}
+            />
+          </Suspense>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 
-  const renderCardView = () => (
-    <div className={styles.cardGrid}>
+  const renderOrderGrid = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {filteredOrders.map(order => (
-        <div key={order.id} className={styles.orderCard}>
-          <div className={styles.cardHeader}>
-            <div>
-              <h3>#{order.id}</h3>
-              <p>{new Date(order.createdAt).toLocaleString('de-CH')}</p>
-            </div>
-            <span 
-              className={styles.statusBadge}
-              style={{ backgroundColor: ORDER_STATUSES[order.status].color }}
-            >
-              {React.createElement(ORDER_STATUSES[order.status].icon, { size: 14 })}
-              {ORDER_STATUSES[order.status].label}
-            </span>
-          </div>
-          
-          <div className={styles.cardBody}>
-            <div className={styles.customerSection}>
-              <h4>{order.customer.name}</h4>
-              <p><Phone size={14} /> {order.customer.phone}</p>
-              <p><Mail size={14} /> {order.customer.email}</p>
-              {order.deliveryAddress && (
-                <p><MapPin size={14} /> {order.deliveryAddress}</p>
-              )}
-            </div>
-            
-            <div className={styles.orderDetails}>
-              <div className={styles.itemsList}>
-                {order.items.slice(0, 3).map((item, index) => (
-                  <div key={index} className={styles.itemPreview}>
-                    {item.quantity}x {item.name}
-                  </div>
-                ))}
-                {order.items.length > 3 && (
-                  <div className={styles.moreItems}>
-                    +{order.items.length - 3} weitere Artikel
-                  </div>
-                )}
-              </div>
-              
-              <div className={styles.cardFooter}>
-                <div className={styles.paymentInfo}>
-                  {React.createElement(PAYMENT_METHODS[order.paymentMethod].icon, { size: 16 })}
-                  {PAYMENT_METHODS[order.paymentMethod].label}
-                </div>
-                <div className={styles.totalAmount}>
-                  CHF {order.total.toFixed(2)}
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className={styles.cardActions}>
-            <button onClick={() => {
-              setSelectedOrder(order);
-              setShowOrderModal(true);
-            }}>
-              <Eye size={16} /> Details
-            </button>
-            <button onClick={() => handlePrintOrder(order)}>
-              <Printer size={16} /> Drucken
-            </button>
-            <select 
-              value={order.status} 
-              onChange={(e) => handleStatusChange(order.id, e.target.value)}
-              className={styles.statusSelect}
-            >
-              {Object.entries(ORDER_STATUSES).map(([key, value]) => (
-                <option key={key} value={key}>{value.label}</option>
-              ))}
-            </select>
-          </div>
-        </div>
+        <Suspense key={order.id} fallback={<div className="h-64 bg-gray-100 rounded-lg animate-pulse"></div>}>
+          <OrderCard
+            order={order}
+            selected={selectedOrders.has(order.id)}
+            onSelect={() => {
+              const newSelected = new Set(selectedOrders);
+              if (newSelected.has(order.id)) {
+                newSelected.delete(order.id);
+              } else {
+                newSelected.add(order.id);
+              }
+              setSelectedOrders(newSelected);
+            }}
+            onClick={() => setSelectedOrder(order)}
+            onStatusChange={handleOrderStatusChange}
+            onAssign={handleOrderAssignment}
+            onPrint={handlePrintOrder}
+            onCancel={handleOrderCancel}
+          />
+        </Suspense>
       ))}
     </div>
   );
 
-  const renderOrderModal = () => {
-    if (!selectedOrder) return null;
+  const renderKitchenDisplay = () => (
+    <Suspense fallback={<LoadingSpinner />}>
+      <KitchenDisplay
+        orders={filteredOrders.filter(order => 
+          [ORDER_STATUSES.CONFIRMED, ORDER_STATUSES.PREPARING].includes(order.status)
+        )}
+        onStatusChange={handleOrderStatusChange}
+        onEstimateTime={(orderId, time) => {
+          setOrders(prev => prev.map(order => 
+            order.id === orderId 
+              ? { ...order, estimatedReadyTime: time }
+              : order
+          ));
+        }}
+      />
+    </Suspense>
+  );
 
-    return (
-      <div className={styles.modal} onClick={() => setShowOrderModal(false)}>
-        <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-          <div className={styles.modalHeader}>
-            <h2>Bestellung #{selectedOrder.id}</h2>
-            <button onClick={() => setShowOrderModal(false)}>×</button>
-          </div>
-          
-          <div className={styles.modalBody}>
-            <div className={styles.section}>
-              <h3>Kundeninformationen</h3>
-              <div className={styles.infoGrid}>
-                <div>
-                  <label>Name:</label>
-                  <p>{selectedOrder.customer.name}</p>
-                </div>
-                <div>
-                  <label>Telefon:</label>
-                  <p>{selectedOrder.customer.phone}</p>
-                </div>
-                <div>
-                  <label>E-Mail:</label>
-                  <p>{selectedOrder.customer.email}</p>
-                </div>
-                {selectedOrder.deliveryAddress && (
-                  <div>
-                    <label>Lieferadresse:</label>
-                    <p>{selectedOrder.deliveryAddress}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <div className={styles.section}>
-              <h3>Bestelldetails</h3>
-              <table className={styles.itemsTable}>
-                <thead>
-                  <tr>
-                    <th>Artikel</th>
-                    <th>Menge</th>
-                    <th>Preis</th>
-                    <th>Gesamt</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedOrder.items.map((item, index) => (
-                    <tr key={index}>
-                      <td>
-                        {item.name}
-                        {item.modifiers && item.modifiers.length > 0 && (
-                          <div className={styles.modifiers}>
-                            {item.modifiers.join(', ')}
-                          </div>
-                        )}
-                      </td>
-                      <td>{item.quantity}</td>
-                      <td>CHF {item.price.toFixed(2)}</td>
-                      <td>CHF {(item.quantity * item.price).toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <td colSpan="3">Zwischensumme</td>
-                    <td>CHF {selectedOrder.subtotal.toFixed(2)}</td>
-                  </tr>
-                  {selectedOrder.discount > 0 && (
-                    <tr>
-                      <td colSpan="3">Rabatt</td>
-                      <td>-CHF {selectedOrder.discount.toFixed(2)}</td>
-                    </tr>
-                  )}
-                  <tr>
-                    <td colSpan="3">MwSt (7.7%)</td>
-                    <td>CHF {selectedOrder.tax.toFixed(2)}</td>
-                  </tr>
-                  <tr className={styles.totalRow}>
-                    <td colSpan="3">Gesamtbetrag</td>
-                    <td>CHF {selectedOrder.total.toFixed(2)}</td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-            
-            <div className={styles.section}>
-              <h3>Bestellverlauf</h3>
-              <div className={styles.timeline}>
-                <div className={styles.timelineItem}>
-                  <div className={styles.timelineDot} />
-                  <div className={styles.timelineContent}>
-                    <p>Bestellung eingegangen</p>
-                    <span>{new Date(selectedOrder.createdAt).toLocaleString('de-CH')}</span>
-                  </div>
-                </div>
-                {selectedOrder.statusHistory && selectedOrder.statusHistory.map((history, index) => (
-                  <div key={index} className={styles.timelineItem}>
-                    <div className={styles.timelineDot} />
-                    <div className={styles.timelineContent}>
-                      <p>{history.status}</p>
-                      <span>{new Date(history.timestamp).toLocaleString('de-CH')}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            {selectedOrder.notes && (
-              <div className={styles.section}>
-                <h3>Notizen</h3>
-                <p className={styles.notes}>{selectedOrder.notes}</p>
-              </div>
-            )}
-          </div>
-          
-          <div className={styles.modalFooter}>
-            <button 
-              className={styles.printButton}
-              onClick={() => handlePrintOrder(selectedOrder)}
-            >
-              <Printer size={16} /> Drucken
-            </button>
-            <button 
-              className={styles.refundButton}
-              onClick={() => handleRefund(selectedOrder.id)}
-            >
-              <RotateCcw size={16} /> Erstatten
-            </button>
-            <button 
-              className={styles.primaryButton}
-              onClick={() => setShowOrderModal(false)}
-            >
-              Schließen
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const renderDeliveryTracker = () => (
+    <Suspense fallback={<LoadingSpinner />}>
+      <DeliveryTracker
+        orders={filteredOrders.filter(order => 
+          [ORDER_STATUSES.READY, ORDER_STATUSES.OUT_FOR_DELIVERY].includes(order.status)
+        )}
+        onStatusChange={handleOrderStatusChange}
+        onLocationUpdate={(orderId, location) => {
+          setOrders(prev => prev.map(order => 
+            order.id === orderId 
+              ? { ...order, deliveryLocation: location }
+              : order
+          ));
+        }}
+      />
+    </Suspense>
+  );
 
-  const renderBulkActions = () => {
-    if (selectedOrders.length === 0) return null;
+  const renderContent = () => {
+    if (isLoading) {
+      return <LoadingSpinner />;
+    }
 
-    return (
-      <div className={styles.bulkActions}>
-        <span>{selectedOrders.length} Bestellungen ausgewählt</span>
-        <div className={styles.bulkButtons}>
-          <button onClick={() => handleBulkStatusChange('CONFIRMED')}>
-            <CheckCircle size={16} /> Bestätigen
-          </button>
-          <button onClick={() => handleBulkStatusChange('CANCELLED')}>
-            <XCircle size={16} /> Stornieren
-          </button>
-          <button onClick={() => {
-            // Export selected orders
-            const selectedOrdersData = orders.filter(o => selectedOrders.includes(o.id));
-            const csv = convertToCSV(selectedOrdersData);
-            downloadCSV(csv, 'selected_orders.csv');
-          }}>
-            <Download size={16} /> Exportieren
+    if (error) {
+      return (
+        <div className="text-center py-12">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Orders</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+          >
+            Retry
           </button>
         </div>
-        <button 
-          className={styles.clearSelection}
-          onClick={() => setSelectedOrders([])}
-        >
-          Auswahl aufheben
-        </button>
-      </div>
-    );
+      );
+    }
+
+    if (filteredOrders.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No Orders Found</h3>
+          <p className="text-gray-600">
+            {filters.searchTerm || filters.status !== 'all' 
+              ? 'Try adjusting your filters to see more orders.'
+              : 'Orders will appear here when customers place them.'
+            }
+          </p>
+        </div>
+      );
+    }
+
+    switch (viewMode) {
+      case VIEW_MODES.KITCHEN:
+        return renderKitchenDisplay();
+      case VIEW_MODES.DELIVERY:
+        return renderDeliveryTracker();
+      case VIEW_MODES.LIST:
+        // TODO: Implement list view
+        return renderOrderGrid();
+      default:
+        return renderOrderGrid();
+    }
   };
 
   // ============================================================================
-  // MAIN RENDER
+  // RENDER
   // ============================================================================
-  if (loading) {
-    return (
-      <div className={styles.loading}>
-        <RefreshCw className={styles.spinner} />
-        <p>Lade Bestellungen...</p>
-      </div>
-    );
-  }
-
   return (
-    <div className={styles.orderManagement}>
-      <div className={styles.header}>
-        <div className={styles.titleSection}>
-          <h1>Bestellverwaltung</h1>
-          <button className={styles.refreshButton} onClick={loadOrders}>
-            <RefreshCw size={16} /> Aktualisieren
-          </button>
-        </div>
-        
-        <div className={styles.headerActions}>
-          <div className={styles.searchBar}>
-            <Search size={20} />
-            <input
-              type="text"
-              placeholder="Suche nach Bestell-Nr., Kunde, E-Mail..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          
-          <button 
-            className={styles.filterButton}
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <Filter size={16} /> Filter {showFilters && '✕'}
-          </button>
-          
-          <button 
-            className={styles.exportButton}
-            onClick={handleExport}
-          >
-            <Download size={16} /> Export
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
+      {/* Header */}
+      {renderHeader()}
 
-      {renderStatistics()}
+      {/* Stats */}
+      {renderStats()}
+
+      {/* Filters */}
       {renderFilters()}
+
+      {/* Content */}
+      {renderContent()}
+
+      {/* Bulk Actions */}
       {renderBulkActions()}
-      
-      <div className={styles.content}>
-        {viewMode === 'table' ? renderTableView() : renderCardView()}
-      </div>
-      
-      {showOrderModal && renderOrderModal()}
+
+      {/* Modals */}
+      {selectedOrder && (
+        <Suspense fallback={null}>
+          <OrderDetailsModal
+            order={selectedOrder}
+            isOpen={!!selectedOrder}
+            onClose={() => setSelectedOrder(null)}
+            onStatusChange={handleOrderStatusChange}
+            onAssign={handleOrderAssignment}
+            onPrint={handlePrintOrder}
+            onCancel={handleOrderCancel}
+          />
+        </Suspense>
+      )}
+
+      {showAnalytics && (
+        <Suspense fallback={null}>
+          <OrderAnalytics
+            isOpen={showAnalytics}
+            orders={orders}
+            stats={stats}
+            onClose={() => setShowAnalytics(false)}
+          />
+        </Suspense>
+      )}
+
+      {showExporter && (
+        <Suspense fallback={null}>
+          <OrderExporter
+            isOpen={showExporter}
+            orders={filteredOrders}
+            filters={filters}
+            onClose={() => setShowExporter(false)}
+          />
+        </Suspense>
+      )}
+
+      {showEstimationTool && (
+        <Suspense fallback={null}>
+          <EstimationTool
+            isOpen={showEstimationTool}
+            orders={filteredOrders}
+            onClose={() => setShowEstimationTool(false)}
+            onEstimate={(orderId, time) => {
+              handleOrderStatusChange(orderId, ORDER_STATUSES.PREPARING, {
+                estimatedTime: time
+              });
+            }}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };
 
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
-const convertToCSV = (data) => {
-  const headers = ['Bestell-Nr', 'Datum', 'Kunde', 'E-Mail', 'Telefon', 'Artikel', 'Betrag', 'Status'];
-  const rows = data.map(order => [
-    order.id,
-    new Date(order.createdAt).toLocaleString('de-CH'),
-    order.customer.name,
-    order.customer.email,
-    order.customer.phone,
-    order.items.length,
-    order.total.toFixed(2),
-    ORDER_STATUSES[order.status].label
-  ]);
-  
-  return [headers, ...rows]
-    .map(row => row.map(cell => `"${cell}"`).join(','))
-    .join('\n');
-};
-
-const downloadCSV = (csv, filename) => {
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = filename;
-  link.click();
-};
-
-// ============================================================================
-// EXPORT
-// ============================================================================
 export default OrderManagement;

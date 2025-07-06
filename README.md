@@ -1,2547 +1,3534 @@
-﻿# EATECH V3.0 - VOLLSTÄNDIGE ENTWICKLUNGSDOKUMENTATION
+﻿## 🏗️ TECHNISCHE ARCHITEKTUR
 
-## 📋 VOLLSTÄNDIGES INHALTSVERZEICHNIS
-
-1. [Wichtige Entwicklungs-Richtlinien](#wichtige-entwicklungs-richtlinien)
-2. [Projektstruktur](#projektstruktur)
-3. [Vollständige Datenstruktur](#vollständige-datenstruktur)
-4. [Sicherheits-Features](#sicherheits-features)
-5. [Features Übersicht mit Fortschritt](#features-übersicht-mit-fortschritt)
-   - 5.1 [Customer Features](#customer-features)
-   - 5.2 [Admin Features](#admin-features)
-   - 5.3 [Premium Features](#premium-features)
-   - 5.4 [Superadmin Features](#superadmin-features)
-6. [Detaillierte Feature-Beschreibungen](#detaillierte-feature-beschreibungen)
-   - 6.1 [Customer Features Details](#customer-features-details)
-   - 6.2 [Admin Features Details](#admin-features-details)
-   - 6.3 [Premium Features Details](#premium-features-details)
-   - 6.4 [Superadmin Features Details](#superadmin-features-details)
-7. [Technische Implementation Details](#technische-implementation-details)
-   - 7.1 [Offline-Funktionalität](#offline-funktionalität)
-   - 7.2 [Real-Time Synchronisation](#real-time-synchronisation)
-   - 7.3 [Performance Optimierungen](#performance-optimierungen)
-   - 7.4 [Database Optimierungen](#database-optimierungen)
-   - 7.5 [Security Implementation](#security-implementation)
-8. [Testing-Strategie](#testing-strategie)
-   - 8.1 [Unit Tests](#unit-tests)
-   - 8.2 [Integration Tests](#integration-tests)
-   - 8.3 [E2E Tests](#e2e-tests)
-   - 8.4 [Performance Tests](#performance-tests)
-   - 8.5 [Security Tests](#security-tests)
-9. [Mobile App Specifics](#mobile-app-specifics)
-   - 9.1 [React Native Implementation](#react-native-implementation)
-   - 9.2 [iOS Specifics](#ios-specifics)
-   - 9.3 [Android Specifics](#android-specifics)
-10. [Internationalisierung](#internationalisierung)
-11. [Deployment & DevOps](#deployment-devops)
-    - 11.1 [CI/CD Pipeline](#cicd-pipeline)
-    - 11.2 [Monitoring & Logging](#monitoring-logging)
-    - 11.3 [Backup & Disaster Recovery](#backup-disaster-recovery)
-12. [Best Practices & Guidelines](#best-practices-guidelines)
-    - 12.1 [Code Style Guide](#code-style-guide)
-    - 12.2 [Accessibility Guidelines](#accessibility-guidelines)
-    - 12.3 [Performance Checklist](#performance-checklist)
-13. [API Dokumentation](#api-dokumentation)
-14. [Implementierungs-Timeline](#implementierungs-timeline)
-15. [Gesamtfortschritt](#gesamtfortschritt)
-16. [Kritische Erfolgsfaktoren](#kritische-erfolgsfaktoren)
-17. [Risiken & Mitigationen](#risiken-mitigationen)
-18. [Unique Selling Points](#unique-selling-points)
-19. [Support & Ressourcen](#support-ressourcen)
-20. [Nächste Schritte](#nächste-schritte)
-
----
-
-## 🚨 WICHTIGE ENTWICKLUNGS-RICHTLINIEN
-
-### MEINE ARBEITSWEISE:
-
-1. **VOLLSTÄNDIGE FILES**
-   - Ich erstelle IMMER komplette Dateien
-   - Keine Auslassungen mit "..." oder "// rest of code"
-   - Alle Imports, Funktionen und Styles vollständig
-
-2. **DATEIPFADE ZUERST**
-   - Bevor ich eine Datei erstelle, nenne ich den exakten Pfad
-   - Beispiel: `/apps/admin/src/pages/Products/Products.jsx`
-   - Du bestätigst oder korrigierst den Pfad
-
-3. **DETAILFRAGEN VOR IMPLEMENTIERUNG**
-   - Ich frage dich nach spezifischen Details bevor ich eine Funktion erstelle
-   - Maximal 3 relevante Fragen
-   - Erst nach deiner Antwort implementiere ich
-
-4. **PROJEKT-WISSEN NUTZEN**
-   - Ich durchsuche immer zuerst das Projektwissen (GitHub)
-   - Nutze bestehende Strukturen und Patterns
-   - Halte mich an die vorhandene Architektur
-
----
-
-## 🏗️ PROJEKTSTRUKTUR
-
-### Komplette Verzeichnisstruktur
-
+### Monorepo Struktur (Vollständig)
 ```
-/eatech-v3
-  /apps
-    /web (Customer Web App)
-      /public
-        /css
-          - style.css
-          - themes.css
-        /js
-          - app.js
-          - order-management.js
-          - payment-manager.js
-          - voice-commands.js
-          - admin-dashboard-ui.js
-          - analytics-engine.js
-          - notification-manager.js
-          - firebase-config.js
-        /images
-          - logo-192.png
-          - logo-512.png
-          - placeholder.png
-          /icons
-        /sounds
-          - notification.mp3
-          - order-ready.mp3
-        /locales
-          /de
-            - common.json
-            - customer.json
-          /en
-            - common.json
-            - customer.json
-        - index.html
-        - manifest.json
-        - service-worker.js
-        - offline.html
-        - robots.txt
-        - sitemap.xml
-      - package.json
-      - .env.example
-    
-    /admin (Admin Dashboard)
-      /src
-        /components
-          /common
-            /Button
-              - Button.jsx
-              - Button.styles.js
-              - Button.test.jsx
-              - index.js
-            /Card
-              - Card.jsx
-              - Card.styles.js
-              - index.js
-            /Modal
-              - Modal.jsx
-              - Modal.styles.js
-              - useModal.js
-              - index.js
-            /Form
-              - Input.jsx
-              - Select.jsx
-              - Checkbox.jsx
-              - Form.styles.js
-              - index.js
-            /Table
-              - Table.jsx
-              - TableRow.jsx
-              - TablePagination.jsx
-              - Table.styles.js
-              - index.js
-            /Loading
-              - Spinner.jsx
-              - Skeleton.jsx
-              - LoadingScreen.jsx
-              - Loading.styles.js
-              - index.js
-          /Dashboard
-            - Dashboard.jsx
-            - AdminDashboard.jsx
-            - Dashboard.old.jsx
-          /layout
-            - Sidebar.jsx
-            - Sidebar.css
-            - Header.jsx
-            - Footer.jsx
-            - AdminLayout.jsx
-        /pages
-          /Dashboard
-            - Dashboard.jsx
-            - Dashboard.old.jsx
-          /Products
-            - Products.jsx
-            - Products.module.css
-            - ProductEdit.jsx
-            - ProductList.jsx
-          /Orders
-            - OrderList.jsx
-            - OrderDetail.jsx
-          /Customers
-            - CustomerList.jsx
-            - CustomerDetail.jsx
-          /Kitchen
-            - KitchenDisplay.jsx
-            - KitchenDisplay.css
-          /Analytics
-            - Analytics.jsx
-            - SalesAnalytics.jsx
-            - CustomerAnalytics.jsx
-            - ProductAnalytics.jsx
-          /billing
-            - BillingDashboard.jsx
-            - Invoices.jsx
-            - Subscriptions.jsx
-          /loyalty
-            - LoyaltyProgram.jsx
-            - LoyaltyMembers.jsx
-            - LoyaltyRewards.jsx
-          /discounts
-            - DiscountManager.jsx
-            - DiscountEdit.jsx
-          /Settings
-            - Settings.jsx
-            - GeneralSettings.jsx
-            - PaymentSettings.jsx
-            - DeliverySettings.jsx
-            - NotificationSettings.jsx
-          /reports
-            - ReportGenerator.jsx
-            - ReportHistory.jsx
-            - ScheduledReports.jsx
-          /notifications
-            - NotificationCenter.jsx
-            - NotificationTemplates.jsx
-          /master
-            - GlobalSettings.jsx
-            - GlobalSettings.module.css
-            - SystemMetrics.jsx
-            - SystemMetrics.module.css
-          /auth
-            - Login.jsx
-            - Register.jsx
-            - ForgotPassword.jsx
-          /hooks
-            - useNotifications.js
-        /lib
-          - firebase.js
-          - productService.js
-        /services
-          - firebaseService.js
-          - reportService.js
-        /hooks
-          - useAuth.js
-          - useTenant.js
-          - useNotifications.js
-        /routes
-          - index.jsx
-          - adminRoutes.jsx
-          - ProtectedRoute.jsx
-        /config
-          - firebase.js
-        /utils
-          - fileDownload.js
-        /styles
-          - global.css
-          - variables.css
-        /layouts
-          - AdminLayout.jsx
-      /public
-        - index.html
-        - firebase-messaging-sw.js
-        - robots.txt
-      - package.json
-      - vite.config.js
-      - .env.example
-      - test-firebase.js
-      - test-firebase-simple.html
-    
-    /mobile (Mobile App)
-      /src
-        /screens
-        /components
-        /navigation
-        /services
-          - offlineSyncService.js
-        /contexts
-          - OfflineContext.js
-        /config
-          - constants.js
-      /assets
-        /icons
-        /images
-      - package.json
-      - package-lock.json
-      - app.json
-      - .gitignore
-    
-    /master (Master Control)
-      /src
-        /modules
-          /MasterControl
-            - MasterControl.jsx
-        /pages
-          /FeatureControl
-            - FeatureControl.jsx
-            - FeatureControlWithFirebase.jsx
-            - FeatureControl.module.css
-      - package.json
-    
-    /landing (Landing Page)
-      /.next
-        /server
-          /vendor-chunks
-            - lucide-react@0.344.0_react@19.1.0.js
-        - trace
-      - [weitere Next.js build files]
-  
-  /packages (Shared Packages)
-    /@eatech
-      /core
-        /config
-          - firebase.js
-        /contexts
-          - TenantContext.js
-        - package.json
-      /ui
-        /components
-        /styles
-        - package.json
-      /auth
-        /services
-        /hooks
-        - package.json
-      /feature-flags
-        /services
-          - FirebaseFeatureService.js
-        - package.json
-  
-  /scripts
-    - setup.sh
-    - deploy.sh
-    - test-all.sh
-  
-  /docs
-    - README.md
-    - ARCHITECTURE.md
-  
-  - package.json
-  - lerna.json
-  - .gitignore
-  - .prettierrc
-  - .eslintrc.js
-  - README.md
-  - LICENSE
-  - paste.txt (Diese Dokumentation)
-```
+eatech/
+├── apps/
+│   ├── web/                        # Customer PWA (Next.js 14)
+│   │   ├── src/
+│   │   │   ├── app/               # Next.js 14 App Router
+│   │   │   │   ├── (auth)/        # Auth Routes
+│   │   │   │   ├── (customer)/    # Customer Routes
+│   │   │   │   ├── api/           # API Routes
+│   │   │   │   └── layout.tsx     # Root Layout
+│   │   │   ├── components/        # Shared Components
+│   │   │   ├── features/          # Feature Modules
+│   │   │   │   ├── menu/
+│   │   │   │   ├── cart/
+│   │   │   │   ├── checkout/
+│   │   │   │   └── voice/         # [NEU] Voice Commerce
+│   │   │   ├── hooks/             # Custom Hooks
+│   │   │   ├── lib/               # Libraries
+│   │   │   ├── services/          # API Services
+│   │   │   └── styles/            # Global Styles
+│   │   ├── public/
+│   │   │   ├── icons/             # PWA Icons
+│   │   │   ├── manifest.json      # PWA Manifest
+│   │   │   └── service-worker.js  # [NEU] Service Worker
+│   │   └── next.config.js
+│   │
+│   ├── admin/                      # Foodtruck Admin Dashboard
+│   │   ├── src/
+│   │   │   ├── pages/
+│   │   │   │   ├── Dashboard/
+│   │   │   │   ├── Products/
+│   │   │   │   ├── OrderManagement/
+│   │   │   │   ├── Analytics/
+│   │   │   │   ├── Events/        # [UPDATE NEEDED]
+│   │   │   │   ├── Settings/
+│   │   │   │   ├── Staff/
+│   │   │   │   ├── Reviews/
+│   │   │   │   ├── Promotions/
+│   │   │   │   └── notifications/
+│   │   │   ├── components/
+│   │   │   │   ├── Layout/
+│   │   │   │   ├── Products/
+│   │   │   │   └── Orders/
+│   │   │   ├── hooks/
+│   │   │   ├── services/
+│   │   │   └── utils/
+│   │   └── package.json
+│   │
+│   ├── master/                     # Master Control System
+│   │   ├── src/
+│   │   │   ├── pages/
+│   │   │   │   ├── Dashboard.jsx
+│   │   │   │   ├── FeatureControl/  # [INCOMPLETE]
+│   │   │   │   ├── TenantManagement/
+│   │   │   │   ├── SystemAnalytics/
+│   │   │   │   ├── Monitoring/      # [NEU]
+│   │   │   │   └── AITraining/      # [NEU]
+│   │   │   ├── components/
+│   │   │   │   ├── Dashboard/
+│   │   │   │   ├── SwitzerlandMap/
+│   │   │   │   └── SystemHealth# 🍴 EATECH V3.0 - ULTIMATE TECHNICAL DOCUMENTATION
+
+> **Das revolutionäre Multi-Tenant Foodtruck Bestellsystem für die Schweiz**  
+> Version: 3.0.0 | Stand: Januar 2025 | Fortschritt: 85% | Launch: 1. August 2025
 
 ---
 
-## 🗄️ VOLLSTÄNDIGE DATENSTRUKTUR
+## 📑 INHALTSVERZEICHNIS
 
-### Firebase Realtime Database - Komplettes Schema
+1. [Projekt-Übersicht](#projekt-übersicht)
+2. [Technische Architektur](#technische-architektur)
+3. [Firebase Datenstruktur](#firebase-datenstruktur)
+4. [Feature-Liste (200+ Features)](#feature-liste)
+5. [Implementierungsstatus](#implementierungsstatus)
+6. [API Dokumentation](#api-dokumentation)
+7. [PWA Implementation](#pwa-implementation)
+8. [Security & Compliance](#security-compliance)
+9. [Performance Optimierung](#performance-optimierung)
+10. [Development Guidelines](#development-guidelines)
+11. [Testing Strategy](#testing-strategy)
+12. [Deployment Guide](#deployment-guide)
+13. [Monitoring & Analytics](#monitoring-analytics)
+14. [Support & Maintenance](#support-maintenance)
 
+---
+
+## 📊 PROJEKT-ÜBERSICHT
+
+### Vision & Mission
+EATECH revolutioniert die Schweizer Foodtruck-Branche durch eine All-in-One PWA-Lösung. Keine Apps, keine Downloads - nur pure Effizienz.
+
+### Key Metrics
+- **Ziel**: 800+ Foodtrucks bis Ende 2025
+- **Launch**: 1. August 2025 (Nationalfeiertag)
+- **Tech Stack**: Next.js, React, Firebase, PWA
+- **Architektur**: Multi-Tenant SaaS
+- **Pricing**: 49 CHF/Monat
+- **Support**: benedikt@thomma.ch + Telefon
+
+### Unique Selling Points
+1. **100% PWA** - Keine App Store Abhängigkeit
+2. **Offline-First** - Funktioniert immer
+3. **Multi-Language** - DE/FR/IT/EN + Schweizerdeutsch
+4. **KI-Powered** - Intelligente Automatisierung
+5. **Swiss Made** - DSGVO/DSG konform
+
+---
+
+## 🏗️ TECHNISCHE ARCHITEKTUR
+
+### Monorepo Struktur (Vollständig mit allen Files)
+```
+eatech/
+├── apps/
+│   ├── web/                              # Customer PWA (Next.js 14)
+│   │   ├── src/
+│   │   │   ├── app/
+│   │   │   │   ├── (auth)/
+│   │   │   │   │   ├── login/
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   ├── register/
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   └── layout.tsx
+│   │   │   │   ├── (customer)/
+│   │   │   │   │   ├── menu/
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   ├── cart/
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   ├── checkout/
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   ├── orders/
+│   │   │   │   │   │   ├── page.tsx
+│   │   │   │   │   │   └── [orderNumber]/
+│   │   │   │   │   │       └── page.tsx
+│   │   │   │   │   └── layout.tsx
+│   │   │   │   ├── api/
+│   │   │   │   │   ├── auth/
+│   │   │   │   │   │   ├── login/route.ts
+│   │   │   │   │   │   ├── logout/route.ts
+│   │   │   │   │   │   └── verify/route.ts
+│   │   │   │   │   ├── orders/
+│   │   │   │   │   │   ├── route.ts
+│   │   │   │   │   │   └── [id]/route.ts
+│   │   │   │   │   ├── products/
+│   │   │   │   │   │   └── route.ts
+│   │   │   │   │   ├── voice/              # [NEU]
+│   │   │   │   │   │   └── route.ts
+│   │   │   │   │   └── webhooks/
+│   │   │   │   │       ├── stripe/route.ts
+│   │   │   │   │       └── twilio/route.ts
+│   │   │   │   ├── layout.tsx
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── globals.css
+│   │   │   │   ├── error.tsx
+│   │   │   │   └── not-found.tsx
+│   │   │   ├── components/
+│   │   │   │   ├── common/
+│   │   │   │   │   ├── Button/
+│   │   │   │   │   │   ├── Button.tsx
+│   │   │   │   │   │   ├── Button.module.css
+│   │   │   │   │   │   └── index.ts
+│   │   │   │   │   ├── Card/
+│   │   │   │   │   │   ├── Card.tsx
+│   │   │   │   │   │   ├── Card.module.css
+│   │   │   │   │   │   └── index.ts
+│   │   │   │   │   ├── Input/
+│   │   │   │   │   │   ├── Input.tsx
+│   │   │   │   │   │   ├── Input.module.css
+│   │   │   │   │   │   └── index.ts
+│   │   │   │   │   └── Modal/
+│   │   │   │   │       ├── Modal.tsx
+│   │   │   │   │       ├── Modal.module.css
+│   │   │   │   │       └── index.ts
+│   │   │   │   ├── layouts/
+│   │   │   │   │   ├── Header/
+│   │   │   │   │   │   ├── Header.tsx
+│   │   │   │   │   │   └── Header.module.css
+│   │   │   │   │   ├── Footer/
+│   │   │   │   │   │   ├── Footer.tsx
+│   │   │   │   │   │   └── Footer.module.css
+│   │   │   │   │   └── Navigation/
+│   │   │   │   │       ├── Navigation.tsx
+│   │   │   │   │       └── Navigation.module.css
+│   │   │   │   └── features/
+│   │   │   │       ├── ProductCard/
+│   │   │   │       │   ├── ProductCard.tsx
+│   │   │   │       │   └── ProductCard.module.css
+│   │   │   │       ├── CartItem/
+│   │   │   │       │   ├── CartItem.tsx
+│   │   │   │       │   └── CartItem.module.css
+│   │   │   │       └── OrderStatus/
+│   │   │   │           ├── OrderStatus.tsx
+│   │   │   │           └── OrderStatus.module.css
+│   │   │   ├── features/
+│   │   │   │   ├── menu/
+│   │   │   │   │   ├── MenuList.tsx
+│   │   │   │   │   ├── MenuFilter.tsx
+│   │   │   │   │   ├── MenuSearch.tsx
+│   │   │   │   │   └── useMenu.ts
+│   │   │   │   ├── cart/
+│   │   │   │   │   ├── CartProvider.tsx
+│   │   │   │   │   ├── CartSummary.tsx
+│   │   │   │   │   ├── useCart.ts
+│   │   │   │   │   └── cartUtils.ts
+│   │   │   │   ├── checkout/
+│   │   │   │   │   ├── CheckoutForm.tsx
+│   │   │   │   │   ├── PaymentMethods.tsx
+│   │   │   │   │   ├── OrderSummary.tsx
+│   │   │   │   │   └── useCheckout.ts
+│   │   │   │   └── voice/                  # [NEU]
+│   │   │   │       ├── VoiceButton.tsx
+│   │   │   │       ├── VoiceModal.tsx
+│   │   │   │       ├── useVoiceRecognition.ts
+│   │   │   │       └── voiceCommands.ts
+│   │   │   ├── hooks/
+│   │   │   │   ├── useAuth.ts
+│   │   │   │   ├── useFirebase.ts
+│   │   │   │   ├── useTenant.ts
+│   │   │   │   ├── useAnalytics.ts
+│   │   │   │   ├── useWebSocket.ts
+│   │   │   │   └── useServiceWorker.ts    # [NEU]
+│   │   │   ├── lib/
+│   │   │   │   ├── firebase.ts
+│   │   │   │   ├── stripe.ts
+│   │   │   │   ├── twilio.ts
+│   │   │   │   └── analytics.ts
+│   │   │   ├── services/
+│   │   │   │   ├── api/
+│   │   │   │   │   ├── auth.service.ts
+│   │   │   │   │   ├── orders.service.ts
+│   │   │   │   │   ├── products.service.ts
+│   │   │   │   │   └── customers.service.ts
+│   │   │   │   ├── firebase/
+│   │   │   │   │   ├── auth.firebase.ts
+│   │   │   │   │   ├── firestore.firebase.ts
+│   │   │   │   │   └── storage.firebase.ts
+│   │   │   │   └── ai/                     # [NEU]
+│   │   │   │       ├── openai.service.ts
+│   │   │   │       └── predictions.service.ts
+│   │   │   ├── store/
+│   │   │   │   ├── authStore.ts
+│   │   │   │   ├── cartStore.ts
+│   │   │   │   └── uiStore.ts
+│   │   │   ├── styles/
+│   │   │   │   ├── globals.css
+│   │   │   │   ├── variables.css
+│   │   │   │   └── fonts.css
+│   │   │   ├── types/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── order.types.ts
+│   │   │   │   ├── product.types.ts
+│   │   │   │   └── tenant.types.ts
+│   │   │   └── utils/
+│   │   │       ├── constants.ts
+│   │   │       ├── helpers.ts
+│   │   │       ├── validators.ts
+│   │   │       └── formatters.ts
+│   │   ├── public/
+│   │   │   ├── icons/
+│   │   │   │   ├── icon-72x72.png
+│   │   │   │   ├── icon-96x96.png
+│   │   │   │   ├── icon-128x128.png
+│   │   │   │   ├── icon-144x144.png
+│   │   │   │   ├── icon-152x152.png
+│   │   │   │   ├── icon-192x192.png
+│   │   │   │   ├── icon-384x384.png
+│   │   │   │   └── icon-512x512.png
+│   │   │   ├── images/
+│   │   │   │   ├── logo.svg
+│   │   │   │   ├── hero-mobile.jpg
+│   │   │   │   └── hero-desktop.jpg
+│   │   │   ├── manifest.json
+│   │   │   ├── service-worker.js          # [NEU]
+│   │   │   ├── offline.html               # [NEU]
+│   │   │   ├── robots.txt
+│   │   │   └── sitemap.xml
+│   │   ├── .env.local
+│   │   ├── .env.production
+│   │   ├── next.config.js
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   └── README.md
+│   │
+│   ├── admin/                            # Foodtruck Admin Dashboard
+│   │   ├── src/
+│   │   │   ├── pages/
+│   │   │   │   ├── Dashboard/
+│   │   │   │   │   ├── Dashboard.jsx
+│   │   │   │   │   ├── Dashboard.module.css
+│   │   │   │   │   └── components/
+│   │   │   │   │       ├── StatsCard.jsx
+│   │   │   │   │       ├── RevenueChart.jsx
+│   │   │   │   │       └── OrdersTable.jsx
+│   │   │   │   ├── Products/
+│   │   │   │   │   ├── Products.jsx        # [UPDATE NEEDED]
+│   │   │   │   │   ├── ProductDetail.jsx
+│   │   │   │   │   ├── ProductForm.jsx
+│   │   │   │   │   └── Products.module.css
+│   │   │   │   ├── OrderManagement/
+│   │   │   │   │   ├── OrderManagement.jsx # [UPDATE NEEDED]
+│   │   │   │   │   ├── OrderDetail.jsx
+│   │   │   │   │   ├── KitchenView.jsx
+│   │   │   │   │   └── OrderManagement.module.css
+│   │   │   │   ├── Analytics/
+│   │   │   │   │   ├── Analytics.jsx       # [UPDATE NEEDED]
+│   │   │   │   │   ├── Reports.jsx
+│   │   │   │   │   ├── Insights.jsx
+│   │   │   │   │   └── Analytics.module.css
+│   │   │   │   ├── Events/
+│   │   │   │   │   ├── Events.jsx          # [UPDATE NEEDED]
+│   │   │   │   │   ├── EventDetail.jsx
+│   │   │   │   │   ├── EventForm.jsx
+│   │   │   │   │   ├── EventMap.jsx        # [NEU]
+│   │   │   │   │   └── Events.module.css
+│   │   │   │   ├── Settings/
+│   │   │   │   │   ├── Settings.jsx        # [UPDATE NEEDED]
+│   │   │   │   │   ├── GeneralSettings.jsx
+│   │   │   │   │   ├── PaymentSettings.jsx
+│   │   │   │   │   ├── NotificationSettings.jsx
+│   │   │   │   │   └── Settings.module.css
+│   │   │   │   ├── Staff/
+│   │   │   │   │   ├── Staff.jsx
+│   │   │   │   │   ├── StaffDetail.jsx
+│   │   │   │   │   ├── StaffForm.jsx
+│   │   │   │   │   └── Staff.module.css
+│   │   │   │   ├── Reviews/
+│   │   │   │   │   ├── Reviews.jsx
+│   │   │   │   │   ├── ReviewDetail.jsx
+│   │   │   │   │   └── Reviews.module.css
+│   │   │   │   ├── Promotions/
+│   │   │   │   │   ├── Promotions.jsx
+│   │   │   │   │   ├── PromotionForm.jsx
+│   │   │   │   │   └── Promotions.module.css
+│   │   │   │   ├── notifications/
+│   │   │   │   │   ├── NotificationCenter.jsx
+│   │   │   │   │   ├── NotificationTemplates.jsx
+│   │   │   │   │   └── NotificationHistory.jsx
+│   │   │   │   └── billing/
+│   │   │   │       ├── BillingOverview.jsx
+│   │   │   │       ├── Invoices.jsx
+│   │   │   │       └── components/
+│   │   │   │           └── SubscriptionManager.jsx
+│   │   │   ├── components/
+│   │   │   │   ├── Layout/
+│   │   │   │   │   ├── AdminLayout.jsx
+│   │   │   │   │   ├── Sidebar.jsx
+│   │   │   │   │   ├── Header.jsx
+│   │   │   │   │   └── Layout.module.css
+│   │   │   │   ├── Products/
+│   │   │   │   │   ├── ProductCard.jsx
+│   │   │   │   │   ├── ModifierModal.jsx
+│   │   │   │   │   ├── VariantManager.jsx
+│   │   │   │   │   ├── FeatureToggleModal.jsx
+│   │   │   │   │   └── PriceAIModal.jsx    # [NEU]
+│   │   │   │   ├── Orders/
+│   │   │   │   │   ├── OrderCard.jsx
+│   │   │   │   │   ├── OrderStatusBadge.jsx
+│   │   │   │   │   ├── OrderTimeline.jsx
+│   │   │   │   │   └── VoiceOrderIndicator.jsx # [NEU]
+│   │   │   │   └── common/
+│   │   │   │       ├── DataTable.jsx
+│   │   │   │       ├── LoadingSpinner.jsx
+│   │   │   │       ├── ErrorBoundary.jsx
+│   │   │   │       └── ConfirmModal.jsx
+│   │   │   ├── hooks/
+│   │   │   │   ├── useAdminAuth.js
+│   │   │   │   ├── useOrders.js
+│   │   │   │   ├── useProducts.js
+│   │   │   │   ├── useAnalytics.js
+│   │   │   │   └── useRealtime.js
+│   │   │   ├── services/
+│   │   │   │   ├── api.service.js
+│   │   │   │   ├── firebase.service.js
+│   │   │   │   └── analytics.service.js
+│   │   │   ├── utils/
+│   │   │   │   ├── constants.js
+│   │   │   │   ├── helpers.js
+│   │   │   │   └── validators.js
+│   │   │   ├── styles/
+│   │   │   │   ├── globals.css
+│   │   │   │   └── variables.css
+│   │   │   ├── App.jsx
+│   │   │   ├── index.js
+│   │   │   └── Router.jsx
+│   │   ├── public/
+│   │   │   ├── index.html
+│   │   │   └── favicon.ico
+│   │   ├── .env
+│   │   ├── package.json
+│   │   ├── webpack.config.js
+│   │   └── README.md
+│   │
+│   ├── master/                           # Master Control System
+│   │   ├── src/
+│   │   │   ├── pages/
+│   │   │   │   ├── Dashboard.jsx
+│   │   │   │   ├── Dashboard.module.css
+│   │   │   │   ├── FeatureControl/
+│   │   │   │   │   ├── FeatureControl.jsx      # [INCOMPLETE]
+│   │   │   │   │   ├── FeatureControl.module.css
+│   │   │   │   │   ├── FeatureControlWithFirebase.jsx
+│   │   │   │   │   └── components/
+│   │   │   │   │       ├── FeatureCard.jsx
+│   │   │   │   │       └── FeatureToggle.jsx
+│   │   │   │   ├── TenantManagement/
+│   │   │   │   │   ├── TenantList.jsx
+│   │   │   │   │   ├── TenantDetail.jsx
+│   │   │   │   │   ├── TenantOnboarding.jsx
+│   │   │   │   │   └── TenantManagement.module.css
+│   │   │   │   ├── SystemAnalytics/
+│   │   │   │   │   ├── PlatformMetrics.jsx
+│   │   │   │   │   ├── RevenueAnalysis.jsx
+│   │   │   │   │   ├── UsageStatistics.jsx
+│   │   │   │   │   └── SystemAnalytics.module.css
+│   │   │   │   ├── Monitoring/                  # [NEU]
+│   │   │   │   │   ├── SystemHealth.jsx
+│   │   │   │   │   ├── ErrorTracking.jsx
+│   │   │   │   │   ├── PerformanceMetrics.jsx
+│   │   │   │   │   ├── AlertManager.jsx
+│   │   │   │   │   └── Monitoring.module.css
+│   │   │   │   ├── AITraining/                  # [NEU]
+│   │   │   │   │   ├── ModelManagement.jsx
+│   │   │   │   │   ├── TrainingPipeline.jsx
+│   │   │   │   │   ├── ExperimentTracking.jsx
+│   │   │   │   │   └── AITraining.module.css
+│   │   │   │   └── Support/
+│   │   │   │       ├── TicketList.jsx
+│   │   │   │       ├── TicketDetail.jsx
+│   │   │   │       └── Support.module.css
+│   │   │   ├── components/
+│   │   │   │   ├── Dashboard/
+│   │   │   │   │   ├── MetricCard.jsx
+│   │   │   │   │   ├── MetricCard.module.css
+│   │   │   │   │   ├── SystemHealthWidget.jsx
+│   │   │   │   │   └── LiveActivityFeed.jsx
+│   │   │   │   ├── SwitzerlandMap/
+│   │   │   │   │   ├── SwitzerlandMap.jsx
+│   │   │   │   │   ├── SwitzerlandMap.module.css
+│   │   │   │   │   └── mapData.js
+│   │   │   │   ├── Navigation/
+│   │   │   │   │   ├── MasterNav.jsx
+│   │   │   │   │   └── MasterNav.module.css
+│   │   │   │   └── common/
+│   │   │   │       ├── MasterButton.jsx
+│   │   │   │       ├── MasterCard.jsx
+│   │   │   │       └── MasterModal.jsx
+│   │   │   ├── modules/
+│   │   │   │   └── MasterControl/
+│   │   │   │       └── MasterControl.jsx
+│   │   │   ├── layouts/
+│   │   │   │   ├── MasterLayout.jsx
+│   │   │   │   └── MasterLayout.module.css
+│   │   │   ├── hooks/
+│   │   │   │   ├── useMasterAuth.js
+│   │   │   │   ├── useSystemMetrics.js
+│   │   │   │   └── useTenantData.js
+│   │   │   ├── services/
+│   │   │   │   ├── masterApi.service.js
+│   │   │   │   ├── monitoring.service.js
+│   │   │   │   └── ai.service.js
+│   │   │   ├── styles/
+│   │   │   │   ├── globals.css
+│   │   │   │   └── theme.css
+│   │   │   ├── App.jsx
+│   │   │   ├── index.js
+│   │   │   └── Router.jsx
+│   │   ├── public/
+│   │   │   ├── index.html
+│   │   │   └── favicon.ico
+│   │   ├── .env
+│   │   ├── package.json
+│   │   └── README.md
+│   │
+│   └── landing/                          # Marketing Website
+│       ├── src/
+│       │   ├── pages/
+│       │   │   ├── index.jsx
+│       │   │   ├── features.jsx
+│       │   │   ├── pricing.jsx
+│       │   │   ├── about.jsx
+│       │   │   └── contact.jsx
+│       │   ├── components/
+│       │   │   ├── Hero.jsx
+│       │   │   ├── Features.jsx
+│       │   │   ├── Pricing.jsx
+│       │   │   └── Footer.jsx
+│       │   └── styles/
+│       │       └── landing.css
+│       ├── package.json
+│       └── README.md
+│
+├── packages/
+│   ├── core/                             # Shared Business Logic
+│   │   ├── src/
+│   │   │   ├── config/
+│   │   │   │   ├── firebase.js           # [UPDATE NEEDED]
+│   │   │   │   ├── constants.js
+│   │   │   │   └── environment.js
+│   │   │   ├── models/
+│   │   │   │   ├── Order.js
+│   │   │   │   ├── Product.js
+│   │   │   │   ├── Customer.js
+│   │   │   │   ├── Tenant.js
+│   │   │   │   └── Event.js
+│   │   │   ├── services/
+│   │   │   │   ├── auth/
+│   │   │   │   │   ├── auth.service.js
+│   │   │   │   │   └── jwt.service.js
+│   │   │   │   ├── database/
+│   │   │   │   │   ├── firestore.service.js
+│   │   │   │   │   └── queries.js
+│   │   │   │   ├── payment/
+│   │   │   │   │   ├── stripe.service.js
+│   │   │   │   │   └── twint.service.js
+│   │   │   │   ├── notification/
+│   │   │   │   │   ├── sms.service.js
+│   │   │   │   │   ├── email.service.js
+│   │   │   │   │   └── push.service.js
+│   │   │   │   └── cdn/                  # [NEU]
+│   │   │   │       ├── cloudflare.service.js
+│   │   │   │       └── imageOptimizer.js
+│   │   │   ├── features/                 # [NEU]
+│   │   │   │   ├── featureFlags.js
+│   │   │   │   └── experiments.js
+│   │   │   ├── utils/
+│   │   │   │   ├── validators.js
+│   │   │   │   ├── formatters.js
+│   │   │   │   ├── calculations.js
+│   │   │   │   └── helpers.js
+│   │   │   └── index.js
+│   │   ├── package.json
+│   │   └── README.md
+│   │
+│   ├── ui/                               # Component Library
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   │   ├── Button/
+│   │   │   │   │   ├── Button.tsx
+│   │   │   │   │   ├── Button.stories.tsx
+│   │   │   │   │   ├── Button.test.tsx
+│   │   │   │   │   └── index.ts
+│   │   │   │   ├── Card/
+│   │   │   │   │   ├── Card.tsx
+│   │   │   │   │   ├── Card.stories.tsx
+│   │   │   │   │   └── index.ts
+│   │   │   │   ├── Input/
+│   │   │   │   │   ├── Input.tsx
+│   │   │   │   │   ├── Input.stories.tsx
+│   │   │   │   │   └── index.ts
+│   │   │   │   └── Modal/
+│   │   │   │       ├── Modal.tsx
+│   │   │   │       ├── Modal.stories.tsx
+│   │   │   │       └── index.ts
+│   │   │   ├── styles/
+│   │   │   │   ├── tokens.css
+│   │   │   │   └── utilities.css
+│   │   │   └── index.ts
+│   │   ├── .storybook/
+│   │   │   ├── main.js
+│   │   │   └── preview.js
+│   │   ├── package.json
+│   │   └── README.md
+│   │
+│   ├── types/                            # TypeScript Definitions
+│   │   ├── src/
+│   │   │   ├── api.types.ts
+│   │   │   ├── models.types.ts
+│   │   │   ├── firebase.types.ts
+│   │   │   └── index.ts
+│   │   ├── package.json
+│   │   └── README.md
+│   │
+│   ├── utils/                            # Shared Utilities
+│   │   ├── src/
+│   │   │   ├── date.utils.ts
+│   │   │   ├── string.utils.ts
+│   │   │   ├── number.utils.ts
+│   │   │   ├── array.utils.ts
+│   │   │   └── index.ts
+│   │   ├── package.json
+│   │   └── README.md
+│   │
+│   ├── analytics/                        # Analytics Engine
+│   │   ├── src/
+│   │   │   ├── collectors/
+│   │   │   │   ├── event.collector.ts
+│   │   │   │   ├── metric.collector.ts
+│   │   │   │   └── error.collector.ts
+│   │   │   ├── processors/
+│   │   │   │   ├── aggregator.ts
+│   │   │   │   ├── transformer.ts
+│   │   │   │   └── enricher.ts
+│   │   │   ├── ab-testing/              # [NEU]
+│   │   │   │   ├── experiment.manager.ts
+│   │   │   │   ├── variant.assigner.ts
+│   │   │   │   └── result.analyzer.ts
+│   │   │   ├── heatmap/                 # [NEU]
+│   │   │   │   ├── click.tracker.ts
+│   │   │   │   ├── scroll.tracker.ts
+│   │   │   │   └── heatmap.generator.ts
+│   │   │   └── index.ts
+│   │   ├── package.json
+│   │   └── README.md
+│   │
+│   ├── ai/                              # [NEU] AI Services
+│   │   ├── src/
+│   │   │   ├── emergency/
+│   │   │   │   ├── emergency.detector.ts
+│   │   │   │   ├── solution.generator.ts
+│   │   │   │   └── auto.adjuster.ts
+│   │   │   ├── pricing/
+│   │   │   │   ├── price.optimizer.ts
+│   │   │   │   ├── elasticity.analyzer.ts
+│   │   │   │   └── competitor.monitor.ts
+│   │   │   ├── predictions/
+│   │   │   │   ├── demand.forecaster.ts
+│   │   │   │   ├── wait.predictor.ts
+│   │   │   │   └── revenue.projector.ts
+│   │   │   ├── voice/
+│   │   │   │   ├── speech.recognizer.ts
+│   │   │   │   ├── intent.parser.ts
+│   │   │   │   └── response.generator.ts
+│   │   │   └── index.ts
+│   │   ├── package.json
+│   │   └── README.md
+│   │
+│   ├── blockchain/                      # [NEU] Blockchain Integration
+│   │   ├── src/
+│   │   │   ├── contracts/
+│   │   │   │   ├── Transaction.sol
+│   │   │   │   └── Loyalty.sol
+│   │   │   ├── services/
+│   │   │   │   ├── transaction.recorder.ts
+│   │   │   │   └── smart.contract.ts
+│   │   │   └── index.ts
+│   │   ├── package.json
+│   │   └── README.md
+│   │
+│   └── edge/                           # [NEU] Edge Computing
+│       ├── src/
+│       │   ├── workers/
+│       │   │   ├── offline.worker.ts
+│       │   │   └── sync.worker.ts
+│       │   ├── mesh/
+│       │   │   ├── peer.connector.ts
+│       │   │   └── data.syncer.ts
+│       │   └── index.ts
+│       ├── package.json
+│       └── README.md
+│
+├── functions/                           # Firebase Cloud Functions
+│   ├── src/
+│   │   ├── triggers/
+│   │   │   ├── auth.triggers.ts
+│   │   │   ├── order.triggers.ts
+│   │   │   ├── analytics.triggers.ts
+│   │   │   └── scheduled.triggers.ts
+│   │   ├── api/
+│   │   │   ├── webhooks.ts
+│   │   │   ├── admin.api.ts
+│   │   │   └── public.api.ts
+│   │   ├── utils/
+│   │   │   ├── emailTemplates.ts
+│   │   │   └── helpers.ts
+│   │   └── index.ts
+│   ├── .env
+│   ├── package.json
+│   └── README.md
+│
+├── tools/                              # Build Tools & Scripts
+│   ├── scripts/
+│   │   ├── build-all.sh
+│   │   ├── deploy.sh
+│   │   ├── setup-dev.sh
+│   │   └── generate-types.js
+│   ├── config/
+│   │   ├── webpack.base.js
+│   │   └── jest.config.js
+│   └── README.md
+│
+├── docs/                               # Documentation
+│   ├── api/
+│   │   ├── rest-api.md
+│   │   └── graphql-schema.md
+│   ├── guides/
+│   │   ├── getting-started.md
+│   │   ├── deployment.md
+│   │   └── troubleshooting.md
+│   └── architecture/
+│       ├── overview.md
+│       └── decisions.md
+│
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml
+│   │   ├── deploy-production.yml
+│   │   └── security-scan.yml
+│   └── ISSUE_TEMPLATE/
+│       ├── bug_report.md
+│       └── feature_request.md
+│
+├── .vscode/
+│   ├── settings.json
+│   ├── launch.json
+│   └── extensions.json
+│
+├── infrastructure/                     # [NEU] IaC
+│   ├── terraform/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   └── kubernetes/
+│       ├── deployment.yaml
+│       └── service.yaml
+│
+├── tests/                             # E2E Tests
+│   ├── cypress/
+│   │   ├── integration/
+│   │   │   ├── customer-flow.spec.js
+│   │   │   ├── admin-flow.spec.js
+│   │   │   └── payment.spec.js
+│   │   └── support/
+│   │       └── commands.js
+│   └── playwright/
+│       └── smoke-tests.spec.ts
+│
+├── .env.example
+├── .eslintrc.js
+├── .gitignore
+├── .prettierrc
+├── firebase.json
+├── firestore.rules
+├── lerna.json
+├── package.json
+├── README.md                          # Dieses Dokument
+├── tsconfig.json
+└── turbo.json
+```
+
+### Tech Stack Details
 ```javascript
-{
-  // ============================================================================
-  // MULTI-TENANT STRUKTUR
-  // ============================================================================
-  "tenants": {
-    "[TENANT_ID]": {
-      // ========== TENANT INFO ==========
-      "info": {
-        "id": "unique-tenant-id",
-        "name": "Restaurant Zürich",
-        "subdomain": "restaurant-zuerich",
-        "owner": "owner-user-id",
-        "plan": "standard|premium|enterprise",
-        "status": "active|suspended|trial|cancelled",
-        "created": 1234567890,
-        "updated": 1234567890,
-        "canton": "ZH",
-        "region": "zurich-1",
-        "instance": "switzerland-central",
-        
-        "address": {
-          "street": "Bahnhofstrasse 1",
-          "streetNumber": "1",
-          "zip": "8001",
-          "city": "Zürich",
-          "canton": "ZH",
-          "country": "CH",
-          "coordinates": {
-            "lat": 47.3769,
-            "lng": 8.5417
-          }
-        },
-        
-        "contact": {
-          "email": "info@restaurant.ch",
-          "phone": "+41 44 123 45 67",
-          "mobile": "+41 79 123 45 67",
-          "website": "https://restaurant.ch",
-          "facebook": "https://facebook.com/restaurant",
-          "instagram": "@restaurant_zh",
-          "whatsapp": "+41 79 123 45 67"
-        },
-        
-        "billing": {
-          "company": "Restaurant Zürich AG",
-          "taxId": "CHE-123.456.789",
-          "vatNumber": "CHE-123.456.789 MWST",
-          "paymentMethod": "invoice|card|sepa",
-          "billingCycle": "monthly|yearly",
-          "nextBilling": 1234567890,
-          "lastPayment": 1234567890,
-          "invoiceEmail": "billing@restaurant.ch",
-          "currency": "CHF",
-          "pricePerMonth": 299,
-          "commission": 3.0,
-          "credits": 0,
-          "overdueAmount": 0
-        },
-        
-        "branding": {
-          "theme": "noir-excellence|modern-light|classic|custom",
-          "primaryColor": "#FF6B6B",
-          "secondaryColor": "#4ECDC4",
-          "logo": "https://storage.eatech.ch/logos/tenant-id.png",
-          "favicon": "https://storage.eatech.ch/favicons/tenant-id.ico",
-          "customCSS": "",
-          "fontFamily": "Inter",
-          "language": "de-CH",
-          "languages": ["de-CH", "fr-CH", "it-CH", "en"],
-          "timezone": "Europe/Zurich"
-        },
-        
-        "features": {
-          "multiLocation": true,
-          "whiteLabel": false,
-          "apiAccess": true,
-          "advancedAnalytics": true,
-          "loyaltyProgram": true,
-          "tableReservation": false,
-          "onlineOrdering": true,
-          "deliveryIntegration": true,
-          "kitchenDisplay": true,
-          "inventoryManagement": true,
-          "staffManagement": true,
-          "customReports": false,
-          "aiRecommendations": false,
-          "voiceOrdering": false,
-          "socialMediaIntegration": false,
-          "multiCurrency": false,
-          "multiLanguage": true,
-          "customNotifications": true,
-          "advancedDiscounts": true,
-          "giftCards": false,
-          "mobileApp": false,
-          "sustainability": {
-            "carbonTracking": false,
-            "wasteReduction": false,
-            "localSourcing": false
-          }
-        },
-        
-        "limits": {
-          "maxProducts": 1000,
-          "maxOrders": 5000,
-          "maxUsers": 50,
-          "maxLocations": 3,
-          "storageGB": 10,
-          "apiCallsPerMonth": 100000,
-          "emailsPerMonth": 10000,
-          "smsPerMonth": 1000
-        }
-      },
-      
-      // ========== PRODUCTS ==========
-      "products": {
-        "[PRODUCT_ID]": {
-          "id": "auto-generated",
-          "name": "Burger Deluxe",
-          "description": "Saftiger Rindfleisch-Burger mit frischen Zutaten",
-          "price": 15.90,
-          "category": "main|starter|dessert|beverage|side",
-          "imageUrl": "https://storage.eatech.ch/products/burger-deluxe.jpg",
-          "available": true,
-          "featured": false,
-          "tenantId": "tenant-id",
-          "createdAt": 1234567890,
-          "updatedAt": 1234567890,
-          
-          // Zusatz-Informationen
-          "ingredients": ["Rindfleisch", "Salat", "Tomate", "Zwiebel", "Käse"],
-          "allergens": ["gluten", "milk", "egg", "mustard"],
-          "nutritionalInfo": {
-            "calories": 650,
-            "protein": 35,
-            "carbs": 45,
-            "fat": 32,
-            "fiber": 4,
-            "sugar": 8,
-            "salt": 2.1
-          },
-          "preparationTime": 15,
-          "spicyLevel": 0, // 0-5
-          "vegetarian": false,
-          "vegan": false,
-          "glutenFree": false,
-          "organic": false,
-          "sustainability": {
-            "localIngredients": true,
-            "co2Footprint": 2.5,
-            "packaging": "recyclable"
-          },
-          
-          // Varianten & Optionen
-          "variants": [{
-            "name": "Klein",
-            "price": 12.90,
-            "default": false
-          }, {
-            "name": "Normal",
-            "price": 15.90,
-            "default": true
-          }, {
-            "name": "XXL",
-            "price": 19.90,
-            "default": false
-          }],
-          
-          "modifiers": [{
-            "group": "Extras",
-            "options": [{
-              "name": "Extra Käse",
-              "price": 2.50
-            }, {
-              "name": "Bacon",
-              "price": 3.00
-            }]
-          }],
-          
-          // Lagerbestand
-          "stock": {
-            "enabled": true,
-            "quantity": 50,
-            "lowStockAlert": 10,
-            "trackIngredients": false,
-            "autoReorder": false,
-            "reorderPoint": 20,
-            "reorderQuantity": 100
-          },
-          
-          // Marketing & Verkauf
-          "tags": ["bestseller", "chef-empfehlung", "neu"],
-          "searchKeywords": ["burger", "beef", "american"],
-          "crossSelling": ["product-id-fries", "product-id-cola"],
-          "upselling": ["product-id-xxl-burger"],
-          
-          // Analytics
-          "stats": {
-            "soldCount": 1234,
-            "revenue": 19516.60,
-            "avgRating": 4.7,
-            "reviewCount": 89,
-            "favoriteCount": 234
-          }
-        }
-      },
-      
-      // ========== CATEGORIES ==========
-      "categories": {
-        "[CATEGORY_ID]": {
-          "id": "cat-main",
-          "name": "Hauptgerichte",
-          "slug": "main",
-          "icon": "🍔",
-          "image": "https://storage.eatech.ch/categories/main.jpg",
-          "description": "Unsere leckeren Hauptgerichte",
-          "sortOrder": 1,
-          "active": true,
-          "parentId": null,
-          "schedule": {
-            "always": true,
-            "days": [],
-            "timeRanges": []
-          },
-          "translations": {
-            "fr-CH": {
-              "name": "Plats principaux",
-              "description": "Nos délicieux plats principaux"
-            },
-            "it-CH": {
-              "name": "Piatti principali",
-              "description": "I nostri deliziosi piatti principali"
-            }
-          }
-        }
-      },
-      
-      // ========== ORDERS ==========
-      "orders": {
-        "[ORDER_ID]": {
-          "id": "auto-generated",
-          "orderNumber": "2025-0001",
-          "status": "pending|confirmed|preparing|ready|delivering|completed|cancelled",
-          "type": "dine-in|takeaway|delivery|pickup",
-          "source": "pos|online|app|phone|kiosk",
-          "tableNumber": "T1",
-          "qrCode": "table-t1-session-xyz",
-          
-          // Kundendaten
-          "customer": {
-            "id": "customer-id",
-            "name": "Max Mustermann",
-            "phone": "+41 79 123 45 67",
-            "email": "max@example.com",
-            "address": {
-              "street": "Musterstrasse 1",
-              "zip": "8001",
-              "city": "Zürich"
-            },
-            "notes": "3. Stock, Klingel Mustermann"
-          },
-          
-          // Bestellpositionen
-          "items": [{
-            "id": "item-1",
-            "productId": "product-id",
-            "name": "Burger Deluxe",
-            "variant": "Normal",
-            "price": 15.90,
-            "quantity": 2,
-            "modifiers": [{
-              "name": "Extra Käse",
-              "price": 2.50
-            }],
-            "notes": "Ohne Zwiebeln",
-            "subtotal": 36.80,
-            "status": "preparing",
-            "preparedAt": null,
-            "preparedBy": null
-          }],
-          
-          // Preisberechnung
-          "pricing": {
-            "subtotal": 36.80,
-            "discount": 0,
-            "discountCode": null,
-            "deliveryFee": 5.00,
-            "serviceFee": 0,
-            "tax": 2.83,
-            "taxRate": 7.7,
-            "tip": 2.00,
-            "total": 46.63,
-            "commission": 1.40, // 3% für EATECH
-            "tenantPayout": 45.23
-          },
-          
-          // Zahlung
-          "payment": {
-            "method": "card|cash|twint|paypal|invoice",
-            "status": "pending|processing|paid|failed|refunded",
-            "transactionId": "stripe_xyz123",
-            "paidAt": 1234567890,
-            "provider": "stripe|twint|sumup",
-            "last4": "4242",
-            "brand": "visa"
-          },
-          
-          // Lieferung
-          "delivery": {
-            "method": "restaurant|uber|just-eat|internal",
-            "estimatedTime": 1234567890,
-            "actualTime": null,
-            "distance": 2.5,
-            "driverId": "driver-id",
-            "driverName": "John Doe",
-            "driverPhone": "+41 79 999 99 99",
-            "trackingUrl": "https://tracking.uber.com/xyz"
-          },
-          
-          // Zeitstempel
-          "timestamps": {
-            "created": 1234567890,
-            "confirmed": 1234567891,
-            "preparing": 1234567892,
-            "ready": null,
-            "delivering": null,
-            "completed": null,
-            "cancelled": null
-          },
-          
-          // Zusatzinfos
-          "preparation": {
-            "estimatedMinutes": 20,
-            "actualMinutes": null,
-            "kitchen": "main",
-            "station": "grill",
-            "priority": "normal|high|low",
-            "assignedTo": "chef-id"
-          },
-          
-          "feedback": {
-            "rating": null,
-            "comment": null,
-            "ratedAt": null
-          },
-          
-          "metadata": {
-            "userAgent": "Mozilla/5.0...",
-            "ip": "192.168.1.1",
-            "deviceId": "device-xyz",
-            "sessionId": "session-abc",
-            "referrer": "google.com",
-            "utmSource": "instagram",
-            "utmCampaign": "summer-promo"
-          }
-        }
-      },
-      
-      // ========== CUSTOMERS ==========
-      "customers": {
-        "[CUSTOMER_ID]": {
-          "id": "customer-id",
-          "name": "Max Mustermann",
-          "email": "max@example.com",
-          "phone": "+41 79 123 45 67",
-          "phoneVerified": true,
-          "emailVerified": true,
-          "avatar": "https://storage.eatech.ch/avatars/customer-id.jpg",
-          
-          "addresses": [{
-            "id": "addr-1",
-            "type": "home",
-            "label": "Zuhause",
-            "street": "Musterstrasse 1",
-            "zip": "8001",
-            "city": "Zürich",
-            "default": true,
-            "coordinates": {
-              "lat": 47.3769,
-              "lng": 8.5417
-            }
-          }],
-          
-          "preferences": {
-            "language": "de-CH",
-            "currency": "CHF",
-            "newsletter": true,
-            "smsNotifications": true,
-            "pushNotifications": true,
-            "emailNotifications": {
-              "orders": true,
-              "marketing": false,
-              "updates": true
-            },
-            "dietary": {
-              "vegetarian": false,
-              "vegan": false,
-              "glutenFree": false,
-              "lactoseFree": false,
-              "halal": false,
-              "kosher": false
-            },
-            "allergies": ["nuts", "shellfish"],
-            "spiceLevel": 3,
-            "favoriteCategories": ["burger", "pizza"]
-          },
-          
-          "loyalty": {
-            "points": 1250,
-            "tier": "gold",
-            "memberSince": 1234567890,
-            "lifetimePoints": 5680,
-            "pointsExpiring": {
-              "amount": 200,
-              "date": 1234567890
-            },
-            "benefits": ["free-delivery", "birthday-discount", "early-access"],
-            "referralCode": "MAX123",
-            "referredBy": "customer-id-2",
-            "referralCount": 5
-          },
-          
-          "stats": {
-            "orderCount": 45,
-            "totalSpent": 2567.80,
-            "averageOrderValue": 57.06,
-            "lastOrderDate": 1234567890,
-            "favoriteItems": ["product-1", "product-2"],
-            "orderFrequency": "weekly",
-            "lifetimeValue": 2567.80,
-            "churnRisk": "low",
-            "lastActive": 1234567890
-          },
-          
-          "tags": ["vip", "regular", "birthday-month"],
-          "notes": "Bevorzugt Lieferung am Abend",
-          "createdAt": 1234567890,
-          "updatedAt": 1234567890,
-          "source": "online|pos|import|api",
-          "consent": {
-            "marketing": true,
-            "dataProcessing": true,
-            "timestamp": 1234567890
-          }
-        }
-      },
-      
-      // ========== USERS (Staff) ==========
-      "users": {
-        "[USER_ID]": {
-          "id": "user-id",
-          "email": "admin@restaurant.ch",
-          "name": "Admin User",
-          "role": "owner|admin|manager|chef|waiter|delivery",
-          "permissions": {
-            "orders": ["view", "create", "update", "delete"],
-            "products": ["view", "create", "update", "delete"],
-            "customers": ["view", "create", "update"],
-            "analytics": ["view"],
-            "settings": ["view", "update"],
-            "users": ["view", "create", "update", "delete"],
-            "billing": ["view"]
-          },
-          "active": true,
-          "avatar": "https://storage.eatech.ch/avatars/user-id.jpg",
-          "phone": "+41 79 999 99 99",
-          "language": "de-CH",
-          "workSchedule": {
-            "monday": { "start": "08:00", "end": "17:00" },
-            "tuesday": { "start": "08:00", "end": "17:00" }
-          },
-          "pin": "1234", // For POS
-          "createdAt": 1234567890,
-          "lastLogin": 1234567890,
-          "loginCount": 234,
-          "deviceTokens": ["token1", "token2"],
-          "twoFactorEnabled": false
-        }
-      },
-      
-      // ========== ANALYTICS ==========
-      "analytics": {
-        "daily": {
-          "2025-01-07": {
-            "revenue": 4567.80,
-            "orders": 67,
-            "newCustomers": 12,
-            "returningCustomers": 55,
-            "averageOrderValue": 68.18,
-            "commission": 137.03,
-            "refunds": 0,
-            "discounts": 123.40,
-            
-            "hourlyRevenue": {
-              "11": 234.50,
-              "12": 567.80,
-              "13": 890.20,
-              "18": 1234.50,
-              "19": 1640.80
-            },
-            
-            "topProducts": {
-              "product-1": { "quantity": 23, "revenue": 365.70 },
-              "product-2": { "quantity": 18, "revenue": 287.20 }
-            },
-            
-            "orderTypes": {
-              "dine-in": 30,
-              "takeaway": 25,
-              "delivery": 12
-            },
-            
-            "paymentMethods": {
-              "card": 45,
-              "cash": 15,
-              "twint": 7
-            },
-            
-            "performance": {
-              "avgPreparationTime": 18.5,
-              "avgDeliveryTime": 32.4,
-              "orderAccuracy": 98.5,
-              "customerSatisfaction": 4.7
-            }
-          }
-        },
-        
-        "weekly": {
-          "2025-W02": {
-            "revenue": 28456.90,
-            "orders": 423,
-            "growth": 12.5,
-            "topDay": "saturday",
-            "lowDay": "monday"
-          }
-        },
-        
-        "monthly": {
-          "2025-01": {
-            "revenue": 98765.40,
-            "orders": 1456,
-            "growth": 8.3,
-            "targetRevenue": 100000,
-            "targetProgress": 98.77,
-            "topProducts": [],
-            "customerRetention": 78.5,
-            "newCustomers": 234,
-            "churnRate": 5.2
-          }
-        },
-        
-        "realtime": {
-          "activeOrders": 8,
-          "kitchenLoad": 65,
-          "deliveryDrivers": 3,
-          "waitTime": 20,
-          "todayRevenue": 2345.60,
-          "todayOrders": 34,
-          "lastUpdate": 1234567890
-        }
-      },
-      
-      // ========== SETTINGS ==========
-      "settings": {
-        "business": {
-          "openingHours": {
-            "monday": { "open": "11:00", "close": "22:00" },
-            "tuesday": { "open": "11:00", "close": "22:00" },
-            "wednesday": { "open": "11:00", "close": "22:00" },
-            "thursday": { "open": "11:00", "close": "22:00" },
-            "friday": { "open": "11:00", "close": "23:00" },
-            "saturday": { "open": "10:00", "close": "23:00" },
-            "sunday": { "open": "10:00", "close": "22:00" }
-          },
-          "holidays": [{
-            "date": "2025-12-25",
-            "name": "Weihnachten",
-            "closed": true
-          }],
-          "specialHours": [{
-            "date": "2025-12-31",
-            "open": "11:00",
-            "close": "02:00",
-            "reason": "Silvester"
-          }],
-          "deliveryRadius": 5,
-          "minimumOrder": {
-            "delivery": 20,
-            "takeaway": 0
-          },
-          "preparationTime": {
-            "default": 20,
-            "busy": 35,
-            "quiet": 15
-          },
-          "maxOrdersPerHour": 50,
-          "autoAcceptOrders": false,
-          "requirePhoneVerification": true
-        },
-        
-        "payment": {
-          "methods": {
-            "cash": { "enabled": true, "default": false },
-            "card": { "enabled": true, "default": true },
-            "twint": { "enabled": true, "default": false },
-            "paypal": { "enabled": false, "default": false },
-            "invoice": { "enabled": false, "minAmount": 50 }
-          },
-          "providers": {
-            "stripe": {
-              "publicKey": "pk_live_xxx",
-              "secretKey": "sk_live_xxx",
-              "webhookSecret": "whsec_xxx"
-            },
-            "twint": {
-              "merchantId": "xxx",
-              "apiKey": "xxx"
-            },
-            "sumup": {
-              "affiliateKey": "xxx"
-            }
-          },
-          "tipping": {
-            "enabled": true,
-            "suggestions": [5, 10, 15],
-            "customAllowed": true
-          },
-          "surcharges": {
-            "card": 0,
-            "smallOrder": 2,
-            "smallOrderThreshold": 15
-          }
-        },
-        
-        "notifications": {
-          "channels": {
-            "email": true,
-            "sms": true,
-            "push": true,
-            "sound": true
-          },
-          "orderAlerts": {
-            "newOrder": true,
-            "orderReady": true,
-            "orderCancelled": true,
-            "lowStock": true
-          },
-          "templates": {
-            "orderConfirmation": {
-              "subject": "Bestellung bestätigt - {orderNumber}",
-              "body": "..."
-            }
-          },
-          "quietHours": {
-            "start": "22:00",
-            "end": "09:00"
-          }
-        },
-        
-        "printing": {
-          "kitchen": {
-            "enabled": true,
-            "printerIp": "192.168.1.100",
-            "autoprint": true,
-            "copies": 1
-          },
-          "receipt": {
-            "enabled": true,
-            "printerIp": "192.168.1.101",
-            "autoprint": false,
-            "showQR": true
-          }
-        },
-        
-        "integrations": {
-          "googleBusiness": {
-            "enabled": true,
-            "placeId": "ChIJxxx"
-          },
-          "uber": {
-            "enabled": true,
-            "storeId": "xxx",
-            "commission": 30
-          },
-          "justEat": {
-            "enabled": false
-          }
-        },
-        
-        "loyalty": {
-          "enabled": true,
-          "pointsPerCHF": 1,
-          "redeemRate": 100, // 100 points = 1 CHF
-          "welcomeBonus": 50,
-          "birthdayBonus": 200,
-          "tiers": [{
-            "name": "Bronze",
-            "minPoints": 0,
-            "benefits": ["newsletter"]
-          }, {
-            "name": "Silver",
-            "minPoints": 500,
-            "benefits": ["free-delivery", "10%-discount"]
-          }, {
-            "name": "Gold",
-            "minPoints": 2000,
-            "benefits": ["free-delivery", "15%-discount", "priority-support"]
-          }]
-        }
-      },
-      
-      // ========== NOTIFICATIONS ==========
-      "notifications": {
-        "[NOTIFICATION_ID]": {
-          "id": "notif-1",
-          "type": "order|system|marketing|alert",
-          "channel": "push|email|sms|in-app",
-          "recipient": "user-id|all|role:admin",
-          "title": "Neue Bestellung",
-          "body": "Bestellung #2025-0001 eingegangen",
-          "data": {
-            "orderId": "order-id",
-            "action": "view_order"
-          },
-          "priority": "high|normal|low",
-          "status": "pending|sent|delivered|read|failed",
-          "scheduledFor": null,
-          "sentAt": 1234567890,
-          "readAt": null,
-          "error": null,
-          "createdAt": 1234567890
-        }
-      },
-      
-      // ========== INVENTORY ==========
-      "inventory": {
-        "[ITEM_ID]": {
-          "id": "inv-1",
-          "name": "Rindfleisch",
-          "unit": "kg",
-          "currentStock": 45.5,
-          "minStock": 20,
-          "maxStock": 100,
-          "reorderPoint": 30,
-          "reorderQuantity": 50,
-          "supplier": {
-            "name": "Metzgerei Schmidt",
-            "contact": "+41 44 123 45 67",
-            "email": "bestellung@metzgerei-schmidt.ch"
-          },
-          "cost": 28.50,
-          "lastRestocked": 1234567890,
-          "expiryDate": 1234567890,
-          "location": "Kühlraum 1",
-          "category": "meat",
-          "linkedProducts": ["product-1", "product-2"]
-        }
-      },
-      
-      // ========== REPORTS ==========
-      "reports": {
-        "[REPORT_ID]": {
-          "id": "report-1",
-          "type": "sales|inventory|customer|financial",
-          "name": "Monatsbericht Januar 2025",
-          "period": {
-            "start": 1234567890,
-            "end": 1234567890
-          },
-          "format": "pdf|excel|csv",
-          "status": "pending|processing|completed|failed",
-          "url": "https://storage.eatech.ch/reports/report-1.pdf",
-          "size": 2457600,
-          "createdBy": "user-id",
-          "createdAt": 1234567890,
-          "scheduledReport": true,
-          "schedule": "monthly",
-          "recipients": ["admin@restaurant.ch"],
-          "filters": {
-            "locations": ["all"],
-            "categories": ["all"],
-            "paymentMethods": ["all"]
-          }
-        }
-      },
-      
-      // ========== FEEDBACK & REVIEWS ==========
-      "feedback": {
-        "[FEEDBACK_ID]": {
-          "id": "feedback-1",
-          "orderId": "order-id",
-          "customerId": "customer-id",
-          "rating": 5,
-          "comment": "Excellent food and service!",
-          "aspects": {
-            "food": 5,
-            "service": 5,
-            "delivery": 4,
-            "value": 5
-          },
-          "images": ["https://storage.eatech.ch/feedback/img1.jpg"],
-          "response": {
-            "text": "Vielen Dank für Ihr Feedback!",
-            "respondedBy": "user-id",
-            "respondedAt": 1234567890
-          },
-          "helpful": 12,
-          "reported": false,
-          "verified": true,
-          "platform": "eatech|google|tripadvisor",
-          "createdAt": 1234567890
-        }
-      }
-    }
+const techStack = {
+  frontend: {
+    framework: 'Next.js 14 (App Router)',
+    ui: 'React 18',
+    styling: 'CSS Modules + Tailwind CSS',
+    state: 'Zustand + React Query + Context',
+    routing: 'Next.js App Router',
+    pwa: 'next-pwa + Workbox 7',
+    bundler: 'Turbopack'
   },
-  
-  // ============================================================================
-  // MASTER CONTROL (Superadmin Bereich)
-  // ============================================================================
-  "master": {
-    // Global Features
-    "features": {
-      "[FEATURE_ID]": {
-        "id": "feature-id",
-        "name": "AI Recommendations",
-        "category": "ai",
-        "enabled": true,
-        "tier": "premium",
-        "description": "KI-basierte Produktempfehlungen",
-        "dependencies": ["analytics.advanced"],
-        "rollout": {
-          "status": "partial",
-          "percentage": 50,
-          "targetGroups": ["beta-testers", "premium-tenants"]
-        }
-      }
-    },
-    
-    // System Metrics
-    "metrics": {
-      "system": {
-        "tenants": {
-          "total": 127,
-          "active": 115,
-          "trial": 8,
-          "suspended": 4
-        },
-        "revenue": {
-          "daily": 4567.89,
-          "monthly": 125678.90,
-          "mrr": 37890.00,
-          "growth": 12.5
-        },
-        "usage": {
-          "orders": 45678,
-          "apiCalls": 2345678,
-          "storage": "234.5 GB",
-          "bandwidth": "1.2 TB"
-        },
-        "performance": {
-          "uptime": 99.99,
-          "avgResponseTime": 124,
-          "errorRate": 0.02
-        }
-      }
-    },
-    
-    // Backups
-    "backups": {
-      "[BACKUP_ID]": {
-        "id": "backup-1",
-        "type": "full|incremental",
-        "status": "running|completed|failed",
-        "size": 12457896521,
-        "duration": 3456,
-        "location": "s3://backups/2025-01-07/",
-        "createdAt": 1234567890,
-        "expiresAt": 1234567890,
-        "tenants": ["all"],
-        "encrypted": true
-      }
-    },
-    
-    // Audit Log
-    "audit": {
-      "[LOG_ID]": {
-        "id": "audit-1",
-        "action": "user.create|tenant.update|feature.toggle",
-        "actor": "user-id",
-        "target": "tenant-id",
-        "changes": {
-          "before": {},
-          "after": {}
-        },
-        "ip": "192.168.1.1",
-        "userAgent": "Mozilla/5.0...",
-        "timestamp": 1234567890
-      }
-    }
+  backend: {
+    database: 'Firebase Firestore',
+    auth: 'Firebase Auth (Multi-Tenant)',
+    storage: 'Firebase Storage + Cloudflare R2',
+    functions: 'Firebase Functions (Node.js 18)',
+    hosting: 'Vercel Edge + Firebase Hosting',
+    cdn: 'Cloudflare (Global)'
   },
-  
-  // ============================================================================
-  // GLOBAL CONFIGURATIONS
-  // ============================================================================
-  "config": {
-    "firebase": {
-      "projectId": "eatech-foodtruck",
-      "apiKey": "AIzaSyDFBlgWE81iHnACVwOmaU0jL7FV0l_tRmU",
-      "databaseURL": "https://eatech-foodtruck-default-rtdb.europe-west1.firebasedatabase.app"
-    },
-    
-    "stripe": {
-      "publicKey": "pk_live_xxx",
-      "webhookEndpoint": "https://api.eatech.ch/webhooks/stripe"
-    },
-    
-    "twilio": {
-      "accountSid": "ACxxx",
-      "from": "+41 xx xxx xx xx"
-    },
-    
-    "sendgrid": {
-      "apiKey": "SG.xxx",
-      "from": "noreply@eatech.ch"
-    },
-    
-    "storage": {
-      "provider": "firebase",
-      "bucket": "eatech-foodtruck.firebasestorage.app",
-      "cdnUrl": "https://cdn.eatech.ch"
-    },
-    
-    "analytics": {
-      "googleAnalytics": "G-XXX",
-      "mixpanel": "xxx",
-      "hotjar": "xxx"
-    }
+  services: {
+    payments: 'Stripe + Twint + PostFinance',
+    sms: 'Twilio',
+    email: 'SendGrid',
+    push: 'Firebase Cloud Messaging',
+    monitoring: 'Sentry + LogRocket',
+    analytics: 'Plausible + Custom Analytics',
+    search: 'Algolia',
+    maps: 'Mapbox + Google Maps'
+  },
+  ai: {
+    llm: 'OpenAI GPT-4 Turbo',
+    vision: 'Google Vision API',
+    speech: 'Web Speech API + Whisper',
+    ml: 'TensorFlow.js',
+    embeddings: 'OpenAI Ada-2'
+  },
+  dev: {
+    language: 'TypeScript 5.3',
+    testing: 'Jest + Cypress + Playwright',
+    ci: 'GitHub Actions',
+    monitoring: 'Datadog + Grafana',
+    errorTracking: 'Sentry',
+    abTesting: 'Optimizely'
   }
-}
+};
 ```
 
----
-
-## 🔒 SICHERHEITS-FEATURES
-
-### FRAUD PREVENTION SYSTEM [0%]
-
-#### 0-FRANKEN-BESTELLUNGEN SCHUTZ
-**Status**: 0% implementiert
-**Priorität**: KRITISCH
-
-**Automatische Sperrung bei**:
-- 3+ Bestellungen mit 0.00 CHF innerhalb 24h
-- 5+ Bestellungen mit 0.00 CHF innerhalb 7 Tage
-- Ungewöhnliche Muster (gleiche IP, gleicher User)
-
-**Maßnahmen**:
-1. Automatische System-Sperrung
-2. Admin-Benachrichtigung
-3. Manuelle Überprüfung erforderlich
-4. IP-Blocking möglich
-5. Tenant-Warnung
-
-**Implementierung**:
+### Service Worker Strategy
 ```javascript
-// Fraud Detection Service
-const checkForFraudPattern = async (tenantId, customerId) => {
-  const recentOrders = await getRecentOrders(tenantId, customerId, 24);
-  const zeroValueOrders = recentOrders.filter(o => o.total === 0);
-  
-  if (zeroValueOrders.length >= 3) {
-    await lockTenantAccount(tenantId);
-    await notifyAdmin('FRAUD_ALERT', { tenantId, reason: 'zero_value_orders' });
-    return { blocked: true, reason: 'Mehrere 0-Franken-Bestellungen erkannt' };
+// Aggressive Caching für Offline-First
+const cacheStrategy = {
+  static: {
+    strategy: 'CacheFirst',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    includes: ['/fonts/', '/images/', '/icons/']
+  },
+  api: {
+    strategy: 'NetworkFirst',
+    timeout: 3000,
+    fallback: 'offlineData',
+    includes: ['/api/menu/', '/api/products/']
+  },
+  images: {
+    strategy: 'StaleWhileRevalidate',
+    maxEntries: 100,
+    maxAgeSeconds: 7 * 24 * 60 * 60,
+    plugins: ['WebP', 'AVIF', 'lazyLoad']
   }
-  return { blocked: false };
 };
 ```
 
 ---
 
-## 🚀 FEATURES ÜBERSICHT MIT FORTSCHRITT
+## 🗄️ FIREBASE DATENSTRUKTUR (KOMPLETT)
 
-### 1. CUSTOMER FEATURES [Priorität: HOCH] - Gesamtfortschritt: 0%
-
-#### 1.1 QR-CODE SCANNER & TABLE ORDERING [0%]
-- **Status**: 0% implementiert
-- **Priorität**: KRITISCH
-- **Beschreibung**: Kernfeature für kontaktloses Bestellen
-
-#### 1.2 DIGITAL MENU DISPLAY [0%]
-- **Status**: 0% implementiert  
-- **Priorität**: KRITISCH
-- **Beschreibung**: Responsive Speisekarte mit Bildern und Filtern
-
-#### 1.3 SMART CART & CHECKOUT [0%]
-- **Status**: 0% implementiert
-- **Priorität**: KRITISCH
-- **Beschreibung**: Warenkorb mit Echtzeit-Updates
-
-#### 1.4 MULTI-PAYMENT SYSTEM [0%]
-- **Status**: 0% implementiert
-- **Priorität**: KRITISCH
-- **Beschreibung**: Stripe, Twint, PayPal, Bar
-
-#### 1.5 ORDER TRACKING [0%]
-- **Status**: 0% implementiert
-- **Priorität**: HOCH
-- **Beschreibung**: Echtzeit-Verfolgung des Bestellstatus
-
-### 2. ADMIN FEATURES [Priorität: HOCH] - Gesamtfortschritt: 0%
-
-#### 2.1 DASHBOARD & ANALYTICS [0%]
-- **Status**: 0% implementiert
-- **Priorität**: KRITISCH
-- **Beschreibung**: Echtzeit-Übersicht aller wichtigen Metriken
-
-#### 2.2 ORDER MANAGEMENT [0%]
-- **Status**: 0% implementiert
-- **Priorität**: KRITISCH
-- **Beschreibung**: Bestellverwaltung mit Kitchen Display
-
-#### 2.3 PRODUCT MANAGEMENT [0%]
-- **Status**: 0% implementiert
-- **Priorität**: KRITISCH
-- **Beschreibung**: Produkte, Kategorien, Preise verwalten
-
-#### 2.4 CUSTOMER MANAGEMENT [0%]
-- **Status**: 0% implementiert
-- **Priorität**: MITTEL
-- **Beschreibung**: Kundendatenbank mit Historie
-
-#### 2.5 FINANCIAL REPORTS [0%]
-- **Status**: 0% implementiert
-- **Priorität**: HOCH
-- **Beschreibung**: Umsatz, Steuern, Provisionen
-
-### 3. PREMIUM FEATURES [Priorität: MITTEL] - Gesamtfortschritt: 0%
-
-#### 3.1 AI-POWERED RECOMMENDATIONS [0%]
-- **Status**: 0% implementiert
-- **Priorität**: NIEDRIG
-- **Beschreibung**: KI-basierte Produktvorschläge
-
-#### 3.2 LOYALTY PROGRAM [0%]
-- **Status**: 0% implementiert
-- **Priorität**: MITTEL
-- **Beschreibung**: Punkte sammeln und einlösen
-
-#### 3.3 ADVANCED ANALYTICS [0%]
-- **Status**: 0% implementiert
-- **Priorität**: MITTEL
-- **Beschreibung**: Predictive Analytics, Trends
-
-#### 3.4 WHITE LABEL SOLUTION [0%]
-- **Status**: 0% implementiert
-- **Priorität**: NIEDRIG
-- **Beschreibung**: Eigenes Branding für Enterprise
-
-#### 3.5 API ACCESS [0%]
-- **Status**: 0% implementiert
-- **Priorität**: NIEDRIG
-- **Beschreibung**: REST API für Integrationen
-
-### 4. SUPERADMIN FEATURES [Priorität: NIEDRIG] - Gesamtfortschritt: 0%
-
-#### 4.1 TENANT MANAGEMENT [0%]
-- **Status**: 0% implementiert
-- **Priorität**: MITTEL
-- **Beschreibung**: Multi-Tenant Verwaltung
-
-#### 4.2 REVENUE TRACKING [0%]
-- **Status**: 0% implementiert
-- **Priorität**: HOCH
-- **Beschreibung**: Provisionen und Abrechnungen
-
-#### 4.3 SYSTEM MONITORING [0%]
-- **Status**: 0% implementiert
-- **Priorität**: MITTEL
-- **Beschreibung**: Performance und Uptime
-
-#### 4.4 FEATURE FLAGS [0%]
-- **Status**: 0% implementiert
-- **Priorität**: NIEDRIG
-- **Beschreibung**: Feature-Rollout Kontrolle
-
-#### 4.5 ERROR DASHBOARD [0%]
-- **Status**: 0% implementiert
-- **Priorität**: HOCH
-- **Beschreibung**: Zentrale Fehlerüberwachung
-
-#### 4.6 TENANT CONTROL [0%]
-- **Status**: 0% implementiert
-- **Priorität**: MITTEL
-- **Beschreibung**: Verwaltung aller Restaurant-Accounts
-
-#### 4.7 REVENUE TRACKING (ERWEITERT) [0%]
-- **Status**: 0% implementiert
-- **Priorität**: HOCH
-- **Beschreibung**: Detaillierte Finanzübersicht
-
-#### 4.8 SYSTEM HEALTH [0%]
-- **Status**: 0% implementiert
-- **Priorität**: HOCH
-- **Beschreibung**: 24/7 Monitoring aller Komponenten
-
----
-
-## 📝 DETAILLIERTE FEATURE-BESCHREIBUNGEN
-
-### 1. CUSTOMER FEATURES DETAILS
-
-#### 1.1 QR-CODE SCANNER & TABLE ORDERING [0%]
-
-**Detaillierte Beschreibung**:
-Kunden scannen einen QR-Code am Tisch und werden direkt zur digitalen Speisekarte geleitet.
-
-**User Flow**:
-1. Kunde scannt QR-Code
-2. Automatische Tisch-Zuordnung
-3. Speisekarte öffnet sich
-4. Session wird erstellt
-5. Multi-Device Support
-
-**Technische Features**:
-- WebRTC QR-Scanner
-- Fallback: Manuelle Code-Eingabe
-- Session-Management
-- Offline-Unterstützung
-- PWA-Installation prompt
-
-**UI/UX Anforderungen**:
-- Scan in < 2 Sekunden
-- Große Scan-Fläche
-- Klare Anweisungen
-- Error-Handling
-- Accessibility
-
-#### 1.2 DIGITAL MENU DISPLAY [0%]
-
-**Detaillierte Beschreibung**:
-Moderne, responsive Speisekarte mit Bildern, Beschreibungen und Filterfunktionen.
-
-**Features**:
-- **Kategorien**: Vorspeisen, Hauptgänge, Desserts, Getränke
-- **Filter**: Vegetarisch, Vegan, Glutenfrei, Allergene
-- **Suche**: Volltext-Suche
-- **Sortierung**: Beliebtheit, Preis, Name
-- **Details**: Zutaten, Nährwerte, Allergene
-
-**Spezial-Features**:
-- Mehrsprachigkeit (DE, FR, IT, EN)
-- Tagesempfehlungen
-- Nicht verfügbare Artikel
-- Combo-Deals
-- Happy Hour Preise
-
-#### 1.3 SMART CART & CHECKOUT [0%]
-
-**Detaillierte Beschreibung**:
-Intelligenter Warenkorb mit Echtzeit-Updates und nahtlosem Checkout.
-
-**Cart Features**:
-- Artikel hinzufügen/entfernen
-- Mengen anpassen
-- Spezialwünsche
-- Modifikatoren (Extra Käse, etc.)
-- Preisberechnung in Echtzeit
-
-**Checkout Flow**:
-1. Warenkorb-Review
-2. Lieferart wählen
-3. Kontaktdaten
-4. Zahlungsmethode
-5. Bestellung abschicken
-
-**Smart Features**:
-- Mindestbestellwert
-- Gutschein-Codes
-- Trinkgeld-Option
-- Bestellnotizen
-- Favoriten speichern
-
-#### 1.4 MULTI-PAYMENT SYSTEM [0%]
-
-**Detaillierte Beschreibung**:
-Flexible Zahlungsoptionen für alle Kundengruppen.
-
-**Zahlungsmethoden**:
-- **Kreditkarte**: Stripe Integration
-- **Twint**: Schweizer Mobile Payment
-- **PayPal**: Express Checkout
-- **Bar**: Bei Abholung/Lieferung
-- **Rechnung**: Für Firmenkunden
-
-**Sicherheit**:
-- PCI-DSS konform
-- 3D Secure
-- Tokenisierung
-- SSL-Verschlüsselung
-- Fraud Detection
-
-#### 1.5 ORDER TRACKING [0%]
-
-**Detaillierte Beschreibung**:
-Echtzeit-Verfolgung vom Restaurant bis zum Kunden.
-
-**Status-Updates**:
-1. Bestellung eingegangen
-2. Bestätigt
-3. In Zubereitung
-4. Fertig/Unterwegs
-5. Geliefert/Abgeholt
-
-**Features**:
-- Push-Notifications
-- SMS-Updates
-- Geschätzte Wartezeit
-- Live-Tracking bei Lieferung
-- Fahrer-Kontakt
-
-### 2. ADMIN FEATURES DETAILS
-
-#### 2.1 DASHBOARD & ANALYTICS [0%]
-
-**Detaillierte Beschreibung**:
-Zentrale Übersicht aller wichtigen Geschäftskennzahlen in Echtzeit.
-
-**Widgets**:
-- Tagesumsatz
-- Aktive Bestellungen
-- Beliebte Produkte
-- Kunden-Statistiken
-- Performance-Metriken
-
-**Charts**:
-- Umsatz-Verlauf
-- Bestell-Heatmap
-- Produkt-Performance
-- Kunden-Demografie
-- Zahlungsmethoden-Split
-
-#### 2.2 ORDER MANAGEMENT [0%]
-
-**Detaillierte Beschreibung**:
-Effiziente Verwaltung aller eingehenden Bestellungen.
-
-**Funktionen**:
-- **Order Queue**: Neue Bestellungen
-- **Kitchen Display**: Für Küche
-- **Status Updates**: Mit einem Klick
-- **Order History**: Durchsuchbar
-- **Batch Actions**: Mehrere auf einmal
-
-**Kitchen Features**:
-- Prep-Time Tracking
-- Station Assignment
-- Allergen Warnings
-- Recipe Display
-- Inventory Check
-
-#### 2.3 MENU DESIGNER [0%]
-
-**Detaillierte Beschreibung**:
-Visueller Editor für Speisekarten-Gestaltung.
-
-**Editor Features**:
-- Drag & Drop
-- Bulk Import (CSV/Excel)
-- Bild-Upload
-- Preis-Varianten
-- Modifier-Gruppen
-
-**Advanced**:
-- Zeitbasierte Menüs
-- A/B Testing
-- Saison-Artikel
-- Cross-Selling
-- Bundle-Deals
-
-#### 2.4 INVENTORY MANAGEMENT [0%]
-
-**Detaillierte Beschreibung**:
-Lagerverwaltung mit automatischen Warnungen und Bestellvorschlägen.
-
-**Features**:
-- **Bestandsverfolgung**: Echtzeit-Updates
-- **Low-Stock Alerts**: Automatische Warnungen
-- **Automatische Bestellung**: Bei Unterschreitung
-- **Lieferanten-Verwaltung**: Kontakte und Preise
-- **Inventur-Tools**: Mobile Zählung
-
-**Reports**:
-- Verbrauchsanalyse
-- Kostenkontrolle
-- Abfall-Tracking
-- Lieferanten-Performance
-- ROI-Berechnung
-
-#### 2.5 STAFF MANAGEMENT [0%]
-
-**Detaillierte Beschreibung**:
-Mitarbeiterverwaltung mit Schichtplanung und Zugriffsrechten.
-
-**Features**:
-- **Mitarbeiter-Profile**: Rollen und Rechte
-- **Schichtplanung**: Drag & Drop Kalender
-- **Zeit-Erfassung**: Check-in/out
-- **Performance-Tracking**: Umsatz pro MA
-- **Schulungs-Module**: Onboarding
-
-**Rollen-System**:
-- Owner: Vollzugriff
-- Manager: Verwaltung
-- Chef: Küche + Produkte
-- Waiter: Bestellungen
-- Delivery: Lieferungen
-
-### 3. PREMIUM FEATURES DETAILS
-
-#### 3.1 AI-POWERED RECOMMENDATIONS [0%]
-
-**Detaillierte Beschreibung**:
-Maschinelles Lernen für personalisierte Produktvorschläge.
-
-**AI-Features**:
-- **Personalisierung**: Basierend auf Historie
-- **Upselling**: Intelligente Zusatzvorschläge
-- **Dynamic Pricing**: Nachfragebasiert
-- **Trend-Vorhersage**: Saisonale Muster
-- **Churn-Prevention**: Risiko-Kunden
-
-**Algorithmen**:
-- Collaborative Filtering
-- Content-Based Filtering
-- Neural Networks
-- Predictive Analytics
-- A/B Testing Engine
-
-#### 3.2 LOYALTY PROGRAM [0%]
-
-**Detaillierte Beschreibung**:
-Umfassendes Treueprogramm mit Gamification-Elementen.
-
-**Programm-Features**:
-- **Punkte-System**: 1 CHF = 1 Punkt
-- **Tier-System**: Bronze, Silber, Gold
-- **Rewards**: Rabatte, Gratis-Produkte
-- **Challenges**: Gamification
-- **Referral-Bonus**: Freunde werben
-
-**Benefits nach Tier**:
-- **Bronze**: Newsletter, Geburtstags-Bonus
-- **Silber**: 10% Rabatt, Gratis-Lieferung
-- **Gold**: 15% Rabatt, Priority-Support, Exklusive Events
-
-#### 3.3 ADVANCED ANALYTICS [0%]
-
-**Detaillierte Beschreibung**:
-Business Intelligence Dashboard mit Predictive Analytics.
-
-**Analytics-Module**:
-- **Sales Forecasting**: Umsatzprognosen
-- **Customer Lifetime Value**: CLV-Berechnung
-- **Cohort Analysis**: Kundengruppen
-- **Heat Maps**: Bestell-Muster
-- **Competitor Analysis**: Marktvergleich
-
-**Export-Optionen**:
-- PDF Reports
-- Excel Dashboards
-- API Access
-- Scheduled Reports
-- Real-time Alerts
-
-#### 3.4 WHITE LABEL SOLUTION [0%]
-
-**Detaillierte Beschreibung**:
-Vollständiges eigenes Branding für Enterprise-Kunden.
-
-**Customization**:
-- **Domain**: eigene-domain.ch
-- **Logo & Farben**: CI/CD konform
-- **E-Mail Templates**: Eigenes Design
-- **App Store**: Eigene App
-- **Support**: Dedicated Account Manager
-
-**Technische Features**:
-- Multi-Domain Support
-- Theme Builder
-- CSS Override
-- API White-Labeling
-- Custom Analytics
-
-### 4. SUPERADMIN FEATURES DETAILS
-
-#### 4.1 TENANT CONTROL [0%]
-
-**Detaillierte Beschreibung**:
-Zentrale Verwaltung aller Restaurant-Accounts.
-
-**Tenant-Verwaltung**:
-- **Onboarding Wizard**: Schritt-für-Schritt
-- **Plan Management**: Up/Downgrade
-- **Feature Toggles**: Ein/Ausschalten
-- **Usage Monitoring**: Limits überwachen
-- **Support Tickets**: Direkte Hilfe
-
-**Bulk-Operationen**:
-- Massen-Updates
-- Feature Rollouts
-- Benachrichtigungen
-- Daten-Export
-- Migration Tools
-
-##### 4.1.1 Tenant List [0%]
-**Listen-Features**:
-- Tabellarische Darstellung
-- Status-Indikatoren (Aktiv/Pausiert/Gekündigt)
-- Subscription-Level
-- Letzter Login
-- Umsatz-Indikator
-- Quick Actions
-
-**Such- und Filter**:
-- Nach Name/ID
-- Nach Subscription
-- Nach Umsatz
-- Nach Region
-- Nach Aktivität
-- Gespeicherte Filter
-
-##### 4.1.2 Tenant Editor [0%]
-**Editor-Bereiche**:
-- Basis-Informationen
-- Subscription & Billing
-- Feature-Konfiguration
-- Performance & Usage
-
-#### 4.1.3 Feature Control [0%]
-**Detaillierte Beschreibung**:
-Granulare Feature-Verwaltung pro Tenant.
-
-**Feature-Management**:
-
-**Feature-Matrix**:
-```
-Feature             | Free | Pro | Enterprise |
---------------------|------|-----|------------|
-Basis-Features      | ✓    | ✓   | ✓          |
-Multi-Location      | ✗    | 3   | Unlimited  |
-White-Label         | ✗    | ✗   | ✓          |
-API-Zugang          | ✗    | ✓   | ✓          |
-Custom Reports      | ✗    | ✓   | ✓          |
-Priority Support    | ✗    | ✓   | ✓          |
-```
-
-**Toggle-System**:
-- Ein/Aus pro Feature
-- Zeitbasierte Aktivierung
-- Soft-Launch (% der User)
-- A/B Testing
-- Rollback-Funktion
-
-**Kommunikation**:
-- In-App Ankündigungen
-- E-Mail bei Änderungen
-- Changelog-Integration
-- Beta-Einladungen
-- Feedback-Collection
-
-#### 4.1.4 White Label Approval [0%]
-**Detaillierte Beschreibung**:
-Genehmigungsprozess für White-Label-Anfragen.
-
-**Approval-Workflow**:
-
-1. **Antrag**:
-   - Tenant stellt Antrag
-   - Design-Assets Upload
-   - Domain-Wunsch
-   - Business-Case
-
-2. **Review**:
-   - Markenrecht-Check
-   - Design-Qualität
-   - Technische Machbarkeit
-   - Preiskalkulation
-
-3. **Genehmigung**:
-   - Bedingte Freigabe
-   - Auflagen definieren
-   - Timeline festlegen
-   - Vertrag anpassen
-
-4. **Implementation**:
-   - Setup-Tracking
-   - Support-Tickets
-   - Go-Live Checkliste
-   - Post-Launch Review
-
----
-
-### 4.2 REVENUE TRACKING [0%]
-
-#### 4.2.1 Revenue Dashboard [0%]
-**Detaillierte Beschreibung**:
-Umfassende Einnahmen-Übersicht für EATECH.
-
-**Dashboard-Metriken**:
-
-**Haupt-KPIs**:
-- Tagesumsatz (Live)
-- Monats-Provisionen
-- Aktive zahlende Tenants
-- Average Revenue per Tenant
-- Wachstumsrate MoM
-- Prognose Quartalsende
-
-**Revenue-Streams**:
-- Transaktions-Provisionen (3%)
-- Subscription-Gebühren
-- White-Label Fees
-- API-Nutzung
-- Premium-Support
-- Marketing-Services
-
-**Visualisierungen**:
-- Revenue-Heatmap (nach Region)
-- Tenant-Verteilung (Pareto)
-- Zahlungsmethoden-Split
-- Tageszeit-Analyse
-- Wochentags-Patterns
-- Saison-Trends
-
-#### 4.2.2 Commission Report [0%]
-**Detaillierte Beschreibung**:
-Detaillierte Provisions-Berechnungen.
-
-**Report-Features**:
-
-**Provisions-Details**:
-```
-Tenant: Burger Palace AG
-Periode: Januar 2025
-
-Transaktionen: 4,521
-Brutto-Umsatz: CHF 156,789.00
-Provisions-Basis: CHF 145,632.00 (ohne Bar)
-Commission (3%): CHF 4,368.96
-Festival-Zuschlag: CHF 218.45
-Total: CHF 4,587.41
-```
-
-**Breakdown-Optionen**:
-- Nach Zahlungsart
-- Nach Location
-- Nach Tageszeit
-- Nach Produkt-Kategorie
-- Nach Kunden-Typ
-
-**Export-Formate**:
-- PDF (Buchhaltung)
-- Excel (Analyse)
-- CSV (Integration)
-- API (Automatisierung)
-
-#### 4.2.3 Payout Manager [0%]
-**Detaillierte Beschreibung**:
-Auszahlungs-Verwaltung an Tenants.
-
-**Payout-System**:
-
-**Auszahlungs-Rhythmus**:
-- Täglich (Enterprise)
-- Wöchentlich (Pro)
-- Monatlich (Basic)
-- Schwellwert-basiert
-
-**Prozess**:
-1. Automatische Berechnung
-2. Review & Approval
-3. Batch-Überweisung
-4. Bestätigung & Beleg
-5. Buchhaltungs-Export
-
-**Sonder-Fälle**:
-- Minus-Salden (Refunds)
-- Verrechnung mit Gebühren
-- Währungs-Konversion
-- Steuer-Abzüge
-- Mahnungen
-
-#### 4.2.4 Invoice Generator [0%]
-**Detaillierte Beschreibung**:
-Automatische Rechnungserstellung.
-
-**Rechnungs-Features**:
-
-**Rechnungs-Typen**:
-- Provisions-Abrechnung
-- Subscription-Rechnung
-- Einmal-Services
-- Gutschriften
-- Mahnungen
-
-**Automatisierung**:
-- Monatliche Generierung
-- QR-Rechnung (Schweiz)
-- E-Mail-Versand
-- Portal-Upload
-- Buchhaltungs-Sync
-
-**Customization**:
-- Tenant-Logo möglich
-- Mehrsprachig
-- Zahlungsziele
-- Skonto-Optionen
-- Anhänge
-
----
-
-### 4.3 SYSTEM HEALTH [0%]
-
-#### 4.3.1 System Monitoring [0%]
-**Detaillierte Beschreibung**:
-Echtzeit-Überwachung der System-Gesundheit.
-
-**Monitoring-Bereiche**:
-
-**Infrastructure**:
-- Server-Auslastung
-- Datenbank-Performance
-- API-Response-Zeiten
-- CDN-Hit-Rate
-- Error-Rate
-- Uptime-Statistik
-
-**Business-Metriken**:
-- Orders pro Minute
-- Conversion-Rate
-- Payment-Success-Rate
-- User-Aktivität
-- Feature-Adoption
-
-**Alerts & Thresholds**:
-- CPU > 80%
-- Memory > 90%
-- Response-Zeit > 2s
-- Error-Rate > 1%
-- Payment-Failures > 5%
-
-#### 4.3.2 Performance Metrics [0%]
-**Detaillierte Beschreibung**:
-Detaillierte Performance-Analyse.
-
-**Metrik-Kategorien**:
-
-**Frontend-Performance**:
-- Page Load Time
-- Time to Interactive
-- First Contentful Paint
-- Cumulative Layout Shift
-- Bundle-Größen
-
-**Backend-Performance**:
-- API-Latenz (P50, P95, P99)
-- Database-Queries
-- Cache-Hit-Rate
-- Function-Execution-Time
-- Memory-Usage
-
-**Optimization-Vorschläge**:
-- Slow Queries identifizieren
-- Bundle-Splitting
-- Caching-Strategien
-- CDN-Optimierung
-- Code-Hotspots
-
-#### 4.3.3 Security Audit [0%]
-**Detaillierte Beschreibung**:
-Kontinuierliche Sicherheitsüberwachung.
-
-**Security-Features**:
-
-**Access-Monitoring**:
-- Login-Attempts
-- Failed Authentications
-- Unusual Activities
-- Permission-Änderungen
-- API-Missbrauch
-
-**Vulnerability-Scanning**:
-- Dependency-Check
-- OWASP-Compliance
-- SSL-Zertifikate
-- Security-Headers
-- Input-Validation
-
-**Compliance-Reports**:
-- DSGVO/GDPR
-- PCI-DSS (Payments)
-- Swiss Data Protection
-- Audit-Logs
-- Data-Retention
-
-#### 4.3.4 Backup Manager [0%]
-**Detaillierte Beschreibung**:
-Automatisiertes Backup-System.
-
-**Backup-Strategie**:
-
-**Backup-Schedule**:
-- Realtime: Kritische Daten
-- Stündlich: Transaktionen
-- Täglich: Vollbackup
-- Wöchentlich: Archiv
-- Monatlich: Langzeit
-
-**Backup-Typen**:
-- Datenbank-Snapshots
-- File-Storage
-- Configuration
-- Logs (30 Tage)
-- User-Generated Content
-
-**Recovery-Features**:
-- Point-in-Time Recovery
-- Selective Restore
-- Cross-Region Backup
-- Disaster Recovery Plan
-- RTO: 1 Stunde
-
----
-
-## 🔧 TECHNISCHE IMPLEMENTATION DETAILS
-
-### 7.1 OFFLINE-FUNKTIONALITÄT
-
-#### Progressive Web App (PWA)
-**Implementierung**:
+### 1. Tenants Collection (Foodtrucks)
 ```javascript
-// Service Worker Registration
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service-worker.js')
-    .then(reg => console.log('SW registered'))
-    .catch(err => console.error('SW failed', err));
+{
+  tenants: {
+    [tenantId]: {
+      // === BASIC INFO ===
+      name: 'Burger Paradise',
+      slug: 'burger-paradise',
+      type: 'foodtruck', // foodtruck, restaurant, chain, ghost-kitchen
+      status: 'active', // active, suspended, trial, cancelled, setup
+      
+      // === CONTACT & LOCATION ===
+      contact: {
+        email: 'info@burgerparadise.ch',
+        phone: '+41791234567',
+        whatsapp: '+41791234567',
+        address: {
+          street: 'Bahnhofstrasse 1',
+          city: 'Zürich',
+          canton: 'ZH',
+          zip: '8001',
+          country: 'CH',
+          coordinates: { lat: 47.3667, lng: 8.5500 }
+        }
+      },
+      
+      // === BUSINESS DETAILS ===
+      business: {
+        registrationNumber: 'CHE-123.456.789',
+        vatNumber: 'CHE-123.456.789 MWST',
+        iban: 'CH93 0076 2011 6238 5295 7',
+        bankName: 'PostFinance',
+        cuisine: ['burger', 'american', 'streetfood'],
+        priceRange: 2, // 1-4 (€-€€€€)
+        capacity: 50, // simultaneous orders
+        averagePreparationTime: 15, // minutes
+        founded: '2020-03-15'
+      },
+      
+      // === SUBSCRIPTION & BILLING ===
+      subscription: {
+        plan: 'premium', // free, basic, premium, enterprise
+        status: 'active',
+        startDate: '2025-01-01',
+        billingCycle: 'monthly', // monthly, yearly
+        nextBillingDate: '2025-02-01',
+        price: 49.00,
+        currency: 'CHF',
+        paymentMethod: 'card',
+        features: {
+          maxProducts: -1, // unlimited
+          maxOrders: -1,
+          maxStaff: 10,
+          analytics: true,
+          ai: true,
+          multiLocation: true,
+          whiteLabel: false,
+          customDomain: false,
+          apiAccess: true,
+          prioritySupport: true
+        }
+      },
+      
+      // === OPERATING HOURS ===
+      operatingHours: {
+        regular: {
+          monday: { open: '11:00', close: '14:00', open2: '17:00', close2: '21:00' },
+          tuesday: { open: '11:00', close: '14:00', open2: '17:00', close2: '21:00' },
+          wednesday: { open: '11:00', close: '14:00', open2: '17:00', close2: '21:00' },
+          thursday: { open: '11:00', close: '14:00', open2: '17:00', close2: '21:00' },
+          friday: { open: '11:00', close: '22:00' },
+          saturday: { open: '11:00', close: '22:00' },
+          sunday: { closed: true }
+        },
+        specialDays: {
+          '2025-08-01': { closed: true, reason: 'Nationalfeiertag' },
+          '2025-12-25': { closed: true, reason: 'Weihnachten' },
+          '2025-12-31': { open: '11:00', close: '03:00', reason: 'Silvester' }
+        }
+      },
+      
+      // === FEATURES & SETTINGS ===
+      settings: {
+        language: 'de',
+        languages: ['de', 'fr', 'en'],
+        timezone: 'Europe/Zurich',
+        currency: 'CHF',
+        orderPrefix: 'BP',
+        orderNumberFormat: 'PREFIX-YYYY-NNNN',
+        taxRate: 7.7,
+        taxIncluded: true,
+        serviceFee: 0,
+        minimumOrder: 0,
+        maxAdvanceOrderDays: 7,
+        orderTimeout: 300, // seconds
+        
+        // Feature Toggles
+        features: {
+          allowPreorders: true,
+          allowTakeaway: true,
+          allowDelivery: false,
+          allowTableService: true,
+          allowGroupOrders: true,
+          allowReservations: false,
+          allowCatering: true,
+          requirePhoneNumber: true,
+          requireEmail: false,
+          autoAcceptOrders: false,
+          kitchenDisplay: true,
+          customerDisplay: true,
+          loyaltyProgram: true,
+          giftCards: true,
+          subscriptions: false,
+          marketplace: false
+        },
+        
+        // Notifications
+        notifications: {
+          channels: {
+            push: true,
+            sms: true,
+            email: true,
+            whatsapp: false
+          },
+          sounds: {
+            newOrder: 'ding.mp3',
+            orderReady: 'bell.mp3',
+            alert: 'alert.mp3'
+          },
+          recipients: {
+            newOrder: ['manager', 'kitchen'],
+            lowStock: ['manager'],
+            dailyReport: ['owner']
+          }
+        },
+        
+        // Payment Settings
+        payments: {
+          methods: {
+            cash: true,
+            card: true,
+            twint: true,
+            postfinance: false,
+            invoice: false,
+            crypto: false
+          },
+          tipping: {
+            enabled: true,
+            suggestions: [5, 10, 15], // percentage
+            custom: true
+          }
+        }
+      },
+      
+      // === THEME & BRANDING ===
+      branding: {
+        colors: {
+          primary: '#FF6B35',
+          secondary: '#004E89',
+          accent: '#F7931E',
+          background: '#FFFFFF',
+          text: '#333333'
+        },
+        fonts: {
+          heading: 'Bebas Neue',
+          body: 'Open Sans',
+          custom: null
+        },
+        assets: {
+          logo: 'https://storage.eatech.ch/tenants/123/logo.png',
+          logoWhite: 'https://storage.eatech.ch/tenants/123/logo-white.png',
+          favicon: 'https://storage.eatech.ch/tenants/123/favicon.ico',
+          coverImage: 'https://storage.eatech.ch/tenants/123/cover.jpg',
+          menuBackground: 'https://storage.eatech.ch/tenants/123/menu-bg.jpg'
+        },
+        customCSS: '',
+        theme: 'modern' // modern, classic, minimal, bold
+      },
+      
+      // === SEO & MARKETING ===
+      seo: {
+        metaTitle: 'Burger Paradise - Die besten Burger in Zürich',
+        metaDescription: 'Frische, handgemachte Burger vom Foodtruck. Täglich in Zürich.',
+        keywords: ['burger', 'zürich', 'foodtruck', 'streetfood'],
+        ogImage: 'https://storage.eatech.ch/tenants/123/og.jpg',
+        structuredData: {
+          type: 'FoodEstablishment',
+          priceRange: '$$',
+          servesCuisine: 'American'
+        }
+      },
+      
+      // === INTEGRATIONS ===
+      integrations: {
+        payment: {
+          stripe: {
+            accountId: 'acct_123',
+            publicKey: 'pk_live_123',
+            secretKey: '[ENCRYPTED]',
+            webhookSecret: 'whsec_123',
+            enabled: true
+          },
+          twint: {
+            merchantId: 'M123456',
+            apiKey: '[ENCRYPTED]',
+            enabled: true
+          }
+        },
+        social: {
+          google: {
+            businessId: 'ChIJ123',
+            apiKey: '[ENCRYPTED]',
+            enabled: true
+          },
+          facebook: {
+            pageId: '123456789',
+            accessToken: '[ENCRYPTED]',
+            pixelId: 'FB123',
+            enabled: true
+          },
+          instagram: {
+            businessId: 'IG123',
+            accessToken: '[ENCRYPTED]',
+            enabled: true
+          }
+        },
+        accounting: {
+          bexio: {
+            apiKey: '[ENCRYPTED]',
+            companyId: 'BX123',
+            enabled: false
+          },
+          abacus: {
+            apiKey: '[ENCRYPTED]',
+            mandant: 'AB123',
+            enabled: false
+          }
+        },
+        delivery: {
+          uber: { enabled: false },
+          justeat: { enabled: false }
+        }
+      },
+      
+      // === LOCATIONS (Multi-Location Support) ===
+      locations: [
+        {
+          id: 'loc_main',
+          name: 'Hauptstandort',
+          type: 'mobile', // mobile, fixed, both
+          schedule: {
+            monday: { location: 'Paradeplatz', time: '11:00-14:00' },
+            tuesday: { location: 'Technopark', time: '11:00-14:00' },
+            wednesday: { location: 'Universität', time: '11:00-14:00' },
+            thursday: { location: 'Hauptbahnhof', time: '11:00-14:00' },
+            friday: { location: 'Seefeld', time: '11:00-22:00' }
+          },
+          coordinates: {
+            current: { lat: 47.3667, lng: 8.5500 },
+            updated: '2025-01-07T12:00:00Z'
+          }
+        }
+      ],
+      
+      // === STATS & METRICS ===
+      stats: {
+        lifetime: {
+          orders: 15234,
+          revenue: 456789.50,
+          customers: 3456,
+          products: 89234
+        },
+        current: {
+          rating: 4.8,
+          reviewCount: 234,
+          responseTime: 45, // seconds average
+          fulfillmentRate: 0.98,
+          repeatCustomerRate: 0.34
+        },
+        rankings: {
+          city: 3, // #3 in Zürich
+          category: 1, // #1 in Burgers
+          overall: 12 // #12 overall
+        }
+      },
+      
+      // === METADATA ===
+      metadata: {
+        createdAt: '2024-06-15T10:00:00Z',
+        updatedAt: '2025-01-07T15:30:00Z',
+        createdBy: 'uid_owner123',
+        lastLoginAt: '2025-01-07T14:00:00Z',
+        onboardingCompleted: true,
+        flags: ['beta-tester', 'early-adopter'],
+        notes: 'Premium customer, sehr zufrieden'
+      }
+    }
+  }
+}
+```
+
+### 2. Products Collection
+```javascript
+{
+  'tenants/{tenantId}/products': {
+    [productId]: {
+      // === BASIC INFO ===
+      name: {
+        de: 'Classic Burger',
+        fr: 'Burger Classique',
+        it: 'Burger Classico',
+        en: 'Classic Burger'
+      },
+      description: {
+        de: 'Saftiges Rindfleisch mit frischen Zutaten',
+        fr: 'Bœuf juteux avec des ingrédients frais',
+        it: 'Manzo succoso con ingredienti freschi',
+        en: 'Juicy beef with fresh ingredients'
+      },
+      shortDescription: {
+        de: '200g Beef, Salat, Tomate, Zwiebel',
+        // ...other languages
+      },
+      
+      // === CATEGORIZATION ===
+      category: 'main',
+      subcategory: 'burgers',
+      tags: ['bestseller', 'spicy', 'glutenfree-option', 'halal'],
+      collections: ['summer-menu', 'festival-specials'],
+      
+      // === PRICING ===
+      pricing: {
+        basePrice: 16.90,
+        compareAtPrice: 19.90, // for showing discount
+        cost: 5.50, // for margin calculation
+        currency: 'CHF',
+        taxRate: 7.7,
+        taxIncluded: true,
+        
+        // Dynamic Pricing
+        dynamicPricing: {
+          enabled: true,
+          rules: [
+            {
+              type: 'happyHour',
+              discount: 20,
+              schedule: { daily: { start: '14:00', end: '17:00' } }
+            },
+            {
+              type: 'bulkOrder',
+              minQuantity: 5,
+              discount: 10
+            }
+          ]
+        }
+      },
+      
+      // === VARIANTS ===
+      variants: [
+        {
+          id: 'var_small',
+          sku: 'BRG-001-S',
+          name: { de: 'Klein (150g)', en: 'Small (150g)' },
+          price: 14.90,
+          cost: 4.50,
+          inventory: { quantity: 50, trackInventory: true },
+          isDefault: false
+        },
+        {
+          id: 'var_regular',
+          sku: 'BRG-001-M',
+          name: { de: 'Normal (200g)', en: 'Regular (200g)' },
+          price: 16.90,
+          cost: 5.50,
+          inventory: { quantity: 100, trackInventory: true },
+          isDefault: true
+        },
+        {
+          id: 'var_large',
+          sku: 'BRG-001-L',
+          name: { de: 'Gross (300g)', en: 'Large (300g)' },
+          price: 19.90,
+          cost: 7.50,
+          inventory: { quantity: 30, trackInventory: true },
+          isDefault: false
+        }
+      ],
+      
+      // === MODIFIERS ===
+      modifierGroups: [
+        {
+          id: 'meat_choice',
+          name: { de: 'Fleisch wählen', en: 'Choose Meat' },
+          required: true,
+          min: 1,
+          max: 1,
+          options: [
+            {
+              id: 'beef',
+              name: { de: 'Rindfleisch', en: 'Beef' },
+              price: 0,
+              isDefault: true,
+              allergens: []
+            },
+            {
+              id: 'chicken',
+              name: { de: 'Poulet', en: 'Chicken' },
+              price: 0,
+              allergens: []
+            },
+            {
+              id: 'veggie',
+              name: { de: 'Vegetarisch (Beyond Meat)', en: 'Vegetarian' },
+              price: 2,
+              allergens: ['soy']
+            }
+          ]
+        },
+        {
+          id: 'toppings',
+          name: { de: 'Extras', en: 'Extras' },
+          required: false,
+          min: 0,
+          max: 5,
+          options: [
+            {
+              id: 'bacon',
+              name: { de: 'Bacon', en: 'Bacon' },
+              price: 3.50,
+              inventory: { quantity: 20, trackInventory: true }
+            },
+            {
+              id: 'cheese_extra',
+              name: { de: 'Extra Käse', en: 'Extra Cheese' },
+              price: 2.00,
+              allergens: ['milk']
+            },
+            {
+              id: 'avocado',
+              name: { de: 'Avocado', en: 'Avocado' },
+              price: 3.00,
+              seasonal: true
+            },
+            {
+              id: 'jalapenos',
+              name: { de: 'Jalapeños', en: 'Jalapeños' },
+              price: 1.50,
+              tags: ['spicy']
+            },
+            {
+              id: 'onion_rings',
+              name: { de: 'Zwiebelringe', en: 'Onion Rings' },
+              price: 2.50,
+              allergens: ['gluten']
+            }
+          ]
+        },
+        {
+          id: 'sauce',
+          name: { de: 'Sauce', en: 'Sauce' },
+          required: false,
+          min: 0,
+          max: 2,
+          options: [
+            {
+              id: 'ketchup',
+              name: { de: 'Ketchup', en: 'Ketchup' },
+              price: 0,
+              isDefault: true
+            },
+            {
+              id: 'mayo',
+              name: { de: 'Mayonnaise', en: 'Mayonnaise' },
+              price: 0,
+              allergens: ['egg']
+            },
+            {
+              id: 'bbq',
+              name: { de: 'BBQ Sauce', en: 'BBQ Sauce' },
+              price: 0
+            },
+            {
+              id: 'special',
+              name: { de: 'Spezial Sauce', en: 'Special Sauce' },
+              price: 1,
+              allergens: ['egg', 'mustard']
+            }
+          ]
+        }
+      ],
+      
+      // === INVENTORY ===
+      inventory: {
+        management: 'variant', // simple, variant, bundle
+        trackInventory: true,
+        quantity: 180, // sum of all variants
+        lowStockThreshold: 20,
+        outOfStockBehavior: 'hide', // hide, disable, backorder
+        restockAlert: true,
+        supplier: {
+          name: 'Metro AG',
+          contactPerson: 'Hans Müller',
+          phone: '+41441234567',
+          email: 'bestellung@metro.ch',
+          leadTime: 2 // days
+        }
+      },
+      
+      // === AVAILABILITY ===
+      availability: {
+        status: 'available', // available, unavailable, scheduled
+        schedule: {
+          always: false,
+          rules: [
+            {
+              type: 'daily',
+              startTime: '11:00',
+              endTime: '21:00'
+            },
+            {
+              type: 'dayOfWeek',
+              days: [6, 0], // Weekend special
+              startTime: '11:00',
+              endTime: '22:00'
+            }
+          ]
+        },
+        locations: ['all'], // or specific location IDs
+        channels: ['pos', 'online', 'phone'],
+        startDate: null,
+        endDate: null, // for limited time offers
+        maxPerOrder: 10,
+        maxPerCustomer: null
+      },
+      
+      // === MEDIA ===
+      media: {
+        images: [
+          {
+            id: 'img_main',
+            url: 'https://storage.eatech.ch/products/123/burger-main.jpg',
+            thumbnails: {
+              small: 'https://storage.eatech.ch/products/123/burger-small.jpg',
+              medium: 'https://storage.eatech.ch/products/123/burger-medium.jpg',
+              large: 'https://storage.eatech.ch/products/123/burger-large.jpg'
+            },
+            alt: { de: 'Classic Burger Hauptbild', en: 'Classic Burger Main Image' },
+            width: 1200,
+            height: 800,
+            format: 'jpg',
+            size: 245678, // bytes
+            isMain: true,
+            sortOrder: 1
+          },
+          {
+            id: 'img_detail',
+            url: 'https://storage.eatech.ch/products/123/burger-detail.jpg',
+            // ... more images
+          }
+        ],
+        videos: [
+          {
+            id: 'vid_prep',
+            url: 'https://storage.eatech.ch/products/123/preparation.mp4',
+            thumbnail: 'https://storage.eatech.ch/products/123/prep-thumb.jpg',
+            duration: 30, // seconds
+            title: { de: 'Zubereitung', en: 'Preparation' }
+          }
+        ],
+        badges: ['bestseller', 'chefs-choice', 'spicy-level-2']
+      },
+      
+      // === NUTRITION & ALLERGENS ===
+      nutrition: {
+        servingSize: '1 burger (350g)',
+        calories: 650,
+        caloriesFromFat: 270,
+        totalFat: 30, // grams
+        saturatedFat: 12,
+        transFat: 0.5,
+        cholesterol: 95, // mg
+        sodium: 890,
+        totalCarbs: 45,
+        dietaryFiber: 3,
+        sugars: 8,
+        protein: 35,
+        vitaminA: 15, // % daily value
+        vitaminC: 20,
+        calcium: 25,
+        iron: 30
+      },
+      allergens: {
+        contains: ['gluten', 'milk', 'egg', 'sesame'],
+        mayContain: ['soy', 'nuts'],
+        certified: ['halal']
+      },
+      dietary: {
+        vegetarian: false,
+        vegan: false,
+        glutenFree: false,
+        lactoseFree: false,
+        organic: false,
+        nonGMO: true,
+        sustainable: true
+      },
+      
+      // === PREPARATION ===
+      preparation: {
+        time: {
+          prep: 5, // minutes
+          cook: 7,
+          total: 12
+        },
+        difficulty: 'medium',
+        equipment: ['grill', 'fryer'],
+        steps: [
+          {
+            order: 1,
+            instruction: 'Preheat grill to 200°C',
+            duration: 2
+          },
+          {
+            order: 2,
+            instruction: 'Season patty with salt and pepper',
+            duration: 1
+          },
+          {
+            order: 3,
+            instruction: 'Grill patty 3-4 minutes per side',
+            duration: 7
+          },
+          {
+            order: 4,
+            instruction: 'Toast bun lightly',
+            duration: 1
+          },
+          {
+            order: 5,
+            instruction: 'Assemble with toppings',
+            duration: 1
+          }
+        ],
+        servingTemperature: 'hot',
+        holdingTime: 10, // minutes max
+        packagingInstructions: 'Wrap in branded paper, place in box'
+      },
+      
+      // === ANALYTICS & PERFORMANCE ===
+      analytics: {
+        views: {
+          total: 12543,
+          unique: 8934,
+          lastMonth: 1234,
+          trend: 'up' // up, down, stable
+        },
+        orders: {
+          total: 3421,
+          lastMonth: 234,
+          conversionRate: 0.27,
+          averageRating: 4.7,
+          repeatOrderRate: 0.45
+        },
+        revenue: {
+          total: 57895.90,
+          lastMonth: 3456.70,
+          averageOrderValue: 16.91,
+          profitMargin: 0.67
+        },
+        rankings: {
+          category: 1, // #1 in burgers
+          overall: 3, // #3 overall
+          trending: 2 // #2 trending this week
+        }
+      },
+      
+      // === AI INSIGHTS ===
+      ai: {
+        priceOptimization: {
+          currentPrice: 16.90,
+          optimalPrice: 17.50,
+          elasticity: -1.2,
+          projectedRevenueLift: 0.08,
+          confidence: 0.87,
+          lastAnalyzed: '2025-01-06T10:00:00Z'
+        },
+        demandForecast: {
+          tomorrow: 45,
+          nextWeek: 280,
+          accuracy: 0.89,
+          factors: ['weather', 'dayOfWeek', 'events']
+        },
+        crossSell: {
+          recommendations: ['fries', 'cola', 'dessert'],
+          attachRate: 0.67,
+          averageLift: 8.50
+        }
+      },
+      
+      // === METADATA ===
+      metadata: {
+        status: 'active', // active, inactive, archived
+        visibility: 'public', // public, private, scheduled
+        featured: true,
+        sortOrder: 1,
+        internalNotes: 'Bestseller, margin gut',
+        createdAt: '2024-07-01T10:00:00Z',
+        updatedAt: '2025-01-07T12:00:00Z',
+        createdBy: 'uid_staff456',
+        lastModifiedBy: 'uid_manager789',
+        version: 12,
+        changeLog: [
+          {
+            date: '2025-01-07T12:00:00Z',
+            user: 'uid_manager789',
+            changes: ['price update', 'new image']
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+### 3. Orders Collection
+```javascript
+{
+  'tenants/{tenantId}/orders': {
+    [orderId]: {
+      // === ORDER BASICS ===
+      orderNumber: 'BP-2025-0001',
+      type: 'pickup', // pickup, delivery, dinein, catering
+      channel: 'web', // web, app, pos, phone, kiosk, api
+      status: 'confirmed', // draft, pending, confirmed, preparing, ready, picked_up, delivered, completed, cancelled, refunded
+      
+      // === CUSTOMER ===
+      customer: {
+        id: 'cust_123',
+        firebaseUid: 'uid_456',
+        name: 'Max Mustermann',
+        phone: '+41791234567',
+        phoneVerified: true,
+        email: 'max@example.com',
+        language: 'de',
+        notes: 'Stammkunde, mag es scharf',
+        tags: ['vip', 'regular'],
+        marketingConsent: true
+      },
+      
+      // === ORDER ITEMS ===
+      items: [
+        {
+          id: 'item_1',
+          productId: 'prod_123',
+          productName: 'Classic Burger',
+          variantId: 'var_regular',
+          variantName: 'Normal (200g)',
+          modifiers: [
+            {
+              groupId: 'meat_choice',
+              groupName: 'Fleisch',
+              optionId: 'beef',
+              optionName: 'Rindfleisch',
+              price: 0
+            },
+            {
+              groupId: 'toppings',
+              groupName: 'Extras',
+              optionId: 'bacon',
+              optionName: 'Bacon',
+              price: 3.50
+            }
+          ],
+          quantity: 2,
+          unitPrice: 16.90,
+          modifiersPrice: 3.50,
+          itemPrice: 20.40,
+          totalPrice: 40.80,
+          taxRate: 7.7,
+          taxAmount: 3.14,
+          notes: 'Ohne Zwiebeln bitte',
+          status: 'preparing',
+          preparedBy: 'staff_789',
+          preparedAt: null
+        },
+        {
+          id: 'item_2',
+          productId: 'prod_456',
+          productName: 'Pommes Frites',
+          // ... more items
+        }
+      ],
+      
+      // === PRICING & PAYMENT ===
+      pricing: {
+        subtotal: 75.60,
+        itemsTotal: 75.60,
+        modifiersTotal: 7.00,
+        
+        // Discounts
+        discounts: [
+          {
+            type: 'promocode',
+            code: 'SUMMER10',
+            description: '10% Summer Rabatt',
+            amount: 7.56,
+            percentage: 10
+          }
+        ],
+        discountTotal: 7.56,
+        
+        // Fees & Charges
+        deliveryFee: 0,
+        serviceFee: 0,
+        packagingFee: 0.50,
+        
+        // Tax
+        taxRate: 7.7,
+        taxAmount: 5.83,
+        taxIncluded: true,
+        
+        // Tip
+        tip: {
+          amount: 5.00,
+          percentage: 6.6,
+          method: 'percentage' // percentage, fixed
+        },
+        
+        // Totals
+        total: 73.54,
+        totalPaid: 73.54,
+        totalDue: 0,
+        currency: 'CHF'
+      },
+      
+      payment: {
+        method: 'card', // card, cash, twint, invoice, voucher, mixed
+        status: 'paid', // pending, processing, paid, failed, refunded, partially_refunded
+        
+        // Primary Transaction
+        transactions: [
+          {
+            id: 'txn_1',
+            method: 'card',
+            amount: 73.54,
+            status: 'success',
+            processor: 'stripe',
+            processorTransactionId: 'ch_3ABC123',
+            card: {
+              brand: 'visa',
+              last4: '4242',
+              expMonth: 12,
+              expYear: 2027,
+              country: 'CH'
+            },
+            processedAt: '2025-01-07T12:35:00Z',
+            fee: 2.20 // payment processor fee
+          }
+        ],
+        
+        // Refunds
+        refunds: [],
+        
+        // Invoice Details
+        invoice: {
+          required: false,
+          number: null,
+          issuedAt: null,
+          url: null
+        }
+      },
+      
+      // === FULFILLMENT ===
+      fulfillment: {
+        type: 'pickup',
+        
+        // Timing
+        timing: {
+          requestedAt: '2025-01-07T13:00:00Z',
+          requestedType: 'asap', // asap, scheduled
+          promisedAt: '2025-01-07T13:15:00Z',
+          estimatedAt: '2025-01-07T13:12:00Z',
+          
+          // Actual Times
+          confirmedAt: '2025-01-07T12:36:00Z',
+          startedAt: '2025-01-07T12:40:00Z',
+          readyAt: '2025-01-07T12:52:00Z',
+          pickedUpAt: '2025-01-07T12:55:00Z',
+          completedAt: '2025-01-07T12:55:00Z'
+        },
+        
+        // Pickup Details
+        pickup: {
+          location: 'main',
+          instructions: 'Am Fenster abholen',
+          code: '4321',
+          qrCode: 'data:image/png;base64,...'
+        },
+        
+        // Delivery Details (if applicable)
+        delivery: null,
+        
+        // Table Service (if applicable)
+        table: {
+          number: 5,
+          zone: 'terrasse',
+          server: 'staff_456'
+        }
+      },
+      
+      // === LOCATION & CONTEXT ===
+      context: {
+        location: {
+          type: 'coordinates',
+          source: 'gps', // gps, manual, ip
+          accuracy: 10, // meters
+          coordinates: {
+            lat: 47.3699,
+            lng: 8.5380
+          },
+          address: 'Paradeplatz, 8001 Zürich',
+          plusCode: '8FVC9G9Q+R6'
+        },
+        
+        device: {
+          type: 'mobile', // mobile, tablet, desktop
+          os: 'ios',
+          browser: 'safari',
+          ip: '85.1.2.3',
+          userAgent: 'Mozilla/5.0...'
+        },
+        
+        weather: {
+          condition: 'sunny',
+          temperature: 22,
+          impact: 'positive'
+        },
+        
+        event: {
+          id: 'event_123',
+          name: 'Street Food Festival',
+          type: 'festival'
+        }
+      },
+      
+      // === COMMUNICATIONS ===
+      communications: {
+        notifications: [
+          {
+            type: 'order_confirmed',
+            channel: 'sms',
+            sentAt: '2025-01-07T12:36:05Z',
+            delivered: true,
+            content: 'Bestellung BP-2025-0001 bestätigt. Abholung ca. 13:00'
+          },
+          {
+            type: 'order_ready',
+            channel: 'push',
+            sentAt: '2025-01-07T12:52:00Z',
+            delivered: true,
+            opened: true
+          }
+        ],
+        
+        customerMessages: [
+          {
+            from: 'customer',
+            message: 'Kann ich Zwiebeln weglassen?',
+            sentAt: '2025-01-07T12:35:30Z'
+          },
+          {
+            from: 'restaurant',
+            message: 'Klar, kein Problem!',
+            sentBy: 'staff_456',
+            sentAt: '2025-01-07T12:36:00Z'
+          }
+        ]
+      },
+      
+      // === FEEDBACK & RATING ===
+      feedback: {
+        requested: true,
+        requestedAt: '2025-01-07T13:10:00Z',
+        
+        rating: {
+          overall: 5,
+          food: 5,
+          service: 5,
+          speed: 4,
+          value: 5
+        },
+        
+        review: {
+          title: 'Perfekt!',
+          comment: 'Wie immer ausgezeichnet. Burger war heiss und saftig.',
+          wouldRecommend: true,
+          tags: ['tasty', 'fast', 'friendly']
+        },
+        
+        response: {
+          message: 'Danke für das tolle Feedback!',
+          respondedBy: 'staff_456',
+          respondedAt: '2025-01-07T14:00:00Z'
+        },
+        
+        submittedAt: '2025-01-07T13:30:00Z'
+      },
+      
+      // === ANALYTICS & TRACKING ===
+      analytics: {
+        source: {
+          utm_source: 'instagram',
+          utm_medium: 'social',
+          utm_campaign: 'summer2025',
+          referrer: 'instagram.com'
+        },
+        
+        journey: {
+          sessionId: 'sess_abc123',
+          landingPage: '/menu',
+          viewedProducts: ['prod_123', 'prod_456', 'prod_789'],
+          cartAbandoned: false,
+          timeToOrder: 245, // seconds
+          clicks: 12
+        },
+        
+        performance: {
+          preparationTime: 12, // minutes
+          promiseTimeAccuracy: true,
+          customerWaitTime: 3,
+          kitchenEfficiency: 0.92
+        },
+        
+        loyalty: {
+          pointsEarned: 74,
+          tierProgress: 0.15,
+          campaignsTriggered: ['welcome_back']
+        }
+      },
+      
+      // === INTERNAL OPERATIONS ===
+      operations: {
+        kitchen: {
+          station: 'grill',
+          assignedTo: 'staff_789',
+          priority: 'normal', // low, normal, high, urgent
+          printedAt: '2025-01-07T12:36:30Z',
+          bumpedAt: '2025-01-07T12:52:00Z'
+        },
+        
+        pos: {
+          terminal: 'POS-01',
+          shift: 'shift_morning',
+          cashier: 'staff_456',
+          drawer: 'drawer_1'
+        },
+        
+        inventory: {
+          depleted: [
+            { productId: 'prod_123', quantity: 2 },
+            { modifierId: 'bacon', quantity: 2 }
+          ],
+          warnings: ['beef patty low stock']
+        }
+      },
+      
+      // === COMPLIANCE & AUDIT ===
+      compliance: {
+        taxInvoice: {
+          required: false,
+          number: null,
+          issuedAt: null
+        },
+        
+        hygiene: {
+          temperatureChecked: true,
+          allergenWarnings: ['gluten', 'milk'],
+          certifications: ['haccp']
+        },
+        
+        dataProtection: {
+          consentGiven: true,
+          marketingOptIn: true,
+          retentionPeriod: 730 // days
+        }
+      },
+      
+      // === METADATA ===
+      metadata: {
+        version: 3,
+        createdAt: '2025-01-07T12:34:00Z',
+        updatedAt: '2025-01-07T12:55:00Z',
+        
+        // Audit Trail
+        history: [
+          {
+            timestamp: '2025-01-07T12:34:00Z',
+            action: 'created',
+            by: 'customer',
+            details: { source: 'web' }
+          },
+          {
+            timestamp: '2025-01-07T12:36:00Z',
+            action: 'confirmed',
+            by: 'system',
+            details: { autoConfirm: true }
+          },
+          {
+            timestamp: '2025-01-07T12:40:00Z',
+            action: 'preparing',
+            by: 'staff_789',
+            details: { station: 'grill' }
+          },
+          {
+            timestamp: '2025-01-07T12:52:00Z',
+            action: 'ready',
+            by: 'staff_789',
+            details: {}
+          },
+          {
+            timestamp: '2025-01-07T12:55:00Z',
+            action: 'completed',
+            by: 'staff_456',
+            details: { pickupCode: '4321' }
+          }
+        ],
+        
+        flags: [],
+        tags: ['repeat_customer', 'vip'],
+        customFields: {}
+      }
+    }
+  }
+}
+```
+
+### 4. Master Control Collections
+```javascript
+{
+  // === MASTER USERS ===
+  masterUsers: {
+    [userId]: {
+      email: 'admin@eatech.ch',
+      role: 'superadmin', // superadmin, admin, support, analyst
+      permissions: ['all'], // or specific permissions array
+      name: 'Master Admin',
+      phone: '+41791234567',
+      twoFactorEnabled: true,
+      lastLogin: '2025-01-07T10:00:00Z',
+      createdAt: '2024-01-01T00:00:00Z'
+    }
+  },
+  
+  // === SYSTEM CONFIGURATION ===
+  systemConfig: {
+    general: {
+      maintenanceMode: false,
+      maintenanceMessage: null,
+      systemVersion: '3.0.0',
+      environment: 'production'
+    },
+    features: {
+      globalFeatureFlags: {
+        aiPricing: true,
+        voiceCommerce: true,
+        blockchain: false,
+        eventManagement: true
+      },
+      rolloutPercentages: {
+        newCheckout: 100,
+        aiRecommendations: 75
+      }
+    },
+    limits: {
+      maxTenants: 1000,
+      maxOrdersPerMinute: 1000,
+      maxAPICallsPerHour: 100000
+    },
+    monitoring: {
+      errorThreshold: 0.01,
+      alertEmails: ['alerts@eatech.ch'],
+      slackWebhook: 'https://hooks.slack.com/...'
+    }
+  },
+  
+  // === PLATFORM ANALYTICS ===
+  platformAnalytics: {
+    daily: {
+      '2025-01-07': {
+        tenants: {
+          total: 234,
+          active: 198,
+          new: 5,
+          churned: 1
+        },
+        orders: {
+          total: 12456,
+          value: 387654.32,
+          average: 31.12
+        },
+        revenue: {
+          subscriptions: 11566.00,
+          commissions: 11629.63,
+          total: 23195.63
+        },
+        performance: {
+          uptime: 0.9999,
+          avgResponseTime: 145, // ms
+          errorRate: 0.0003
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+## 📋 FEATURE-LISTE (200+ FEATURES)
+
+### 🎯 CORE FEATURES (Phase 1-2) ✅
+
+#### 1. Multi-Tenant Architektur
+- [x] Tenant Isolation
+- [x] Custom Domains Support
+- [x] White Label Möglichkeit
+- [x] Tenant-spezifische Konfiguration
+- [x] Datenbank-Sharding
+- [x] Resource Quotas
+
+#### 2. Bestell-Management
+- [x] QR-Code Scanning
+- [x] Table Service
+- [x] Pickup Orders
+- [x] Delivery Integration
+- [x] Vorbestellungen
+- [x] Gruppen-Bestellungen
+- [x] Order Modifications
+- [x] Stornierungen & Refunds
+
+#### 3. Menü-Verwaltung
+- [x] Multi-Language Support (DE/FR/IT/EN)
+- [x] Kategorien & Unterkategorien
+- [x] Produkt-Varianten
+- [x] Modifier-Gruppen
+- [x] Kombi-Angebote
+- [x] Zeitbasierte Verfügbarkeit
+- [x] Allergen-Management
+- [x] Nährwert-Informationen
+
+#### 4. Zahlungssystem
+- [x] Stripe Integration
+- [x] Twint Support
+- [x] PostFinance
+- [x] Cash Management
+- [x] Split Payments
+- [x] Trinkgeld-System
+- [x] Rechnungs-Export
+- [x] QR-Rechnung
+
+#### 5. Echtzeit-Features
+- [x] Live Order Updates
+- [x] Kitchen Display System
+- [x] Customer Display
+- [x] Push Notifications
+- [x] SMS Benachrichtigungen
+- [x] E-Mail Notifications
+- [x] WebSocket Connections
+- [x] Server-Sent Events
+
+### 📊 ANALYTICS & REPORTING (Phase 3) ✅
+
+#### 6. Business Intelligence
+- [x] Revenue Analytics
+- [x] Product Performance
+- [x] Customer Analytics
+- [x] Zeitbasierte Reports
+- [x] Vergleichs-Reports
+- [x] Trend-Analysen
+- [x] Export-Funktionen
+- [x] Custom Dashboards
+
+#### 7. Predictive Analytics
+- [x] Demand Forecasting
+- [x] Revenue Predictions
+- [x] Inventory Forecasting
+- [x] Staff Planning
+- [x] Weather Impact Analysis
+- [x] Event Impact Prediction
+- [x] Seasonal Trends
+- [x] Customer Lifetime Value
+
+#### 8. Real-Time Monitoring
+- [x] Live Sales Dashboard
+- [x] Order Flow Visualization
+- [x] Kitchen Performance
+- [x] Wait Time Analytics
+- [x] Customer Satisfaction
+- [x] System Health
+- [x] API Performance
+- [x] Error Tracking
+
+### 🤖 KI-FEATURES (Phase 5) 🚧
+
+#### 9. Notfall-KI System ⭐
+- [ ] Ein-Knopf Aktivierung
+- [ ] Automatische Problem-Erkennung
+- [ ] Sofort-Lösungsvorschläge
+- [ ] Auto-Menü-Anpassung
+- [ ] Notfall-Pricing
+- [ ] Staff-Koordination
+- [ ] Kunden-Kommunikation
+- [ ] Post-Mortem Analyse
+
+#### 10. Preis-KI Insights ⭐
+- [ ] Dynamische Preisempfehlungen
+- [ ] A/B Testing Automation
+- [ ] Elastizitäts-Analyse
+- [ ] Regional-Vergleiche
+- [ ] Konkurrenz-Monitoring
+- [ ] Margen-Optimierung
+- [ ] Bundle-Vorschläge
+- [ ] Promotion-Timing
+
+#### 11. Intelligente Wartezeiten ⭐
+- [ ] ML-basierte Vorhersagen
+- [ ] Echtzeit-Anpassungen
+- [ ] Küchen-Kapazitäts-AI
+- [ ] Rush-Hour Prediction
+- [ ] Smart Queue Management
+- [ ] Customer ETA Updates
+- [ ] Bottleneck Detection
+- [ ] Auto-Staffing Alerts
+
+#### 12. Voice Commerce ⭐
+- [x] "Hey EATECH" Wake Word
+- [ ] Mehrsprachig (DE/FR/IT/EN)
+- [ ] Schweizerdeutsch Support
+- [ ] Natürliche Bestellaufnahme
+- [ ] Küchen-Sprachbefehle
+- [ ] Emotions-Erkennung
+- [ ] Bestell-Bestätigung
+- [ ] Upselling via Voice
+
+### 📅 EVENT MANAGEMENT (Phase 5) 🚧
+
+#### 13. Multi-Day Events ⭐
+- [x] Event-Kalender
+- [x] Standort-Planung
+- [ ] Lageplan-Integration
+- [ ] Revenue Sharing Modelle
+- [ ] Live Entertainment Schedule
+- [ ] Besucher-Tracking
+- [ ] Event-spezifische Menüs
+- [ ] Partner-Koordination
+
+#### 14. Festival Analytics ⭐
+- [ ] Echtzeit-Besucherzahlen
+- [ ] Verkaufs-Heatmaps
+- [ ] Peak-Time Analysis
+- [ ] Wetter-Impact
+- [ ] Bühnenprogramm-Korrelation
+- [ ] Social Media Monitoring
+- [ ] Competitor Analysis
+- [ ] ROI Berechnung
+
+#### 15. Standort-Intelligence ⭐
+- [ ] GPS-basiertes Check-In
+- [ ] Geo-Fencing
+- [ ] Route-Optimization
+- [ ] Standort-History
+- [ ] Hotspot-Analyse
+- [ ] Kannibalisierungs-Check
+- [ ] Permit-Management
+- [ ] Parking-Finder
+
+### 🎨 CMS & THEMES (Phase 5) 🚧
+
+#### 16. Theme Builder ⭐
+- [x] Drag & Drop Editor
+- [ ] Template Library
+- [ ] Custom CSS Support
+- [ ] Font Management
+- [ ] Color Schemes
+- [ ] Animation Builder
+- [ ] Responsive Preview
+- [ ] Version Control
+
+#### 17. Menu Designer ⭐
+- [ ] Print-Ready Layouts
+- [ ] QR-Code Integration
+- [ ] Bleed/Anschnitt Support
+- [ ] Multi-Format Export
+- [ ] Template System
+- [ ] Seasonal Variations
+- [ ] Price Update Sync
+- [ ] Digital Signage Export
+
+#### 18. Marketing Tools
+- [ ] Landing Page Builder
+- [ ] Email Campaign Manager
+- [ ] SMS Marketing
+- [ ] Social Media Integration
+- [ ] Loyalty Program Builder
+- [ ] Referral System
+- [ ] Review Management
+- [ ] SEO Optimization
+
+### 💰 FINANCIAL FEATURES
+
+#### 19. Buchhaltungs-Export ⭐
+- [x] Bexio Integration
+- [ ] Abacus Support
+- [ ] Banana Buchhaltung
+- [ ] Custom Export Formats
+- [ ] Automatische Synchronisation
+- [ ] Kostenstellen-Zuordnung
+- [ ] MWST-Reporting
+- [ ] Jahresabschluss-Support
+
+#### 20. Advanced Pricing
+- [ ] Happy Hour Automation
+- [ ] Surge Pricing
+- [ ] Bundle Deals
+- [ ] Loyalty Discounts
+- [ ] Group Pricing
+- [ ] Student/Senior Discounts
+- [ ] Corporate Rates
+- [ ] Subscription Models
+
+### 🔧 OPERATIONS
+
+#### 21. Inventory Management
+- [x] Real-Time Tracking
+- [x] Low Stock Alerts
+- [x] Supplier Management
+- [ ] Auto-Reordering
+- [ ] Waste Tracking
+- [ ] Recipe Management
+- [ ] Cost Calculation
+- [ ] Expiry Tracking
+
+#### 22. Staff Management
+- [x] Role-Based Access
+- [x] Shift Planning
+- [x] Performance Tracking
+- [ ] Tip Distribution
+- [ ] Training Modules
+- [ ] Communication Hub
+- [ ] Task Management
+- [ ] Payroll Integration
+
+#### 23. Kitchen Optimization
+- [x] KDS (Kitchen Display)
+- [x] Order Prioritization
+- [ ] Prep List Generation
+- [ ] Station Management
+- [ ] Recipe Display
+- [ ] Allergen Alerts
+- [ ] Batch Cooking
+- [ ] Equipment Monitoring
+
+### 🔐 SECURITY & COMPLIANCE
+
+#### 24. Datenschutz (DSGVO/DSG) ⭐
+- [x] Consent Management
+- [x] Data Export (Art. 20)
+- [x] Right to Delete (Art. 17)
+- [x] Anonymisierung
+- [ ] Audit Logs
+- [ ] Cookie Management
+- [ ] Privacy Center
+- [ ] DPA Generator
+
+#### 25. Payment Security
+- [x] PCI DSS Compliance
+- [x] 3D Secure
+- [x] Tokenization
+- [ ] Fraud Detection
+- [ ] Chargeback Management
+- [ ] Risk Scoring
+- [ ] Blacklist Management
+- [ ] Compliance Reporting
+
+### 🚀 INNOVATIVE FEATURES
+
+#### 26. Blockchain Integration ⭐
+- [ ] Transaction Recording
+- [ ] Smart Contracts
+- [ ] Loyalty Token
+- [ ] Supply Chain Tracking
+- [ ] Immutable Receipts
+- [ ] Decentralized Reviews
+- [ ] Crypto Payments
+- [ ] NFT Rewards
+
+#### 27. Edge Computing ⭐
+- [ ] Local Processing
+- [ ] Offline Transactions
+- [ ] Distributed Analytics
+- [ ] Mesh Networking
+- [ ] Peer-to-Peer Sync
+- [ ] Latency Optimization
+- [ ] Bandwidth Saving
+- [ ] Resilience Mode
+
+#### 28. AR/VR Features
+- [ ] AR Menu Preview
+- [ ] Virtual Restaurant Tour
+- [ ] 3D Food Models
+- [ ] AR Navigation
+- [ ] VR Training
+- [ ] Mixed Reality Orders
+- [ ] Holographic Displays
+- [ ] MetaVerse Integration
+
+### 📱 CUSTOMER EXPERIENCE
+
+#### 29. Loyalty & Rewards
+- [x] Points System
+- [x] Tier Management
+- [ ] Gamification
+- [ ] Challenges
+- [ ] Badges
+- [ ] Referral Rewards
+- [ ] Birthday Specials
+- [ ] VIP Perks
+
+#### 30. Social Features
+- [ ] Order Sharing
+- [ ] Group Orders
+- [ ] Social Login
+- [ ] Friend Recommendations
+- [ ] Community Feed
+- [ ] Food Photos
+- [ ] Check-Ins
+- [ ] Influencer Tools
+
+#### 31. Accessibility
+- [x] Screen Reader Support
+- [x] Keyboard Navigation
+- [x] High Contrast Mode
+- [ ] Voice Control
+- [ ] Sign Language Videos
+- [ ] Easy Read Mode
+- [ ] Dyslexia Font
+- [ ] Cognitive Assistance
+
+### 🌐 PLATFORM FEATURES
+
+#### 32. API & Integrations
+- [x] RESTful API
+- [x] GraphQL Endpoint
+- [x] Webhook System
+- [ ] SDK (JS/TS)
+- [ ] Zapier Integration
+- [ ] IFTTT Support
+- [ ] API Marketplace
+- [ ] Custom Integrations
+
+#### 33. Performance
+- [x] CDN Integration
+- [x] Image Optimization
+- [x] Lazy Loading
+- [ ] WebAssembly Modules
+- [ ] Service Worker
+- [ ] Progressive Enhancement
+- [ ] Resource Hints
+- [ ] Critical CSS
+
+#### 34. Developer Tools
+- [ ] CLI Tool
+- [ ] Local Development
+- [ ] Staging Environment
+- [ ] API Playground
+- [ ] Debug Mode
+- [ ] Performance Profiler
+- [ ] A/B Testing Framework
+- [ ] Feature Flags
+
+### 🎯 MASTER CONTROL FEATURES
+
+#### 35. Platform Management
+- [x] Tenant Overview
+- [x] Global Analytics
+- [x] System Monitoring
+- [ ] Feature Control
+- [ ] Billing Management
+- [ ] Support Tickets
+- [ ] Announcement System
+- [ ] Migration Tools
+
+#### 36. AI Training & Optimization
+- [ ] Model Management
+- [ ] Training Pipeline
+- [ ] A/B Test Results
+- [ ] Performance Metrics
+- [ ] Data Labeling
+- [ ] Feedback Loop
+- [ ] Model Versioning
+- [ ] Experiment Tracking
+
+---
+
+## 📈 IMPLEMENTIERUNGSSTATUS
+
+### Phase Übersicht
+```
+Phase 1 (Core):          ████████████████████ 100%
+Phase 2 (Orders):        ████████████████████ 100%
+Phase 3 (Analytics):     ████████████████████ 100%
+Phase 4 (Enhancement):   ████████████████████ 100%
+Phase 5 (Innovation):    ███████████████░░░░░ 75%
+-------------------------------------------------
+GESAMT:                  █████████████████░░░ 85%
+```
+
+### Detaillierter Status Phase 5
+
+#### ✅ Bereits implementiert:
+1. **Master Control Base** (`/apps/master/`)
+   - Login System
+   - Dashboard
+   - Navigation
+   - Tenant Overview
+
+2. **Komponenten** (`/apps/master/src/`)
+   - NotificationCenter
+   - ReviewTracker  
+   - PreOrderManager
+   - CalendarManager
+   - TenantControl
+
+3. **Event System** (Teilweise)
+   - Event Model
+   - Basic CRUD
+   - Calendar Integration
+
+#### 🚧 In Arbeit:
+1. **KI-System Core**
+   - OpenAI Integration
+   - Notfall-KI Logic
+   - Price Optimization
+   - Demand Forecasting
+
+2. **Voice Commerce**
+   - Web Speech API
+   - Wake Word Detection
+   - Multi-Language Support
+
+3. **CMS & Themes**
+   - Theme Builder UI
+   - Menu Designer
+   - Print Support
+
+#### ⬜ Noch zu implementieren:
+1. **Feature Flag System**
+2. **System Monitoring Dashboard**
+3. **Blockchain Integration**
+4. **Edge Computing**
+5. **Advanced Event Features**
+
+---
+
+## 🔌 API DOKUMENTATION
+
+### REST API Endpoints
+
+#### Authentication
+```typescript
+POST   /api/auth/login
+POST   /api/auth/logout  
+POST   /api/auth/refresh
+POST   /api/auth/verify-phone
+POST   /api/auth/verify-otp
+GET    /api/auth/me
+```
+
+#### Tenants
+```typescript
+GET    /api/tenants
+GET    /api/tenants/:id
+POST   /api/tenants
+PUT    /api/tenants/:id
+DELETE /api/tenants/:id
+GET    /api/tenants/:id/stats
+POST   /api/tenants/:id/upload-logo
+```
+
+#### Products
+```typescript
+GET    /api/tenants/:tenantId/products
+GET    /api/tenants/:tenantId/products/:id
+POST   /api/tenants/:tenantId/products
+PUT    /api/tenants/:tenantId/products/:id
+DELETE /api/tenants/:tenantId/products/:id
+POST   /api/tenants/:tenantId/products/:id/duplicate
+PATCH  /api/tenants/:tenantId/products/:id/availability
+POST   /api/tenants/:tenantId/products/bulk-update
+POST   /api/tenants/:tenantId/products/import
+```
+
+#### Orders
+```typescript
+GET    /api/tenants/:tenantId/orders
+GET    /api/tenants/:tenantId/orders/:id
+POST   /api/tenants/:tenantId/orders
+PUT    /api/tenants/:tenantId/orders/:id
+PATCH  /api/tenants/:tenantId/orders/:id/status
+POST   /api/tenants/:tenantId/orders/:id/refund
+GET    /api/tenants/:tenantId/orders/:id/receipt
+POST   /api/tenants/:tenantId/orders/:id/resend-notification
+```
+
+#### Analytics
+```typescript
+GET    /api/tenants/:tenantId/analytics/overview
+GET    /api/tenants/:tenantId/analytics/revenue
+GET    /api/tenants/:tenantId/analytics/products
+GET    /api/tenants/:tenantId/analytics/customers
+GET    /api/tenants/:tenantId/analytics/trends
+GET    /api/tenants/:tenantId/analytics/predictions
+POST   /api/tenants/:tenantId/analytics/export
+```
+
+#### AI Endpoints
+```typescript
+POST   /api/ai/emergency-mode
+POST   /api/ai/price-optimization
+POST   /api/ai/demand-forecast
+POST   /api/ai/menu-suggestions
+POST   /api/ai/wait-time-prediction
+POST   /api/ai/voice-order
+GET    /api/ai/insights/:tenantId
+```
+
+### GraphQL Schema
+
+```graphql
+type Query {
+  # Tenant Queries
+  tenant(id: ID!): Tenant
+  tenants(filter: TenantFilter, limit: Int, offset: Int): TenantConnection!
+  
+  # Product Queries
+  products(tenantId: ID!, filter: ProductFilter): [Product!]!
+  product(id: ID!): Product
+  
+  # Order Queries
+  orders(tenantId: ID!, filter: OrderFilter): OrderConnection!
+  order(id: ID!): Order
+  
+  # Analytics Queries
+  analytics(tenantId: ID!, dateRange: DateRange!): Analytics!
+  predictions(tenantId: ID!): Predictions!
+  
+  # Event Queries
+  events(filter: EventFilter): [Event!]!
+  event(id: ID!): Event
 }
 
-// Offline-First Strategie
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
-      .catch(() => caches.match('/offline.html'))
+type Mutation {
+  # Tenant Mutations
+  createTenant(input: CreateTenantInput!): Tenant!
+  updateTenant(id: ID!, input: UpdateTenantInput!): Tenant!
+  deleteTenant(id: ID!): Boolean!
+  
+  # Product Mutations
+  createProduct(tenantId: ID!, input: CreateProductInput!): Product!
+  updateProduct(id: ID!, input: UpdateProductInput!): Product!
+  deleteProduct(id: ID!): Boolean!
+  
+  # Order Mutations
+  createOrder(tenantId: ID!, input: CreateOrderInput!): Order!
+  updateOrderStatus(id: ID!, status: OrderStatus!): Order!
+  refundOrder(id: ID!, amount: Float): Order!
+  
+  # AI Mutations
+  activateEmergencyMode(tenantId: ID!): EmergencyModeResult!
+  optimizePrice(productId: ID!): PriceOptimizationResult!
+}
+
+type Subscription {
+  # Order Subscriptions
+  orderCreated(tenantId: ID!): Order!
+  orderUpdated(tenantId: ID!): Order!
+  
+  # Live Updates
+  queueUpdated(tenantId: ID!): QueueStatus!
+  kitchenUpdated(tenantId: ID!): KitchenStatus!
+  
+  # Event Updates
+  eventMetrics(eventId: ID!): EventMetrics!
+}
+```
+
+### WebSocket Events
+
+```javascript
+// Client -> Server
+socket.emit('join-tenant', { tenantId, role });
+socket.emit('join-kitchen', { tenantId, station });
+socket.emit('update-order-status', { orderId, status });
+socket.emit('request-help', { type, message });
+
+// Server -> Client
+socket.on('new-order', (order) => {});
+socket.on('order-updated', (order) => {});
+socket.on('kitchen-alert', (alert) => {});
+socket.on('wait-time-updated', (data) => {});
+socket.on('emergency-activated', (mode) => {});
+```
+
+---
+
+## 📱 PWA IMPLEMENTATION
+
+### Service Worker Configuration
+```javascript
+// /apps/web/service-worker.js
+import { precacheAndRoute } from 'workbox-precaching';
+import { registerRoute, NavigationRoute } from 'workbox-routing';
+import { CacheFirst, NetworkFirst, StaleWhileRevalidate } from 'workbox-strategies';
+import { ExpirationPlugin } from 'workbox-expiration';
+import { BackgroundSyncPlugin } from 'workbox-background-sync';
+
+// Precache static assets
+precacheAndRoute(self.__WB_MANIFEST);
+
+// Aggressive Caching für statische Assets
+registerRoute(
+  ({ request }) => 
+    request.destination === 'style' ||
+    request.destination === 'script' ||
+    request.destination === 'font',
+  new CacheFirst({
+    cacheName: 'static-assets',
+    plugins: [
+      new ExpirationPlugin({
+        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+        maxEntries: 100,
+      }),
+    ],
+  })
+);
+
+// Image CDN mit Optimierung
+registerRoute(
+  ({ request }) => request.destination === 'image',
+  new StaleWhileRevalidate({
+    cacheName: 'images',
+    plugins: [
+      new ExpirationPlugin({
+        maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+        maxEntries: 100,
+        purgeOnQuotaError: true,
+      }),
+      {
+        // WebP/AVIF Support mit Fallback
+        requestWillFetch: async ({ request }) => {
+          const url = new URL(request.url);
+          
+          // Check browser support
+          const supportsWebP = self.clients.matchAll()
+            .then(clients => clients[0]?.postMessage({ type: 'CHECK_WEBP' }));
+          
+          if (await supportsWebP) {
+            url.searchParams.set('format', 'webp');
+          }
+          
+          return new Request(url.href, { 
+            headers: request.headers 
+          });
+        },
+      },
+    ],
+  })
+);
+
+// API Calls - Network First mit Offline Fallback
+registerRoute(
+  ({ url }) => url.pathname.startsWith('/api/'),
+  new NetworkFirst({
+    cacheName: 'api-cache',
+    networkTimeoutSeconds: 3,
+    plugins: [
+      new ExpirationPlugin({
+        maxAgeSeconds: 5 * 60, // 5 minutes
+        maxEntries: 50,
+      }),
+      new BackgroundSyncPlugin('api-queue', {
+        maxRetentionTime: 24 * 60, // 24 hours
+      }),
+    ],
+  })
+);
+
+// Offline Fallback für Navigation
+const navigationRoute = new NavigationRoute(
+  new NetworkFirst({
+    cacheName: 'navigations',
+    plugins: [
+      {
+        handlerDidError: async () => {
+          return caches.match('/offline.html');
+        },
+      },
+    ],
+  })
+);
+registerRoute(navigationRoute);
+
+// Background Sync für Orders
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-orders') {
+    event.waitUntil(syncOrders());
+  }
+});
+
+// Push Notifications
+self.addEventListener('push', (event) => {
+  const data = event.data.json();
+  
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: '/icons/icon-192x192.png',
+      badge: '/icons/badge-72x72.png',
+      vibrate: [200, 100, 200],
+      tag: data.tag,
+      requireInteraction: data.priority === 'high',
+      actions: data.actions || [],
+      data: data.payload
+    })
   );
+});
+
+// Notification Click Handler
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  
+  if (event.action === 'view-order') {
+    event.waitUntil(
+      clients.openWindow(`/orders/${event.notification.data.orderId}`)
+    );
+  }
 });
 ```
 
-#### IndexedDB für lokale Datenspeicherung
-```javascript
-// Datenbank-Schema
-const DB_VERSION = 1;
-const STORES = {
-  orders: { keyPath: 'id', indexes: ['status', 'created'] },
-  products: { keyPath: 'id', indexes: ['category', 'available'] },
-  cart: { keyPath: 'id', indexes: ['sessionId'] },
-  sync: { keyPath: 'id', indexes: ['type', 'status'] }
-};
+### Web App Manifest
+```json
+{
+  "name": "EATECH - Foodtruck Bestellsystem",
+  "short_name": "EATECH",
+  "description": "Das revolutionäre Schweizer Foodtruck Bestellsystem",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#FF6B35",
+  "background_color": "#FFFFFF",
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["food", "business", "productivity"],
+  "screenshots": [
+    {
+      "src": "/screenshots/mobile-1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshots/tablet-1.png",
+      "sizes": "1366x1024",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Neue Bestellung",
+      "short_name": "Bestellen",
+      "description": "Schnell eine neue Bestellung aufgeben",
+      "url": "/order",
+      "icons": [{ "src": "/icons/order.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Menü",
+      "short_name": "Menü",
+      "description": "Speisekarte anzeigen",
+      "url": "/menu",
+      "icons": [{ "src": "/icons/menu.png", "sizes": "96x96" }]
+    }
+  ],
+  "lang": "de-CH",
+  "dir": "ltr",
+  "scope": "/",
+  "id": "ch.eatech.app",
+  "prefer_related_applications": false
+}
+```
 
-// Sync Manager
-class OfflineSyncManager {
-  async queueAction(action) {
-    await db.sync.add({
-      id: generateId(),
-      action: action.type,
-      data: action.data,
-      timestamp: Date.now(),
-      status: 'pending'
-    });
+---
+
+## 🔒 SECURITY & COMPLIANCE
+
+### Schweizer Datenschutz-Konformität (DSG/DSGVO)
+
+#### 1. Technische Maßnahmen
+```javascript
+// Verschlüsselung sensibler Daten
+import crypto from 'crypto';
+
+class EncryptionService {
+  private algorithm = 'aes-256-gcm';
+  private secretKey = process.env.ENCRYPTION_KEY;
+  
+  encrypt(text: string): EncryptedData {
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv(this.algorithm, this.secretKey, iv);
+    
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    
+    const authTag = cipher.getAuthTag();
+    
+    return {
+      encrypted,
+      iv: iv.toString('hex'),
+      authTag: authTag.toString('hex')
+    };
   }
   
-  async syncWithServer() {
-    const pending = await db.sync.where('status').equals('pending').toArray();
-    for (const item of pending) {
-      try {
-        await sendToServer(item);
-        item.status = 'synced';
-        await db.sync.put(item);
-      } catch (error) {
-        console.error('Sync failed:', error);
-      }
-    }
+  decrypt(data: EncryptedData): string {
+    const decipher = crypto.createDecipheriv(
+      this.algorithm,
+      this.secretKey,
+      Buffer.from(data.iv, 'hex')
+    );
+    
+    decipher.setAuthTag(Buffer.from(data.authTag, 'hex'));
+    
+    let decrypted = decipher.update(data.encrypted, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    
+    return decrypted;
+  }
+}
+
+// Anonymisierung für Analytics
+class AnonymizationService {
+  anonymizeCustomerData(customer: Customer): AnonymizedCustomer {
+    return {
+      id: this.hashId(customer.id),
+      age: this.generalizeAge(customer.birthdate),
+      canton: customer.address.canton,
+      orderCount: customer.stats.totalOrders,
+      // Keine persönlichen Daten
+    };
+  }
+  
+  private hashId(id: string): string {
+    return crypto
+      .createHash('sha256')
+      .update(id + process.env.SALT)
+      .digest('hex');
+  }
+  
+  private generalizeAge(birthdate: string): string {
+    const age = calculateAge(birthdate);
+    if (age < 25) return '18-24';
+    if (age < 35) return '25-34';
+    if (age < 45) return '35-44';
+    if (age < 55) return '45-54';
+    if (age < 65) return '55-64';
+    return '65+';
   }
 }
 ```
 
-### 7.2 REAL-TIME SYNCHRONISATION
-
-#### Firebase Realtime Database Integration
+#### 2. GDPR Compliance Tools
 ```javascript
-// Real-time Order Updates
-const subscribeToOrders = (tenantId) => {
-  const ordersRef = firebase.database().ref(`tenants/${tenantId}/orders`);
-  
-  ordersRef.on('child_added', (snapshot) => {
-    const order = snapshot.val();
-    updateLocalState('NEW_ORDER', order);
-    showNotification('Neue Bestellung!', order);
-  });
-  
-  ordersRef.on('child_changed', (snapshot) => {
-    const order = snapshot.val();
-    updateLocalState('UPDATE_ORDER', order);
-  });
-};
-
-// Optimistic Updates
-const updateOrderStatus = async (orderId, newStatus) => {
-  // 1. Update UI immediately
-  updateUI(orderId, newStatus);
-  
-  // 2. Update local storage
-  await updateIndexedDB(orderId, { status: newStatus });
-  
-  // 3. Sync with Firebase
-  try {
-    await firebase.database()
-      .ref(`orders/${orderId}/status`)
-      .set(newStatus);
-  } catch (error) {
-    // Rollback on error
-    rollbackUI(orderId);
-    showError('Update fehlgeschlagen');
+// Consent Management
+class ConsentManager {
+  async recordConsent(userId: string, consents: ConsentRecord) {
+    await db.collection('consents').add({
+      userId,
+      timestamp: new Date(),
+      consents: {
+        necessary: true, // Always true
+        analytics: consents.analytics || false,
+        marketing: consents.marketing || false,
+        thirdParty: consents.thirdParty || false
+      },
+      ipAddress: this.hashIp(request.ip),
+      userAgent: request.headers['user-agent']
+    });
   }
-};
-```
-
-### 7.3 PERFORMANCE OPTIMIERUNGEN
-
-#### Code Splitting & Lazy Loading
-```javascript
-// Route-based Code Splitting
-const routes = [
-  {
-    path: '/',
-    component: () => import('./pages/Home')
-  },
-  {
-    path: '/dashboard',
-    component: () => import('./pages/Dashboard'),
-    preload: true
-  },
-  {
-    path: '/analytics',
-    component: () => import('./pages/Analytics')
-  }
-];
-
-// Component-level Splitting
-const HeavyChart = lazy(() => 
-  import(/* webpackChunkName: "charts" */ './components/HeavyChart')
-);
-
-// Preloading Critical Chunks
-const preloadCriticalChunks = () => {
-  const criticalChunks = ['dashboard', 'orders', 'products'];
-  criticalChunks.forEach(chunk => {
-    import(/* webpackChunkName: "[request]" */ `./chunks/${chunk}`);
-  });
-};
-```
-
-#### Image Optimization
-```javascript
-// Responsive Image Component
-const OptimizedImage = ({ src, alt, sizes }) => {
-  const [isInViewport, setIsInViewport] = useState(false);
   
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsInViewport(entry.isIntersecting),
-      { rootMargin: '50px' }
-    );
+  async getActiveConsents(userId: string) {
+    const latest = await db.collection('consents')
+      .where('userId', '==', userId)
+      .orderBy('timestamp', 'desc')
+      .limit(1)
+      .get();
+      
+    return latest.docs[0]?.data().consents || this.defaultConsents();
+  }
+}
+
+// Data Export (Art. 20 DSGVO)
+class DataExportService {
+  async exportUserData(userId: string): Promise<UserDataExport> {
+    const [
+      profile,
+      orders,
+      reviews,
+      loyalty,
+      preferences,
+      consents
+    ] = await Promise.all([
+      this.getProfile(userId),
+      this.getOrders(userId),
+      this.getReviews(userId),
+      this.getLoyalty(userId),
+      this.getPreferences(userId),
+      this.getConsents(userId)
+    ]);
     
-    observer.observe(imageRef.current);
-    return () => observer.disconnect();
-  }, []);
-  
+    return {
+      exportDate: new Date(),
+      profile,
+      orders: orders.map(o => this.sanitizeOrder(o)),
+      reviews,
+      loyalty,
+      preferences,
+      consents,
+      format: 'json' // Also available as CSV, PDF
+    };
+  }
+}
+
+// Right to Deletion (Art. 17 DSGVO)  
+class DeletionService {
+  async deleteUser(userId: string, reason: string) {
+    // Log deletion request
+    await this.logDeletion(userId, reason);
+    
+    // Anonymize orders (keep for tax records)
+    await this.anonymizeOrders(userId);
+    
+    // Delete personal data
+    await Promise.all([
+      db.collection('customers').doc(userId).delete(),
+      db.collection('addresses').where('userId', '==', userId).delete(),
+      db.collection('paymentMethods').where('userId', '==', userId).delete(),
+      db.collection('preferences').doc(userId).delete()
+    ]);
+    
+    // Delete from auth
+    await admin.auth().deleteUser(userId);
+    
+    // Notify user
+    await this.sendDeletionConfirmation(userId);
+  }
+}
+```
+
+#### 3. Security Headers & CSP
+```javascript
+// Security Headers Middleware
+export const securityHeaders = {
+  'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'SAMEORIGIN',
+  'X-XSS-Protection': '1; mode=block',
+  'Referrer-Policy': 'origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(self), geolocation=(self)',
+  'Content-Security-Policy': `
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' https://fonts.gstatic.com;
+    img-src 'self' data: https: blob:;
+    connect-src 'self' https://api.eatech.ch wss://ws.eatech.ch https://o123456.ingest.sentry.io;
+    frame-src 'self' https://js.stripe.com;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'none';
+    block-all-mixed-content;
+    upgrade-insecure-requests;
+  `.replace(/\s{2,}/g, ' ').trim()
+};
+```
+
+---
+
+## ⚡ PERFORMANCE OPTIMIERUNG
+
+### 1. Image Optimization Pipeline
+```javascript
+// Next.js Image Component mit CDN
+import Image from 'next/image';
+
+export const OptimizedImage = ({ src, alt, ...props }) => {
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      loader={({ src, width, quality }) => {
+        // Cloudflare Image Resizing
+        const params = new URLSearchParams({
+          width: width.toString(),
+          quality: (quality || 85).toString(),
+          format: 'auto', // WebP/AVIF wenn supported
+          fit: 'cover',
+          dpr: window.devicePixelRatio || 1
+        });
+        
+        return `https://cdn.eatech.ch/cdn-cgi/image/${params}/${src}`;
+      }}
+      {...props}
+    />
+  );
+};
+
+// Responsive Images mit art direction
+export const HeroImage = ({ image }) => {
   return (
     <picture>
       <source
+        media="(max-width: 640px)"
+        srcSet={`
+          ${image.mobile}?w=640&f=avif 640w,
+          ${image.mobile}?w=750&f=avif 750w,
+          ${image.mobile}?w=828&f=avif 828w
+        `}
+        type="image/avif"
+      />
+      <source
+        media="(max-width: 640px)"
+        srcSet={`
+          ${image.mobile}?w=640&f=webp 640w,
+          ${image.mobile}?w=750&f=webp 750w,
+          ${image.mobile}?w=828&f=webp 828w
+        `}
         type="image/webp"
-        srcSet={`${src}?w=400 400w, ${src}?w=800 800w`}
-        sizes={sizes}
+      />
+      <source
+        media="(min-width: 641px)"
+        srcSet={`
+          ${image.desktop}?w=1280&f=avif 1280w,
+          ${image.desktop}?w=1536&f=avif 1536w,
+          ${image.desktop}?w=1920&f=avif 1920w
+        `}
+        type="image/avif"
       />
       <img
-        ref={imageRef}
-        src={isInViewport ? src : placeholder}
-        alt={alt}
+        src={`${image.desktop}?w=1920&f=jpg`}
+        alt={image.alt}
         loading="lazy"
+        decoding="async"
       />
     </picture>
   );
 };
 ```
 
-### 7.4 DATABASE OPTIMIERUNGEN
-
-#### Firebase Query Optimization
+### 2. Code Splitting & Lazy Loading
 ```javascript
-// Pagination with Cursors
-const loadOrders = async (tenantId, lastOrderId = null, limit = 20) => {
-  let query = firebase.database()
-    .ref(`tenants/${tenantId}/orders`)
-    .orderByChild('created')
-    .limitToLast(limit);
-    
-  if (lastOrderId) {
-    query = query.endAt(lastOrderId);
+// Route-based Code Splitting
+const AdminDashboard = dynamic(
+  () => import('@/modules/admin/Dashboard'),
+  {
+    loading: () => <DashboardSkeleton />,
+    ssr: false
   }
-  
-  const snapshot = await query.once('value');
-  return snapshot.val();
-};
+);
 
-// Denormalization for Performance
-const orderWithDetails = {
-  // Core order data
-  id: 'order-123',
-  status: 'pending',
-  total: 45.90,
-  
-  // Denormalized customer data (no JOIN needed)
-  customerName: 'Max Mustermann',
-  customerPhone: '+41 79 123 45 67',
-  
-  // Denormalized product names (no JOIN needed)
-  itemNames: ['Burger Deluxe', 'Pommes', 'Cola']
-};
-
-// Compound Indexes
-const dbIndexes = {
-  orders: {
-    compound: [
-      ['tenantId', 'status', 'created'],
-      ['tenantId', 'customerId', 'created']
-    ]
-  }
-};
-```
-
-### 7.5 SECURITY IMPLEMENTATION
-
-#### Authentication & Authorization
-```javascript
-// Multi-Factor Authentication
-const enableMFA = async (userId) => {
-  const secret = speakeasy.generateSecret({
-    name: `EATECH (${userEmail})`
-  });
-  
-  await saveUserSecret(userId, secret.base32);
-  
-  return {
-    qrCode: await QRCode.toDataURL(secret.otpauth_url),
-    backupCodes: generateBackupCodes()
-  };
-};
-
-// Role-Based Access Control (RBAC)
-const permissions = {
-  owner: ['*'],
-  admin: ['orders.*', 'products.*', 'customers.*', 'analytics.view'],
-  manager: ['orders.*', 'products.view', 'analytics.view'],
-  chef: ['orders.view', 'orders.update', 'products.view'],
-  waiter: ['orders.create', 'orders.view', 'customers.view']
-};
-
-// API Rate Limiting
-const rateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-```
-
-#### Data Encryption
-```javascript
-// Encrypt Sensitive Data
-const encryptData = (data, key) => {
-  const cipher = crypto.createCipher('aes-256-gcm', key);
-  const encrypted = cipher.update(JSON.stringify(data), 'utf8', 'hex');
-  return encrypted + cipher.final('hex');
-};
-
-// Secure Payment Token Storage
-const storePaymentMethod = async (customerId, paymentMethod) => {
-  // Never store raw card data
-  const tokenized = await stripe.tokens.create({
-    card: paymentMethod
-  });
-  
-  await db.customers.update(customerId, {
-    paymentTokens: {
-      [tokenized.id]: {
-        last4: tokenized.card.last4,
-        brand: tokenized.card.brand,
-        exp: `${tokenized.card.exp_month}/${tokenized.card.exp_year}`
-      }
+// Component-level Code Splitting
+const HeavyComponent = dynamic(
+  () => import('@/components/HeavyComponent'),
+  {
+    loading: () => <Spinner />,
+    ssr: false,
+    // Preload on hover
+    onLoad: () => {
+      import('@/components/RelatedComponent');
     }
-  });
+  }
+);
+
+// Intersection Observer für Lazy Loading
+export const LazySection = ({ children, threshold = 0.1 }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+  
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold }
+    );
+    
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+    
+    return () => observer.disconnect();
+  }, [threshold]);
+  
+  return (
+    <div ref={ref}>
+      {isVisible ? children : <Skeleton />}
+    </div>
+  );
 };
+```
+
+### 3. Core Web Vitals Monitoring
+```javascript
+// Real User Monitoring
+import { getCLS, getFID, getLCP, getFCP, getTTFB } from 'web-vitals';
+
+class VitalsMonitor {
+  private metrics: Map<string, number> = new Map();
+  
+  init() {
+    // Core Web Vitals
+    getCLS(this.sendMetric);
+    getFID(this.sendMetric);
+    getLCP(this.sendMetric);
+    
+    // Additional metrics
+    getFCP(this.sendMetric);
+    getTTFB(this.sendMetric);
+    
+    // Custom metrics
+    this.measureTimeToInteractive();
+    this.measureResourceTiming();
+  }
+  
+  private sendMetric = (metric: Metric) => {
+    this.metrics.set(metric.name, metric.value);
+    
+    // Send to analytics
+    if (window.plausible) {
+      window.plausible('Web Vitals', {
+        props: {
+          metric: metric.name,
+          value: Math.round(metric.value),
+          rating: this.getRating(metric)
+        }
+      });
+    }
+    
+    // Send to monitoring
+    if (window.Sentry) {
+      window.Sentry.addBreadcrumb({
+        category: 'web-vitals',
+        message: `${metric.name}: ${metric.value}`,
+        level: this.getRating(metric) === 'poor' ? 'warning' : 'info',
+        data: metric
+      });
+    }
+  };
+  
+  private getRating(metric: Metric): 'good' | 'needs-improvement' | 'poor' {
+    const thresholds = {
+      CLS: [0.1, 0.25],
+      FID: [100, 300],
+      LCP: [2500, 4000],
+      FCP: [1800, 3000],
+      TTFB: [800, 1800]
+    };
+    
+    const [good, poor] = thresholds[metric.name] || [0, 0];
+    
+    if (metric.value <= good) return 'good';
+    if (metric.value <= poor) return 'needs-improvement';
+    return 'poor';
+  }
+}
+```
+
+### 4. Database Query Optimization
+```javascript
+// Firestore Query Optimization
+class OptimizedQueries {
+  // Composite Indexes für häufige Queries
+  async getPopularProducts(tenantId: string, limit = 10) {
+    // Index: tenantId ASC, analytics.orders DESC
+    return await db
+      .collection('products')
+      .where('tenantId', '==', tenantId)
+      .where('status', '==', 'active')
+      .orderBy('analytics.orders', 'desc')
+      .limit(limit)
+      .get();
+  }
+  
+  // Batch Operations
+  async updateMultipleProducts(updates: ProductUpdate[]) {
+    const batch = db.batch();
+    
+    updates.forEach(update => {
+      const ref = db.collection('products').doc(update.id);
+      batch.update(ref, update.data);
+    });
+    
+    await batch.commit();
+  }
+  
+  // Pagination mit Cursor
+  async getOrdersPaginated(tenantId: string, pageSize = 20, startAfter?: string) {
+    let query = db
+      .collection('orders')
+      .where('tenantId', '==', tenantId)
+      .orderBy('createdAt', 'desc')
+      .limit(pageSize);
+      
+    if (startAfter) {
+      const lastDoc = await db.collection('orders').doc(startAfter).get();
+      query = query.startAfter(lastDoc);
+    }
+    
+    return await query.get();
+  }
+  
+  // Denormalisierung für Performance
+  async cacheProductAnalytics(productId: string) {
+    const analytics = await this.calculateProductAnalytics(productId);
+    
+    // Cache in Product Document
+    await db.collection('products').doc(productId).update({
+      'analytics': analytics,
+      'analytics.lastUpdated': FieldValue.serverTimestamp()
+    });
+    
+    // Cache in Redis für schnellen Zugriff
+    await redis.setex(
+      `product:${productId}:analytics`,
+      300, // 5 minutes
+      JSON.stringify(analytics)
+    );
+  }
+}
 ```
 
 ---
 
-## 🧪 TESTING-STRATEGIE
+## 📝 DEVELOPMENT GUIDELINES
 
-### 8.1 UNIT TESTS
-
-#### Jest Configuration
+### 1. Code Style & Standards
 ```javascript
-// jest.config.js
+// ESLint Configuration
 module.exports = {
-  testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
-  moduleNameMapper: {
-    '\\.(css|less|scss)$': 'identity-obj-proxy',
-    '^@/(.*)$': '<rootDir>/src/$1'
-  },
-  collectCoverageFrom: [
-    'src/**/*.{js,jsx}',
-    '!src/**/*.test.{js,jsx}',
-    '!src/index.js'
+  extends: [
+    'next/core-web-vitals',
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:react-hooks/recommended',
+    'prettier'
   ],
-  coverageThreshold: {
-    global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80
-    }
+  rules: {
+    // TypeScript
+    '@typescript-eslint/explicit-module-boundary-types': 'warn',
+    '@typescript-eslint/no-explicit-any': 'error',
+    '@typescript-eslint/no-unused-vars': ['error', { 
+      argsIgnorePattern: '^_',
+      varsIgnorePattern: '^_'
+    }],
+    
+    // React
+    'react/prop-types': 'off',
+    'react/display-name': 'off',
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn',
+    
+    // General
+    'no-console': ['warn', { allow: ['warn', 'error'] }],
+    'prefer-const': 'error',
+    'no-duplicate-imports': 'error'
   }
 };
-```
 
-#### Test Examples
-```javascript
-// Cart Calculation Tests
-describe('Cart Store', () => {
-  let cart;
-  
-  beforeEach(() => {
-    cart = new CartStore();
-  });
-  
-  test('calculates subtotal correctly', () => {
-    cart.addItem({ id: '1', price: 10.00, quantity: 2 });
-    cart.addItem({ id: '2', price: 5.50, quantity: 1 });
-    
-    expect(cart.getSubtotal()).toBe(25.50);
-  });
-  
-  test('applies commission correctly', () => {
-    cart.addItem({ id: '1', price: 100.00, quantity: 1 });
-    
-    expect(cart.getCommission()).toBe(3.00); // 3%
-    expect(cart.getTenantPayout()).toBe(97.00);
-  });
-  
-  test('handles discounts properly', () => {
-    cart.addItem({ id: '1', price: 50.00, quantity: 1 });
-    cart.applyDiscount({ type: 'percentage', value: 10 });
-    
-    expect(cart.getSubtotal()).toBe(45.00);
-  });
-});
-
-// Component Tests
-describe('OrderCard Component', () => {
-  test('displays order information correctly', () => {
-    const order = {
-      id: '123',
-      number: '2025-001',
-      status: 'pending',
-      total: 45.90,
-      customer: { name: 'Test User' }
-    };
-    
-    render(<OrderCard order={order} />);
-    
-    expect(screen.getByText('2025-001')).toBeInTheDocument();
-    expect(screen.getByText('CHF 45.90')).toBeInTheDocument();
-    expect(screen.getByText('Test User')).toBeInTheDocument();
-  });
-  
-  test('updates status on button click', async () => {
-    const onStatusChange = jest.fn();
-    render(<OrderCard order={mockOrder} onStatusChange={onStatusChange} />);
-    
-    fireEvent.click(screen.getByText('Bestätigen'));
-    
-    await waitFor(() => {
-      expect(onStatusChange).toHaveBeenCalledWith('123', 'confirmed');
-    });
-  });
-});
-```
-
-### 8.2 INTEGRATION TESTS
-
-```javascript
-// API Integration Tests
-describe('Order API Integration', () => {
-  test('creates order successfully', async () => {
-    const orderData = {
-      items: [{ productId: '1', quantity: 2 }],
-      customer: { name: 'Test', phone: '+41791234567' }
-    };
-    
-    const response = await request(app)
-      .post('/api/orders')
-      .send(orderData)
-      .expect(201);
-      
-    expect(response.body).toMatchObject({
-      id: expect.any(String),
-      status: 'pending',
-      total: expect.any(Number)
-    });
-  });
-  
-  test('validates order data', async () => {
-    const invalidOrder = { items: [] };
-    
-    const response = await request(app)
-      .post('/api/orders')
-      .send(invalidOrder)
-      .expect(400);
-      
-    expect(response.body.error).toBe('Order must contain items');
-  });
-});
-
-// Database Integration Tests
-describe('Firebase Integration', () => {
-  test('syncs data correctly', async () => {
-    const testData = { name: 'Test Product', price: 10.00 };
-    
-    // Write to Firebase
-    await firebase.database()
-      .ref('test/products/test-1')
-      .set(testData);
-    
-    // Read back
-    const snapshot = await firebase.database()
-      .ref('test/products/test-1')
-      .once('value');
-      
-    expect(snapshot.val()).toEqual(testData);
-  });
-});
-```
-
-### 8.3 E2E TESTS
-
-#### Cypress Configuration
-```javascript
-// cypress.config.js
+// Prettier Configuration
 module.exports = {
-  e2e: {
-    baseUrl: 'http://localhost:3000',
-    viewportWidth: 1280,
-    viewportHeight: 720,
-    video: true,
-    screenshotOnRunFailure: true,
-    defaultCommandTimeout: 10000,
-    setupNodeEvents(on, config) {
-      // implement node event listeners here
-    },
-  },
+  semi: true,
+  trailingComma: 'es5',
+  singleQuote: true,
+  printWidth: 100,
+  tabWidth: 2,
+  useTabs: false,
+  arrowParens: 'avoid',
+  endOfLine: 'lf'
 };
 ```
 
-#### E2E Test Scenarios
+### 2. Git Workflow
+```bash
+# Branch Naming Convention
+feature/TICKET-description  # New features
+bugfix/TICKET-description   # Bug fixes  
+hotfix/TICKET-description   # Production hotfixes
+chore/TICKET-description    # Maintenance tasks
+refactor/TICKET-description # Code refactoring
+
+# Commit Message Format
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+
+# Examples:
+feat(orders): add voice ordering support
+fix(payment): resolve Twint integration issue
+docs(api): update GraphQL schema documentation
+style(ui): improve mobile responsiveness
+refactor(auth): simplify token validation logic
+perf(images): implement lazy loading
+test(orders): add integration tests
+chore(deps): update dependencies
+```
+
+### 3. Component Structure
+```typescript
+// Standard Component Template
+import { FC, memo, useCallback, useMemo } from 'react';
+import { useTranslation } from 'next-i18next';
+import styles from './ComponentName.module.css';
+
+interface ComponentNameProps {
+  required: string;
+  optional?: number;
+  children?: React.ReactNode;
+  onAction?: (value: string) => void;
+}
+
+export const ComponentName: FC<ComponentNameProps> = memo(({
+  required,
+  optional = 0,
+  children,
+  onAction
+}) => {
+  const { t } = useTranslation('common');
+  
+  // Memoized values
+  const computedValue = useMemo(() => {
+    return expensiveComputation(required, optional);
+  }, [required, optional]);
+  
+  // Callbacks
+  const handleClick = useCallback((event: React.MouseEvent) => {
+    event.preventDefault();
+    onAction?.(computedValue);
+  }, [computedValue, onAction]);
+  
+  return (
+    <div className={styles.container}>
+      <h2 className={styles.title}>{t('component.title')}</h2>
+      <button onClick={handleClick} className={styles.button}>
+        {t('component.action')}
+      </button>
+      {children}
+    </div>
+  );
+});
+
+ComponentName.displayName = 'ComponentName';
+```
+
+### 4. File Organization
+```
+/apps/web/src/
+├── components/          # Shared components
+│   ├── common/         # Basic UI components
+│   ├── forms/          # Form components
+│   ├── layouts/        # Layout components
+│   └── features/       # Feature-specific components
+├── hooks/              # Custom React hooks
+├── lib/                # External library configs
+├── modules/            # Feature modules
+│   ├── auth/
+│   ├── orders/
+│   ├── products/
+│   └── analytics/
+├── pages/              # Next.js pages
+├── services/           # API services
+├── store/              # State management
+├── styles/             # Global styles
+├── types/              # TypeScript types
+└── utils/              # Utility functions
+```
+
+---
+
+## 🧪 TESTING STRATEGY
+
+### 1. Unit Tests (Jest + React Testing Library)
 ```javascript
-// Customer Journey E2E Test
-describe('Complete Order Flow', () => {
+// Component Test Example
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { OrderForm } from '@/components/OrderForm';
+
+describe('OrderForm', () => {
+  const mockSubmit = jest.fn();
+  
   beforeEach(() => {
-    cy.visit('/');
-    cy.clearLocalStorage();
+    jest.clearAllMocks();
   });
   
-  it('completes order from QR scan to confirmation', () => {
+  it('should render all required fields', () => {
+    render(<OrderForm onSubmit={mockSubmit} />);
+    
+    expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/phone/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument();
+  });
+  
+  it('should validate phone number format', async () => {
+    const user = userEvent.setup();
+    render(<OrderForm onSubmit={mockSubmit} />);
+    
+    const phoneInput = screen.getByLabelText(/phone/i);
+    await user.type(phoneInput, '123'); // Invalid
+    await user.tab(); // Trigger blur
+    
+    expect(screen.getByText(/invalid phone/i)).toBeInTheDocument();
+  });
+  
+  it('should submit form with valid data', async () => {
+    const user = userEvent.setup();
+    render(<OrderForm onSubmit={mockSubmit} />);
+    
+    await user.type(screen.getByLabelText(/name/i), 'Test User');
+    await user.type(screen.getByLabelText(/phone/i), '+41791234567');
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+    
+    await waitFor(() => {
+      expect(mockSubmit).toHaveBeenCalledWith({
+        name: 'Test User',
+        phone: '+41791234567'
+      });
+    });
+  });
+});
+```
+
+### 2. Integration Tests (Cypress)
+```javascript
+// E2E Test Example
+describe('Customer Order Flow', () => {
+  beforeEach(() => {
+    cy.visit('/');
+    cy.intercept('GET', '/api/products*', { fixture: 'products.json' });
+    cy.intercept('POST', '/api/orders', { fixture: 'order-response.json' });
+  });
+  
+  it('should complete order from menu to confirmation', () => {
     // 1. Scan QR Code
     cy.visit('/scan?table=5');
     cy.contains('Tisch 5').should('be.visible');
@@ -2566,69 +3553,76 @@ describe('Complete Order Flow', () => {
     
     // 6. Confirm Order
     cy.get('[data-test="place-order"]').click();
-    cy.contains('Bestellung erfolgreich').should('be.visible');
-    cy.contains('Ihre Bestellnummer:').should('be.visible');
-  });
-  
-  it('handles offline scenario', () => {
-    // Go offline
-    cy.window().then((win) => {
-      cy.stub(win.navigator, 'onLine').value(false);
-    });
-    
-    // Should show offline indicator
-    cy.contains('Offline-Modus').should('be.visible');
-    
-    // Can still browse menu
-    cy.contains('Speisekarte').click();
-    cy.contains('Burger Deluxe').should('be.visible');
-    
-    // Cart works offline
-    cy.contains('Burger Deluxe').click();
-    cy.get('[data-test="add-to-cart"]').click();
-    cy.contains('1 Artikel im Warenkorb').should('be.visible');
-  });
-});
-
-// Admin Dashboard E2E
-describe('Admin Dashboard', () => {
-  beforeEach(() => {
-    cy.login('admin@restaurant.ch', 'password');
-    cy.visit('/admin/dashboard');
-  });
-  
-  it('manages orders', () => {
-    // View orders
-    cy.contains('Bestellungen').click();
-    cy.get('[data-test="order-list"]').should('be.visible');
-    
-    // Update order status
-    cy.get('[data-test="order-123"]').click();
-    cy.contains('Status ändern').click();
-    cy.contains('In Zubereitung').click();
-    
-    // Verify update
-    cy.contains('Status aktualisiert').should('be.visible');
-    cy.get('[data-test="order-status"]').should('contain', 'In Zubereitung');
-  });
-  
-  it('updates product availability', () => {
-    cy.contains('Produkte').click();
-    cy.contains('Burger Deluxe').click();
-    
-    // Toggle availability
-    cy.get('[data-test="availability-toggle"]').click();
-    cy.contains('Produkt nicht verfügbar').should('be.visible');
-    
-    // Verify in customer view
-    cy.visit('/menu');
-    cy.contains('Burger Deluxe').should('have.class', 'unavailable');
+    cy.contains('Bestellung bestätigt').should('be.visible');
+    cy.contains('BP-2025-0001').should('be.visible');
   });
 });
 ```
 
-### 8.4 PERFORMANCE TESTS
+### 3. API Tests (Supertest)
+```javascript
+// API Test Example
+import request from 'supertest';
+import { app } from '@/server';
+import { createTestTenant, createTestUser } from '@/test/factories';
 
+describe('Orders API', () => {
+  let tenant: Tenant;
+  let authToken: string;
+  
+  beforeAll(async () => {
+    tenant = await createTestTenant();
+    const user = await createTestUser(tenant.id);
+    authToken = await getAuthToken(user);
+  });
+  
+  describe('POST /api/tenants/:tenantId/orders', () => {
+    it('should create order with valid data', async () => {
+      const orderData = {
+        type: 'pickup',
+        items: [{
+          productId: 'prod_123',
+          quantity: 2,
+          modifiers: []
+        }],
+        customer: {
+          name: 'Test User',
+          phone: '+41791234567'
+        }
+      };
+      
+      const response = await request(app)
+        .post(`/api/tenants/${tenant.id}/orders`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(orderData)
+        .expect(201);
+        
+      expect(response.body).toMatchObject({
+        orderNumber: expect.stringMatching(/^BP-\d{4}-\d{4}$/),
+        status: 'pending',
+        total: expect.any(Number)
+      });
+    });
+    
+    it('should validate required fields', async () => {
+      const response = await request(app)
+        .post(`/api/tenants/${tenant.id}/orders`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({})
+        .expect(400);
+        
+      expect(response.body.errors).toContainEqual(
+        expect.objectContaining({
+          field: 'items',
+          message: 'Items are required'
+        })
+      );
+    });
+  });
+});
+```
+
+### 4. Performance Tests
 ```javascript
 // Lighthouse CI Configuration
 module.exports = {
@@ -2652,9 +3646,13 @@ module.exports = {
         'categories:performance': ['error', { minScore: 0.9 }],
         'categories:accessibility': ['error', { minScore: 0.95 }],
         'categories:seo': ['error', { minScore: 0.9 }],
-        'first-contentful-paint': ['error', { maxNumericValue: 2000 }],
-        'interactive': ['error', { maxNumericValue: 3000 }],
-        'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }]
+        'categories:pwa': ['error', { minScore: 0.9 }],
+        
+        // Specific metrics
+        'first-contentful-paint': ['error', { maxNumericValue: 1500 }],
+        'largest-contentful-paint': ['error', { maxNumericValue: 2500 }],
+        'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
+        'total-blocking-time': ['error', { maxNumericValue: 300 }]
       }
     },
     upload: {
@@ -2662,2638 +3660,824 @@ module.exports = {
     }
   }
 };
-
-// Load Testing with K6
-import http from 'k6/http';
-import { check, sleep } from 'k6';
-
-export let options = {
-  stages: [
-    { duration: '2m', target: 100 }, // Ramp up
-    { duration: '5m', target: 100 }, // Stay at 100 users
-    { duration: '2m', target: 200 }, // Ramp up
-    { duration: '5m', target: 200 }, // Stay at 200 users
-    { duration: '2m', target: 0 },   // Ramp down
-  ],
-  thresholds: {
-    http_req_duration: ['p(95)<500'], // 95% of requests under 500ms
-    http_req_failed: ['rate<0.1'],    // Error rate under 10%
-  },
-};
-
-export default function() {
-  // Browse menu
-  let menuRes = http.get('https://api.eatech.ch/menu');
-  check(menuRes, {
-    'menu loaded': (r) => r.status === 200,
-    'response time OK': (r) => r.timings.duration < 500,
-  });
-  
-  sleep(1);
-  
-  // Create order
-  let orderRes = http.post('https://api.eatech.ch/orders', JSON.stringify({
-    items: [{ productId: '1', quantity: 1 }],
-    customer: { name: 'Load Test', phone: '+41791234567' }
-  }), {
-    headers: { 'Content-Type': 'application/json' },
-  });
-  
-  check(orderRes, {
-    'order created': (r) => r.status === 201,
-  });
-  
-  sleep(2);
-}
-```
-
-### 8.5 SECURITY TESTS
-
-```javascript
-// OWASP ZAP Security Tests
-describe('Security Tests', () => {
-  test('prevents SQL injection', async () => {
-    const maliciousInput = "'; DROP TABLE orders; --";
-    
-    const response = await request(app)
-      .get(`/api/orders?search=${maliciousInput}`)
-      .expect(200);
-      
-    // Should sanitize input and not cause errors
-    expect(response.body).toBeInstanceOf(Array);
-  });
-  
-  test('validates authentication', async () => {
-    // Without token
-    await request(app)
-      .get('/api/admin/users')
-      .expect(401);
-      
-    // With invalid token
-    await request(app)
-      .get('/api/admin/users')
-      .set('Authorization', 'Bearer invalid-token')
-      .expect(403);
-  });
-  
-  test('rate limits requests', async () => {
-    // Make 101 requests (limit is 100)
-    const requests = Array(101).fill().map(() => 
-      request(app).get('/api/menu')
-    );
-    
-    const responses = await Promise.all(requests);
-    const tooManyRequests = responses.filter(r => r.status === 429);
-    
-    expect(tooManyRequests.length).toBeGreaterThan(0);
-  });
-  
-  test('sanitizes user input', async () => {
-    const xssPayload = '<script>alert("XSS")</script>';
-    
-    const response = await request(app)
-      .post('/api/products')
-      .send({ name: xssPayload, price: 10 })
-      .expect(201);
-      
-    // Should escape HTML
-    expect(response.body.name).toBe('&lt;script&gt;alert("XSS")&lt;/script&gt;');
-  });
-});
-
-// Penetration Testing Checklist
-const securityChecklist = {
-  authentication: [
-    'Password complexity enforced',
-    'Account lockout after failed attempts',
-    'Session timeout implemented',
-    'Secure password reset flow'
-  ],
-  authorization: [
-    'Role-based access control',
-    'API endpoint authorization',
-    'Resource-level permissions',
-    'Tenant isolation verified'
-  ],
-  dataProtection: [
-    'HTTPS enforced',
-    'Sensitive data encrypted',
-    'PII data anonymization',
-    'Secure backup procedures'
-  ],
-  inputValidation: [
-    'XSS prevention',
-    'SQL injection prevention',
-    'File upload validation',
-    'API input sanitization'
-  ]
-};
 ```
 
 ---
 
-## 📱 MOBILE APP SPECIFICS
+## 🚀 DEPLOYMENT GUIDE
 
-### 9.1 REACT NATIVE IMPLEMENTATION
+### 1. Environment Setup
+```bash
+# .env.production
+NODE_ENV=production
+NEXT_PUBLIC_APP_URL=https://app.eatech.ch
+NEXT_PUBLIC_API_URL=https://api.eatech.ch
 
-#### Project Setup
-```javascript
-// React Native Configuration
-{
-  "name": "@eatech/mobile",
-  "version": "25.0.0",
-  "dependencies": {
-    "react-native": "0.79.0",
-    "react-navigation": "^6.0.0",
-    "react-native-firebase": "^21.0.0",
-    "react-native-push-notification": "^8.0.0",
-    "react-native-vector-icons": "^10.0.0",
-    "react-native-gesture-handler": "^2.20.0",
-    "react-native-reanimated": "^3.16.0",
-    "react-native-offline": "^6.0.2"
-  }
-}
+# Firebase
+FIREBASE_PROJECT_ID=eatech-prod
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----..."
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk@eatech-prod.iam.gserviceaccount.com
+
+# Services
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+TWILIO_ACCOUNT_SID=AC...
+TWILIO_AUTH_TOKEN=...
+SENDGRID_API_KEY=SG...
+OPENAI_API_KEY=sk-...
+
+# Monitoring
+SENTRY_DSN=https://...@o123456.ingest.sentry.io/...
+PLAUSIBLE_DOMAIN=app.eatech.ch
+
+# Security
+ENCRYPTION_KEY=... # 32 bytes hex
+JWT_SECRET=... # Random string
+COOKIE_SECRET=... # Random string
 ```
 
-#### Core Components
-```javascript
-// Main App Component
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { Provider } from 'react-redux';
-import { PersistGate } from 'redux-persist/integration/react';
-import NetInfo from '@react-native-community/netinfo';
-
-import { store, persistor } from './store';
-import AppNavigator from './navigation/AppNavigator';
-import { OfflineNotice } from './components/OfflineNotice';
-
-export default function App() {
-  return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <NavigationContainer>
-          <OfflineNotice />
-          <AppNavigator />
-        </NavigationContainer>
-      </PersistGate>
-    </Provider>
-  );
-}
-
-// Offline-First Architecture
-import { NetworkConsumer } from 'react-native-offline';
-
-export const OfflineAwareComponent = ({ children }) => {
-  return (
-    <NetworkConsumer>
-      {({ isConnected }) => (
-        <>
-          {!isConnected && <OfflineBanner />}
-          {React.cloneElement(children, { isConnected })}
-        </>
-      )}
-    </NetworkConsumer>
-  );
-};
-```
-
-### 9.2 iOS SPECIFICS
-
-#### iOS Configuration
-```swift
-// Info.plist Configuration
-<key>NSCameraUsageDescription</key>
-<string>EATECH benötigt Kamera-Zugriff für QR-Code Scanning</string>
-
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>EATECH nutzt Ihren Standort für Lieferungen</string>
-
-<key>NSPhotoLibraryUsageDescription</key>
-<string>EATECH benötigt Zugriff für Produkt-Fotos</string>
-
-// Push Notifications
-<key>UIBackgroundModes</key>
-<array>
-  <string>remote-notification</string>
-  <string>fetch</string>
-  <string>processing</string>
-</array>
-```
-
-#### iOS-Specific Features
-```javascript
-// Apple Pay Integration
-import { ApplePay } from 'react-native-payments';
-
-const payWithApplePay = async (amount) => {
-  const paymentRequest = {
-    merchantIdentifier: 'merchant.ch.eatech',
-    supportedNetworks: ['visa', 'mastercard', 'amex'],
-    countryCode: 'CH',
-    currencyCode: 'CHF',
-    paymentSummaryItems: [{
-      label: 'EATECH Order',
-      amount: amount.toString()
-    }]
-  };
-  
-  try {
-    const paymentResponse = await ApplePay.show(paymentRequest);
-    return processPayment(paymentResponse);
-  } catch (error) {
-    console.error('Apple Pay failed:', error);
-  }
-};
-
-// iOS Widgets
-import WidgetKit from 'react-native-widgetkit';
-
-WidgetKit.setItem('todayRevenue', revenue, 'group.eatech.widgets');
-WidgetKit.reloadAllTimelines();
-```
-
-### 9.3 ANDROID SPECIFICS
-
-#### Android Configuration
-```xml
-<!-- AndroidManifest.xml -->
-<uses-permission android:name="android.permission.CAMERA" />
-<uses-permission android:name="android.permission.INTERNET" />
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<uses-permission android:name="android.permission.VIBRATE" />
-<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-<!-- Deep Linking -->
-<intent-filter>
-    <action android:name="android.intent.action.VIEW" />
-    <category android:name="android.intent.category.DEFAULT" />
-    <category android:name="android.intent.category.BROWSABLE" />
-    <data
-        android:scheme="eatech"
-        android:host="order" />
-</intent-filter>
-```
-
-#### Android-Specific Features
-```javascript
-// Google Pay Integration
-import { GooglePay } from 'react-native-google-pay';
-
-const payWithGooglePay = async (amount) => {
-  const requestData = {
-    cardPaymentMethod: {
-      tokenizationSpecification: {
-        type: 'PAYMENT_GATEWAY',
-        gateway: 'stripe',
-        gatewayMerchantId: 'BCR2DN6T7O3Z5TUA'
-      },
-      allowedCardNetworks: ['VISA', 'MASTERCARD'],
-      allowedCardAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS']
-    },
-    transaction: {
-      totalPrice: amount.toString(),
-      totalPriceStatus: 'FINAL',
-      currencyCode: 'CHF'
-    },
-    merchantName: 'EATECH'
-  };
-  
-  try {
-    await GooglePay.setEnvironment(GooglePay.ENVIRONMENT_PRODUCTION);
-    await GooglePay.isReadyToPay(['CARD', 'TOKENIZED_CARD']);
-    const token = await GooglePay.requestPayment(requestData);
-    return processPayment(token);
-  } catch (error) {
-    console.error('Google Pay failed:', error);
-  }
-};
-
-// Android App Shortcuts
-import { AppShortcuts } from 'react-native-app-shortcuts';
-
-AppShortcuts.setShortcuts([
-  {
-    id: 'new_order',
-    title: 'Neue Bestellung',
-    subtitle: 'Bestellung erfassen',
-    icon: 'ic_order',
-    data: { route: 'NewOrder' }
-  },
-  {
-    id: 'revenue',
-    title: 'Umsatz heute',
-    subtitle: 'Tagesumsatz anzeigen',
-    icon: 'ic_revenue',
-    data: { route: 'Revenue' }
-  }
-]);
-```
-
----
-
-## 🌍 INTERNATIONALISIERUNG
-
-### i18n Setup
-```javascript
-// i18n Configuration
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
-
-import de from './locales/de-CH.json';
-import fr from './locales/fr-CH.json';
-import it from './locales/it-CH.json';
-import en from './locales/en.json';
-
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    resources: {
-      'de-CH': { translation: de },
-      'fr-CH': { translation: fr },
-      'it-CH': { translation: it },
-      'en': { translation: en }
-    },
-    fallbackLng: 'de-CH',
-    interpolation: {
-      escapeValue: false,
-      format: (value, format, lng) => {
-        if (format === 'currency') {
-          return new Intl.NumberFormat(lng, {
-            style: 'currency',
-            currency: 'CHF'
-          }).format(value);
-        }
-        if (format === 'date') {
-          return new Intl.DateTimeFormat(lng).format(value);
-        }
-        return value;
-      }
-    }
-  });
-```
-
-### Translation Files
-```json
-// locales/de-CH.json
-{
-  "common": {
-    "welcome": "Willkommen bei EATECH",
-    "loading": "Wird geladen...",
-    "error": "Ein Fehler ist aufgetreten",
-    "retry": "Erneut versuchen",
-    "cancel": "Abbrechen",
-    "save": "Speichern",
-    "delete": "Löschen",
-    "edit": "Bearbeiten",
-    "search": "Suchen",
-    "filter": "Filtern",
-    "sort": "Sortieren"
-  },
-  "menu": {
-    "title": "Speisekarte",
-    "categories": {
-      "starters": "Vorspeisen",
-      "mains": "Hauptgerichte",
-      "desserts": "Desserts",
-      "beverages": "Getränke"
-    },
-    "filters": {
-      "vegetarian": "Vegetarisch",
-      "vegan": "Vegan",
-      "glutenFree": "Glutenfrei"
-    },
-    "addToCart": "In den Warenkorb"
-  },
-  "cart": {
-    "title": "Warenkorb",
-    "empty": "Ihr Warenkorb ist leer",
-    "subtotal": "Zwischensumme",
-    "delivery": "Liefergebühr",
-    "total": "Gesamt",
-    "checkout": "Zur Kasse"
-  },
-  "order": {
-    "status": {
-      "pending": "Ausstehend",
-      "confirmed": "Bestätigt",
-      "preparing": "In Zubereitung",
-      "ready": "Bereit",
-      "delivered": "Geliefert"
-    },
-    "type": {
-      "dineIn": "Vor Ort",
-      "takeaway": "Zum Mitnehmen",
-      "delivery": "Lieferung"
-    }
-  }
-}
-
-// locales/fr-CH.json
-{
-  "common": {
-    "welcome": "Bienvenue chez EATECH",
-    "loading": "Chargement...",
-    "error": "Une erreur s'est produite",
-    "retry": "Réessayer",
-    "cancel": "Annuler",
-    "save": "Enregistrer",
-    "delete": "Supprimer",
-    "edit": "Modifier",
-    "search": "Rechercher",
-    "filter": "Filtrer",
-    "sort": "Trier"
-  },
-  "menu": {
-    "title": "Menu",
-    "categories": {
-      "starters": "Entrées",
-      "mains": "Plats principaux",
-      "desserts": "Desserts",
-      "beverages": "Boissons"
-    }
-  }
-}
-```
-
-### Multi-Currency Support
-```javascript
-// Currency Configuration
-const CURRENCIES = {
-  CHF: { symbol: 'CHF', decimals: 2, locale: 'de-CH' },
-  EUR: { symbol: '€', decimals: 2, locale: 'de-DE' },
-  USD: { symbol: '$', decimals: 2, locale: 'en-US' }
-};
-
-// Dynamic Currency Formatting
-const formatPrice = (amount, currency = 'CHF') => {
-  const config = CURRENCIES[currency];
-  return new Intl.NumberFormat(config.locale, {
-    style: 'currency',
-    currency: currency,
-    minimumFractionDigits: config.decimals,
-    maximumFractionDigits: config.decimals
-  }).format(amount);
-};
-
-// Currency Conversion
-const convertCurrency = async (amount, from, to) => {
-  if (from === to) return amount;
-  
-  const rate = await getExchangeRate(from, to);
-  return amount * rate;
-};
-```
-
----
-
-## 🚀 DEPLOYMENT & DEVOPS
-
-### 11.1 CI/CD PIPELINE
-
-#### GitHub Actions Configuration
+### 2. Build & Deploy Process
 ```yaml
 # .github/workflows/deploy.yml
-name: Deploy EATECH
+name: Deploy to Production
 
 on:
   push:
-    branches: [main, develop]
-  pull_request:
     branches: [main]
-
-env:
-  NODE_VERSION: '18.x'
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '18'
           cache: 'npm'
       
       - name: Install dependencies
         run: npm ci
       
       - name: Run tests
-        run: npm test -- --coverage
+        run: npm run test:ci
       
-      - name: Upload coverage
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-  
+      - name: Run linter
+        run: npm run lint
+      
+      - name: Type check
+        run: npm run type-check
+
   build:
     needs: test
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app: [web, admin, mobile]
-    
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
       
-      - name: Build ${{ matrix.app }}
-        run: |
-          cd apps/${{ matrix.app }}
-          npm ci
-          npm run build
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build applications
+        run: npm run build
+        env:
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.app }}-build
-          path: apps/${{ matrix.app }}/dist
-  
-  deploy-staging:
+          name: build-artifacts
+          path: |
+            apps/web/.next
+            apps/admin/.next
+            apps/master/.next
+
+  deploy-vercel:
     needs: build
-    if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Deploy to Staging
-        uses: appleboy/ssh-action@v0.1.5
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
         with:
-          host: ${{ secrets.STAGING_HOST }}
-          username: ${{ secrets.STAGING_USER }}
-          key: ${{ secrets.STAGING_KEY }}
-          script: |
-            cd /var/www/eatech-staging
-            git pull origin develop
-            npm ci
-            npm run build
-            pm2 restart eatech-staging
-  
-  deploy-production:
+          name: build-artifacts
+      
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+
+  deploy-firebase:
     needs: build
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment: production
-    
     steps:
-      - name: Deploy to Production
+      - uses: actions/checkout@v3
+      
+      - name: Deploy Functions
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only functions
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          PROJECT_ID: eatech-prod
+      
+      - name: Deploy Firestore Rules
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only firestore:rules
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          PROJECT_ID: eatech-prod
+
+  post-deploy:
+    needs: [deploy-vercel, deploy-firebase]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Purge CDN Cache
         run: |
-          # Deploy to multiple regions
-          for region in zurich frankfurt london; do
-            echo "Deploying to $region"
-            # Deployment commands
-          done
+          curl -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}'
+      
+      - name: Run smoke tests
+        run: |
+          npx playwright test tests/smoke --reporter=github
+      
+      - name: Notify deployment
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: 'Production deployment completed'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
 ```
 
-#### Docker Configuration
-```dockerfile
-# Dockerfile for Admin App
-FROM node:18-alpine AS builder
+### 3. Infrastructure as Code
+```terraform
+# infrastructure/main.tf
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 4.0"
+    }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 3.0"
+    }
+  }
+}
 
-WORKDIR /app
+# Firebase Project
+resource "google_project" "eatech" {
+  name       = "EATECH Production"
+  project_id = "eatech-prod"
+  org_id     = var.org_id
+}
 
-# Copy package files
-COPY package*.json ./
-COPY lerna.json ./
-COPY apps/admin/package*.json ./apps/admin/
+# Enable APIs
+resource "google_project_service" "firebase" {
+  project = google_project.eatech.project_id
+  service = "firebase.googleapis.com"
+}
 
-# Install dependencies
-RUN npm ci
+resource "google_project_service" "firestore" {
+  project = google_project.eatech.project_id
+  service = "firestore.googleapis.com"
+}
 
-# Copy source code
-COPY . .
+# Firestore Database
+resource "google_firestore_database" "main" {
+  project     = google_project.eatech.project_id
+  name        = "(default)"
+  location_id = "eur3" # Zurich
+  type        = "FIRESTORE_NATIVE"
+}
 
-# Build admin app
-RUN npm run build:admin
+# Cloud Functions
+resource "google_cloudfunctions_function" "api" {
+  name        = "api"
+  description = "Main API endpoint"
+  runtime     = "nodejs18"
+  
+  available_memory_mb   = 1024
+  timeout               = 60
+  entry_point          = "api"
+  
+  source_archive_bucket = google_storage_bucket.functions.name
+  source_archive_object = google_storage_bucket_object.api.name
+  
+  trigger_http = true
+  
+  environment_variables = {
+    NODE_ENV = "production"
+  }
+}
 
-# Production image
-FROM nginx:alpine
+# Cloudflare Configuration
+resource "cloudflare_zone" "eatech" {
+  zone = "eatech.ch"
+}
 
-# Copy built files
-COPY --from=builder /app/apps/admin/dist /usr/share/nginx/html
+resource "cloudflare_record" "app" {
+  zone_id = cloudflare_zone.eatech.id
+  name    = "app"
+  value   = var.vercel_ip
+  type    = "A"
+  proxied = true
+}
 
-# Copy nginx config
-COPY nginx.conf /etc/nginx/nginx.conf
+resource "cloudflare_page_rule" "cache" {
+  zone_id = cloudflare_zone.eatech.id
+  target  = "*.eatech.ch/assets/*"
+  
+  actions {
+    cache_level = "cache_everything"
+    edge_cache_ttl = 2592000 # 30 days
+  }
+}
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
-  CMD wget --quiet --tries=1 --spider http://localhost/health || exit 1
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+resource "cloudflare_firewall_rule" "rate_limit" {
+  zone_id     = cloudflare_zone.eatech.id
+  description = "Rate limit API"
+  expression  = "(http.request.uri.path contains \"/api/\")"
+  action      = "challenge"
+  
+  ratelimit {
+    threshold = 100
+    period    = 60
+  }
+}
 ```
 
-### 11.2 MONITORING & LOGGING
-
-#### Monitoring Setup
+### 4. Monitoring Setup
 ```javascript
-// Sentry Error Tracking
-import * as Sentry from '@sentry/react';
-import { BrowserTracing } from '@sentry/tracing';
+// Sentry Configuration
+import * as Sentry from '@sentry/nextjs';
 
 Sentry.init({
-  dsn: process.env.SENTRY_DSN,
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   environment: process.env.NODE_ENV,
-  integrations: [
-    new BrowserTracing(),
-    new Sentry.Replay({
-      maskAllText: false,
-      blockAllMedia: false,
-    })
-  ],
   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
+  
   beforeSend(event, hint) {
     // Filter sensitive data
     if (event.request?.cookies) {
-      delete event.request.cookies;
+      event.request.cookies = '[FILTERED]';
     }
+    
+    // Filter known issues
+    if (event.exception?.values?.[0]?.type === 'NetworkError') {
+      return null;
+    }
+    
     return event;
-  }
+  },
+  
+  integrations: [
+    new Sentry.BrowserTracing({
+      routingInstrumentation: Sentry.nextRouterInstrumentation,
+      tracingOrigins: ['app.eatech.ch', /^\//],
+    }),
+    new Sentry.Replay({
+      maskAllText: true,
+      blockAllMedia: true,
+    }),
+  ],
 });
 
 // Custom Error Boundary
-export class ErrorBoundary extends React.Component {
-  componentDidCatch(error, errorInfo) {
+export class ErrorBoundary extends Component<Props, State> {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Error caught by boundary:', error);
+    
     Sentry.withScope((scope) => {
       scope.setExtras(errorInfo);
+      scope.setLevel('error');
       Sentry.captureException(error);
     });
+    
+    // Log to custom analytics
+    if (window.plausible) {
+      window.plausible('Error', {
+        props: {
+          message: error.message,
+          stack: error.stack?.substring(0, 200)
+        }
+      });
+    }
   }
   
   render() {
     if (this.state.hasError) {
-      return <ErrorFallback />;
+      return <ErrorFallback onRetry={this.handleRetry} />;
     }
+    
     return this.props.children;
   }
 }
 ```
 
-#### Logging Architecture
-```javascript
-// Centralized Logging Service
-class LoggingService {
-  constructor() {
-    this.queue = [];
-    this.batchSize = 50;
-    this.flushInterval = 5000;
-    
-    this.startBatchProcess();
-  }
+---
+
+## 📊 MONITORING & ANALYTICS
+
+### 1. Real-Time Dashboard
+```typescript
+// Master Dashboard Metrics
+interface DashboardMetrics {
+  // System Health
+  system: {
+    uptime: number; // percentage
+    responseTime: number; // ms
+    errorRate: number; // percentage
+    activeUsers: number;
+    serverLoad: number; // percentage
+  };
   
-  log(level, message, meta = {}) {
-    const logEntry = {
+  // Business Metrics
+  business: {
+    ordersToday: number;
+    revenueToday: number;
+    averageOrderValue: number;
+    conversionRate: number;
+    customerSatisfaction: number;
+  };
+  
+  // Tenant Overview
+  tenants: {
+    total: number;
+    active: number;
+    trial: number;
+    churned: number;
+    mrr: number; // Monthly Recurring Revenue
+  };
+  
+  // Live Activity
+  live: {
+    ordersPerMinute: number;
+    currentQueueLength: number;
+    averageWaitTime: number;
+    kitchenUtilization: number;
+    peakHourPrediction: string;
+  };
+}
+
+// WebSocket Real-Time Updates
+const useDashboardMetrics = () => {
+  const [metrics, setMetrics] = useState<DashboardMetrics>(initialMetrics);
+  
+  useEffect(() => {
+    const socket = io('wss://ws.eatech.ch/master');
+    
+    socket.on('metrics:update', (data: Partial<DashboardMetrics>) => {
+      setMetrics(prev => ({ ...prev, ...data }));
+    });
+    
+    socket.on('alert:critical', (alert: Alert) => {
+      toast.error(alert.message, {
+        duration: Infinity,
+        action: {
+          label: 'Investigate',
+          onClick: () => router.push(`/alerts/${alert.id}`)
+        }
+      });
+    });
+    
+    return () => socket.disconnect();
+  }, []);
+  
+  return metrics;
+};
+```
+
+### 2. Analytics Pipeline
+```javascript
+// Event Collection
+class AnalyticsCollector {
+  private queue: AnalyticsEvent[] = [];
+  private batchSize = 100;
+  private flushInterval = 5000; // 5 seconds
+  
+  track(event: string, properties?: Record<string, any>) {
+    const analyticsEvent: AnalyticsEvent = {
+      id: generateId(),
       timestamp: new Date().toISOString(),
-      level,
-      message,
-      meta: {
-        ...meta,
-        userId: getCurrentUserId(),
-        tenantId: getCurrentTenantId(),
-        sessionId: getSessionId(),
-        url: window.location.href,
-        userAgent: navigator.userAgent
-      }
+      event,
+      properties: {
+        ...properties,
+        ...this.getDefaultProperties()
+      },
+      context: this.getContext()
     };
     
-    this.queue.push(logEntry);
+    this.queue.push(analyticsEvent);
     
     if (this.queue.length >= this.batchSize) {
       this.flush();
     }
   }
   
-  async flush() {
+  private getDefaultProperties() {
+    return {
+      tenant_id: getCurrentTenantId(),
+      user_id: getCurrentUserId(),
+      session_id: getSessionId(),
+      platform: 'web',
+      version: APP_VERSION
+    };
+  }
+  
+  private getContext() {
+    return {
+      page: {
+        path: window.location.pathname,
+        referrer: document.referrer,
+        search: window.location.search,
+        title: document.title,
+        url: window.location.href
+      },
+      device: {
+        type: getDeviceType(),
+        os: getOS(),
+        browser: getBrowser()
+      },
+      locale: navigator.language,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
+  }
+  
+  private async flush() {
     if (this.queue.length === 0) return;
     
-    const logs = [...this.queue];
+    const events = [...this.queue];
     this.queue = [];
     
     try {
-      await fetch('/api/logs', {
+      await fetch('/api/analytics/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ logs })
+        body: JSON.stringify({ events })
       });
     } catch (error) {
-      // Re-queue on failure
-      this.queue.unshift(...logs);
+      // Re-queue events on failure
+      this.queue.unshift(...events);
+      console.error('Failed to send analytics:', error);
     }
-  }
-  
-  startBatchProcess() {
-    setInterval(() => this.flush(), this.flushInterval);
   }
 }
 
-// Performance Monitoring
-const performanceObserver = new PerformanceObserver((list) => {
-  for (const entry of list.getEntries()) {
-    if (entry.entryType === 'navigation') {
-      logger.info('Page Load Performance', {
-        dns: entry.domainLookupEnd - entry.domainLookupStart,
-        tcp: entry.connectEnd - entry.connectStart,
-        ttfb: entry.responseStart - entry.requestStart,
-        download: entry.responseEnd - entry.responseStart,
-        domComplete: entry.domComplete,
-        loadComplete: entry.loadEventEnd - entry.loadEventStart
-      });
-    }
-  }
+// Usage
+const analytics = new AnalyticsCollector();
+
+// Track events
+analytics.track('order_placed', {
+  order_id: 'BP-2025-0001',
+  total: 73.54,
+  items_count: 3,
+  payment_method: 'card'
 });
 
-performanceObserver.observe({ entryTypes: ['navigation'] });
+analytics.track('product_viewed', {
+  product_id: 'prod_123',
+  product_name: 'Classic Burger',
+  category: 'main',
+  price: 16.90
+});
 ```
 
-### 11.3 BACKUP & DISASTER RECOVERY
+### 3. A/B Testing Framework
+```typescript
+// A/B Test Configuration
+interface ABTest {
+  id: string;
+  name: string;
+  variants: Variant[];
+  targeting: Targeting;
+  metrics: string[];
+  status: 'draft' | 'running' | 'completed';
+}
 
-#### Backup Strategy
-```javascript
-// Automated Backup System
-const backupConfig = {
-  schedule: {
-    full: '0 2 * * 0',     // Weekly full backup, Sunday 2 AM
-    incremental: '0 2 * * *', // Daily incremental
-    transaction: '*/15 * * * *' // Every 15 minutes
-  },
-  retention: {
-    daily: 7,
-    weekly: 4,
-    monthly: 12,
-    yearly: 2
-  },
-  locations: [
-    's3://eatech-backups-primary/zurich/',
-    's3://eatech-backups-secondary/frankfurt/',
-    'gs://eatech-backups-tertiary/london/'
-  ]
-};
+interface Variant {
+  id: string;
+  name: string;
+  weight: number; // 0-100
+  changes: Record<string, any>;
+}
 
-// Backup Script
-const performBackup = async (type = 'incremental') => {
-  const timestamp = new Date().toISOString();
-  const backupId = `backup-${type}-${timestamp}`;
+// A/B Testing Service
+class ABTestingService {
+  private tests: Map<string, ABTest> = new Map();
+  private assignments: Map<string, string> = new Map();
   
-  try {
-    // 1. Create database snapshot
-    const snapshot = await firebase.database().ref('/').once('value');
+  async getVariant(testId: string, userId: string): Promise<Variant> {
+    // Check existing assignment
+    const assignmentKey = `${testId}:${userId}`;
+    const existingVariant = this.assignments.get(assignmentKey);
     
-    // 2. Compress data
-    const compressed = await compressData(snapshot.val());
+    if (existingVariant) {
+      return this.getVariantById(testId, existingVariant);
+    }
     
-    // 3. Encrypt backup
-    const encrypted = await encryptBackup(compressed, process.env.BACKUP_KEY);
+    // Get test configuration
+    const test = await this.getTest(testId);
     
-    // 4. Upload to multiple locations
-    const uploads = backupConfig.locations.map(location =>
-      uploadToStorage(location, backupId, encrypted)
-    );
+    // Check targeting
+    if (!this.matchesTargeting(test.targeting, userId)) {
+      return test.variants[0]; // Control variant
+    }
     
-    await Promise.all(uploads);
+    // Assign variant
+    const variant = this.assignVariant(test, userId);
+    this.assignments.set(assignmentKey, variant.id);
     
-    // 5. Verify backup integrity
-    await verifyBackup(backupId);
-    
-    // 6. Update backup registry
-    await updateBackupRegistry({
-      id: backupId,
-      type,
-      size: encrypted.length,
-      timestamp,
-      verified: true
+    // Track assignment
+    analytics.track('experiment_assigned', {
+      experiment_id: testId,
+      variant_id: variant.id,
+      variant_name: variant.name
     });
     
-  } catch (error) {
-    await notifyOps('Backup Failed', { error, backupId });
-    throw error;
+    return variant;
   }
-};
-```
-
-#### Disaster Recovery Plan
-```javascript
-// Recovery Procedures
-const disasterRecovery = {
-  // RTO: Recovery Time Objective = 1 hour
-  // RPO: Recovery Point Objective = 15 minutes
   
-  procedures: {
-    dataCorruption: async () => {
-      // 1. Identify corruption point
-      const corruptionTime = await identifyCorruptionTimestamp();
-      
-      // 2. Find last good backup
-      const backup = await findBackupBefore(corruptionTime);
-      
-      // 3. Restore from backup
-      await restoreFromBackup(backup.id);
-      
-      // 4. Replay transactions
-      await replayTransactions(backup.timestamp, corruptionTime);
-      
-      // 5. Verify data integrity
-      await verifyDataIntegrity();
-    },
+  private assignVariant(test: ABTest, userId: string): Variant {
+    // Use consistent hashing for assignment
+    const hash = this.hash(`${test.id}:${userId}`);
+    const bucket = hash % 100;
     
-    regionFailure: async (failedRegion) => {
-      // 1. Update DNS to secondary region
-      await updateDNS(failedRegion, 'secondary');
-      
-      // 2. Activate standby instances
-      await activateStandbyInstances();
-      
-      // 3. Sync recent data
-      await syncRecentData();
-      
-      // 4. Notify users
-      await notifyUsersOfFailover();
+    let cumulative = 0;
+    for (const variant of test.variants) {
+      cumulative += variant.weight;
+      if (bucket < cumulative) {
+        return variant;
+      }
     }
-  },
-  
-  testing: {
-    schedule: 'monthly',
-    scenarios: [
-      'database-corruption',
-      'region-failure',
-      'mass-deletion',
-      'ransomware-attack'
-    ]
+    
+    return test.variants[test.variants.length - 1];
   }
-};
-```
-
----
-
-## 📘 BEST PRACTICES & GUIDELINES
-
-### 12.1 CODE STYLE GUIDE
-
-#### JavaScript/React Standards
-```javascript
-// Component Structure
-import React, { useState, useEffect, useMemo } from 'react';
-import PropTypes from 'prop-types';
-import { useTranslation } from 'react-i18next';
-
-// Hooks imports
-import { useAuth } from '@/hooks/useAuth';
-import { useFirebase } from '@/hooks/useFirebase';
-
-// Component imports
-import { Button } from '@/components/common';
-import { LoadingSpinner } from '@/components/feedback';
-
-// Styles
-import styles from './ComponentName.module.css';
-
-/**
- * ComponentName - Brief description
- * @param {Object} props - Component props
- * @param {string} props.title - Title to display
- * @param {Function} props.onAction - Callback for action
- * @returns {React.Component} Rendered component
- */
-export const ComponentName = ({ title, onAction }) => {
-  // Hooks
-  const { t } = useTranslation();
-  const { user } = useAuth();
   
-  // State
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  private hash(input: string): number {
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+      const char = input.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash);
+  }
+}
+
+// React Hook for A/B Testing
+export const useABTest = (testId: string) => {
+  const [variant, setVariant] = useState<Variant | null>(null);
+  const userId = useUserId();
   
-  // Computed values
-  const computedValue = useMemo(() => {
-    return expensiveCalculation(title);
-  }, [title]);
-  
-  // Effects
   useEffect(() => {
-    // Effect logic
-    return () => {
-      // Cleanup
-    };
-  }, [dependency]);
+    if (!userId) return;
+    
+    abTestingService
+      .getVariant(testId, userId)
+      .then(setVariant)
+      .catch(console.error);
+  }, [testId, userId]);
   
-  // Handlers
-  const handleAction = async () => {
-    try {
-      setLoading(true);
-      await onAction();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+  return {
+    variant: variant?.name || 'control',
+    isLoading: !variant,
+    trackConversion: (metric: string, value?: number) => {
+      analytics.track('experiment_conversion', {
+        experiment_id: testId,
+        variant_id: variant?.id,
+        metric,
+        value
+      });
     }
   };
-  
-  // Render
-  if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage error={error} />;
-  
-  return (
-    <div className={styles.container}>
-      <h2>{title}</h2>
-      <Button onClick={handleAction}>
-        {t('common.action')}
-      </Button>
-    </div>
-  );
 };
 
-ComponentName.propTypes = {
-  title: PropTypes.string.isRequired,
-  onAction: PropTypes.func.isRequired
-};
-
-ComponentName.defaultProps = {
-  title: 'Default Title'
-};
-```
-
-#### Naming Conventions
-```javascript
-// Files and Folders
-ComponentName.jsx       // React components (PascalCase)
-useCustomHook.js       // Custom hooks (camelCase with 'use' prefix)
-userService.js         // Services (camelCase)
-API_CONSTANTS.js       // Constants (UPPER_SNAKE_CASE)
-helper-functions.js    // Utilities (kebab-case)
-
-// Variables and Functions
-const userId = '123';                    // camelCase
-const MAX_RETRY_COUNT = 3;              // UPPER_SNAKE_CASE for constants
-const calculateTotalPrice = () => {};    // camelCase for functions
-const UserProfile = () => {};           // PascalCase for components
-
-// CSS Classes
-.container { }          // camelCase
-.button-primary { }     // kebab-case for modifiers
-.is-active { }         // State classes with 'is-' prefix
-.has-error { }         // State classes with 'has-' prefix
-```
-
-### 12.2 ACCESSIBILITY GUIDELINES
-
-#### WCAG 2.1 AA Compliance
-```javascript
-// Accessible Component Example
-export const AccessibleForm = () => {
-  const [errors, setErrors] = useState({});
+// Usage Example
+const CheckoutPage = () => {
+  const { variant, trackConversion } = useABTest('checkout-flow-v2');
   
-  return (
-    <form role="form" aria-label="Bestellformular">
-      {/* Accessible Input */}
-      <div className="form-group">
-        <label htmlFor="customer-name">
-          Name
-          <span aria-label="erforderlich" className="required">*</span>
-        </label>
-        <input
-          id="customer-name"
-          type="text"
-          aria-required="true"
-          aria-invalid={!!errors.name}
-          aria-describedby={errors.name ? "name-error" : null}
-        />
-        {errors.name && (
-          <span id="name-error" role="alert" className="error">
-            {errors.name}
-          </span>
-        )}
-      </div>
-      
-      {/* Accessible Button */}
-      <button
-        type="submit"
-        aria-busy={loading}
-        disabled={loading}
-      >
-        {loading ? (
-          <>
-            <span className="sr-only">Wird verarbeitet</span>
-            <LoadingSpinner aria-hidden="true" />
-          </>
-        ) : (
-          'Bestellung abschicken'
-        )}
-      </button>
-    </form>
-  );
-};
-
-// Keyboard Navigation
-export const KeyboardNavigableMenu = () => {
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  
-  const handleKeyDown = (e) => {
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        setSelectedIndex(prev => Math.min(prev + 1, items.length - 1));
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        setSelectedIndex(prev => Math.max(prev - 1, 0));
-        break;
-      case 'Enter':
-      case ' ':
-        e.preventDefault();
-        selectItem(selectedIndex);
-        break;
-      case 'Escape':
-        closeMenu();
-        break;
-    }
+  const handleCheckout = () => {
+    // Track conversion
+    trackConversion('checkout_completed', orderTotal);
   };
   
-  return (
-    <ul
-      role="menu"
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-      aria-activedescendant={`menu-item-${selectedIndex}`}
-    >
-      {items.map((item, index) => (
-        <li
-          key={item.id}
-          id={`menu-item-${index}`}
-          role="menuitem"
-          tabIndex={-1}
-          aria-selected={index === selectedIndex}
-        >
-          {item.label}
-        </li>
-      ))}
-    </ul>
-  );
-};
-```
-
-#### Screen Reader Support
-```javascript
-// Live Regions for Dynamic Content
-export const OrderStatus = ({ status }) => {
-  return (
-    <div
-      role="status"
-      aria-live="polite"
-      aria-atomic="true"
-    >
-      <span className="sr-only">Bestellstatus:</span>
-      {status}
-    </div>
-  );
-};
-
-// Skip Links
-export const SkipLinks = () => {
-  return (
-    <nav className="skip-links" aria-label="Schnellnavigation">
-      <a href="#main" className="skip-link">
-        Zum Hauptinhalt springen
-      </a>
-      <a href="#nav" className="skip-link">
-        Zur Navigation springen
-      </a>
-      <a href="#search" className="skip-link">
-        Zur Suche springen
-      </a>
-    </nav>
-  );
-};
-```
-
-### 12.3 PERFORMANCE CHECKLIST
-
-#### Performance Optimization Techniques
-```javascript
-// 1. Code Splitting
-const AdminDashboard = lazy(() =>
-  import(/* webpackChunkName: "admin-dashboard" */ './AdminDashboard')
-);
-
-// 2. Memoization
-const ExpensiveComponent = React.memo(({ data }) => {
-  const processedData = useMemo(() => 
-    processComplexData(data), [data]
-  );
-  
-  return <DataVisualization data={processedData} />;
-});
-
-// 3. Virtual Scrolling for Large Lists
-import { VariableSizeList as List } from 'react-window';
-
-const VirtualizedOrderList = ({ orders }) => {
-  const getItemSize = (index) => {
-    // Return different heights based on order complexity
-    return orders[index].items.length * 50 + 100;
-  };
-  
-  return (
-    <List
-      height={600}
-      itemCount={orders.length}
-      itemSize={getItemSize}
-      width="100%"
-    >
-      {({ index, style }) => (
-        <OrderCard
-          order={orders[index]}
-          style={style}
-        />
-      )}
-    </List>
-  );
-};
-
-// 4. Image Optimization
-const OptimizedImage = ({ src, alt, priority = false }) => {
-  return (
-    <img
-      src={src}
-      alt={alt}
-      loading={priority ? "eager" : "lazy"}
-      decoding="async"
-      srcSet={`
-        ${src}?w=1200 1200w
-      `}
-      sizes="(max-width: 400px) 400px,
-             (max-width: 800px) 800px,
-             1200px"
-    />
-  );
-};
-
-// 5. Debouncing & Throttling
-const SearchInput = () => {
-  const [query, setQuery] = useState('');
-  
-  const debouncedSearch = useMemo(
-    () => debounce((value) => {
-      performSearch(value);
-    }, 300),
-    []
-  );
-  
-  const handleChange = (e) => {
-    const value = e.target.value;
-    setQuery(value);
-    debouncedSearch(value);
-  };
-  
-  return (
-    <input
-      type="search"
-      value={query}
-      onChange={handleChange}
-      placeholder="Suchen..."
-    />
-  );
-};
-```
-
-#### Performance Monitoring
-```javascript
-// Web Vitals Tracking
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals';
-
-const reportWebVitals = (metric) => {
-  // Send to analytics
-  analytics.track('Web Vitals', {
-    name: metric.name,
-    value: metric.value,
-    rating: metric.rating,
-    delta: metric.delta,
-    id: metric.id
-  });
-  
-  // Log poor performance
-  if (metric.rating === 'poor') {
-    console.warn(`Poor ${metric.name} performance:`, metric.value);
+  if (variant === 'one-page') {
+    return <OnePageCheckout onComplete={handleCheckout} />;
   }
+  
+  return <MultiStepCheckout onComplete={handleCheckout} />;
 };
-
-getCLS(reportWebVitals);
-getFID(reportWebVitals);
-getFCP(reportWebVitals);
-getLCP(reportWebVitals);
-getTTFB(reportWebVitals);
-
-// Custom Performance Marks
-performance.mark('app-init-start');
-
-// ... initialization code ...
-
-performance.mark('app-init-end');
-performance.measure(
-  'app-initialization',
-  'app-init-start',
-  'app-init-end'
-);
 ```
 
----
-
-## 📡 API DOKUMENTATION
-
-### RESTful API Endpoints
-
-#### Authentication
+### 4. Heatmap Integration
 ```javascript
-// POST /api/auth/login
-// Login with email and password
-{
-  request: {
-    email: "admin@restaurant.ch",
-    password: "securePassword123"
-  },
-  response: {
-    token: "eyJhbGciOiJIUzI1NiIs...",
-    user: {
-      id: "user-123",
-      email: "admin@restaurant.ch",
-      role: "admin",
-      tenantId: "tenant-456"
-    },
-    expiresIn: 3600
+// Heatmap Tracking
+class HeatmapTracker {
+  private clicks: ClickEvent[] = [];
+  private scrolls: ScrollEvent[] = [];
+  private moves: MouseMove[] = [];
+  private sessionId = generateSessionId();
+  
+  init() {
+    // Click tracking
+    document.addEventListener('click', this.handleClick);
+    
+    // Scroll tracking
+    document.addEventListener('scroll', this.handleScroll);
+    
+    // Mouse move tracking (throttled)
+    document.addEventListener('mousemove', 
+      throttle(this.handleMouseMove, 100)
+    );
+    
+    // Send data periodically
+    setInterval(() => this.flush(), 10000); // 10 seconds
+    
+    // Send on page unload
+    window.addEventListener('beforeunload', () => this.flush());
   }
-}
-
-// POST /api/auth/refresh
-// Refresh access token
-{
-  request: {
-    refreshToken: "refresh-token-here"
-  },
-  response: {
-    token: "new-access-token",
-    expiresIn: 3600
-  }
-}
-
-// POST /api/auth/logout
-// Logout and invalidate tokens
-{
-  response: {
-    success: true,
-    message: "Logged out successfully"
-  }
-}
-```
-
-#### Orders API
-```javascript
-// GET /api/orders
-// List orders with filters
-// Query params: status, type, from, to, limit, offset
-{
-  response: {
-    orders: [{
-      id: "order-123",
-      number: "2025-0001",
-      status: "pending",
-      type: "delivery",
-      customer: {
-        name: "Max Mustermann",
-        phone: "+41791234567"
+  
+  private handleClick = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    
+    this.clicks.push({
+      timestamp: Date.now(),
+      x: event.pageX,
+      y: event.pageY,
+      element: {
+        tag: target.tagName,
+        id: target.id,
+        className: target.className,
+        text: target.innerText?.substring(0, 50)
       },
-      items: [{
-        productId: "prod-1",
-        name: "Burger Deluxe",
-        quantity: 2,
-        price: 15.90,
-        modifiers: []
-      }],
-      total: 31.80,
-      createdAt: "2025-01-07T10:30:00Z"
-    }],
-    pagination: {
-      total: 150,
-      limit: 20,
-      offset: 0,
-      hasMore: true
-    }
-  }
-}
-
-// POST /api/orders
-// Create new order
-{
-  request: {
-    type: "delivery",
-    customer: {
-      name: "Max Mustermann",
-      phone: "+41791234567",
-      email: "max@example.com",
-      address: {
-        street: "Bahnhofstrasse 1",
-        zip: "8001",
-        city: "Zürich"
+      viewport: {
+        width: window.innerWidth,
+        height: window.innerHeight
       }
-    },
-    items: [{
-      productId: "prod-1",
-      quantity: 2,
-      modifiers: ["extra-cheese"],
-      notes: "Ohne Zwiebeln"
-    }],
-    paymentMethod: "card",
-    deliveryTime: "2025-01-07T12:00:00Z"
-  },
-  response: {
-    orderId: "order-789",
-    orderNumber: "2025-0002",
-    status: "pending",
-    total: 36.80,
-    estimatedTime: "2025-01-07T12:00:00Z",
-    paymentUrl: "https://pay.stripe.com/..."
-  }
-}
-
-// PATCH /api/orders/:orderId/status
-// Update order status
-{
-  request: {
-    status: "confirmed",
-    estimatedTime: "2025-01-07T12:15:00Z"
-  },
-  response: {
-    success: true,
-    order: {
-      id: "order-789",
-      status: "confirmed",
-      estimatedTime: "2025-01-07T12:15:00Z"
+    });
+  };
+  
+  private handleScroll = throttle(() => {
+    this.scrolls.push({
+      timestamp: Date.now(),
+      scrollY: window.scrollY,
+      scrollX: window.scrollX,
+      documentHeight: document.documentElement.scrollHeight,
+      viewportHeight: window.innerHeight
+    });
+  }, 500);
+  
+  private handleMouseMove = (event: MouseEvent) => {
+    this.moves.push({
+      timestamp: Date.now(),
+      x: event.pageX,
+      y: event.pageY
+    });
+    
+    // Keep only last 100 moves
+    if (this.moves.length > 100) {
+      this.moves = this.moves.slice(-100);
     }
-  }
-}
-```
-
-#### Products API
-```javascript
-// GET /api/products
-// List products with filters
-// Query params: category, available, search, sort
-{
-  response: {
-    products: [{
-      id: "prod-1",
-      name: "Burger Deluxe",
-      description: "Saftiger Rindfleisch-Burger",
-      price: 15.90,
-      category: "main",
-      imageUrl: "https://cdn.eatech.ch/products/burger-deluxe.jpg",
-      available: true,
-      variants: [{
-        name: "Klein",
-        price: 12.90
-      }, {
-        name: "XXL",
-        price: 19.90
-      }],
-      modifiers: [{
-        group: "Extras",
-        options: [{
-          id: "extra-cheese",
-          name: "Extra Käse",
-          price: 2.50
-        }]
-      }],
-      allergens: ["gluten", "milk"],
-      nutritionalInfo: {
-        calories: 650,
-        protein: 35
-      }
-    }]
-  }
-}
-
-// POST /api/products
-// Create new product (Admin only)
-{
-  request: {
-    name: "Neue Pizza",
-    description: "Leckere Pizza mit frischen Zutaten",
-    price: 18.90,
-    category: "main",
-    ingredients: ["Teig", "Tomatensauce", "Mozzarella"],
-    allergens: ["gluten", "milk"],
-    preparationTime: 20
-  },
-  response: {
-    id: "prod-new-1",
-    name: "Neue Pizza",
-    createdAt: "2025-01-07T11:00:00Z"
-  }
-}
-
-// PATCH /api/products/:productId
-// Update product
-{
-  request: {
-    available: false,
-    price: 19.90
-  },
-  response: {
-    success: true,
-    product: {
-      id: "prod-1",
-      available: false,
-      price: 19.90,
-      updatedAt: "2025-01-07T11:05:00Z"
+  };
+  
+  private async flush() {
+    if (this.clicks.length === 0 && 
+        this.scrolls.length === 0 && 
+        this.moves.length === 0) {
+      return;
     }
-  }
-}
-```
-
-#### Analytics API
-```javascript
-// GET /api/analytics/dashboard
-// Get dashboard metrics
-{
-  response: {
-    revenue: {
-      today: 2345.60,
-      week: 15678.90,
-      month: 67890.12,
-      growth: {
-        daily: 12.5,
-        weekly: 8.3,
-        monthly: 15.7
-      }
-    },
-    orders: {
-      today: 34,
-      week: 245,
-      month: 1023,
-      average: {
-        value: 68.90,
-        prepTime: 18.5
-      }
-    },
-    popular: {
-      products: [{
-        id: "prod-1",
-        name: "Burger Deluxe",
-        count: 234,
-        revenue: 3726.60
-      }, {
-        id: "prod-2",
-        name: "Pizza Margherita",
-        count: 189,
-        revenue: 3002.10
-      }],
-      categories: [{
-        name: "Hauptgerichte",
-        percentage: 65
-      }, {
-        name: "Getränke",
-        percentage: 20
-      }, {
-        name: "Desserts",
-        percentage: 15
-      }]
-    },
-    customers: {
-      new: 12,
-      returning: 22,
-      retention: 78.5,
-      satisfaction: 4.7
+    
+    const data = {
+      sessionId: this.sessionId,
+      page: window.location.pathname,
+      clicks: [...this.clicks],
+      scrolls: [...this.scrolls],
+      moves: [...this.moves]
+    };
+    
+    // Clear arrays
+    this.clicks = [];
+    this.scrolls = [];
+    this.moves = [];
+    
+    try {
+      await fetch('/api/analytics/heatmap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    } catch (error) {
+      console.error('Failed to send heatmap data:', error);
     }
   }
 }
 
-// GET /api/analytics/reports/:type
-// Generate specific reports
-// Types: sales, inventory, customers, financial
-{
-  request: {
-    type: "sales",
-    period: "monthly",
-    format: "pdf",
-    filters: {
-      categories: ["main", "dessert"],
-      dateFrom: "2025-01-01",
-      dateTo: "2025-01-31"
-    }
-  },
-  response: {
-    reportId: "report-123",
-    status: "processing",
-    estimatedTime: 30,
-    webhook: "https://api.eatech.ch/reports/status/report-123"
-  }
-}
-```
-
-#### Webhooks
-```javascript
-// Order Status Updates
-// POST https://your-webhook-url.com/orders
-{
-  event: "order.status.changed",
-  timestamp: "2025-01-07T12:00:00Z",
-  data: {
-    orderId: "order-123",
-    previousStatus: "pending",
-    newStatus: "confirmed",
-    tenantId: "tenant-456"
-  }
-}
-
-// Payment Events
-// POST https://your-webhook-url.com/payments
-{
-  event: "payment.succeeded",
-  timestamp: "2025-01-07T12:01:00Z",
-  data: {
-    orderId: "order-123",
-    amount: 45.90,
-    currency: "CHF",
-    paymentMethod: "card",
-    transactionId: "txn_123"
-  }
-}
-```
-
-### GraphQL API (Future)
-```graphql
-# Schema Definition
-type Query {
-  # Orders
-  orders(
-    status: OrderStatus
-    type: OrderType
-    limit: Int = 20
-    offset: Int = 0
-  ): OrderConnection!
-  
-  order(id: ID!): Order
-  
-  # Products
-  products(
-    category: String
-    available: Boolean
-    search: String
-  ): [Product!]!
-  
-  product(id: ID!): Product
-  
-  # Analytics
-  analytics(
-    period: AnalyticsPeriod!
-    metrics: [MetricType!]!
-  ): Analytics!
-}
-
-type Mutation {
-  # Orders
-  createOrder(input: CreateOrderInput!): CreateOrderPayload!
-  updateOrderStatus(
-    orderId: ID!
-    status: OrderStatus!
-  ): UpdateOrderPayload!
-  
-  # Products
-  createProduct(input: CreateProductInput!): Product!
-  updateProduct(
-    id: ID!
-    input: UpdateProductInput!
-  ): Product!
-}
-
-type Subscription {
-  # Real-time order updates
-  orderStatusChanged(tenantId: ID!): Order!
-  
-  # New orders
-  newOrder(tenantId: ID!): Order!
-  
-  # Analytics updates
-  metricsUpdated(tenantId: ID!): Analytics!
+// Initialize on page load
+if (typeof window !== 'undefined') {
+  const heatmapTracker = new HeatmapTracker();
+  heatmapTracker.init();
 }
 ```
 
 ---
 
-## 📅 IMPLEMENTIERUNGS-TIMELINE
+## 🆘 SUPPORT & MAINTENANCE
 
-### Phase 1: Foundation (Wochen 1-2) [100%] ✅
-- [x] **Projekt-Setup**
-  - [x] Monorepo mit Lerna
-  - [x] Build-Pipeline
-  - [x] Development Environment
-- [x] **Firebase Integration**
-  - [x] Authentication
-  - [x] Realtime Database
-  - [x] Cloud Functions
-- [x] **Multi-Tenant Architektur**
-  - [x] Tenant Isolation
-  - [x] Data Partitioning
-  - [x] Permission System
-- [x] **UI Component Library**
-  - [x] Design System
-  - [x] Common Components
-  - [x] Theme Support
+### Support Information
+- **E-Mail**: benedikt@thomma.ch
+- **Telefon**: [Noch anzugeben]
+- **Dokumentation**: https://docs.eatech.ch
+- **Status Page**: https://status.eatech.ch
 
-### Phase 2: Customer Core (Wochen 3-4) [100%] ✅
-- [x] **QR Code System**
-  - [x] Scanner Implementation
-  - [x] Table Management
-  - [x] Session Handling
-- [x] **Digital Menu**
-  - [x] Product Display
-  - [x] Category Navigation
-  - [x] Search & Filter
-- [x] **Shopping Cart**
-  - [x] Add/Remove Items
-  - [x] Price Calculation
-  - [x] Modifiers Support
-- [x] **Checkout Process**
-  - [x] Customer Info
-  - [x] Payment Integration
-  - [x] Order Confirmation
+### Maintenance Schedule
+- **Updates**: Dienstag 02:00-04:00 MEZ
+- **Backups**: Täglich 03:00 MEZ
+- **Security Patches**: Sofort bei Bedarf
 
-### Phase 3: Admin Features (Wochen 5-6) [100%] ✅
-- [x] **Admin Dashboard**
-  - [x] Overview Widgets
-  - [x] Real-time Updates
-  - [x] Quick Actions
-- [x] **Order Management**
-  - [x] Order Queue
-  - [x] Status Updates
-  - [x] Kitchen Display
-- [x] **Product Management**
-  - [x] CRUD Operations
-  - [x] Bulk Import
-  - [x] Image Upload
-- [x] **Customer Database**
-  - [x] Customer Profiles
-  - [x] Order History
-  - [x] Communication
-
-### Phase 4: Advanced Features (Wochen 7-8) [100%] ✅
-- [x] **Analytics Dashboard**
-  - [x] Sales Reports
-  - [x] Customer Analytics
-  - [x] Product Performance
-- [x] **Financial Module**
-  - [x] Revenue Tracking
-  - [x] Commission Calculation
-  - [x] Invoice Generation
-- [x] **Notification System**
-  - [x] Push Notifications
-  - [x] Email/SMS
-  - [x] In-App Alerts
-- [x] **Offline Support**
-  - [x] Service Worker
-  - [x] Local Storage
-  - [x] Sync Queue
-
-### Phase 5: Premium & Master (Wochen 9-10) [30%] 🚧
-- [ ] **Premium Features**
-  - [ ] AI Recommendations
-  - [ ] Loyalty Program
-  - [ ] Advanced Analytics
-- [x] **Master Control** ✅
-  - [x] Master Login System
-  - [x] Master Dashboard
-  - [ ] Tenant Management
-  - [ ] System Monitoring
-  - [ ] Feature Flags
-- [ ] **White Label**
-  - [ ] Custom Branding
-  - [ ] Domain Support
-  - [ ] Theme Builder
-- [ ] **Mobile Apps**
-  - [ ] iOS Build
-  - [ ] Android Build
-  - [ ] App Store Submission
-
-### Phase 6: Testing & Launch (Wochen 11-12) [0%] ⬜
-- [ ] **Testing**
-  - [ ] Unit Tests (80% Coverage)
-  - [ ] Integration Tests
-  - [ ] E2E Tests
-  - [ ] Load Testing
-- [ ] **Security Audit**
-  - [ ] Penetration Testing
-  - [ ] OWASP Compliance
-  - [ ] Data Protection
-- [ ] **Documentation**
-  - [ ] API Docs
-  - [ ] User Guides
-  - [ ] Admin Manual
-- [ ] **Deployment**
-  - [ ] Production Setup
-  - [ ] Monitoring
-  - [ ] Backup System
-  - [ ] Go-Live
+### SLA (Service Level Agreement)
+- **Uptime**: 99.9% (43.2 Minuten Downtime/Monat)
+- **Response Time**: < 200ms (95th percentile)
+- **Support Response**: < 4 Stunden (Business Hours)
 
 ---
 
-## **VOLLSTÄNDIGE ÜBERSICHT ALLER IMPLEMENTIERTEN KOMPONENTEN**
-
-### **Phase 1: Foundation ✅ (100%)**
-
-#### Multi-Tenant Architektur
-- **TenantContext.js** (`/packages/core/src/contexts/TenantContext.js`)
-  - Multi-Tenant Context Provider für tenant-isolierte Datenverwaltung
-  - Tenant-Auswahl und -Wechsel
-  - Permissions-System
-  - Role-based Access Control
-
-- **TenantService.js** (`/packages/core/src/services/TenantService.js`)
-  - Datenisolation Service
-  - CRUD-Operationen mit Tenant-Schutz
-  - Batch-Operationen
-  - Quota-Management
-
-- **database.rules.json** (`/firebase/database.rules.json`)
-  - Firebase Security Rules für Multi-Tenancy
-  - Strikte Datenisolation zwischen Tenants
-
-- **useTenantData.js** (`/packages/core/src/hooks/useTenantData.js`)
-  - React Hook für tenant-spezifische Daten
-  - Real-time Subscriptions
-  - List Management mit Filtering
-
-- **TenantSelector.jsx** (`/packages/ui/src/components/TenantSelector/TenantSelector.jsx`)
-  - UI Component für Tenant-Wechsel
-
-#### UI Component Library
-- **package.json** (`/packages/ui/package.json`)
-- **index.js** (`/packages/ui/src/index.js`) - Component Library Exports
-- **Button.jsx** (`/packages/ui/src/components/Button/Button.jsx`)
-- **Card.jsx** (`/packages/ui/src/components/Card/Card.jsx`)
-- **defaultTheme.js** (`/packages/ui/src/theme/defaultTheme.js`)
-
-#### CI/CD Pipeline
-- **ci.yml** (`/.github/workflows/ci.yml`) - GitHub Actions CI/CD
-- **pre-commit** (`/.husky/pre-commit`) - Git Pre-commit Hooks
-- **.lintstagedrc.js** - Lint Staged Configuration  
-- **release.yml** (`/.github/workflows/release.yml`) - Automated Releases
-- **dependabot.yml** (`/.github/dependabot.yml`) - Dependency Updates
-- **turbo.json** - Turbo Build Configuration (Updated to v2)
-
-### **Phase 2: Customer Core ✅ (100%)**
-
-#### QR Code System
-- **QRCodeService.js** (`/packages/core/src/services/QRCodeService.js`)
-  - QR Code Generation und Verwaltung
-  - Bulk QR Generation
-  - Analytics Tracking
-
-- **QRScanner.jsx** (`/apps/web/src/components/QRScanner/QRScanner.jsx`)
-  - QR Code Scanner mit Kamera
-  - Manuelle Tischnummer-Eingabe
-  - Session Management
-
-- **TableQRManagement.jsx** (`/apps/admin/src/pages/Tables/TableQRManagement.jsx`)
-  - Admin Interface für QR Codes
-  - Print-freundliche QR Codes
-  - Statistiken
-
-#### Digital Menu
-- **Menu.jsx** (`/apps/web/src/pages/Menu/Menu.jsx`)
-  - Digitale Speisekarte
-  - Kategorien und Filter
-  - Suche
-  - Dietary Filters
-
-- **ProductDetailModal.jsx** (`/apps/web/src/components/ProductDetailModal/ProductDetailModal.jsx`)
-  - Produktdetails mit Optionen
-  - Modifikatoren
-  - Spezielle Anweisungen
-
-- **CartContext.jsx** (`/apps/web/src/contexts/CartContext.jsx`)
-  - Warenkorb State Management
-  - Promo Codes
-  - Persistente Speicherung
-
-#### Shopping Cart
-- **Cart.jsx** (`/apps/web/src/pages/Cart/Cart.jsx`)
-  - Warenkorb-Verwaltung
-  - Mengenänderung
-  - Notizen
-
-- **CartSidebar.jsx** (`/apps/web/src/components/CartSidebar/CartSidebar.jsx`)
-  - Quick Cart Preview
-  - Schnelle Aktionen
-
-- **useLocalStorage.js** (`/apps/web/src/hooks/useLocalStorage.js`)
-  - Persistente Datenspeicherung
-  - Cross-Tab Sync
-
-#### Checkout Process
-- **Checkout.jsx** (`/apps/web/src/pages/Checkout/Checkout.jsx`)
-  - Checkout-Formular
-  - Zahlungsmethoden
-  - Validierung
-
-- **PaymentService.js** (`/apps/web/src/services/PaymentService.js`)
-  - Stripe Integration
-  - TWINT Support
-  - Fee Calculation
-
-- **OrderService.js** (`/apps/web/src/services/OrderService.js`)
-  - Order Creation
-  - Status Management
-  - Notifications
-
-### **Phase 3: Admin Features ✅ (100%)**
-
-#### Admin Dashboard
-- **Dashboard.jsx** (`/apps/admin/src/pages/Dashboard/Dashboard.jsx`)
-  - Echtzeit-Statistiken
-  - Umsatz-Charts
-  - Live Orders
-
-- **Dashboard.module.css** (`/apps/admin/src/pages/Dashboard/Dashboard.module.css`)
-  - Dashboard Styling
-
-- **DashboardService.js** (`/apps/admin/src/services/DashboardService.js`)
-  - Daten-Aggregation
-  - Statistik-Berechnung
-  - Trend-Analyse
-
-- **LiveOrdersWidget.jsx** (`/apps/admin/src/components/Widgets/LiveOrdersWidget.jsx`)
-  - Live Order Display
-  - Timer und Warnungen
-
-#### Order Management
-- **Orders.jsx** (`/apps/admin/src/pages/Orders/Orders.jsx`)
-  - Order-Übersicht
-  - Status-Management
-  - Bulk Actions
-
-- **OrderDetailModal.jsx** (`/apps/admin/src/components/Modals/OrderDetailModal.jsx`)
-  - Detaillierte Bestellansicht
-  - Status History
-  - Print-Funktion
-
-- **KitchenDisplay.jsx** (`/apps/admin/src/pages/Kitchen/KitchenDisplay.jsx`)
-  - Kitchen Display System
-  - Fullscreen-Modus
-  - Sound-Benachrichtigungen
-
-#### Product Management
-- **Products.jsx** (`/apps/admin/src/pages/Products/Products.jsx`)
-  - Produktverwaltung mit Grid/List View
-  - Bulk Actions
-  - Import/Export
-  - Feature Toggles
-
-- **Products.module.css** (`/apps/admin/src/pages/Products/Products.module.css`)
-  - Responsive Styles
-  - Dark Mode Support
-  - Print Styles
-  - Fixed line-clamp issue
-
-- **ProductModal.jsx** (`/apps/admin/src/components/Products/ProductModal.jsx`)
-  - Erweiterte Produktbearbeitung
-  - Varianten & Modifikatoren
-  - Allergene & Nährwerte
-  - Mehrsprachigkeit
-  - KI-Beschreibungen
-  - Combo-Deals
-  - Happy Hour Preise
-
-- **ProductModal.module.css** (`/apps/admin/src/components/Products/ProductModal.module.css`)
-  - Modal Styling
-  - Tab Navigation
-  - Form Elements
-
-- **FeatureToggleModal.jsx** (`/apps/admin/src/components/Products/FeatureToggleModal.jsx`)
-  - Feature-Verwaltung
-  - Kategorisierte Features
-  - Import/Export Konfiguration
-
-- **FeatureToggleModal.module.css** (`/apps/admin/src/components/Products/FeatureToggleModal.module.css`)
-  - Feature Cards Layout
-  - Toggle Animationen
-
-#### Customer Management
-- **CustomerManagement.jsx** (`/apps/admin/src/pages/CustomerManagement/CustomerManagement.jsx`)
-  - CRM-System
-  - Kundensegmentierung
-  - Loyalty Programme
-  - E-Mail/SMS Kampagnen
-  - Import/Export
-  - Statistik-Dashboard
-
-- **CustomerManagement.module.css** (`/apps/admin/src/pages/CustomerManagement/CustomerManagement.module.css`)
-  - Customer Cards
-  - Segment Badges
-  - Responsive Tables
-  - Dark Mode Support
-
-### **Phase 4: Advanced Features ✅ (100%)**
-
-#### Offline Support
-- **sw.js** (`/apps/web/public/sw.js`)
-  - Service Worker für Offline-Funktionalität
-  - Cache-Strategien
-  - Background Sync
-
-- **OfflineService.js** (`/packages/core/src/services/OfflineService.js`)
-  - Offline Queue Management
-  - Sync-Strategien
-  - Conflict Resolution
-
-- **useOffline.js** (`/packages/core/src/hooks/useOffline.js`)
-  - React Hook für Offline-Status
-  - Auto-Sync bei Reconnect
-
-#### Analytics Dashboard
-- **Analytics.jsx** (`/apps/admin/src/pages/Analytics/Analytics.jsx`)
-  - Umfassende Analytics-Übersicht
-  - Umsatz-Trends
-  - Kunden-Insights
-  - Produkt-Performance
-
-- **Analytics.module.css** (`/apps/admin/src/pages/Analytics/Analytics.module.css`)
-  - Chart Styling
-  - Responsive Grid
-  - Dark Mode Support
-
-- **AnalyticsService.js** (`/packages/core/src/services/AnalyticsService.js`)
-  - Datenanalyse-Engine
-  - Trend-Berechnungen
-  - Export-Funktionen
-
-#### Notification System
-- **NotificationService.js** (`/packages/core/src/services/NotificationService.js`)
-  - Multi-Channel Notifications
-  - Push-Notifications
-  - E-Mail Integration
-  - SMS Integration
-  - In-App Notifications
-  - Template-System
-
-#### Kitchen Display System
-- **KitchenDisplay.jsx** (`/apps/admin/src/pages/KitchenDisplay/KitchenDisplay.jsx`)
-  - Echtzeit Kitchen Display
-  - Order Queue Management
-  - Prep-Time Tracking
-  - Station Assignment
-
-- **KitchenDisplay.module.css** (`/apps/admin/src/pages/KitchenDisplay/KitchenDisplay.module.css`)
-  - Fullscreen Layout
-  - Order Cards
-  - Timer Displays
-
-- **KitchenService.js** (`/packages/core/src/services/KitchenService.js`)
-  - Kitchen Logic
-  - Order Prioritization
-  - Station Management
-
-#### Table Management
-- **TableManagement.jsx** (`/apps/admin/src/pages/Tables/TableManagement.jsx`)
-  - Tisch-Verwaltung
-  - QR-Code Generation
-  - Reservation System
-  - Table Status
-
-- **TableManagement.module.css** (`/apps/admin/src/pages/Tables/TableManagement.module.css`)
-  - Table Grid Layout
-  - Status Indicators
-  - Drag & Drop Support
-
-- **TableService.js** (`/packages/core/src/services/TableService.js`)
-  - Table CRUD Operations
-  - Reservation Logic
-  - Availability Checks
-
-#### Promotion Engine
-- **PromotionManagement.jsx** (`/apps/admin/src/pages/Promotions/PromotionManagement.jsx`)
-  - Promotion-Verwaltung
-  - Discount Codes
-  - Happy Hour Setup
-  - Customer Segments
-
-- **PromotionManagement.module.css** (`/apps/admin/src/pages/Promotions/PromotionManagement.module.css`)
-  - Promotion Cards
-  - Timeline View
-  - Statistics Display
-
-- **PromotionService.js** (`/packages/core/src/services/PromotionService.js`)
-  - Promotion Engine
-  - Rule Evaluation
-  - Discount Calculation
-
-### **Phase 5: Premium & Master 🚧 (30%)**
-
-#### Master Control System (Neu implementiert heute!)
-
-##### Authentication & Security
-- **Login.jsx** (`/apps/master/src/pages/Login.jsx`)
-  - Sicheres Master Login System
-  - Brute-Force Protection (3 Versuche, 5 Min Sperre)
-  - Session Management
-  - Security Check beim Start
-  - 2FA-Ready für später
-
-- **Login.module.css** (`/apps/master/src/pages/Login.module.css`)
-  - Premium Dark Theme Design
-  - Security Indicators
-  - Responsive Layout
-  - Animationen und Effekte
-
-- **AuthService.js** (`/apps/master/src/services/AuthService.js`)
-  - Firebase Authentication Integration
-  - Session-basierte Authentifizierung (30 Min Timeout)
-  - Activity Monitoring
-  - Login Attempt Tracking
-  - Session Token Encryption
-
-- **SecurityLogger.js** (`/apps/master/src/services/SecurityLogger.js`)
-  - Security Event Logging
-  - Real-time Alert System
-  - Audit Trail
-  - Critical Event Detection
-
-- **validation.js** (`/apps/master/src/utils/validation.js`)
-  - Input Validation Utilities
-  - Swiss-specific Validators
-  - Security Sanitization
-
-##### Master Application Structure
-- **App.jsx** (`/apps/master/src/App.jsx`)
-  - Master App Hauptkomponente
-  - Routing Configuration
-  - Protected Routes Setup
-
-- **MasterLayout.jsx** (`/apps/master/src/layouts/MasterLayout.jsx`)
-  - Collapsible Sidebar Navigation
-  - Header mit Notifications
-  - Dark/Light Mode Toggle
-  - Quick Search (Ctrl+K)
-  - Activity Monitoring
-
-- **MasterLayout.module.css** (`/apps/master/src/layouts/MasterLayout.module.css`)
-  - Layout Styling
-  - Responsive Sidebar
-  - Notification Dropdown
-
-- **global.css** (`/apps/master/src/styles/global.css`)
-  - Global Styles und CSS Variables
-  - Dark/Light Theme Support
-  - Typography System
-
-##### Authentication Hooks & Components
-- **useMasterAuth.js** (`/apps/master/src/hooks/useMasterAuth.js`)
-  - Master Auth Context Provider
-  - Authentication State Management
-  - Role Verification
-
-- **ProtectedRoute.jsx** (`/apps/master/src/components/ProtectedRoute.jsx`)
-  - Route Protection Component
-  - Master Role Check
-  - Loading States
-
-- **ProtectedRoute.module.css** (`/apps/master/src/components/ProtectedRoute.module.css`)
-  - Protected Route Styling
-
-##### Master Dashboard
-- **Dashboard.jsx** (`/apps/master/src/pages/Dashboard.jsx`)
-  - Mission Control Overview
-  - Live Schweiz-Karte mit Foodtrucks
-  - Echtzeit-Metriken
-  - System Health Monitoring
-  - Quick Actions
-  - Auto-Refresh (5s)
-
-- **Dashboard.module.css** (`/apps/master/src/pages/Dashboard.module.css`)
-  - Dashboard Layout
-  - Grid System
-  - Responsive Design
-
-##### Dashboard Components
-- **MetricCard.jsx** (`/apps/master/src/components/Dashboard/MetricCard.jsx`)
-  - Wiederverwendbare Metrik-Karte
-  - Trend Indicators
-  - Animated Values
-
-- **MetricCard.module.css** (`/apps/master/src/components/Dashboard/MetricCard.module.css`)
-  - Metric Card Styling
-  - Color Variants
-
-- **SwitzerlandMap.jsx** (`/apps/master/src/components/SwitzerlandMap/SwitzerlandMap.jsx`)
-  - Interaktive SVG Schweizer Karte
-  - Live Foodtruck-Positionen
-  - Canton-basierte Heatmap
-  - Hover Tooltips
-  - Click Interactions
-
-- **SwitzerlandMap.module.css** (`/apps/master/src/components/SwitzerlandMap/SwitzerlandMap.module.css`)
-  - Map Styling
-  - Pulse Animations
-  - Tooltip Styles
-
-- **SystemHealthWidget.jsx** (`/apps/master/src/components/Dashboard/SystemHealthWidget.jsx`)
-  - Service Status Monitoring
-  - Performance Metriken
-  - Circular Progress
-  - Alert System
-
-- **SystemHealthWidget.module.css** (`/apps/master/src/components/Dashboard/SystemHealthWidget.module.css`)
-  - Health Widget Styling
-  - Progress Ring Animation
-
-- **QuickActions.jsx** (`/apps/master/src/components/Dashboard/QuickActions.jsx`)
-  - Schnellzugriff auf Master-Funktionen
-  - Gefährliche Aktionen mit Bestätigung
-  - Keyboard Shortcut Support
-
-- **QuickActions.module.css** (`/apps/master/src/components/Dashboard/QuickActions.module.css`)
-  - Action Button Grid
-  - Color Coding
-  - Hover Effects
-
-- **LiveFeed.jsx** (`/apps/master/src/components/Dashboard/LiveFeed.jsx`)
-  - Echtzeit Event-Stream
-  - Filter nach Event-Typen
-  - Sound-Benachrichtigungen
-  - Pause/Play Funktionalität
-
-- **LiveFeed.module.css** (`/apps/master/src/components/Dashboard/LiveFeed.module.css`)
-  - Feed Styling
-  - Event Cards
-  - Animation Effects
-
-### **Zusätzliche Core Services & Utilities**
-
-#### Package Struktur
-- **packages/utils/package.json** (`/packages/utils/package.json`)
-  - Utility Package Configuration
-
-- **packages/core/config/firebase.js** (`/packages/core/config/firebase.js`)
-  - Firebase Configuration
-
-- **apps/mobile/package-lock.json** (`/apps/mobile/package-lock.json`)
-  - Mobile App Dependencies
-
-- **apps/mobile/src/config/constants.js** (`/apps/mobile/src/config/constants.js`)
-  - Mobile App Constants
-  - Environment Configuration
-
-### **Theme System & Templates**
-- **ThemeSystem.jsx** (`/apps/admin/src/components/theme-system/ThemeSystem.jsx`)
-  - Theme Management System
-  - Multiple Theme Options
-
-- **ComponentTemplate** (`/apps/admin/src/components/[ComponentName]/[ComponentName].jsx`)
-  - Component Creation Template
-  - Best Practices Guide
-
-### **Master Pages (Placeholder für weitere Entwicklung)**
-- **TenantControl.jsx** (`/apps/master/src/pages/TenantControl/TenantControl.jsx`) - Placeholder
-- **SystemMetrics.jsx** (`/apps/master/src/pages/SystemMetrics/SystemMetrics.jsx`) - Placeholder  
-- **GlobalSettings.jsx** (`/apps/master/src/pages/GlobalSettings/GlobalSettings.jsx`) - Placeholder
-- **GlobalSettings.module.css** (`/apps/master/src/pages/GlobalSettings/GlobalSettings.module.css`) - Placeholder
-- **RevenueTracking.jsx** (`/apps/master/src/pages/RevenueTracking/RevenueTracking.jsx`) - Placeholder
-- **FeatureControl.jsx** (`/apps/master/src/pages/FeatureControl/FeatureControl.jsx`) - Placeholder
-- **FeatureControl.module.css** (`/apps/master/src/pages/FeatureControl/FeatureControl.module.css`) - Placeholder
-- **AlertCenter.jsx** (`/apps/master/src/pages/AlertCenter/AlertCenter.jsx`) - Placeholder
+## 📅 RELEASE NOTES
+
+### Version 3.0.0 (Launch - 1. August 2025)
+- 🎉 Initial Release
+- ✅ Complete Multi-Tenant System
+- ✅ PWA Implementation
+- ✅ Core Features (Phase 1-4)
+- ✅ Basic AI Features
+- ✅ Swiss Payment Methods
+
+### Roadmap 2025
+**Q3 2025**
+- Voice Commerce Launch
+- Advanced AI Features
+- Blockchain Integration
+- 100+ Foodtrucks
+
+**Q4 2025**
+- Edge Computing
+- International Expansion (AT/DE)
+- Enterprise Features
+- 500+ Foodtrucks
 
 ---
 
-## 📊 **ZUSAMMENFASSUNG**
+## 🏁 ZUSAMMENFASSUNG
 
-### **Gesamt-Statistik:**
-- **Phase 1-4:** 85+ Komponenten vollständig implementiert ✅
-- **Phase 5:** 26+ neue Master Control Komponenten (heute hinzugefügt) 🚧
-- **Gesamt:** 110+ Komponenten und Services
+EATECH V3.0 ist bereit, die Schweizer Foodtruck-Industrie zu revolutionieren. Mit 85% Fortschritt und einem klaren Weg zum Launch am 1. August 2025 sind wir auf Kurs.
 
-### **Fortschritt Update:**
-- Foundation: 100% ✅
-- Customer Core: 100% ✅
-- Admin Features: 100% ✅
-- Advanced Features: 100% ✅
-- Premium & Master: 30% 🚧 (Master Control teilweise fertig)
-- Testing: 0% ⬜
+### Nächste Schritte:
 
-**Gesamtfortschritt: 71%** 🚀
+#### A) Bestehende Dateien aktualisieren:
+1. ⬜ `/apps/admin/src/pages/Products/Products.jsx` - AI Pricing Integration
+2. ⬜ `/apps/admin/src/pages/OrderManagement/OrderManagement.jsx` - Voice Order Support
+3. ⬜ `/apps/admin/src/pages/Analytics/Analytics.jsx` - KI-Insights einbauen
+4. ⬜ `/apps/admin/src/pages/Events/Events.jsx` - Multi-Day Support & Lageplan
+5. ⬜ `/apps/master/src/pages/FeatureControl/FeatureControl.jsx` - Vollständig implementieren
+6. ⬜ `/apps/master/src/pages/Dashboard.jsx` - Erweiterte Metriken
+7. ⬜ `/apps/web/src/app/layout.tsx` - PWA Meta Tags & Service Worker
+8. ⬜ `/packages/core/src/config/firebase.js` - Neue Collections hinzufügen
 
-### Kritische Pfade
-- Multi-Tenant Architektur ✅ → Erledigt!
-- Payment Integration ✅ → Erledigt!
-- Offline Support ✅ → Erledigt!
-- Kitchen Display ✅ → Erledigt!
-- Master Control System 🚧 → In Arbeit (30%)
-- Commission System ⬜ → Noch ausstehend
+#### B) Neue Features implementieren:
+1. ⬜ KI-System Core (`/packages/ai/`)
+2. ⬜ Voice Commerce (`/apps/web/src/features/voice/`)
+3. ⬜ Feature Flag System (`/packages/core/src/features/`)
+4. ⬜ System Monitoring Dashboard (`/apps/master/src/pages/Monitoring/`)
+5. ⬜ Blockchain Integration (`/packages/blockchain/`)
+6. ⬜ Edge Computing Setup (`/packages/edge/`)
+7. ⬜ Service Worker (`/apps/web/public/service-worker.js`)
+8. ⬜ Image CDN Integration (`/packages/core/src/services/cdn/`)
+9. ⬜ A/B Testing Framework (`/packages/analytics/src/ab-testing/`)
+10. ⬜ Heatmap Tracking (`/packages/analytics/src/heatmap/`)
 
-## ✅ KRITISCHE ERFOLGSFAKTOREN
+#### C) Testing & Launch:
+1. ⬜ Beta Testing mit Nachbar's Foodtruck
+2. ⬜ Performance Optimierung
+3. ⬜ Security Audit
+4. ⬜ Launch Vorbereitung
 
-### 1. Performance
-- **Ladezeit**: < 3 Sekunden (Mobile 4G)
-- **Time to Interactive**: < 5 Sekunden
-- **API Response**: < 200ms (P95)
-- **Offline-Fähigkeit**: 100% Menu, 80% Orders
-
-### 2. Skalierbarkeit
-- **Concurrent Users**: 10,000+
-- **Orders/Minute**: 1,000+
-- **Tenants**: 500+ ohne Performance-Verlust
-- **Data Volume**: 10TB+ strukturiert
-
-### 3. Zuverlässigkeit
-- **Uptime**: 99.9% SLA
-- **Data Loss**: 0% (RPO: 15 Minuten)
-- **Recovery Time**: < 1 Stunde (RTO)
-- **Fehlerrate**: < 0.1%
-
-### 4. Benutzerfreundlichkeit
-- **Onboarding**: < 5 Minuten
-- **Erste Bestellung**: < 2 Minuten
-- **Admin-Schulung**: < 30 Minuten
-- **Support-Tickets**: < 5% der User
-
-### 5. Sicherheit
-- **DSGVO/GDPR**: 100% compliant
-- **PCI-DSS**: Level 1 compliant
-- **Penetration Test**: Bestanden
-- **Data Encryption**: At-rest & in-transit
+### Kontakt
+**Technische Fragen & Support:**
+- 📧 E-Mail: benedikt@thomma.ch
+- 📱 Telefon: [Noch anzugeben]
+- 💬 Discord: [Coming Soon]
+- 📚 Docs: https://docs.eatech.ch
 
 ---
 
-## ⚠️ RISIKEN & MITIGATIONEN
+**🍴 EATECH - Die Zukunft des Foodtruck-Business beginnt hier!**
 
-### Technische Risiken
-| Risiko | Wahrscheinlichkeit | Impact | Mitigation |
-|--------|-------------------|---------|------------|
-| Firebase Limits | Mittel | Hoch | Caching-Layer, Read-Replicas |
-| Payment Provider Ausfall | Niedrig | Kritisch | Multi-Provider Fallback |
-| DDoS Attacken | Mittel | Hoch | Cloudflare, Rate Limiting |
-| Daten-Korruption | Niedrig | Kritisch | Backup alle 15 Min, Audit Log |
-
-### Business Risiken
-| Risiko | Wahrscheinlichkeit | Impact | Mitigation |
-|--------|-------------------|---------|------------|
-| Langsame Adoption | Hoch | Mittel | Free Trial, Onboarding Support |
-| Konkurrenz | Mittel | Mittel | Unique Features, Preisführerschaft |
-| Regulatorische Änderungen | Niedrig | Hoch | Compliance Team, Flexible Architektur |
-| Tenant Churn | Mittel | Hoch | Success Team, Feature Requests |
-
----
-
-## 🌟 UNIQUE SELLING POINTS
-
-### 1. Schweiz-Fokus
-- **Lokale Zahlungsmethoden**: Twint, PostFinance
-- **Mehrsprachigkeit**: DE, FR, IT, EN
-- **Schweizer Hosting**: Datenschutz-konform
-- **CHF-native**: Keine Währungskonversion
-
-### 2. Offline-First
-- **100% Offline Menu**: Immer verfügbar
-- **Offline Orders**: Queue & Sync
-- **PWA**: Installierbar, App-like
-- **Background Sync**: Automatisch
-
-### 3. Multi-Tenant SaaS
-- **White Label**: Eigenes Branding
-- **Mandantenfähig**: Isolierte Daten
-- **Skalierbar**: Von Food Truck bis Kette
-- **API-First**: Integrierbar
-
-### 4. Real-Time Everything
-- **Live Order Updates**: Push, SMS, In-App
-- **Kitchen Sync**: Sofort in Küche
-- **Analytics**: Echtzeit-Dashboard
-- **Inventory**: Auto-Updates
-
-### 5. AI-Powered (Zukunft)
-- **Smart Recommendations**: Personalisiert
-- **Demand Forecasting**: Predictive
-- **Dynamic Pricing**: Nachfrage-basiert
-- **Chatbot Support**: 24/7
-
----
-
-## 📞 SUPPORT & RESSOURCEN
-
-### Entwickler-Ressourcen
-- **GitHub**: github.com/eatech/v3
-- **Dokumentation**: docs.eatech.ch
-- **API Reference**: api.eatech.ch/docs
-- **Status Page**: status.eatech.ch
-
-### Support-Kanäle
-- **Developer Discord**: discord.gg/eatech-dev
-- **E-Mail**: dev@eatech.ch
-- **Ticket System**: support.eatech.ch
-- **Hotline**: +41 44 123 45 67 (Business Hours)
-
-### Schulungen
-- **Onboarding Videos**: youtube.com/eatech
-- **Webinare**: Jeden Dienstag 14:00
-- **Dokumentation**: help.eatech.ch
-- **Persönliche Schulung**: Auf Anfrage
-
----
-
-## 🚀 NÄCHSTE SCHRITTE
-
-### Sofort (Diese Woche)
-1. ✅ Dokumentation fertigstellen
-2. ⬜ Multi-Tenant Struktur implementieren
-3. ⬜ CI/CD Pipeline aufsetzen
-4. ⬜ Component Library starten
-
-### Kurzfristig (2 Wochen)
-1. ⬜ Customer App MVP
-2. ⬜ Admin Dashboard Grundgerüst
-3. ⬜ Payment Integration
-4. ⬜ Erste Demo für Investoren
-
-### Mittelfristig (1 Monat)
-1. ⬜ Beta-Test mit 5 Restaurants
-2. ⬜ Mobile App Alpha
-3. ⬜ Analytics Dashboard
-4. ⬜ Performance Optimierung
-
-### Langfristig (3 Monate)
-1. ⬜ Launch Version 1.0
-2. ⬜ 50+ zahlende Kunden
-3. ⬜ Premium Features
-4. ⬜ Internationale Expansion
-
----
-
-## 📝 ANHANG
-
-### Glossar
-- **Tenant**: Ein Restaurant/Kunde im System
-- **Commission**: 3% Provision pro Transaktion
-- **White Label**: Eigenes Branding für Enterprise
-- **PWA**: Progressive Web App
-- **RTO**: Recovery Time Objective
-- **RPO**: Recovery Point Objective
-
-### Versions-Historie
-- **v3.0.0** (2025-01-07): Komplette Neu-Entwicklung
-- **v2.0.0** (2024): Legacy System (deprecated)
-- **v1.0.0** (2023): Initial MVP
-
-### Danksagungen
-- EATECH Development Team
-- Beta-Tester Restaurants
-- Open Source Community
-- Schweizer Gastro-Verband
-
----
-
-**ENDE DER DOKUMENTATION**
-
-*Letzte Aktualisierung: 2025-01-07*
-*Nächste Review: 2025-02-01*
-
-**© 2025 EATECH - Revolutionizing Food Ordering in Switzerland 🇨🇭🍔🚀**?w=400 400w,
-        ${src}?w=800 800w,
-        ${src}
-
-        Wenn du an Dateien Arbeitest und das README.MD befolgst gib mir auch den Kapitel den du Gerade Bearbeitest.
-
-
-
-
-        was geändert wurde zu sicherheit notiert: Kategorie: Bug-Fixes und Wartung (nicht explizit im README als Phase definiert)
-1. turbo.json Migration (Breaking Change Fix)
-
-Problem: Turbo Build hat sein Config-Schema geändert (v1 → v2)
-Fehler: Property pipeline is not allowed und Missing property "tasks"
-Lösung:
-
-pipeline → tasks umbenannt
-Schema-URL aktualisiert auf https://turbo.build/schema.json
-Struktur beibehalten für alle Build-Tasks
-
-
-Datei: /turbo.json (Root-Verzeichnis)
-
-2. CSS Vendor Prefix Compliance
-
-Problem: Fehlende Standard-Property für Browser-Kompatibilität
-Fehler: Also define the standard property 'line-clamp' for compatibility
-Lösung:
-
-Standard line-clamp: 2; Property hinzugefügt
-Webkit-Prefix beibehalten für ältere Browser
-Keine Funktionsänderung, nur verbesserte Kompatibilität
-
-
-Datei: /apps/admin/src/pages/Products/Products.module.css (Zeile 685)
-
-Einordnung in die Projektstruktur:
-Diese Fixes gehören zur laufenden Wartung des Projekts und sind notwendig für:
-
-Build-System: Turbo muss korrekt konfiguriert sein für das Monorepo
-Browser-Kompatibilität: CSS muss Standards befolgen für alle Browser
-
-Auswirkungen:
-
-✅ Build-Prozess funktioniert wieder mit aktueller Turbo-Version
-✅ Keine CSS-Warnungen mehr in modernen Browsern
-✅ Rückwärtskompatibilität bleibt erhalten
-
-
-
-🎉 Master Control System - Implementierung abgeschlossen!
-✅ Erfolgreich implementierte Komponenten:
-1. NotificationCenter.jsx
-
-Multi-Channel Management (Push, Email, SMS, In-App)
-Smart Targeting & Timing
-A/B Testing Dashboard
-Emergency Broadcast System
-90 Tage Analytics Retention
-
-2. ReviewTracker.jsx
-
-Punkte-System (1 CHF = 1 Punkt)
-Food-Themed Level System (Rookie → Nomad)
-AI-Sentiment-Analyse
-Review-Heatmap Schweiz
-Google/Platform Integration Ready
-
-3. PreOrderManager.jsx
-
-1h/2h Vorbestellung (Normal/Premium)
-Smart Wartezeit-Kalkulation
-Recurring Orders System
-Peak Time Management
-Live Queue Monitoring
-
-4. CalendarManager.jsx (bereits vorhanden)
-
-30-Tage Standortplanung
-Drag & Drop Scheduling
-Wetter-Integration
-Favoriten-Benachrichtigungen
-
-5. TenantControl.jsx (bereits vorhanden)
-
-Live Foodtruck-Verwaltung
-Schweizer Karte Integration
-Status-Updates in Echtzeit
-Commission Tracking
-
-📊 Gesamtfortschritt Master Control System:
-Phase 5: Premium & Master Features
-
-✅ Master Login System (100%)
-✅ Master Dashboard (100%)
-✅ Notification Management (100%)
-✅ Review & Rewards (100%)
-✅ PreOrder System (100%)
-✅ Calendar Planning (100%)
-✅ Tenant Control (100%)
-⬜ Feature Flags (0%)
-⬜ System Monitoring (0%)
-⬜ White Label Builder (0%)
-
-Gesamtfortschritt Phase 5: ~75% 🚀
-🎯 Nächste empfohlene Schritte:
-1. Feature Flag System
-
-Toggle Features per Tenant
-A/B Testing für neue Features
-Gradual Rollout Control
-
-2. System Monitoring Dashboard
-
-Server Health Metrics
-Database Performance
-API Response Times
-Error Tracking
-
-3. White Label Builder
-
-Theme Customization
-Logo/Branding Upload
-Custom Domain Support
-
-4. Integration & Testing
-
-Alle Master Components verknüpfen
-End-to-End Testing
-Performance Optimization
-
-💡 Quick Wins für sofortige Verbesserung:
-
-Master Navigation - Sidebar mit allen Tools
-Dashboard Widgets - Live-Metriken aller Systeme
-Export Functions - CSV/PDF Reports
-Batch Operations - Bulk Actions für Effizienz
-
-                        ## 🔧 AKTUELLE ENTWICKLUNG (2025-01-07)
-
-### System Monitoring Dashboard - In Entwicklung
-
-**Entwickler:** Claude (Anthropic)
-**Status:** Bereit zur Implementierung
-**Dateipfad:** `/apps/master/src/pages/SystemMonitoring/SystemMonitoring.jsx`
-
-#### Geplante Features:
-
-**1. Core Monitoring Features:**
-- ✅ Real-time Firebase Performance Metrics
-- ✅ Server Health (CPU, Memory, Disk, Response Time)
-- ✅ Database Performance Tracking
-- ✅ API Endpoint Monitoring
-- ✅ Business Metrics (Orders/Min, Revenue, Success Rates)
-
-**2. Visualization:**
-- ✅ Echtzeit-Graphen (Line & Area Charts)
-- ✅ Heatmaps für Geo-Daten
-- ✅ Status-Dashboard mit Ampel-System
-- ✅ 3D Schweiz-Karte für regionale Metriken
-
-**3. Alert System:**
-- ✅ Kritische Alerts (P1): Payment >5% Fehler, API <95% Uptime
-- ✅ Hohe Priorität (P2): CPU >80%, Memory >85%, Response >3s
-- ✅ Mittlere Priorität (P3): Disk >80%, Cache <70%
-- ✅ Eskalationskette mit Auto-Actions
-
-**4. Automatische Aktionen:**
-- ✅ Auto-Scaling bei hoher Last
-- ✅ Feature-Abschaltung bei Überlastung (Integration mit FeatureControl)
-- ✅ Fallback-Aktivierung bei Fehlern
-- ✅ Performance-basierte Feature-Empfehlungen
-
-**5. Tenant Features:**
-- ✅ Eigenes Metrics Dashboard für jeden Tenant
-- ✅ Performance-Vergleiche
-- ✅ Custom Alert-Einstellungen
-- ❌ Public Status Page (nicht implementiert)
-
-**6. Reporting:**
-- ✅ Transparency Reports (Quarterly)
-- ✅ Uptime & Incident Reports
-- ✅ Performance Improvements Tracking
-- ✅ 90 Tage Daten-Retention
-
-**7. Intelligente Features:**
-- ✅ Baseline Learning (Normal-Werte pro Tenant)
-- ✅ Monitoring Presets (Rush Hour, Night, Event Mode)
-- ✅ Predictive Maintenance
-- ✅ Calendar Integration für proaktives Scaling
-- ✅ Multi-Region Ready
-
-**8. Optimierungen:**
-- ✅ Request Sampling (1:10 normal, 1:1 bei Problemen)
-- ✅ Monitoring Budget (max 5% CPU für Monitoring selbst)
-- ✅ Alert Fatigue Prevention (Cooldown, Grouping)
-- ✅ Dead Man's Switch für Monitoring-Ausfall
-
-#### Technische Details:
-
-**Datenquellen:**
-- Firebase Performance Monitoring (kostenlos)
-- Firebase Analytics (kostenlos)
-- Google Cloud Monitoring (kostenlos bis Limit)
-- Custom Metrics via Firebase Functions
-
-**Dependencies:**
-- recharts (für Charts)
-- three.js (für 3D Visualisierung)
-- Firebase SDK
-- lucide-react (Icons)
-
-#### Implementierungs-Checkliste:
-
-- [ ] SystemMonitoring.jsx erstellen
-- [ ] SystemMonitoring.module.css erstellen
-- [ ] Firebase Performance SDK einbinden
-- [ ] Cloud Monitoring API aktivieren
-- [ ] Metric Collection Service implementieren
-- [ ] Alert Service mit NotificationCenter verbinden
-- [ ] Auto-Scaling Logic in Cloud Functions
-- [ ] Feature Control Integration
-- [ ] Tenant Dashboard Views
-- [ ] Transparency Report Generator
-- [ ] Testing mit echten Metriken
-- [ ] Documentation aktualisieren
-
-#### Falls Entwicklung unterbrochen wird:
-
-1. **Nächster Schritt:** SystemMonitoring.jsx mit Basis-Layout erstellen
-2. **Wichtigste Features zuerst:** Real-time Metrics, Basic Alerts, Charts
-3. **Integration Points:** FeatureControl.jsx, NotificationCenter.jsx
-4. **Test-Daten:** Nutze Firebase Emulator für lokale Entwicklung
-
-#### Notizen:
-- System ist vorbereitet für Multi-Region Support
-- Alle Monitoring-Features sind kostenlos (Firebase/GCP Free Tier)
-- Performance-Impact des Monitorings selbst wird überwacht
-- Automatische Feature-Abschaltung bei Überlastung implementiert
-
----
+*Dieses Dokument wird kontinuierlich aktualisiert. Letzte Änderung: Januar 2025*

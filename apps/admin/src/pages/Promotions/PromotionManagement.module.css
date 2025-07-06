@@ -1,0 +1,429 @@
+/**
+ * EATECH - Promotion Management Styles
+ * Version: 1.0.0
+ * 
+ * Kapitel: Phase 4 - Advanced Features - Promotion Engine
+ */
+
+/* ============================================================================
+   CONTAINER
+   ============================================================================ */
+.promotionManagement {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  gap: 1rem;
+  color: #666;
+}
+
+/* ============================================================================
+   HEADER
+   ============================================================================ */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.headerLeft h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.subtitle {
+  margin: 0.5rem 0 0 0;
+  color: #666;
+  font-size: 1rem;
+}
+
+.headerRight {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* ============================================================================
+   STATS GRID
+   ============================================================================ */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.2s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.statIcon {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.statContent {
+  flex: 1;
+}
+
+.statValue {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+/* ============================================================================
+   FILTERS
+   ============================================================================ */
+.filters {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.filtersLeft {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 250px;
+  padding: 0.625rem 1rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filterSelect {
+  padding: 0.625rem 1rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filterSelect:hover {
+  border-color: #d5d5d5;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filtersRight {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.resultCount {
+  color: #666;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* ============================================================================
+   PROMOTIONS GRID
+   ============================================================================ */
+.promotionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+/* ============================================================================
+   EMPTY STATE
+   ============================================================================ */
+.emptyState {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #666;
+}
+
+.emptyState svg {
+  color: #d5d5d5;
+  margin-bottom: 1rem;
+}
+
+.emptyState h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.emptyState p {
+  margin: 0 0 1.5rem 0;
+  color: #666;
+}
+
+/* ============================================================================
+   BUTTONS
+   ============================================================================ */
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button.primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.button.primary:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.button.secondary {
+  background: white;
+  color: #666;
+  border: 1px solid #e5e5e5;
+}
+
+.button.secondary:hover:not(:disabled) {
+  background: #f5f5f5;
+  border-color: #d5d5d5;
+}
+
+.button.danger {
+  background: #ef4444;
+  color: white;
+}
+
+.button.danger:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 1024px) {
+  .promotionManagement {
+    padding: 1.5rem;
+  }
+  
+  .statsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+  
+  .promotionsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .promotionManagement {
+    padding: 1rem;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .headerRight {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .headerRight .button {
+    width: 100%;
+  }
+  
+  .filters {
+    padding: 1rem;
+  }
+  
+  .filtersLeft {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+  
+  .searchInput {
+    min-width: 0;
+  }
+  
+  .statsGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .statCard {
+    padding: 1rem;
+  }
+  
+  .statIcon {
+    width: 3rem;
+    height: 3rem;
+  }
+  
+  .statValue {
+    font-size: 1.5rem;
+  }
+  
+  .promotionsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================================
+   DARK MODE
+   ============================================================================ */
+@media (prefers-color-scheme: dark) {
+  .promotionManagement {
+    background: #0f0f0f;
+  }
+  
+  .header h1 {
+    color: #ffffff;
+  }
+  
+  .subtitle {
+    color: #999;
+  }
+  
+  .statCard {
+    background: #1a1a1a;
+    border-color: #2a2a2a;
+  }
+  
+  .statValue {
+    color: #ffffff;
+  }
+  
+  .statLabel {
+    color: #999;
+  }
+  
+  .filters {
+    background: #1a1a1a;
+    border-color: #2a2a2a;
+  }
+  
+  .searchInput,
+  .filterSelect {
+    background: #0f0f0f;
+    border-color: #2a2a2a;
+    color: #ffffff;
+  }
+  
+  .searchInput:hover,
+  .filterSelect:hover {
+    border-color: #3a3a3a;
+  }
+  
+  .resultCount {
+    color: #999;
+  }
+  
+  .emptyState h3 {
+    color: #ffffff;
+  }
+  
+  .emptyState p {
+    color: #999;
+  }
+  
+  .button.secondary {
+    background: #1a1a1a;
+    border-color: #2a2a2a;
+    color: #ffffff;
+  }
+  
+  .button.secondary:hover:not(:disabled) {
+    background: #2a2a2a;
+    border-color: #3a3a3a;
+  }
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+@media print {
+  .headerRight,
+  .filters {
+    display: none;
+  }
+  
+  .promotionsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .statCard {
+    page-break-inside: avoid;
+  }
+}

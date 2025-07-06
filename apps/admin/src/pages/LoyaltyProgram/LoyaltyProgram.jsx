@@ -1,418 +1,524 @@
 /**
  * EATECH - Loyalty Program Management
- * Version: 20.0.0
- * Description: Umfassendes Treueprogramm-System mit Punkteverwaltung und Belohnungen
- * Features: Punkte-Management, Belohnungen, Stufen, Kampagnen, Analytics
- * File Path: /src/pages/LoyaltyProgram/LoyaltyProgram.jsx
+ * Version: 5.1.0
+ * Description: Comprehensive Loyalty Program mit gamification und Lazy Loading
+ * Author: EATECH Development Team
+ * Modified: 2025-01-08
+ * File Path: /apps/admin/src/pages/LoyaltyProgram/LoyaltyProgram.jsx
+ * 
+ * Features: Tier management, rewards catalog, gamification, analytics
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getDatabase, ref, onValue, push, update, remove } from 'firebase/database';
 import { 
-  Award, Gift, Star, TrendingUp, Users, 
-  DollarSign, Target, Calendar, Settings,
-  Plus, Edit2, Trash2, Search, Filter,
-  Download, Upload, RefreshCw, Info,
-  CheckCircle, XCircle, Clock, AlertCircle,
-  Zap, Heart, Coffee, Pizza, Percent,
-  Trophy, Medal, Crown, Gem, ChevronRight,
-  BarChart3, PieChart, Activity, CreditCard
+  Star, Gift, Trophy, Crown,
+  TrendingUp, Users, Target, Zap,
+  Plus, Edit2, Trash2, Eye,
+  Download, Upload, Settings, Award,
+  BarChart3, PieChart, Calendar, Clock,
+  Search, Filter, RefreshCw, Share2
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { format, parseISO, addDays, subDays } from 'date-fns';
+import { de } from 'date-fns/locale';
 import styles from './LoyaltyProgram.module.css';
 
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-const LOYALTY_TIERS = [
-  {
-    id: 'BRONZE',
+// Lazy loaded components
+const TierManager = lazy(() => import('./components/TierManager'));
+const RewardsEditor = lazy(() => import('./components/RewardsEditor'));
+const MembersList = lazy(() => import('./components/MembersList'));
+const CampaignBuilder = lazy(() => import('./components/CampaignBuilder'));
+const GamificationPanel = lazy(() => import('./components/GamificationPanel'));
+const AnalyticsDashboard = lazy(() => import('./components/AnalyticsDashboard'));
+const RewardsCatalog = lazy(() => import('./components/RewardsCatalog'));
+const PointsCalculator = lazy(() => import('./components/PointsCalculator'));
+
+// Lazy loaded services
+const LoyaltyService = lazy(() => import('../../services/LoyaltyService'));
+const RewardsService = lazy(() => import('../../services/RewardsService'));
+const CampaignService = lazy(() => import('../../services/CampaignService'));
+const AnalyticsService = lazy(() => import('../../services/AnalyticsService'));
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDFBlgWE81iHnACVwOmaU0jL7FV0l_tRmU",
+  authDomain: "eatech-foodtruck.firebaseapp.com",
+  databaseURL: "https://eatech-foodtruck-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "eatech-foodtruck",
+  storageBucket: "eatech-foodtruck.firebasestorage.app",
+  messagingSenderId: "261222802445",
+  appId: "1:261222802445:web:edde22580422fbced22144"
+};
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
+const LoadingSpinner = () => (
+  <div className={styles.loadingContainer}>
+    <div className={styles.spinner} />
+  </div>
+);
+
+const LOYALTY_TIERS = {
+  bronze: {
+    id: 'bronze',
     name: 'Bronze',
-    icon: Medal,
-    color: '#CD7F32',
-    bgColor: 'rgba(205, 127, 50, 0.1)',
     minPoints: 0,
+    color: '#CD7F32',
+    bgColor: '#FED7AA',
+    icon: Star,
     benefits: {
       pointMultiplier: 1,
       birthdayBonus: 50,
-      welcomeBonus: 25,
-      extraPerks: []
+      freeDelivery: false,
+      exclusiveOffers: false
     }
   },
-  {
-    id: 'SILVER',
+  silver: {
+    id: 'silver',
     name: 'Silber',
-    icon: Medal,
-    color: '#C0C0C0',
-    bgColor: 'rgba(192, 192, 192, 0.1)',
     minPoints: 500,
+    color: '#C0C0C0',
+    bgColor: '#F1F5F9',
+    icon: Award,
     benefits: {
-      pointMultiplier: 1.25,
+      pointMultiplier: 1.2,
       birthdayBonus: 100,
-      welcomeBonus: 50,
-      extraPerks: ['Gratis Getränk-Upgrade', 'Early Access zu neuen Produkten']
+      freeDelivery: true,
+      exclusiveOffers: false
     }
   },
-  {
-    id: 'GOLD',
+  gold: {
+    id: 'gold',
     name: 'Gold',
-    icon: Crown,
-    color: '#FFD700',
-    bgColor: 'rgba(255, 215, 0, 0.1)',
     minPoints: 1500,
+    color: '#FFD700',
+    bgColor: '#FEF3C7',
+    icon: Trophy,
     benefits: {
       pointMultiplier: 1.5,
       birthdayBonus: 200,
-      welcomeBonus: 100,
-      extraPerks: ['Gratis Getränk-Upgrade', 'Early Access', 'Exklusive Angebote']
+      freeDelivery: true,
+      exclusiveOffers: true
     }
   },
-  {
-    id: 'PLATINUM',
+  platinum: {
+    id: 'platinum',
     name: 'Platin',
-    icon: Gem,
+    minPoints: 5000,
     color: '#E5E4E2',
-    bgColor: 'rgba(229, 228, 226, 0.1)',
-    minPoints: 3000,
+    bgColor: '#F8FAFC',
+    icon: Crown,
     benefits: {
       pointMultiplier: 2,
       birthdayBonus: 500,
-      welcomeBonus: 200,
-      extraPerks: ['VIP Support', 'Persönlicher Account Manager', 'Exklusive Events']
+      freeDelivery: true,
+      exclusiveOffers: true
     }
   }
-];
+};
 
 const REWARD_CATEGORIES = {
-  DISCOUNT: { label: 'Rabatte', icon: Percent, color: '#4CAF50' },
-  FREEITEM: { label: 'Gratis Artikel', icon: Gift, color: '#2196F3' },
-  UPGRADE: { label: 'Upgrades', icon: Zap, color: '#9C27B0' },
-  SPECIAL: { label: 'Specials', icon: Star, color: '#FF9800' }
+  food: { name: 'Essen', icon: Gift, color: '#10B981' },
+  discount: { name: 'Rabatte', icon: Target, color: '#3B82F6' },
+  exclusive: { name: 'Exklusiv', icon: Crown, color: '#8B5CF6' },
+  experience: { name: 'Erlebnisse', icon: Star, color: '#F59E0B' }
 };
 
 const POINT_RULES = [
-  { id: 'purchase', name: 'Einkauf', points: 1, per: 1, unit: 'CHF', active: true },
-  { id: 'review', name: 'Bewertung', points: 50, per: 1, unit: 'Bewertung', active: true },
-  { id: 'referral', name: 'Empfehlung', points: 200, per: 1, unit: 'Neukunde', active: true },
-  { id: 'social', name: 'Social Media', points: 25, per: 1, unit: 'Share', active: true },
-  { id: 'app', name: 'App Download', points: 100, per: 1, unit: 'Download', active: true }
+  { action: 'order', points: 10, description: '10 Punkte pro 10 CHF Bestellung' },
+  { action: 'review', points: 50, description: '50 Punkte für Bewertungen' },
+  { action: 'referral', points: 200, description: '200 Punkte für Empfehlungen' },
+  { action: 'birthday', points: 'tier', description: 'Geburtstags-Bonus je nach Tier' },
+  { action: 'social_share', points: 25, description: '25 Punkte für Social Media Shares' }
 ];
 
-// Mock Data
-const generateMockRewards = () => [
-  {
-    id: 'RW001',
-    name: '10% Rabatt',
-    category: 'DISCOUNT',
-    pointsCost: 100,
-    value: 10,
-    type: 'percentage',
-    description: '10% Rabatt auf die gesamte Bestellung',
-    validityDays: 30,
-    stock: -1, // unlimited
-    redeemed: 1234,
-    active: true,
-    tierRestriction: null
-  },
-  {
-    id: 'RW002',
-    name: 'Gratis Kaffee',
-    category: 'FREEITEM',
-    pointsCost: 150,
-    value: 5.50,
-    type: 'item',
-    description: 'Ein gratis Kaffee nach Wahl',
-    validityDays: 14,
-    stock: 500,
-    redeemed: 342,
-    active: true,
-    tierRestriction: null
-  },
-  {
-    id: 'RW003',
-    name: '5 CHF Gutschein',
-    category: 'DISCOUNT',
-    pointsCost: 200,
-    value: 5,
-    type: 'fixed',
-    description: '5 CHF Rabatt auf die nächste Bestellung',
-    validityDays: 30,
-    stock: -1,
-    redeemed: 892,
-    active: true,
-    tierRestriction: null
-  },
-  {
-    id: 'RW004',
-    name: 'Gratis Pizza',
-    category: 'FREEITEM',
-    pointsCost: 500,
-    value: 18,
-    type: 'item',
-    description: 'Eine gratis Pizza nach Wahl (bis 18 CHF)',
-    validityDays: 21,
-    stock: 100,
-    redeemed: 67,
-    active: true,
-    tierRestriction: 'SILVER'
-  },
-  {
-    id: 'RW005',
-    name: 'VIP Event Ticket',
-    category: 'SPECIAL',
-    pointsCost: 1000,
-    value: 50,
-    type: 'experience',
-    description: 'Exklusives Foodtruck Event mit Verkostung',
-    validityDays: 90,
-    stock: 20,
-    redeemed: 12,
-    active: true,
-    tierRestriction: 'GOLD'
-  }
-];
-
-const generateMockMembers = (count = 100) => {
-  return Array.from({ length: count }, (_, i) => ({
-    id: `MEM${String(i + 1).padStart(6, '0')}`,
-    name: `Kunde ${i + 1}`,
-    email: `kunde${i + 1}@example.com`,
-    points: Math.floor(Math.random() * 5000),
-    lifetimePoints: Math.floor(Math.random() * 10000),
-    tier: LOYALTY_TIERS[Math.floor(Math.random() * LOYALTY_TIERS.length)].id,
-    joinedDate: new Date(2023 + Math.floor(Math.random() * 2), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28)),
-    lastActivity: new Date(2025, 0, Math.floor(Math.random() * 7) + 1),
-    rewardsRedeemed: Math.floor(Math.random() * 20),
-    totalSpent: Math.floor(Math.random() * 5000)
-  }));
-};
-
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
 const LoyaltyProgram = () => {
-  // State Management
-  const [activeTab, setActiveTab] = useState('overview');
-  const [rewards, setRewards] = useState([]);
   const [members, setMembers] = useState([]);
-  const [pointRules, setPointRules] = useState(POINT_RULES);
+  const [rewards, setRewards] = useState([]);
+  const [campaigns, setCampaigns] = useState([]);
+  const [statistics, setStatistics] = useState({});
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterTier, setFilterTier] = useState('ALL');
-  const [showAddRewardModal, setShowAddRewardModal] = useState(false);
-  const [showEditRewardModal, setShowEditRewardModal] = useState(false);
-  const [selectedReward, setSelectedReward] = useState(null);
-  const [showMemberModal, setShowMemberModal] = useState(false);
+  const [activeView, setActiveView] = useState('overview');
   const [selectedMember, setSelectedMember] = useState(null);
+  const [selectedReward, setSelectedReward] = useState(null);
+  const [showTierManager, setShowTierManager] = useState(false);
+  const [showRewardsEditor, setShowRewardsEditor] = useState(false);
+  const [showCampaignBuilder, setShowCampaignBuilder] = useState(false);
+  const [showGamification, setShowGamification] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterTier, setFilterTier] = useState('all');
+  const [dateRange, setDateRange] = useState({
+    start: format(subDays(new Date(), 30), 'yyyy-MM-dd'),
+    end: format(new Date(), 'yyyy-MM-dd')
+  });
 
-  // Load Data
+  const tenantId = 'demo-restaurant';
+
+  // ============================================================================
+  // FIREBASE DATA LOADING
+  // ============================================================================
   useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
+    const loadLoyaltyData = async () => {
       setLoading(true);
-      // Simulate API calls
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setRewards(generateMockRewards());
-      setMembers(generateMockMembers());
-    } catch (error) {
-      toast.error('Fehler beim Laden der Daten');
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+        // Load loyalty members
+        const membersRef = ref(database, `tenants/${tenantId}/loyaltyMembers`);
+        onValue(membersRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            const membersArray = Object.entries(data).map(([id, member]) => ({
+              id,
+              ...member,
+              tier: calculateTier(member.points || 0)
+            }));
+            setMembers(membersArray);
+          } else {
+            setMembers([]);
+          }
+        });
 
-  // Statistics
-  const statistics = useMemo(() => {
-    const stats = {
-      totalMembers: members.length,
-      activeMembers: members.filter(m => {
-        const daysSinceActivity = (new Date() - new Date(m.lastActivity)) / (1000 * 60 * 60 * 24);
-        return daysSinceActivity < 30;
-      }).length,
-      totalPointsIssued: members.reduce((sum, m) => sum + m.lifetimePoints, 0),
-      totalPointsRedeemed: rewards.reduce((sum, r) => sum + (r.redeemed * r.pointsCost), 0),
-      averagePointsPerMember: 0,
-      tierDistribution: {},
-      popularRewards: rewards.sort((a, b) => b.redeemed - a.redeemed).slice(0, 5),
-      conversionRate: 0
+        // Load rewards
+        const rewardsRef = ref(database, `tenants/${tenantId}/loyaltyRewards`);
+        onValue(rewardsRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            const rewardsArray = Object.entries(data).map(([id, reward]) => ({
+              id,
+              ...reward
+            }));
+            setRewards(rewardsArray);
+          } else {
+            setRewards([]);
+          }
+        });
+
+        // Load campaigns
+        const campaignsRef = ref(database, `tenants/${tenantId}/loyaltyCampaigns`);
+        onValue(campaignsRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            const campaignsArray = Object.entries(data).map(([id, campaign]) => ({
+              id,
+              ...campaign
+            }));
+            setCampaigns(campaignsArray);
+          } else {
+            setCampaigns([]);
+          }
+        });
+
+        // Calculate statistics
+        calculateStatistics();
+
+      } catch (error) {
+        console.error('Error loading loyalty data:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    stats.averagePointsPerMember = stats.totalMembers > 0 
-      ? Math.round(stats.totalPointsIssued / stats.totalMembers)
-      : 0;
+    loadLoyaltyData();
+  }, [tenantId]);
 
-    // Calculate tier distribution
-    LOYALTY_TIERS.forEach(tier => {
-      stats.tierDistribution[tier.id] = members.filter(m => m.tier === tier.id).length;
+  // ============================================================================
+  // STATISTICS CALCULATION
+  // ============================================================================
+  const calculateStatistics = useCallback(() => {
+    const totalMembers = members.length;
+    const activeMembers = members.filter(m => m.lastActivity && 
+      new Date(m.lastActivity) > subDays(new Date(), 30)
+    ).length;
+    
+    const tierDistribution = Object.keys(LOYALTY_TIERS).reduce((acc, tier) => {
+      acc[tier] = members.filter(m => m.tier === tier).length;
+      return acc;
+    }, {});
+
+    const totalPointsIssued = members.reduce((sum, m) => sum + (m.totalPointsEarned || 0), 0);
+    const totalPointsRedeemed = members.reduce((sum, m) => sum + (m.totalPointsRedeemed || 0), 0);
+    
+    const popularRewards = rewards
+      .map(reward => ({
+        ...reward,
+        redeemed: members.reduce((sum, m) => 
+          sum + (m.redemptions?.filter(r => r.rewardId === reward.id).length || 0), 0
+        )
+      }))
+      .sort((a, b) => b.redeemed - a.redeemed)
+      .slice(0, 5);
+
+    const avgPointsPerMember = totalMembers > 0 ? totalPointsIssued / totalMembers : 0;
+    const redemptionRate = totalPointsIssued > 0 ? (totalPointsRedeemed / totalPointsIssued) * 100 : 0;
+
+    setStatistics({
+      totalMembers,
+      activeMembers,
+      tierDistribution,
+      totalPointsIssued,
+      totalPointsRedeemed,
+      popularRewards,
+      avgPointsPerMember,
+      redemptionRate
     });
-
-    // Calculate conversion rate
-    const membersWhoRedeemed = members.filter(m => m.rewardsRedeemed > 0).length;
-    stats.conversionRate = stats.totalMembers > 0 
-      ? ((membersWhoRedeemed / stats.totalMembers) * 100).toFixed(1)
-      : 0;
-
-    return stats;
   }, [members, rewards]);
 
-  // Filtered Members
-  const filteredMembers = useMemo(() => {
-    let filtered = [...members];
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(member =>
-        member.name.toLowerCase().includes(term) ||
-        member.email.toLowerCase().includes(term) ||
-        member.id.toLowerCase().includes(term)
-      );
+  useEffect(() => {
+    if (members.length > 0) {
+      calculateStatistics();
     }
+  }, [members, rewards, calculateStatistics]);
 
-    if (filterTier !== 'ALL') {
-      filtered = filtered.filter(member => member.tier === filterTier);
-    }
-
-    return filtered.sort((a, b) => b.points - a.points);
-  }, [members, searchTerm, filterTier]);
-
-  // Handlers
-  const handleAddReward = async (rewardData) => {
-    try {
-      const newReward = {
-        ...rewardData,
-        id: `RW${String(rewards.length + 1).padStart(3, '0')}`,
-        redeemed: 0,
-        active: true
-      };
-      setRewards([...rewards, newReward]);
-      toast.success('Belohnung erfolgreich hinzugefügt');
-      setShowAddRewardModal(false);
-    } catch (error) {
-      toast.error('Fehler beim Hinzufügen der Belohnung');
-    }
-  };
-
-  const handleEditReward = async (rewardData) => {
-    try {
-      setRewards(rewards.map(r => 
-        r.id === selectedReward.id ? { ...r, ...rewardData } : r
-      ));
-      toast.success('Belohnung erfolgreich aktualisiert');
-      setShowEditRewardModal(false);
-    } catch (error) {
-      toast.error('Fehler beim Aktualisieren der Belohnung');
-    }
-  };
-
-  const handleDeleteReward = async (rewardId) => {
-    if (window.confirm('Möchten Sie diese Belohnung wirklich löschen?')) {
-      try {
-        setRewards(rewards.filter(r => r.id !== rewardId));
-        toast.success('Belohnung erfolgreich gelöscht');
-      } catch (error) {
-        toast.error('Fehler beim Löschen der Belohnung');
+  // ============================================================================
+  // UTILITY FUNCTIONS
+  // ============================================================================
+  const calculateTier = useCallback((points) => {
+    const tierEntries = Object.entries(LOYALTY_TIERS).sort((a, b) => b[1].minPoints - a[1].minPoints);
+    
+    for (const [tierId, tier] of tierEntries) {
+      if (points >= tier.minPoints) {
+        return tierId;
       }
     }
-  };
+    
+    return 'bronze';
+  }, []);
 
-  const handleToggleReward = async (rewardId) => {
+  const getTierInfo = useCallback((tierId) => {
+    return LOYALTY_TIERS[tierId] || LOYALTY_TIERS.bronze;
+  }, []);
+
+  // ============================================================================
+  // FILTERED DATA
+  // ============================================================================
+  const filteredMembers = useMemo(() => {
+    return members.filter(member => {
+      const matchesSearch = member.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           member.email?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesTier = filterTier === 'all' || member.tier === filterTier;
+      
+      return matchesSearch && matchesTier;
+    });
+  }, [members, searchTerm, filterTier]);
+
+  // ============================================================================
+  // EVENT HANDLERS
+  // ============================================================================
+  const handleCreateReward = useCallback(async (rewardData) => {
     try {
-      setRewards(rewards.map(r => 
-        r.id === rewardId ? { ...r, active: !r.active } : r
-      ));
-      toast.success('Status erfolgreich geändert');
+      const rewardsRef = ref(database, `tenants/${tenantId}/loyaltyRewards`);
+      await push(rewardsRef, {
+        ...rewardData,
+        createdAt: new Date().toISOString(),
+        isActive: true
+      });
+      setShowRewardsEditor(false);
     } catch (error) {
-      toast.error('Fehler beim Statuswechsel');
+      console.error('Error creating reward:', error);
     }
-  };
+  }, [tenantId]);
 
-  const handleUpdatePointRule = (ruleId, updates) => {
-    setPointRules(pointRules.map(rule =>
-      rule.id === ruleId ? { ...rule, ...updates } : rule
-    ));
-    toast.success('Punkteregel aktualisiert');
-  };
-
-  const handleAwardPoints = async (memberId, points, reason) => {
+  const handleUpdateReward = useCallback(async (rewardId, rewardData) => {
     try {
-      setMembers(members.map(m =>
-        m.id === memberId 
-          ? { 
-              ...m, 
-              points: m.points + points,
-              lifetimePoints: m.lifetimePoints + points,
-              lastActivity: new Date()
+      const rewardRef = ref(database, `tenants/${tenantId}/loyaltyRewards/${rewardId}`);
+      await update(rewardRef, {
+        ...rewardData,
+        updatedAt: new Date().toISOString()
+      });
+      setSelectedReward(null);
+      setShowRewardsEditor(false);
+    } catch (error) {
+      console.error('Error updating reward:', error);
+    }
+  }, [tenantId]);
+
+  const handleDeleteReward = useCallback(async (rewardId) => {
+    if (window.confirm('Belohnung wirklich löschen?')) {
+      try {
+        const rewardRef = ref(database, `tenants/${tenantId}/loyaltyRewards/${rewardId}`);
+        await remove(rewardRef);
+      } catch (error) {
+        console.error('Error deleting reward:', error);
+      }
+    }
+  }, [tenantId]);
+
+  const handleCreateCampaign = useCallback(async (campaignData) => {
+    try {
+      const campaignsRef = ref(database, `tenants/${tenantId}/loyaltyCampaigns`);
+      await push(campaignsRef, {
+        ...campaignData,
+        createdAt: new Date().toISOString(),
+        status: 'active'
+      });
+      setShowCampaignBuilder(false);
+    } catch (error) {
+      console.error('Error creating campaign:', error);
+    }
+  }, [tenantId]);
+
+  const handleAwardPoints = useCallback(async (memberId, points, reason) => {
+    try {
+      const memberRef = ref(database, `tenants/${tenantId}/loyaltyMembers/${memberId}`);
+      const member = members.find(m => m.id === memberId);
+      
+      if (member) {
+        const newPoints = (member.points || 0) + points;
+        const newTier = calculateTier(newPoints);
+        
+        await update(memberRef, {
+          points: newPoints,
+          tier: newTier,
+          totalPointsEarned: (member.totalPointsEarned || 0) + points,
+          lastActivity: new Date().toISOString(),
+          pointsHistory: [
+            ...(member.pointsHistory || []),
+            {
+              points,
+              reason,
+              timestamp: new Date().toISOString(),
+              type: 'earned'
             }
-          : m
-      ));
-      toast.success(`${points} Punkte erfolgreich vergeben`);
+          ]
+        });
+      }
     } catch (error) {
-      toast.error('Fehler beim Vergeben der Punkte');
+      console.error('Error awarding points:', error);
     }
-  };
+  }, [tenantId, members, calculateTier]);
+
+  const handleRedeemReward = useCallback(async (memberId, rewardId) => {
+    try {
+      const member = members.find(m => m.id === memberId);
+      const reward = rewards.find(r => r.id === rewardId);
+      
+      if (member && reward && member.points >= reward.pointsCost) {
+        const memberRef = ref(database, `tenants/${tenantId}/loyaltyMembers/${memberId}`);
+        const newPoints = member.points - reward.pointsCost;
+        
+        await update(memberRef, {
+          points: newPoints,
+          totalPointsRedeemed: (member.totalPointsRedeemed || 0) + reward.pointsCost,
+          lastActivity: new Date().toISOString(),
+          redemptions: [
+            ...(member.redemptions || []),
+            {
+              rewardId,
+              rewardName: reward.name,
+              pointsCost: reward.pointsCost,
+              timestamp: new Date().toISOString()
+            }
+          ],
+          pointsHistory: [
+            ...(member.pointsHistory || []),
+            {
+              points: -reward.pointsCost,
+              reason: `Eingelöst: ${reward.name}`,
+              timestamp: new Date().toISOString(),
+              type: 'redeemed'
+            }
+          ]
+        });
+      }
+    } catch (error) {
+      console.error('Error redeeming reward:', error);
+    }
+  }, [tenantId, members, rewards]);
+
+  const handleExportMembers = useCallback(() => {
+    const csvData = filteredMembers.map(member => ({
+      Name: member.name,
+      Email: member.email,
+      Punkte: member.points || 0,
+      Tier: LOYALTY_TIERS[member.tier]?.name || member.tier,
+      'Letzte Aktivität': member.lastActivity ? format(parseISO(member.lastActivity), 'dd.MM.yyyy') : '-',
+      'Verdiente Punkte': member.totalPointsEarned || 0,
+      'Eingelöste Punkte': member.totalPointsRedeemed || 0
+    }));
+
+    const csv = [
+      Object.keys(csvData[0]).join(','),
+      ...csvData.map(row => Object.values(row).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `loyalty-members-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [filteredMembers]);
 
   // ============================================================================
   // RENDER FUNCTIONS
   // ============================================================================
-  const renderOverview = () => (
-    <div className={styles.overview}>
-      {/* Statistics Cards */}
+  const renderStatsCards = () => {
+    return (
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
           <div className={styles.statIcon}>
-            <Users />
+            <Users size={24} />
           </div>
           <div className={styles.statContent}>
-            <h3>{statistics.totalMembers}</h3>
+            <h3>{statistics.totalMembers || 0}</h3>
             <p>Mitglieder</p>
-            <span className={styles.statChange}>
-              <TrendingUp size={14} /> +12% diesen Monat
+            <span className={styles.statDetail}>
+              {statistics.activeMembers || 0} aktiv
             </span>
           </div>
         </div>
 
         <div className={styles.statCard}>
           <div className={styles.statIcon}>
-            <Activity />
+            <Star size={24} />
           </div>
           <div className={styles.statContent}>
-            <h3>{statistics.activeMembers}</h3>
-            <p>Aktive Mitglieder</p>
-            <span className={styles.statSubtext}>Letzte 30 Tage</span>
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statIcon}>
-            <Star />
-          </div>
-          <div className={styles.statContent}>
-            <h3>{statistics.totalPointsIssued.toLocaleString()}</h3>
+            <h3>{(statistics.totalPointsIssued || 0).toLocaleString()}</h3>
             <p>Punkte vergeben</p>
-            <span className={styles.statSubtext}>Ø {statistics.averagePointsPerMember} pro Mitglied</span>
+            <span className={styles.statDetail}>
+              Ø {Math.round(statistics.avgPointsPerMember || 0)} pro Mitglied
+            </span>
           </div>
         </div>
 
         <div className={styles.statCard}>
           <div className={styles.statIcon}>
-            <Gift />
+            <Gift size={24} />
           </div>
           <div className={styles.statContent}>
-            <h3>{statistics.conversionRate}%</h3>
-            <p>Einlösungsrate</p>
-            <span className={styles.statSubtext}>Mitglieder mit Einlösungen</span>
+            <h3>{(statistics.totalPointsRedeemed || 0).toLocaleString()}</h3>
+            <p>Punkte eingelöst</p>
+            <span className={styles.statDetail}>
+              {(statistics.redemptionRate || 0).toFixed(1)}% Rate
+            </span>
+          </div>
+        </div>
+
+        <div className={styles.statCard}>
+          <div className={styles.statIcon}>
+            <Trophy size={24} />
+          </div>
+          <div className={styles.statContent}>
+            <h3>{rewards.length}</h3>
+            <p>Aktive Belohnungen</p>
+            <span className={styles.statDetail}>
+              {campaigns.length} Kampagnen
+            </span>
           </div>
         </div>
       </div>
+    );
+  };
 
-      {/* Tier Distribution */}
+  const renderTierDistribution = () => {
+    return (
       <div className={styles.section}>
-        <h2>Mitglieder-Verteilung</h2>
-        <div className={styles.tierDistribution}>
-          {LOYALTY_TIERS.map(tier => {
-            const count = statistics.tierDistribution[tier.id] || 0;
+        <h2>Tier-Verteilung</h2>
+        <div className={styles.tierCards}>
+          {Object.entries(LOYALTY_TIERS).map(([tierId, tier]) => {
+            const count = statistics.tierDistribution?.[tierId] || 0;
             const percentage = statistics.totalMembers > 0 
               ? ((count / statistics.totalMembers) * 100).toFixed(1)
               : 0;
@@ -441,18 +547,21 @@ const LoyaltyProgram = () => {
           })}
         </div>
       </div>
+    );
+  };
 
-      {/* Popular Rewards */}
+  const renderPopularRewards = () => {
+    return (
       <div className={styles.section}>
         <h2>Beliebteste Belohnungen</h2>
         <div className={styles.popularRewards}>
-          {statistics.popularRewards.map((reward, index) => (
+          {statistics.popularRewards?.map((reward, index) => (
             <div key={reward.id} className={styles.popularReward}>
               <div className={styles.popularRank}>{index + 1}</div>
-              <div className={styles.popularIcon} style={{ backgroundColor: REWARD_CATEGORIES[reward.category].color + '20' }}>
-                {React.createElement(REWARD_CATEGORIES[reward.category].icon, { 
+              <div className={styles.popularIcon} style={{ backgroundColor: REWARD_CATEGORIES[reward.category]?.color + '20' }}>
+                {React.createElement(REWARD_CATEGORIES[reward.category]?.icon || Gift, { 
                   size: 20, 
-                  color: REWARD_CATEGORIES[reward.category].color 
+                  color: REWARD_CATEGORIES[reward.category]?.color 
                 })}
               </div>
               <div className={styles.popularInfo}>
@@ -463,534 +572,255 @@ const LoyaltyProgram = () => {
                 <span>{reward.redeemed}x eingelöst</span>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Point Rules */}
-      <div className={styles.section}>
-        <h2>Punkte-Regeln</h2>
-        <div className={styles.pointRules}>
-          {pointRules.map(rule => (
-            <div key={rule.id} className={styles.pointRule}>
-              <div className={styles.ruleInfo}>
-                <h4>{rule.name}</h4>
-                <p>{rule.points} Punkte pro {rule.per} {rule.unit}</p>
-              </div>
-              <label className={styles.toggle}>
-                <input
-                  type="checkbox"
-                  checked={rule.active}
-                  onChange={(e) => handleUpdatePointRule(rule.id, { active: e.target.checked })}
-                />
-                <span className={styles.toggleSlider} />
-              </label>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderRewards = () => (
-    <div className={styles.rewards}>
-      <div className={styles.rewardsHeader}>
-        <h2>Belohnungen verwalten</h2>
-        <button 
-          className={styles.addButton}
-          onClick={() => setShowAddRewardModal(true)}
-        >
-          <Plus size={16} /> Neue Belohnung
-        </button>
-      </div>
-
-      <div className={styles.rewardsGrid}>
-        {rewards.map(reward => (
-          <div 
-            key={reward.id} 
-            className={`${styles.rewardCard} ${!reward.active ? styles.inactive : ''}`}
-          >
-            <div className={styles.rewardHeader}>
-              <div 
-                className={styles.rewardIcon}
-                style={{ backgroundColor: REWARD_CATEGORIES[reward.category].color + '20' }}
-              >
-                {React.createElement(REWARD_CATEGORIES[reward.category].icon, {
-                  size: 24,
-                  color: REWARD_CATEGORIES[reward.category].color
-                })}
-              </div>
-              <div className={styles.rewardActions}>
-                <button
-                  onClick={() => {
-                    setSelectedReward(reward);
-                    setShowEditRewardModal(true);
-                  }}
-                  title="Bearbeiten"
-                >
-                  <Edit2 size={16} />
-                </button>
-                <button
-                  onClick={() => handleToggleReward(reward.id)}
-                  title={reward.active ? 'Deaktivieren' : 'Aktivieren'}
-                >
-                  {reward.active ? <XCircle size={16} /> : <CheckCircle size={16} />}
-                </button>
-                <button
-                  onClick={() => handleDeleteReward(reward.id)}
-                  title="Löschen"
-                  className={styles.danger}
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </div>
-
-            <div className={styles.rewardBody}>
-              <h3>{reward.name}</h3>
-              <p className={styles.rewardDescription}>{reward.description}</p>
-              
-              <div className={styles.rewardDetails}>
-                <div className={styles.rewardCost}>
-                  <Star size={16} />
-                  {reward.pointsCost} Punkte
-                </div>
-                <div className={styles.rewardValue}>
-                  {reward.type === 'percentage' && `${reward.value}%`}
-                  {reward.type === 'fixed' && `CHF ${reward.value}`}
-                  {reward.type === 'item' && `CHF ${reward.value} Wert`}
-                  {reward.type === 'experience' && 'Erlebnis'}
-                </div>
-              </div>
-
-              <div className={styles.rewardStats}>
-                <div>
-                  <span className={styles.label}>Eingelöst:</span>
-                  <span className={styles.value}>{reward.redeemed}x</span>
-                </div>
-                <div>
-                  <span className={styles.label}>Gültigkeit:</span>
-                  <span className={styles.value}>{reward.validityDays} Tage</span>
-                </div>
-                {reward.stock !== -1 && (
-                  <div>
-                    <span className={styles.label}>Lager:</span>
-                    <span className={styles.value}>{reward.stock - reward.redeemed}</span>
-                  </div>
-                )}
-              </div>
-
-              {reward.tierRestriction && (
-                <div className={styles.tierRestriction}>
-                  <Info size={14} />
-                  Nur für {LOYALTY_TIERS.find(t => t.id === reward.tierRestriction)?.name}+
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderMembers = () => (
-    <div className={styles.members}>
-      <div className={styles.membersHeader}>
-        <h2>Mitglieder</h2>
-        <div className={styles.memberControls}>
-          <div className={styles.searchBar}>
-            <Search size={20} />
-            <input
-              type="text"
-              placeholder="Suche nach Name, E-Mail..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          
-          <select 
-            value={filterTier}
-            onChange={(e) => setFilterTier(e.target.value)}
-            className={styles.filterSelect}
-          >
-            <option value="ALL">Alle Stufen</option>
-            {LOYALTY_TIERS.map(tier => (
-              <option key={tier.id} value={tier.id}>{tier.name}</option>
-            ))}
-          </select>
-
-          <button className={styles.exportButton}>
-            <Download size={16} /> Export
-          </button>
-        </div>
-      </div>
-
-      <div className={styles.membersTable}>
-        <table>
-          <thead>
-            <tr>
-              <th>Mitglied</th>
-              <th>Stufe</th>
-              <th>Punkte</th>
-              <th>Lifetime</th>
-              <th>Einlösungen</th>
-              <th>Umsatz</th>
-              <th>Letzte Aktivität</th>
-              <th>Aktionen</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredMembers.map(member => {
-              const tier = LOYALTY_TIERS.find(t => t.id === member.tier);
-              return (
-                <tr key={member.id}>
-                  <td>
-                    <div className={styles.memberInfo}>
-                      <div className={styles.memberAvatar}>
-                        {member.name.charAt(0)}
-                      </div>
-                      <div>
-                        <div className={styles.memberName}>{member.name}</div>
-                        <div className={styles.memberEmail}>{member.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div 
-                      className={styles.tierBadge}
-                      style={{ backgroundColor: tier.bgColor, color: tier.color }}
-                    >
-                      {React.createElement(tier.icon, { size: 14 })}
-                      {tier.name}
-                    </div>
-                  </td>
-                  <td className={styles.points}>{member.points.toLocaleString()}</td>
-                  <td className={styles.lifetime}>{member.lifetimePoints.toLocaleString()}</td>
-                  <td>{member.rewardsRedeemed}</td>
-                  <td>CHF {member.totalSpent.toFixed(2)}</td>
-                  <td>{new Date(member.lastActivity).toLocaleDateString('de-CH')}</td>
-                  <td>
-                    <div className={styles.memberActions}>
-                      <button
-                        onClick={() => {
-                          setSelectedMember(member);
-                          setShowMemberModal(true);
-                        }}
-                        title="Details anzeigen"
-                      >
-                        <ChevronRight size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-
-  const renderCampaigns = () => (
-    <div className={styles.campaigns}>
-      <div className={styles.campaignsHeader}>
-        <h2>Kampagnen & Aktionen</h2>
-        <button className={styles.addButton}>
-          <Plus size={16} /> Neue Kampagne
-        </button>
-      </div>
-
-      <div className={styles.campaignsList}>
-        <div className={styles.campaign}>
-          <div className={styles.campaignIcon}>
-            <Gift />
-          </div>
-          <div className={styles.campaignInfo}>
-            <h3>Doppelte Punkte Wochenende</h3>
-            <p>Alle Einkäufe erhalten 2x Punkte</p>
-            <div className={styles.campaignMeta}>
-              <span><Calendar size={14} /> 10.01. - 12.01.2025</span>
-              <span><Users size={14} /> Alle Mitglieder</span>
-            </div>
-          </div>
-          <div className={styles.campaignStatus}>
-            <span className={styles.active}>Aktiv</span>
-          </div>
-        </div>
-
-        <div className={styles.campaign}>
-          <div className={styles.campaignIcon}>
-            <Trophy />
-          </div>
-          <div className={styles.campaignInfo}>
-            <h3>Gold Status Challenge</h3>
-            <p>500 Bonuspunkte beim Erreichen von Gold</p>
-            <div className={styles.campaignMeta}>
-              <span><Calendar size={14} /> 01.01. - 31.01.2025</span>
-              <span><Users size={14} /> Silber Mitglieder</span>
-            </div>
-          </div>
-          <div className={styles.campaignStatus}>
-            <span className={styles.scheduled}>Geplant</span>
-          </div>
-        </div>
-
-        <div className={styles.campaign}>
-          <div className={styles.campaignIcon}>
-            <Heart />
-          </div>
-          <div className={styles.campaignInfo}>
-            <h3>Valentinstag Special</h3>
-            <p>14% Rabatt Belohnung für nur 140 Punkte</p>
-            <div className={styles.campaignMeta}>
-              <span><Calendar size={14} /> 14.02.2025</span>
-              <span><Users size={14} /> Alle Mitglieder</span>
-            </div>
-          </div>
-          <div className={styles.campaignStatus}>
-            <span className={styles.draft}>Entwurf</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderSettings = () => (
-    <div className={styles.settings}>
-      <h2>Programm-Einstellungen</h2>
-      
-      <div className={styles.settingsSection}>
-        <h3>Allgemeine Einstellungen</h3>
-        <div className={styles.settingsGrid}>
-          <div className={styles.settingItem}>
-            <label>Programmname</label>
-            <input type="text" defaultValue="EATECH Rewards" />
-          </div>
-          <div className={styles.settingItem}>
-            <label>Punkte-Währung</label>
-            <input type="text" defaultValue="Punkte" />
-          </div>
-          <div className={styles.settingItem}>
-            <label>Punkte-Verfallszeit</label>
-            <select>
-              <option>Nie</option>
-              <option>Nach 6 Monaten</option>
-              <option>Nach 12 Monaten</option>
-              <option>Nach 24 Monaten</option>
-            </select>
-          </div>
-          <div className={styles.settingItem}>
-            <label>Minimum Einlösung</label>
-            <input type="number" defaultValue="100" />
-          </div>
-        </div>
-      </div>
-
-      <div className={styles.settingsSection}>
-        <h3>Benachrichtigungen</h3>
-        <div className={styles.notificationSettings}>
-          <label className={styles.checkboxLabel}>
-            <input type="checkbox" defaultChecked />
-            <span>Willkommens-E-Mail für neue Mitglieder</span>
-          </label>
-          <label className={styles.checkboxLabel}>
-            <input type="checkbox" defaultChecked />
-            <span>Punkte-Update Benachrichtigungen</span>
-          </label>
-          <label className={styles.checkboxLabel}>
-            <input type="checkbox" defaultChecked />
-            <span>Stufen-Upgrade Benachrichtigungen</span>
-          </label>
-          <label className={styles.checkboxLabel}>
-            <input type="checkbox" defaultChecked />
-            <span>Geburtstags-Benachrichtigungen</span>
-          </label>
-        </div>
-      </div>
-
-      <div className={styles.settingsActions}>
-        <button className={styles.saveButton}>
-          <CheckCircle size={16} /> Einstellungen speichern
-        </button>
-      </div>
-    </div>
-  );
-
-  // Member Modal
-  const renderMemberModal = () => {
-    if (!selectedMember) return null;
-    
-    const tier = LOYALTY_TIERS.find(t => t.id === selectedMember.tier);
-    const nextTier = LOYALTY_TIERS.find(t => t.minPoints > selectedMember.lifetimePoints);
-
-    return (
-      <div className={styles.modal} onClick={() => setShowMemberModal(false)}>
-        <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-          <div className={styles.modalHeader}>
-            <h2>{selectedMember.name}</h2>
-            <button onClick={() => setShowMemberModal(false)}>×</button>
-          </div>
-          
-          <div className={styles.modalBody}>
-            <div className={styles.memberDetail}>
-              <div className={styles.memberStats}>
-                <div className={styles.memberStatCard}>
-                  <h4>Aktuelle Punkte</h4>
-                  <div className={styles.pointsDisplay}>
-                    <Star size={24} />
-                    <span>{selectedMember.points.toLocaleString()}</span>
-                  </div>
-                </div>
-                
-                <div className={styles.memberStatCard}>
-                  <h4>Lifetime Punkte</h4>
-                  <div className={styles.pointsDisplay}>
-                    <Trophy size={24} />
-                    <span>{selectedMember.lifetimePoints.toLocaleString()}</span>
-                  </div>
-                </div>
-                
-                <div className={styles.memberStatCard}>
-                  <h4>Aktuelle Stufe</h4>
-                  <div 
-                    className={styles.tierDisplay}
-                    style={{ backgroundColor: tier.bgColor, color: tier.color }}
-                  >
-                    {React.createElement(tier.icon, { size: 20 })}
-                    <span>{tier.name}</span>
-                  </div>
-                </div>
-              </div>
-
-              {nextTier && (
-                <div className={styles.tierProgress}>
-                  <p>Fortschritt zur nächsten Stufe ({nextTier.name})</p>
-                  <div className={styles.progressBar}>
-                    <div 
-                      className={styles.progressFill}
-                      style={{ 
-                        width: `${((selectedMember.lifetimePoints - tier.minPoints) / (nextTier.minPoints - tier.minPoints)) * 100}%`,
-                        backgroundColor: nextTier.color
-                      }}
-                    />
-                  </div>
-                  <p className={styles.progressText}>
-                    Noch {nextTier.minPoints - selectedMember.lifetimePoints} Punkte bis {nextTier.name}
-                  </p>
-                </div>
-              )}
-
-              <div className={styles.memberActions}>
-                <div className={styles.awardPoints}>
-                  <h4>Punkte vergeben</h4>
-                  <div className={styles.pointsForm}>
-                    <input 
-                      type="number" 
-                      placeholder="Anzahl Punkte"
-                      id="pointsAmount"
-                    />
-                    <input 
-                      type="text" 
-                      placeholder="Grund"
-                      id="pointsReason"
-                    />
-                    <button 
-                      className={styles.awardButton}
-                      onClick={() => {
-                        const amount = parseInt(document.getElementById('pointsAmount').value);
-                        const reason = document.getElementById('pointsReason').value;
-                        if (amount && reason) {
-                          handleAwardPoints(selectedMember.id, amount, reason);
-                          setShowMemberModal(false);
-                        }
-                      }}
-                    >
-                      <Plus size={16} /> Punkte vergeben
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          )) || []}
         </div>
       </div>
     );
   };
 
+  const renderPointRules = () => {
+    return (
+      <div className={styles.section}>
+        <h2>Punkte-Regeln</h2>
+        <div className={styles.pointRules}>
+          {POINT_RULES.map(rule => (
+            <div key={rule.action} className={styles.pointRule}>
+              <div className={styles.ruleIcon}>
+                <Zap size={16} />
+              </div>
+              <div className={styles.ruleContent}>
+                <div className={styles.rulePoints}>
+                  {rule.points === 'tier' ? 'Tier-abhängig' : `${rule.points} Punkte`}
+                </div>
+                <div className={styles.ruleDescription}>{rule.description}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderViewTabs = () => (
+    <div className={styles.viewTabs}>
+      {[
+        { id: 'overview', name: 'Übersicht', icon: BarChart3 },
+        { id: 'members', name: 'Mitglieder', icon: Users },
+        { id: 'rewards', name: 'Belohnungen', icon: Gift },
+        { id: 'campaigns', name: 'Kampagnen', icon: Target },
+        { id: 'analytics', name: 'Analytics', icon: TrendingUp }
+      ].map(tab => (
+        <button
+          key={tab.id}
+          onClick={() => setActiveView(tab.id)}
+          className={`${styles.viewTab} ${activeView === tab.id ? styles.active : ''}`}
+        >
+          {React.createElement(tab.icon, { size: 16 })}
+          <span>{tab.name}</span>
+        </button>
+      ))}
+    </div>
+  );
+
+  const renderControls = () => (
+    <div className={styles.controls}>
+      <div className={styles.searchAndFilter}>
+        <div className={styles.searchBox}>
+          <Search size={20} />
+          <input
+            type="text"
+            placeholder="Mitglieder suchen..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        
+        <select
+          value={filterTier}
+          onChange={(e) => setFilterTier(e.target.value)}
+          className={styles.tierFilter}
+        >
+          <option value="all">Alle Tiers</option>
+          {Object.entries(LOYALTY_TIERS).map(([id, tier]) => (
+            <option key={id} value={id}>{tier.name}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className={styles.actionButtons}>
+        <button
+          onClick={() => setShowTierManager(true)}
+          className={styles.secondaryButton}
+        >
+          <Crown size={16} />
+          Tiers verwalten
+        </button>
+        
+        <button
+          onClick={() => setShowRewardsEditor(true)}
+          className={styles.secondaryButton}
+        >
+          <Gift size={16} />
+          Neue Belohnung
+        </button>
+        
+        <button
+          onClick={() => setShowCampaignBuilder(true)}
+          className={styles.secondaryButton}
+        >
+          <Target size={16} />
+          Neue Kampagne
+        </button>
+        
+        <button
+          onClick={handleExportMembers}
+          className={styles.secondaryButton}
+        >
+          <Download size={16} />
+          Export
+        </button>
+      </div>
+    </div>
+  );
+
   // ============================================================================
   // MAIN RENDER
   // ============================================================================
   if (loading) {
-    return (
-      <div className={styles.loading}>
-        <Award className={styles.spinner} />
-        <p>Lade Treueprogramm-Daten...</p>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
     <div className={styles.loyaltyProgram}>
+      {/* Header */}
       <div className={styles.header}>
-        <div className={styles.headerTitle}>
-          <Award size={32} />
-          <h1>Treueprogramm</h1>
+        <div className={styles.headerContent}>
+          <h1>Loyalty Program</h1>
+          <p>Verwalten Sie Ihr Kundenbindungsprogramm</p>
         </div>
-        
         <div className={styles.headerActions}>
-          <button className={styles.refreshButton} onClick={loadData}>
-            <RefreshCw size={16} /> Aktualisieren
+          <button
+            onClick={() => setShowGamification(true)}
+            className={styles.secondaryButton}
+          >
+            <Trophy size={20} />
+            Gamification
+          </button>
+          <button
+            onClick={() => setShowAnalytics(true)}
+            className={styles.primaryButton}
+          >
+            <BarChart3 size={20} />
+            Analytics
           </button>
         </div>
       </div>
 
-      <div className={styles.tabs}>
-        <button 
-          className={activeTab === 'overview' ? styles.active : ''}
-          onClick={() => setActiveTab('overview')}
-        >
-          <BarChart3 size={16} /> Übersicht
-        </button>
-        <button 
-          className={activeTab === 'rewards' ? styles.active : ''}
-          onClick={() => setActiveTab('rewards')}
-        >
-          <Gift size={16} /> Belohnungen
-        </button>
-        <button 
-          className={activeTab === 'members' ? styles.active : ''}
-          onClick={() => setActiveTab('members')}
-        >
-          <Users size={16} /> Mitglieder
-        </button>
-        <button 
-          className={activeTab === 'campaigns' ? styles.active : ''}
-          onClick={() => setActiveTab('campaigns')}
-        >
-          <Target size={16} /> Kampagnen
-        </button>
-        <button 
-          className={activeTab === 'settings' ? styles.active : ''}
-          onClick={() => setActiveTab('settings')}
-        >
-          <Settings size={16} /> Einstellungen
-        </button>
-      </div>
+      {/* Stats */}
+      {renderStatsCards()}
 
+      {/* View Tabs */}
+      {renderViewTabs()}
+
+      {/* Controls */}
+      {activeView === 'members' && renderControls()}
+
+      {/* Content */}
       <div className={styles.content}>
-        {activeTab === 'overview' && renderOverview()}
-        {activeTab === 'rewards' && renderRewards()}
-        {activeTab === 'members' && renderMembers()}
-        {activeTab === 'campaigns' && renderCampaigns()}
-        {activeTab === 'settings' && renderSettings()}
+        {activeView === 'overview' && (
+          <div className={styles.overviewContent}>
+            {renderTierDistribution()}
+            {renderPopularRewards()}
+            {renderPointRules()}
+          </div>
+        )}
+
+        {activeView === 'members' && (
+          <Suspense fallback={<LoadingSpinner />}>
+            <MembersList
+              members={filteredMembers}
+              onAwardPoints={handleAwardPoints}
+              onMemberSelect={setSelectedMember}
+              tiers={LOYALTY_TIERS}
+            />
+          </Suspense>
+        )}
+
+        {activeView === 'rewards' && (
+          <Suspense fallback={<LoadingSpinner />}>
+            <RewardsCatalog
+              rewards={rewards}
+              categories={REWARD_CATEGORIES}
+              onEdit={(reward) => {
+                setSelectedReward(reward);
+                setShowRewardsEditor(true);
+              }}
+              onDelete={handleDeleteReward}
+              onRedeem={handleRedeemReward}
+            />
+          </Suspense>
+        )}
       </div>
 
-      {showMemberModal && renderMemberModal()}
+      {/* Lazy Loaded Modals */}
+      {showTierManager && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <TierManager
+            tiers={LOYALTY_TIERS}
+            members={members}
+            onClose={() => setShowTierManager(false)}
+          />
+        </Suspense>
+      )}
+
+      {showRewardsEditor && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <RewardsEditor
+            reward={selectedReward}
+            categories={REWARD_CATEGORIES}
+            onSave={selectedReward ? handleUpdateReward : handleCreateReward}
+            onClose={() => {
+              setShowRewardsEditor(false);
+              setSelectedReward(null);
+            }}
+          />
+        </Suspense>
+      )}
+
+      {showCampaignBuilder && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <CampaignBuilder
+            rewards={rewards}
+            tiers={LOYALTY_TIERS}
+            onSave={handleCreateCampaign}
+            onClose={() => setShowCampaignBuilder(false)}
+          />
+        </Suspense>
+      )}
+
+      {showGamification && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <GamificationPanel
+            members={members}
+            statistics={statistics}
+            onClose={() => setShowGamification(false)}
+          />
+        </Suspense>
+      )}
+
+      {showAnalytics && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <AnalyticsDashboard
+            members={members}
+            rewards={rewards}
+            campaigns={campaigns}
+            statistics={statistics}
+            onClose={() => setShowAnalytics(false)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };
 
-// ============================================================================
-// EXPORT
-// ============================================================================
 export default LoyaltyProgram;

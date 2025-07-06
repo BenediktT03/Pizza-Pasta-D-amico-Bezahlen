@@ -1,48 +1,76 @@
 /**
  * EATECH - Report Generator
- * Version: 23.0.0
- * Description: Hauptkomponente für die Generierung von PDF und Excel Reports
+ * Version: 24.0.0
+ * Description: Hauptkomponente für die Generierung von PDF und Excel Reports mit Lazy Loading
+ * Author: EATECH Development Team
+ * Modified: 2025-01-08
  * File Path: /apps/admin/src/pages/reports/ReportGenerator.jsx
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { 
-  FileText, 
-  Download, 
-  Calendar, 
-  Filter, 
-  TrendingUp,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  FileSpreadsheet,
-  FilePlus,
-  Send,
-  Save,
-  Settings,
-  ChevronRight
+  FileText, Download, Calendar, Filter, TrendingUp, Clock,
+  CheckCircle, AlertCircle, FileSpreadsheet, FilePlus, Send,
+  Save, Settings, ChevronRight, BarChart3, PieChart, Activity,
+  DollarSign, Package, Users, ShoppingCart, RefreshCw, Eye,
+  Printer, Mail, Share2, Zap, Database, HardDrive
 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { de } from 'date-fns/locale';
-import toast from 'react-hot-toast';
+
+// Lazy loaded heavy components
+const ReportPreview = lazy(() => import('./components/ReportPreview'));
+const ChartBuilder = lazy(() => import('./components/ChartBuilder'));
+const DataTableBuilder = lazy(() => import('./components/DataTableBuilder'));
+const ReportScheduler = lazy(() => import('./components/ReportScheduler'));
+const ExportOptionsModal = lazy(() => import('./components/ExportOptionsModal'));
+const EmailReportModal = lazy(() => import('./components/EmailReportModal'));
+
+// Lazy loaded chart libraries
+const SalesChart = lazy(() => import('./charts/SalesChart'));
+const OrdersChart = lazy(() => import('./charts/OrdersChart'));
+const ProductsChart = lazy(() => import('./charts/ProductsChart'));
+const CustomersChart = lazy(() => import('./charts/CustomersChart'));
+const FinancialChart = lazy(() => import('./charts/FinancialChart'));
+
+// Lazy loaded services
+const ReportService = lazy(() => import('../../services/reportService'));
+const PDFGenerator = lazy(() => import('../../services/pdfGenerator'));
+const ExcelGenerator = lazy(() => import('../../services/excelGenerator'));
+const EmailService = lazy(() => import('../../services/emailService'));
+const DataService = lazy(() => import('../../services/dataService'));
+
+// Lazy loaded utilities
+const toast = lazy(() => import('react-hot-toast'));
+const jsPDF = lazy(() => import('jspdf'));
+const ExcelJS = lazy(() => import('exceljs'));
+const html2canvas = lazy(() => import('html2canvas'));
+
+// Loading components
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center p-8">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  </div>
+);
+
+const ChartSkeleton = () => (
+  <div className="animate-pulse bg-gray-200 rounded-lg h-64 w-full"></div>
+);
 
 // Hooks
 import { useTenant } from '../../hooks/useTenant';
 import { useAuth } from '../../hooks/useAuth';
-import { useReports } from '../../hooks/useReports';
 
-// Components
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import DateRangePicker from '../../components/ui/DateRangePicker';
+// UI Components
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Select from '../../components/ui/Select';
+import DateRangePicker from '../../components/ui/DateRangePicker';
 import Modal from '../../components/ui/Modal';
-
-// Services
-import { generatePDFReport, generateExcelReport } from '../../services/reportService';
-import { sendReportEmail } from '../../services/emailService';
+import Checkbox from '../../components/ui/Checkbox';
+import Input from '../../components/ui/Input';
+import Badge from '../../components/ui/Badge';
 
 // Utils
 import { formatCurrency } from '../../utils/formatters';
@@ -51,9 +79,7 @@ import { downloadFile } from '../../utils/fileDownload';
 // Styles
 import styles from './ReportGenerator.module.css';
 
-// ============================================================================
-// CONSTANTS
-// ============================================================================
+// Constants
 const REPORT_TYPES = {
   SALES: {
     id: 'sales',
@@ -61,114 +87,175 @@ const REPORT_TYPES = {
     description: 'Detaillierte Umsatzanalyse mit Produktaufschlüsselung',
     icon: TrendingUp,
     formats: ['pdf', 'excel'],
-    color: '#10B981'
+    color: '#10B981',
+    charts: ['revenue', 'orders', 'average', 'products'],
+    tables: ['daily', 'products', 'categories', 'payment_methods']
   },
   ORDERS: {
     id: 'orders',
     name: 'Bestellübersicht',
     description: 'Alle Bestellungen im gewählten Zeitraum',
-    icon: FileText,
+    icon: ShoppingCart,
     formats: ['pdf', 'excel'],
-    color: '#3B82F6'
+    color: '#3B82F6',
+    charts: ['orders_timeline', 'order_status', 'fulfillment_time'],
+    tables: ['orders_list', 'order_items', 'customer_orders']
   },
   INVENTORY: {
     id: 'inventory',
     name: 'Inventarbericht',
     description: 'Lagerbestand und Verbrauchsanalyse',
-    icon: FileSpreadsheet,
+    icon: Package,
     formats: ['excel'],
-    color: '#8B5CF6'
+    color: '#8B5CF6',
+    charts: ['stock_levels', 'stock_movement', 'low_stock'],
+    tables: ['current_stock', 'stock_history', 'supplier_orders']
   },
   CUSTOMERS: {
     id: 'customers',
     name: 'Kundenbericht',
     description: 'Kundenanalyse und Loyalitätsdaten',
-    icon: FileText,
+    icon: Users,
     formats: ['pdf', 'excel'],
-    color: '#EC4899'
+    color: '#EC4899',
+    charts: ['new_customers', 'retention', 'lifetime_value'],
+    tables: ['customer_list', 'top_customers', 'loyalty_members']
   },
   FINANCIAL: {
     id: 'financial',
     name: 'Finanzbericht',
     description: 'Vollständige Finanzübersicht inkl. Steuern',
-    icon: FileText,
-    formats: ['pdf'],
-    color: '#F59E0B'
+    icon: DollarSign,
+    formats: ['pdf', 'excel'],
+    color: '#F59E0B',
+    charts: ['profit_loss', 'expenses', 'taxes', 'cash_flow'],
+    tables: ['income_statement', 'balance_sheet', 'tax_summary']
   }
 };
 
-const SCHEDULE_OPTIONS = [
-  { value: 'once', label: 'Einmalig' },
-  { value: 'daily', label: 'Täglich' },
-  { value: 'weekly', label: 'Wöchentlich' },
-  { value: 'monthly', label: 'Monatlich' }
+const DATE_RANGES = [
+  { value: 'today', label: 'Heute' },
+  { value: 'yesterday', label: 'Gestern' },
+  { value: 'last7days', label: 'Letzte 7 Tage' },
+  { value: 'last30days', label: 'Letzte 30 Tage' },
+  { value: 'thisMonth', label: 'Dieser Monat' },
+  { value: 'lastMonth', label: 'Letzter Monat' },
+  { value: 'thisQuarter', label: 'Dieses Quartal' },
+  { value: 'lastQuarter', label: 'Letztes Quartal' },
+  { value: 'thisYear', label: 'Dieses Jahr' },
+  { value: 'custom', label: 'Benutzerdefiniert' }
 ];
 
-const QUICK_RANGES = [
-  { id: 'today', label: 'Heute' },
-  { id: 'yesterday', label: 'Gestern' },
-  { id: 'last7days', label: 'Letzte 7 Tage' },
-  { id: 'last30days', label: 'Letzte 30 Tage' },
-  { id: 'thisMonth', label: 'Dieser Monat' },
-  { id: 'lastMonth', label: 'Letzter Monat' },
-  { id: 'thisYear', label: 'Dieses Jahr' }
-];
-
-// ============================================================================
-// COMPONENT
-// ============================================================================
+// Main Component
 const ReportGenerator = () => {
-  // Hooks
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { tenant } = useTenant();
-  const { user } = useAuth();
-  const { 
-    reports, 
-    loading: reportsLoading, 
-    generateReport,
-    scheduleReport,
-    getScheduledReports 
-  } = useReports();
-
   // State
-  const [selectedType, setSelectedType] = useState(searchParams.get('type') || 'sales');
-  const [dateRange, setDateRange] = useState({
+  const [selectedType, setSelectedType] = useState('sales');
+  const [dateRange, setDateRange] = useState('thisMonth');
+  const [customDateRange, setCustomDateRange] = useState({
     start: startOfMonth(new Date()),
     end: endOfMonth(new Date())
   });
-  const [format, setFormat] = useState('pdf');
+  const [selectedCharts, setSelectedCharts] = useState([]);
+  const [selectedTables, setSelectedTables] = useState([]);
+  const [reportData, setReportData] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [scheduleConfig, setScheduleConfig] = useState({
-    frequency: 'once',
-    time: '09:00',
-    emails: [user?.email || ''],
-    nextRun: null
+  const [error, setError] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [showExportOptions, setShowExportOptions] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showScheduler, setShowScheduler] = useState(false);
+  const [exportFormat, setExportFormat] = useState('pdf');
+  const [services, setServices] = useState({});
+  const [reportConfig, setReportConfig] = useState({
+    includeCharts: true,
+    includeTables: true,
+    includeFilters: true,
+    includeSummary: true,
+    includeFooter: true,
+    orientation: 'portrait',
+    paperSize: 'A4',
+    language: 'de'
   });
-  const [scheduledReports, setScheduledReports] = useState([]);
-  const [recentReports, setRecentReports] = useState([]);
 
-  // Load scheduled reports
+  // Hooks
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { tenant } = useTenant();
+  const { user } = useAuth();
+
+  // Load services
   useEffect(() => {
-    loadScheduledReports();
+    const loadServices = async () => {
+      try {
+        const [
+          reportSvc,
+          pdfGen,
+          excelGen,
+          emailSvc,
+          dataSvc,
+          toastLib,
+          jsPDFLib,
+          excelLib,
+          html2canvasLib
+        ] = await Promise.all([
+          import('../../services/reportService'),
+          import('../../services/pdfGenerator'),
+          import('../../services/excelGenerator'),
+          import('../../services/emailService'),
+          import('../../services/dataService'),
+          import('react-hot-toast'),
+          import('jspdf'),
+          import('exceljs'),
+          import('html2canvas')
+        ]);
+        
+        setServices({
+          report: reportSvc.default,
+          pdf: pdfGen.default,
+          excel: excelGen.default,
+          email: emailSvc.default,
+          data: dataSvc.default,
+          toast: toastLib.default,
+          jsPDF: jsPDFLib.default,
+          ExcelJS: excelLib.default,
+          html2canvas: html2canvasLib.default
+        });
+      } catch (error) {
+        console.error('Failed to load services:', error);
+      }
+    };
+    loadServices();
   }, []);
 
-  const loadScheduledReports = async () => {
-    try {
-      const reports = await getScheduledReports();
-      setScheduledReports(reports);
-    } catch (error) {
-      console.error('Error loading scheduled reports:', error);
+  // Initialize from URL params
+  useEffect(() => {
+    const type = searchParams.get('type');
+    const range = searchParams.get('range');
+    
+    if (type && REPORT_TYPES[type.toUpperCase()]) {
+      setSelectedType(type);
     }
-  };
+    if (range && DATE_RANGES.find(r => r.value === range)) {
+      setDateRange(range);
+    }
+  }, [searchParams]);
 
-  // Handlers
-  const handleQuickRange = useCallback((rangeId) => {
+  // Auto-select default charts and tables when type changes
+  useEffect(() => {
+    const reportType = REPORT_TYPES[selectedType.toUpperCase()];
+    if (reportType) {
+      setSelectedCharts(reportType.charts.slice(0, 2)); // Select first 2 charts by default
+      setSelectedTables(reportType.tables.slice(0, 2)); // Select first 2 tables by default
+    }
+  }, [selectedType]);
+
+  // Calculate date range
+  const calculatedDateRange = useMemo(() => {
     const now = new Date();
     let start, end;
 
-    switch (rangeId) {
+    switch (dateRange) {
       case 'today':
         start = new Date(now.setHours(0, 0, 0, 0));
         end = new Date(now.setHours(23, 59, 59, 999));
@@ -192,427 +279,638 @@ const ReportGenerator = () => {
         end = endOfMonth(now);
         break;
       case 'lastMonth':
-        const lastMonth = subMonths(now, 1);
-        start = startOfMonth(lastMonth);
-        end = endOfMonth(lastMonth);
+        start = startOfMonth(subMonths(now, 1));
+        end = endOfMonth(subMonths(now, 1));
         break;
-      case 'thisYear':
-        start = new Date(now.getFullYear(), 0, 1);
-        end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+      case 'custom':
+        start = customDateRange.start;
+        end = customDateRange.end;
         break;
       default:
-        return;
+        start = startOfMonth(now);
+        end = endOfMonth(now);
     }
 
-    setDateRange({ start, end });
-  }, []);
+    return { start, end };
+  }, [dateRange, customDateRange]);
 
-  const handleGenerateReport = async () => {
-    setGenerating(true);
-    const toastId = toast.loading('Report wird generiert...');
+  // Load report data
+  const loadReportData = useCallback(async () => {
+    if (!services.data || !tenant?.id) return;
+
+    setLoading(true);
+    setError(null);
 
     try {
-      const reportData = await generateReport({
+      const data = await services.data.getReportData({
+        tenantId: tenant.id,
         type: selectedType,
-        dateRange,
-        format,
-        tenantId: tenant.id
+        dateRange: calculatedDateRange,
+        charts: selectedCharts,
+        tables: selectedTables
       });
 
+      setReportData(data);
+    } catch (error) {
+      console.error('Error loading report data:', error);
+      setError('Fehler beim Laden der Daten');
+      if (services.toast) {
+        services.toast.error('Fehler beim Laden der Report-Daten');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [tenant?.id, selectedType, calculatedDateRange, selectedCharts, selectedTables, services]);
+
+  // Generate report
+  const generateReport = useCallback(async (format = 'pdf') => {
+    if (!reportData || !services.pdf || !services.excel || !services.toast) return;
+
+    setGenerating(true);
+    setError(null);
+
+    try {
       let file;
+      const reportTitle = `${REPORT_TYPES[selectedType.toUpperCase()].name} - ${
+        format(calculatedDateRange.start, 'dd.MM.yyyy', { locale: de })
+      } bis ${
+        format(calculatedDateRange.end, 'dd.MM.yyyy', { locale: de })
+      }`;
+
       if (format === 'pdf') {
-        file = await generatePDFReport(reportData);
-      } else {
-        file = await generateExcelReport(reportData);
+        file = await services.pdf.generateReport({
+          title: reportTitle,
+          data: reportData,
+          config: reportConfig,
+          charts: selectedCharts,
+          tables: selectedTables,
+          tenant: tenant
+        });
+        
+        downloadFile(file, `bericht-${selectedType}-${Date.now()}.pdf`, 'application/pdf');
+      } else if (format === 'excel') {
+        file = await services.excel.generateReport({
+          title: reportTitle,
+          data: reportData,
+          config: reportConfig,
+          charts: selectedCharts,
+          tables: selectedTables,
+          tenant: tenant
+        });
+        
+        downloadFile(file, `bericht-${selectedType}-${Date.now()}.xlsx`, 
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       }
 
-      downloadFile(file, `${selectedType}-report-${format(new Date(), 'yyyy-MM-dd')}.${format}`);
-      
-      toast.success('Report erfolgreich generiert!', { id: toastId });
+      services.toast.success(`${format.toUpperCase()} erfolgreich generiert`);
 
-      // Add to recent reports
-      setRecentReports(prev => [{
-        id: Date.now(),
-        type: selectedType,
-        format,
-        dateRange,
-        createdAt: new Date(),
-        size: file.size
-      }, ...prev].slice(0, 5));
-
+      // Save to history
+      if (services.report) {
+        await services.report.saveToHistory({
+          tenantId: tenant.id,
+          type: selectedType,
+          format: format,
+          dateRange: calculatedDateRange,
+          generatedBy: user.id,
+          fileSize: file.size
+        });
+      }
     } catch (error) {
       console.error('Error generating report:', error);
-      toast.error('Fehler beim Generieren des Reports', { id: toastId });
+      setError('Fehler beim Generieren des Reports');
+      services.toast.error('Fehler beim Generieren des Reports');
     } finally {
       setGenerating(false);
     }
-  };
+  }, [reportData, selectedType, calculatedDateRange, reportConfig, selectedCharts, selectedTables, tenant, user, services]);
 
-  const handleScheduleReport = async () => {
+  // Handlers
+  const handleChartToggle = useCallback((chartId) => {
+    setSelectedCharts(prev =>
+      prev.includes(chartId)
+        ? prev.filter(id => id !== chartId)
+        : [...prev, chartId]
+    );
+  }, []);
+
+  const handleTableToggle = useCallback((tableId) => {
+    setSelectedTables(prev =>
+      prev.includes(tableId)
+        ? prev.filter(id => id !== tableId)
+        : [...prev, tableId]
+    );
+  }, []);
+
+  const handleGenerateClick = useCallback(() => {
+    if (selectedCharts.length === 0 && selectedTables.length === 0) {
+      if (services.toast) {
+        services.toast.error('Bitte wählen Sie mindestens ein Diagramm oder eine Tabelle aus');
+      }
+      return;
+    }
+    
+    loadReportData();
+  }, [selectedCharts.length, selectedTables.length, loadReportData, services]);
+
+  const handleExport = useCallback((format) => {
+    setExportFormat(format);
+    generateReport(format);
+    setShowExportOptions(false);
+  }, [generateReport]);
+
+  const handleEmailReport = useCallback(async (emailData) => {
+    if (!services.email || !services.toast) return;
+
     try {
-      await scheduleReport({
-        type: selectedType,
-        dateRange,
-        format,
-        schedule: scheduleConfig,
-        tenantId: tenant.id
+      // First generate the report
+      const format = emailData.format || 'pdf';
+      await generateReport(format);
+      
+      // Then send email
+      await services.email.sendReport({
+        to: emailData.recipients,
+        subject: emailData.subject,
+        message: emailData.message,
+        reportType: selectedType,
+        format: format,
+        attachReport: true
       });
+      
+      services.toast.success('Report erfolgreich versendet');
+      setShowEmailModal(false);
+    } catch (error) {
+      console.error('Error sending report:', error);
+      services.toast.error('Fehler beim Versenden des Reports');
+    }
+  }, [services, generateReport, selectedType]);
 
-      toast.success('Report-Plan erfolgreich erstellt!');
-      setShowScheduleModal(false);
-      loadScheduledReports();
+  const handleScheduleReport = useCallback(async (scheduleData) => {
+    if (!services.report || !services.toast) return;
+
+    try {
+      await services.report.scheduleReport({
+        tenantId: tenant.id,
+        ...scheduleData,
+        reportType: selectedType,
+        dateRange: dateRange,
+        charts: selectedCharts,
+        tables: selectedTables,
+        config: reportConfig
+      });
+      
+      services.toast.success('Report-Zeitplan erfolgreich erstellt');
+      setShowScheduler(false);
     } catch (error) {
       console.error('Error scheduling report:', error);
-      toast.error('Fehler beim Planen des Reports');
+      services.toast.error('Fehler beim Erstellen des Zeitplans');
     }
+  }, [services, tenant?.id, selectedType, dateRange, selectedCharts, selectedTables, reportConfig]);
+
+  // Render chart selector
+  const renderChartSelector = () => {
+    const reportType = REPORT_TYPES[selectedType.toUpperCase()];
+    
+    return (
+      <Card className={styles.selectorCard}>
+        <h3 className={styles.selectorTitle}>
+          <BarChart3 size={20} />
+          Diagramme auswählen
+        </h3>
+        <div className={styles.selectorGrid}>
+          {reportType.charts.map(chartId => (
+            <label key={chartId} className={styles.selectorItem}>
+              <Checkbox
+                checked={selectedCharts.includes(chartId)}
+                onChange={() => handleChartToggle(chartId)}
+              />
+              <span className={styles.selectorLabel}>
+                {chartId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </span>
+            </label>
+          ))}
+        </div>
+      </Card>
+    );
   };
 
-  const handleEmailChange = (index, value) => {
-    const newEmails = [...scheduleConfig.emails];
-    newEmails[index] = value;
-    setScheduleConfig(prev => ({ ...prev, emails: newEmails }));
+  // Render table selector
+  const renderTableSelector = () => {
+    const reportType = REPORT_TYPES[selectedType.toUpperCase()];
+    
+    return (
+      <Card className={styles.selectorCard}>
+        <h3 className={styles.selectorTitle}>
+          <Database size={20} />
+          Tabellen auswählen
+        </h3>
+        <div className={styles.selectorGrid}>
+          {reportType.tables.map(tableId => (
+            <label key={tableId} className={styles.selectorItem}>
+              <Checkbox
+                checked={selectedTables.includes(tableId)}
+                onChange={() => handleTableToggle(tableId)}
+              />
+              <span className={styles.selectorLabel}>
+                {tableId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </span>
+            </label>
+          ))}
+        </div>
+      </Card>
+    );
   };
 
-  const addEmailField = () => {
-    setScheduleConfig(prev => ({
-      ...prev,
-      emails: [...prev.emails, '']
-    }));
+  // Render report preview
+  const renderReportPreview = () => {
+    if (!reportData) return null;
+
+    const reportType = REPORT_TYPES[selectedType.toUpperCase()];
+
+    return (
+      <div className={styles.previewContainer}>
+        <div className={styles.previewHeader}>
+          <h2 className={styles.previewTitle}>
+            <reportType.icon size={24} />
+            {reportType.name}
+          </h2>
+          <Badge variant="secondary">
+            {format(calculatedDateRange.start, 'dd.MM.yyyy', { locale: de })} - 
+            {format(calculatedDateRange.end, 'dd.MM.yyyy', { locale: de })}
+          </Badge>
+        </div>
+
+        {/* Summary Cards */}
+        <div className={styles.summaryGrid}>
+          {reportData.summary && Object.entries(reportData.summary).map(([key, value]) => (
+            <Card key={key} className={styles.summaryCard}>
+              <h4 className={styles.summaryLabel}>
+                {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </h4>
+              <p className={styles.summaryValue}>
+                {typeof value === 'number' && key.includes('revenue')
+                  ? formatCurrency(value)
+                  : value.toLocaleString('de-CH')}
+              </p>
+            </Card>
+          ))}
+        </div>
+
+        {/* Charts */}
+        {selectedCharts.length > 0 && (
+          <div className={styles.chartsSection}>
+            <h3 className={styles.sectionTitle}>Diagramme</h3>
+            <div className={styles.chartsGrid}>
+              {selectedCharts.map(chartId => (
+                <Suspense key={chartId} fallback={<ChartSkeleton />}>
+                  <Card className={styles.chartCard}>
+                    {chartId === 'revenue' && <SalesChart data={reportData.charts[chartId]} />}
+                    {chartId === 'orders' && <OrdersChart data={reportData.charts[chartId]} />}
+                    {chartId === 'products' && <ProductsChart data={reportData.charts[chartId]} />}
+                    {chartId === 'new_customers' && <CustomersChart data={reportData.charts[chartId]} />}
+                    {chartId === 'profit_loss' && <FinancialChart data={reportData.charts[chartId]} />}
+                  </Card>
+                </Suspense>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tables */}
+        {selectedTables.length > 0 && (
+          <div className={styles.tablesSection}>
+            <h3 className={styles.sectionTitle}>Detailtabellen</h3>
+            <Suspense fallback={<LoadingSpinner />}>
+              <DataTableBuilder
+                tables={selectedTables}
+                data={reportData.tables}
+                config={reportConfig}
+              />
+            </Suspense>
+          </div>
+        )}
+      </div>
+    );
   };
 
-  const removeEmailField = (index) => {
-    setScheduleConfig(prev => ({
-      ...prev,
-      emails: prev.emails.filter((_, i) => i !== index)
-    }));
-  };
-
-  // Computed values
-  const selectedReportType = REPORT_TYPES[Object.keys(REPORT_TYPES).find(
-    key => REPORT_TYPES[key].id === selectedType
-  )];
-
-  const canGenerateReport = selectedType && dateRange.start && dateRange.end && format;
-
-  // Render
-  if (reportsLoading) {
-    return <LoadingSpinner fullPage />;
-  }
-
+  // Main render
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Report Generator</h1>
+      {/* Header */}
+      <header className={styles.header}>
+        <div className={styles.headerLeft}>
+          <h1 className={styles.title}>
+            <FileText size={28} />
+            Report Generator
+          </h1>
           <p className={styles.subtitle}>
-            Erstellen Sie detaillierte Berichte für Ihre Analysen
+            Erstellen Sie detaillierte Berichte und Analysen
           </p>
         </div>
-        <Button
-          variant="outline"
-          icon={Settings}
-          onClick={() => navigate('/admin/reports/templates')}
-        >
-          Vorlagen verwalten
-        </Button>
-      </div>
-
-      <div className={styles.content}>
-        {/* Report Type Selection */}
-        <Card className={styles.section}>
-          <h2 className={styles.sectionTitle}>Report-Typ auswählen</h2>
-          <div className={styles.reportTypes}>
-            {Object.values(REPORT_TYPES).map(type => (
-              <div
-                key={type.id}
-                className={`${styles.reportType} ${
-                  selectedType === type.id ? styles.selected : ''
-                }`}
-                onClick={() => {
-                  setSelectedType(type.id);
-                  setFormat(type.formats[0]);
-                }}
-                style={{
-                  '--report-color': type.color
-                }}
-              >
-                <div className={styles.reportIcon}>
-                  <type.icon size={24} />
-                </div>
-                <h3>{type.name}</h3>
-                <p>{type.description}</p>
-                <div className={styles.formats}>
-                  {type.formats.map(f => (
-                    <span key={f} className={styles.format}>
-                      {f.toUpperCase()}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Configuration */}
-        <div className={styles.configGrid}>
-          {/* Date Range */}
-          <Card className={styles.section}>
-            <h2 className={styles.sectionTitle}>
-              <Calendar className={styles.sectionIcon} />
-              Zeitraum
-            </h2>
-            
-            <div className={styles.quickRanges}>
-              {QUICK_RANGES.map(range => (
-                <button
-                  key={range.id}
-                  className={styles.quickRange}
-                  onClick={() => handleQuickRange(range.id)}
-                >
-                  {range.label}
-                </button>
-              ))}
-            </div>
-
-            <DateRangePicker
-              startDate={dateRange.start}
-              endDate={dateRange.end}
-              onStartDateChange={(date) => setDateRange(prev => ({ ...prev, start: date }))}
-              onEndDateChange={(date) => setDateRange(prev => ({ ...prev, end: date }))}
-              className={styles.dateRangePicker}
-            />
-
-            <div className={styles.datePreview}>
-              <Clock size={16} />
-              <span>
-                {format(dateRange.start, 'dd. MMM yyyy', { locale: de })} - 
-                {format(dateRange.end, 'dd. MMM yyyy', { locale: de })}
-              </span>
-            </div>
-          </Card>
-
-          {/* Format & Options */}
-          <Card className={styles.section}>
-            <h2 className={styles.sectionTitle}>
-              <Filter className={styles.sectionIcon} />
-              Format & Optionen
-            </h2>
-
-            <div className={styles.field}>
-              <label>Ausgabeformat</label>
-              <Select
-                value={format}
-                onChange={(e) => setFormat(e.target.value)}
-                disabled={!selectedReportType}
-              >
-                {selectedReportType?.formats.map(f => (
-                  <option key={f} value={f}>
-                    {f === 'pdf' ? 'PDF Dokument' : 'Excel Datei'}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div className={styles.options}>
-              <label className={styles.checkbox}>
-                <input type="checkbox" defaultChecked />
-                <span>Grafiken einschließen</span>
-              </label>
-              <label className={styles.checkbox}>
-                <input type="checkbox" defaultChecked />
-                <span>Detaillierte Aufschlüsselung</span>
-              </label>
-              <label className={styles.checkbox}>
-                <input type="checkbox" />
-                <span>Vergleich zum Vorjahreszeitraum</span>
-              </label>
-            </div>
-
-            <div className={styles.actions}>
-              <Button
-                variant="primary"
-                icon={Download}
-                onClick={handleGenerateReport}
-                disabled={!canGenerateReport || generating}
-                loading={generating}
-                fullWidth
-              >
-                Report generieren
-              </Button>
-              <Button
-                variant="outline"
-                icon={Clock}
-                onClick={() => setShowScheduleModal(true)}
-                disabled={!canGenerateReport}
-                fullWidth
-              >
-                Report planen
-              </Button>
-            </div>
-          </Card>
+        <div className={styles.headerActions}>
+          <Button
+            variant="secondary"
+            onClick={() => navigate('/admin/reports/history')}
+          >
+            <Clock size={20} />
+            Verlauf
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => setShowScheduler(true)}
+          >
+            <Calendar size={20} />
+            Zeitplan
+          </Button>
         </div>
+      </header>
 
-        {/* Recent Reports */}
-        {recentReports.length > 0 && (
-          <Card className={styles.section}>
-            <h2 className={styles.sectionTitle}>
-              <Clock className={styles.sectionIcon} />
-              Kürzlich generierte Reports
-            </h2>
-            <div className={styles.recentReports}>
-              {recentReports.map(report => (
-                <div key={report.id} className={styles.recentReport}>
-                  <FileText size={20} />
-                  <div className={styles.reportInfo}>
-                    <span className={styles.reportName}>
-                      {REPORT_TYPES[Object.keys(REPORT_TYPES).find(
-                        key => REPORT_TYPES[key].id === report.type
-                      )]?.name}
-                    </span>
-                    <span className={styles.reportMeta}>
-                      {format(report.createdAt, 'dd.MM.yyyy HH:mm')} • 
-                      {report.format.toUpperCase()} • 
-                      {(report.size / 1024).toFixed(1)} KB
-                    </span>
-                  </div>
-                  <ChevronRight size={16} className={styles.reportAction} />
-                </div>
-              ))}
-            </div>
-          </Card>
-        )}
-
-        {/* Scheduled Reports */}
-        {scheduledReports.length > 0 && (
-          <Card className={styles.section}>
-            <h2 className={styles.sectionTitle}>
-              <Clock className={styles.sectionIcon} />
-              Geplante Reports
-            </h2>
-            <div className={styles.scheduledReports}>
-              {scheduledReports.map(report => (
-                <div key={report.id} className={styles.scheduledReport}>
-                  <div className={styles.scheduleIndicator}>
-                    {report.active ? (
-                      <CheckCircle size={20} className={styles.active} />
-                    ) : (
-                      <AlertCircle size={20} className={styles.inactive} />
-                    )}
-                  </div>
-                  <div className={styles.scheduleInfo}>
-                    <h4>{report.name}</h4>
-                    <p>
-                      {report.frequency} • Nächste Ausführung: 
-                      {format(new Date(report.nextRun), 'dd.MM.yyyy HH:mm')}
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="small"
-                    onClick={() => navigate(`/admin/reports/scheduled/${report.id}`)}
-                  >
-                    Bearbeiten
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </Card>
-        )}
+      {/* Report Type Selection */}
+      <div className={styles.typeSelection}>
+        <h2 className={styles.sectionTitle}>Berichtstyp wählen</h2>
+        <div className={styles.typeGrid}>
+          {Object.entries(REPORT_TYPES).map(([key, type]) => (
+            <Card
+              key={key}
+              className={`${styles.typeCard} ${selectedType === type.id ? styles.selected : ''}`}
+              onClick={() => setSelectedType(type.id)}
+            >
+              <div
+                className={styles.typeIcon}
+                style={{ backgroundColor: `${type.color}20`, color: type.color }}
+              >
+                <type.icon size={32} />
+              </div>
+              <h3 className={styles.typeName}>{type.name}</h3>
+              <p className={styles.typeDescription}>{type.description}</p>
+              <div className={styles.typeFormats}>
+                {type.formats.map(format => (
+                  <Badge key={format} variant="secondary" size="sm">
+                    {format.toUpperCase()}
+                  </Badge>
+                ))}
+              </div>
+            </Card>
+          ))}
+        </div>
       </div>
 
-      {/* Schedule Modal */}
-      <Modal
-        isOpen={showScheduleModal}
-        onClose={() => setShowScheduleModal(false)}
-        title="Report planen"
-        maxWidth="500px"
-      >
-        <div className={styles.scheduleForm}>
-          <div className={styles.field}>
-            <label>Häufigkeit</label>
+      {/* Configuration */}
+      <div className={styles.configuration}>
+        <h2 className={styles.sectionTitle}>Konfiguration</h2>
+        
+        {/* Date Range Selection */}
+        <Card className={styles.dateRangeCard}>
+          <h3 className={styles.cardTitle}>
+            <Calendar size={20} />
+            Zeitraum
+          </h3>
+          <div className={styles.dateRangeControls}>
             <Select
-              value={scheduleConfig.frequency}
-              onChange={(e) => setScheduleConfig(prev => ({ 
-                ...prev, 
-                frequency: e.target.value 
-              }))}
+              value={dateRange}
+              onChange={(e) => setDateRange(e.target.value)}
+              className={styles.dateRangeSelect}
             >
-              {SCHEDULE_OPTIONS.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
+              {DATE_RANGES.map(range => (
+                <option key={range.value} value={range.value}>
+                  {range.label}
                 </option>
               ))}
             </Select>
-          </div>
-
-          {scheduleConfig.frequency !== 'once' && (
-            <div className={styles.field}>
-              <label>Uhrzeit</label>
-              <input
-                type="time"
-                value={scheduleConfig.time}
-                onChange={(e) => setScheduleConfig(prev => ({ 
-                  ...prev, 
-                  time: e.target.value 
-                }))}
-                className={styles.timeInput}
-              />
-            </div>
-          )}
-
-          <div className={styles.field}>
-            <label>E-Mail Empfänger</label>
-            {scheduleConfig.emails.map((email, index) => (
-              <div key={index} className={styles.emailField}>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => handleEmailChange(index, e.target.value)}
-                  placeholder="email@beispiel.ch"
-                  className={styles.emailInput}
+            
+            {dateRange === 'custom' && (
+              <Suspense fallback={<div className={styles.datePickerSkeleton} />}>
+                <DateRangePicker
+                  startDate={customDateRange.start}
+                  endDate={customDateRange.end}
+                  onChange={(range) => setCustomDateRange(range)}
+                  className={styles.datePicker}
                 />
-                {scheduleConfig.emails.length > 1 && (
-                  <button
-                    onClick={() => removeEmailField(index)}
-                    className={styles.removeEmail}
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-            ))}
-            <Button
-              variant="ghost"
-              size="small"
-              icon={FilePlus}
-              onClick={addEmailField}
-            >
-              Empfänger hinzufügen
-            </Button>
+              </Suspense>
+            )}
           </div>
+          
+          <div className={styles.dateRangeDisplay}>
+            <Calendar size={16} />
+            {format(calculatedDateRange.start, 'dd.MM.yyyy', { locale: de })} - 
+            {format(calculatedDateRange.end, 'dd.MM.yyyy', { locale: de })}
+          </div>
+        </Card>
 
-          <div className={styles.modalActions}>
-            <Button
-              variant="outline"
-              onClick={() => setShowScheduleModal(false)}
-            >
-              Abbrechen
-            </Button>
-            <Button
-              variant="primary"
-              icon={Save}
-              onClick={handleScheduleReport}
-            >
-              Plan speichern
-            </Button>
-          </div>
+        {/* Chart and Table Selection */}
+        <div className={styles.selectionGrid}>
+          {renderChartSelector()}
+          {renderTableSelector()}
         </div>
-      </Modal>
+
+        {/* Report Options */}
+        <Card className={styles.optionsCard}>
+          <h3 className={styles.cardTitle}>
+            <Settings size={20} />
+            Report-Optionen
+          </h3>
+          <div className={styles.optionsGrid}>
+            <label className={styles.optionItem}>
+              <Checkbox
+                checked={reportConfig.includeCharts}
+                onChange={(e) => setReportConfig(prev => ({ ...prev, includeCharts: e.target.checked }))}
+              />
+              <span>Diagramme einschließen</span>
+            </label>
+            <label className={styles.optionItem}>
+              <Checkbox
+                checked={reportConfig.includeTables}
+                onChange={(e) => setReportConfig(prev => ({ ...prev, includeTables: e.target.checked }))}
+              />
+              <span>Tabellen einschließen</span>
+            </label>
+            <label className={styles.optionItem}>
+              <Checkbox
+                checked={reportConfig.includeSummary}
+                onChange={(e) => setReportConfig(prev => ({ ...prev, includeSummary: e.target.checked }))}
+              />
+              <span>Zusammenfassung einschließen</span>
+            </label>
+            <label className={styles.optionItem}>
+              <Checkbox
+                checked={reportConfig.includeFilters}
+                onChange={(e) => setReportConfig(prev => ({ ...prev, includeFilters: e.target.checked }))}
+              />
+              <span>Filterkriterien anzeigen</span>
+            </label>
+          </div>
+          
+          <div className={styles.optionsRow}>
+            <div className={styles.optionGroup}>
+              <label>Ausrichtung</label>
+              <Select
+                value={reportConfig.orientation}
+                onChange={(e) => setReportConfig(prev => ({ ...prev, orientation: e.target.value }))}
+              >
+                <option value="portrait">Hochformat</option>
+                <option value="landscape">Querformat</option>
+              </Select>
+            </div>
+            <div className={styles.optionGroup}>
+              <label>Papierformat</label>
+              <Select
+                value={reportConfig.paperSize}
+                onChange={(e) => setReportConfig(prev => ({ ...prev, paperSize: e.target.value }))}
+              >
+                <option value="A4">A4</option>
+                <option value="A3">A3</option>
+                <option value="Letter">Letter</option>
+                <option value="Legal">Legal</option>
+              </Select>
+            </div>
+          </div>
+        </Card>
+
+        {/* Generate Button */}
+        <div className={styles.generateSection}>
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={handleGenerateClick}
+            disabled={loading || generating}
+            className={styles.generateButton}
+          >
+            {loading ? (
+              <>
+                <RefreshCw size={20} className="animate-spin" />
+                Lade Daten...
+              </>
+            ) : (
+              <>
+                <Zap size={20} />
+                Report generieren
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* Report Preview */}
+      {reportData && !loading && (
+        <>
+          <div className={styles.previewSection}>
+            <div className={styles.previewHeader}>
+              <h2 className={styles.sectionTitle}>Vorschau</h2>
+              <div className={styles.previewActions}>
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowPreview(true)}
+                >
+                  <Eye size={20} />
+                  Vollbild
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowEmailModal(true)}
+                >
+                  <Mail size={20} />
+                  Per E-Mail
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => setShowExportOptions(true)}
+                  disabled={generating}
+                >
+                  {generating ? (
+                    <>
+                      <RefreshCw size={20} className="animate-spin" />
+                      Generiere...
+                    </>
+                  ) : (
+                    <>
+                      <Download size={20} />
+                      Exportieren
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+            
+            {renderReportPreview()}
+          </div>
+        </>
+      )}
+
+      {/* Error Display */}
+      {error && (
+        <Card className={styles.errorCard}>
+          <AlertCircle size={20} />
+          <p>{error}</p>
+          <Button variant="secondary" size="sm" onClick={loadReportData}>
+            Erneut versuchen
+          </Button>
+        </Card>
+      )}
+
+      {/* Modals */}
+      {showPreview && reportData && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <Modal
+            isOpen={showPreview}
+            onClose={() => setShowPreview(false)}
+            title="Report-Vorschau"
+            size="full"
+          >
+            <ReportPreview
+              data={reportData}
+              config={reportConfig}
+              type={selectedType}
+              dateRange={calculatedDateRange}
+              onExport={(format) => {
+                setShowPreview(false);
+                handleExport(format);
+              }}
+            />
+          </Modal>
+        </Suspense>
+      )}
+
+      {showExportOptions && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <ExportOptionsModal
+            isOpen={showExportOptions}
+            onClose={() => setShowExportOptions(false)}
+            onExport={handleExport}
+            availableFormats={REPORT_TYPES[selectedType.toUpperCase()].formats}
+            generating={generating}
+          />
+        </Suspense>
+      )}
+
+      {showEmailModal && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <EmailReportModal
+            isOpen={showEmailModal}
+            onClose={() => setShowEmailModal(false)}
+            onSend={handleEmailReport}
+            reportType={selectedType}
+            dateRange={calculatedDateRange}
+          />
+        </Suspense>
+      )}
+
+      {showScheduler && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <ReportScheduler
+            isOpen={showScheduler}
+            onClose={() => setShowScheduler(false)}
+            onSchedule={handleScheduleReport}
+            reportType={selectedType}
+            currentConfig={{
+              charts: selectedCharts,
+              tables: selectedTables,
+              dateRange: dateRange,
+              config: reportConfig
+            }}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };
 
-// ============================================================================
-// EXPORT
-// ============================================================================
 export default ReportGenerator;

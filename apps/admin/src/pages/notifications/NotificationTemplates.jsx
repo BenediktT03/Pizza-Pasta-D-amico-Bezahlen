@@ -1,776 +1,749 @@
 /**
  * EATECH - Notification Templates
- * Version: 23.0.0
- * Description: Verwaltung von Benachrichtigungs-Vorlagen
+ * Version: 24.0.0
+ * Description: Verwaltung von Benachrichtigungs-Vorlagen mit Lazy Loading
+ * Author: EATECH Development Team
+ * Modified: 2025-01-08
  * File Path: /apps/admin/src/pages/notifications/NotificationTemplates.jsx
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Mail, 
-  MessageSquare, 
-  Smartphone,
-  Bell,
-  Plus,
-  Edit3,
-  Trash2,
-  Copy,
-  Save,
-  Eye,
-  Code,
-  FileText,
-  CheckCircle
+  Mail, MessageSquare, Smartphone, Bell, Plus, Edit3, Trash2,
+  Copy, Save, Eye, Code, FileText, CheckCircle, X, Search,
+  Filter, Download, Upload, RefreshCw, Settings, Globe,
+  Clock, User, Tag, Hash, MoreVertical
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+
+// Lazy loaded components
+const TemplateEditor = lazy(() => import('./components/TemplateEditor'));
+const TemplatePreview = lazy(() => import('./components/TemplatePreview'));
+const VariableSelector = lazy(() => import('./components/VariableSelector'));
+const TemplateTestModal = lazy(() => import('./components/TemplateTestModal'));
+const ImportExportModal = lazy(() => import('./components/ImportExportModal'));
+const BulkActionsBar = lazy(() => import('../../components/common/BulkActionsBar'));
+
+// Lazy loaded services
+const NotificationService = lazy(() => import('../../services/notificationService'));
+const TemplateService = lazy(() => import('../../services/templateService'));
+const ExportService = lazy(() => import('../../services/exportService'));
+
+// Lazy loaded utilities
+const toast = lazy(() => import('react-hot-toast'));
+
+// Loading components
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center p-8">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+);
+
+const TemplateCardSkeleton = () => (
+  <div className="animate-pulse">
+    <div className="bg-gray-200 rounded-lg p-6">
+      <div className="h-4 bg-gray-300 rounded w-3/4 mb-4"></div>
+      <div className="h-3 bg-gray-300 rounded w-1/2 mb-2"></div>
+      <div className="h-3 bg-gray-300 rounded w-2/3"></div>
+    </div>
+  </div>
+);
 
 // Hooks
 import { useTenant } from '../../hooks/useTenant';
-import { useNotificationTemplates } from '../../hooks/useNotificationTemplates';
+import { useAuth } from '../../hooks/useAuth';
 
-// Components
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
+// UI Components
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
-import TextArea from '../../components/ui/TextArea';
 import Select from '../../components/ui/Select';
-import Tabs from '../../components/ui/Tabs';
 import Badge from '../../components/ui/Badge';
+import Modal from '../../components/ui/Modal';
+import Tabs from '../../components/ui/Tabs';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 
 // Styles
 import styles from './NotificationTemplates.module.css';
 
-// ============================================================================
-// CONSTANTS
-// ============================================================================
+// Constants
 const TEMPLATE_TYPES = {
-  ORDER_PLACED: 'Bestellung eingegangen',
-  ORDER_CONFIRMED: 'Bestellung bestätigt',
-  ORDER_READY: 'Bestellung bereit',
-  ORDER_DELIVERED: 'Bestellung geliefert',
-  ORDER_CANCELLED: 'Bestellung storniert',
-  PAYMENT_RECEIVED: 'Zahlung erhalten',
-  PAYMENT_FAILED: 'Zahlung fehlgeschlagen',
-  LOW_STOCK_ALERT: 'Niedriger Lagerbestand',
-  CUSTOMER_WELCOME: 'Willkommen',
-  CUSTOMER_BIRTHDAY: 'Geburtstag',
-  LOYALTY_REWARD: 'Treuepunkt-Belohnung',
-  PROMOTION: 'Promotion / Angebot',
-  REVIEW_REQUEST: 'Bewertungsanfrage',
-  SYSTEM_ALERT: 'System-Benachrichtigung'
+  ORDER_PLACED: { id: 'order_placed', label: 'Bestellung eingegangen', icon: Bell },
+  ORDER_CONFIRMED: { id: 'order_confirmed', label: 'Bestellung bestätigt', icon: CheckCircle },
+  ORDER_READY: { id: 'order_ready', label: 'Bestellung bereit', icon: Clock },
+  ORDER_DELIVERED: { id: 'order_delivered', label: 'Bestellung geliefert', icon: CheckCircle },
+  ORDER_CANCELLED: { id: 'order_cancelled', label: 'Bestellung storniert', icon: X },
+  PAYMENT_RECEIVED: { id: 'payment_received', label: 'Zahlung erhalten', icon: CheckCircle },
+  PAYMENT_FAILED: { id: 'payment_failed', label: 'Zahlung fehlgeschlagen', icon: X },
+  LOW_STOCK_ALERT: { id: 'low_stock', label: 'Niedriger Lagerbestand', icon: Bell },
+  CUSTOMER_WELCOME: { id: 'welcome', label: 'Willkommen', icon: User },
+  CUSTOMER_BIRTHDAY: { id: 'birthday', label: 'Geburtstag', icon: User },
+  LOYALTY_REWARD: { id: 'loyalty', label: 'Treuepunkt-Belohnung', icon: Tag },
+  PROMOTION: { id: 'promotion', label: 'Promotion / Angebot', icon: Tag },
+  REVIEW_REQUEST: { id: 'review', label: 'Bewertungsanfrage', icon: MessageSquare },
+  SYSTEM_ALERT: { id: 'system', label: 'System-Benachrichtigung', icon: Bell }
 };
 
 const CHANNELS = {
-  email: { name: 'E-Mail', icon: Mail, color: '#10B981' },
-  sms: { name: 'SMS', icon: MessageSquare, color: '#F59E0B' },
-  push: { name: 'Push', icon: Smartphone, color: '#3B82F6' },
-  in_app: { name: 'In-App', icon: Bell, color: '#8B5CF6' }
+  email: { name: 'E-Mail', icon: Mail, color: '#3B82F6' },
+  sms: { name: 'SMS', icon: Smartphone, color: '#10B981' },
+  push: { name: 'Push', icon: Bell, color: '#8B5CF6' },
+  whatsapp: { name: 'WhatsApp', icon: MessageSquare, color: '#25D366' }
 };
 
-const TEMPLATE_VARIABLES = [
-  { key: '{{customerName}}', description: 'Name des Kunden' },
-  { key: '{{orderNumber}}', description: 'Bestellnummer' },
-  { key: '{{orderTotal}}', description: 'Bestellsumme' },
-  { key: '{{deliveryTime}}', description: 'Lieferzeit' },
-  { key: '{{businessName}}', description: 'Name des Geschäfts' },
-  { key: '{{productName}}', description: 'Produktname' },
-  { key: '{{discountCode}}', description: 'Rabattcode' },
-  { key: '{{loyaltyPoints}}', description: 'Treuepunkte' },
-  { key: '{{date}}', description: 'Aktuelles Datum' },
-  { key: '{{time}}', description: 'Aktuelle Zeit' }
+const LANGUAGES = [
+  { value: 'de', label: 'Deutsch' },
+  { value: 'fr', label: 'Französisch' },
+  { value: 'it', label: 'Italienisch' },
+  { value: 'en', label: 'Englisch' }
 ];
 
-const DEFAULT_TEMPLATES = {
-  ORDER_PLACED: {
-    email: {
-      subject: 'Bestellung eingegangen - #{{orderNumber}}',
-      body: `Hallo {{customerName}},
-
-vielen Dank für Ihre Bestellung bei {{businessName}}!
-
-Bestellnummer: #{{orderNumber}}
-Gesamtbetrag: {{orderTotal}}
-
-Wir werden Ihre Bestellung umgehend bearbeiten und Sie über den Fortschritt informieren.
-
-Mit freundlichen Grüßen
-Ihr {{businessName}} Team`
-    },
-    sms: {
-      message: '{{businessName}}: Bestellung #{{orderNumber}} eingegangen! Betrag: {{orderTotal}}. Wir informieren Sie, sobald Ihre Bestellung bereit ist.'
-    },
-    push: {
-      title: 'Bestellung eingegangen!',
-      body: 'Ihre Bestellung #{{orderNumber}} wurde erfolgreich aufgegeben.'
-    }
-  },
-  ORDER_READY: {
-    email: {
-      subject: 'Ihre Bestellung ist bereit! - #{{orderNumber}}',
-      body: `Hallo {{customerName}},
-
-Ihre Bestellung #{{orderNumber}} ist fertig und kann abgeholt werden!
-
-Abholzeit: {{deliveryTime}}
-
-Wir freuen uns auf Sie!
-
-Mit freundlichen Grüßen
-Ihr {{businessName}} Team`
-    },
-    sms: {
-      message: '{{businessName}}: Ihre Bestellung #{{orderNumber}} ist bereit zur Abholung!'
-    },
-    push: {
-      title: 'Bestellung bereit! 🎉',
-      body: 'Ihre Bestellung #{{orderNumber}} kann jetzt abgeholt werden.'
-    }
-  }
-};
-
-// ============================================================================
-// COMPONENT
-// ============================================================================
+// Main Component
 const NotificationTemplates = () => {
-  const navigate = useNavigate();
-  const { tenant } = useTenant();
-  const { 
-    templates, 
-    loading, 
-    createTemplate, 
-    updateTemplate, 
-    deleteTemplate,
-    duplicateTemplate 
-  } = useNotificationTemplates();
-
   // State
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState(null);
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('all');
   const [selectedChannel, setSelectedChannel] = useState('all');
+  const [selectedLanguage, setSelectedLanguage] = useState('de');
+  const [selectedTemplates, setSelectedTemplates] = useState([]);
+  const [showEditor, setShowEditor] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [activeTab, setActiveTab] = useState('email');
-  
-  // Form state
-  const [formData, setFormData] = useState({
-    name: '',
-    type: 'ORDER_PLACED',
-    channels: {
-      email: { enabled: false, subject: '', body: '' },
-      sms: { enabled: false, message: '' },
-      push: { enabled: false, title: '', body: '' },
-      in_app: { enabled: false, title: '', body: '' }
-    }
-  });
+  const [previewTemplate, setPreviewTemplate] = useState(null);
+  const [showTest, setShowTest] = useState(false);
+  const [testTemplate, setTestTemplate] = useState(null);
+  const [showImportExport, setShowImportExport] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [services, setServices] = useState({});
+
+  // Hooks
+  const navigate = useNavigate();
+  const { tenant } = useTenant();
+  const { user } = useAuth();
+
+  // Load services
+  useEffect(() => {
+    const loadServices = async () => {
+      try {
+        const [notificationSvc, templateSvc, exportSvc, toastLib] = await Promise.all([
+          import('../../services/notificationService'),
+          import('../../services/templateService'),
+          import('../../services/exportService'),
+          import('react-hot-toast')
+        ]);
+        
+        setServices({
+          notification: notificationSvc.default,
+          template: templateSvc.default,
+          export: exportSvc.default,
+          toast: toastLib.default
+        });
+      } catch (error) {
+        console.error('Failed to load services:', error);
+      }
+    };
+    loadServices();
+  }, []);
+
+  // Load templates
+  useEffect(() => {
+    const loadTemplates = async () => {
+      if (!services.template || !tenant?.id) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const data = await services.template.getTemplates(tenant.id);
+        setTemplates(data);
+      } catch (error) {
+        console.error('Error loading templates:', error);
+        setError('Fehler beim Laden der Vorlagen');
+        if (services.toast) {
+          services.toast.error('Fehler beim Laden der Vorlagen');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTemplates();
+  }, [tenant?.id, services.template, services.toast]);
 
   // Filter templates
-  const filteredTemplates = templates.filter(template => {
-    if (selectedType !== 'all' && template.type !== selectedType) return false;
-    if (selectedChannel !== 'all' && !template.channels[selectedChannel]?.enabled) return false;
-    return true;
-  });
+  const filteredTemplates = useMemo(() => {
+    let filtered = [...templates];
+
+    // Search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(t =>
+        t.name.toLowerCase().includes(term) ||
+        t.subject?.toLowerCase().includes(term) ||
+        t.content?.toLowerCase().includes(term)
+      );
+    }
+
+    // Type filter
+    if (selectedType !== 'all') {
+      filtered = filtered.filter(t => t.type === selectedType);
+    }
+
+    // Channel filter
+    if (selectedChannel !== 'all') {
+      filtered = filtered.filter(t => t.channel === selectedChannel);
+    }
+
+    // Language filter
+    filtered = filtered.filter(t => t.language === selectedLanguage);
+
+    return filtered;
+  }, [templates, searchTerm, selectedType, selectedChannel, selectedLanguage]);
 
   // Handlers
-  const handleCreateTemplate = () => {
-    const defaultTemplate = DEFAULT_TEMPLATES[formData.type] || {};
-    
-    setFormData({
+  const handleCreateTemplate = useCallback(() => {
+    setEditingTemplate({
+      id: null,
       name: '',
-      type: 'ORDER_PLACED',
-      channels: {
-        email: defaultTemplate.email 
-          ? { enabled: true, ...defaultTemplate.email }
-          : { enabled: false, subject: '', body: '' },
-        sms: defaultTemplate.sms
-          ? { enabled: true, ...defaultTemplate.sms }
-          : { enabled: false, message: '' },
-        push: defaultTemplate.push
-          ? { enabled: true, ...defaultTemplate.push }
-          : { enabled: false, title: '', body: '' },
-        in_app: { enabled: false, title: '', body: '' }
-      }
+      type: 'order_placed',
+      channel: 'email',
+      language: selectedLanguage,
+      subject: '',
+      content: '',
+      variables: [],
+      active: true,
+      isNew: true
     });
-    setEditingTemplate(null);
-    setShowCreateModal(true);
-  };
+    setShowEditor(true);
+  }, [selectedLanguage]);
 
-  const handleEditTemplate = (template) => {
-    setFormData({
-      name: template.name,
-      type: template.type,
-      channels: template.channels
-    });
-    setEditingTemplate(template);
-    setShowCreateModal(true);
-    setActiveTab(Object.keys(template.channels).find(
-      channel => template.channels[channel]?.enabled
-    ) || 'email');
-  };
+  const handleEditTemplate = useCallback((template) => {
+    setEditingTemplate({ ...template, isNew: false });
+    setShowEditor(true);
+  }, []);
 
-  const handleSaveTemplate = async () => {
+  const handleDuplicateTemplate = useCallback(async (template) => {
+    if (!services.template || !services.toast) return;
+
     try {
-      if (!formData.name.trim()) {
-        toast.error('Bitte geben Sie einen Namen ein');
-        return;
-      }
+      const duplicated = {
+        ...template,
+        id: null,
+        name: `${template.name} (Kopie)`,
+        createdAt: new Date().toISOString()
+      };
+      
+      await services.template.createTemplate(tenant.id, duplicated);
+      services.toast.success('Vorlage erfolgreich dupliziert');
+      
+      // Reload templates
+      const data = await services.template.getTemplates(tenant.id);
+      setTemplates(data);
+    } catch (error) {
+      console.error('Error duplicating template:', error);
+      services.toast.error('Fehler beim Duplizieren der Vorlage');
+    }
+  }, [tenant?.id, services.template, services.toast]);
 
-      const hasEnabledChannel = Object.values(formData.channels).some(c => c.enabled);
-      if (!hasEnabledChannel) {
-        toast.error('Bitte aktivieren Sie mindestens einen Kanal');
-        return;
-      }
+  const handleDeleteTemplate = useCallback(async () => {
+    if (!deleteTarget || !services.template || !services.toast) return;
 
-      if (editingTemplate) {
-        await updateTemplate(editingTemplate.id, formData);
-        toast.success('Vorlage erfolgreich aktualisiert');
+    try {
+      await services.template.deleteTemplate(tenant.id, deleteTarget.id);
+      services.toast.success('Vorlage erfolgreich gelöscht');
+      
+      // Update local state
+      setTemplates(prev => prev.filter(t => t.id !== deleteTarget.id));
+      setShowDeleteConfirm(false);
+      setDeleteTarget(null);
+    } catch (error) {
+      console.error('Error deleting template:', error);
+      services.toast.error('Fehler beim Löschen der Vorlage');
+    }
+  }, [deleteTarget, tenant?.id, services.template, services.toast]);
+
+  const handleSaveTemplate = useCallback(async (templateData) => {
+    if (!services.template || !services.toast) return;
+
+    try {
+      if (templateData.isNew) {
+        await services.template.createTemplate(tenant.id, templateData);
+        services.toast.success('Vorlage erfolgreich erstellt');
       } else {
-        await createTemplate(formData);
-        toast.success('Vorlage erfolgreich erstellt');
+        await services.template.updateTemplate(tenant.id, templateData.id, templateData);
+        services.toast.success('Vorlage erfolgreich aktualisiert');
       }
-
-      setShowCreateModal(false);
+      
+      // Reload templates
+      const data = await services.template.getTemplates(tenant.id);
+      setTemplates(data);
+      setShowEditor(false);
       setEditingTemplate(null);
     } catch (error) {
       console.error('Error saving template:', error);
-      toast.error('Fehler beim Speichern der Vorlage');
+      services.toast.error('Fehler beim Speichern der Vorlage');
     }
-  };
+  }, [tenant?.id, services.template, services.toast]);
 
-  const handleDeleteTemplate = async (template) => {
-    setDeleteConfirm(template);
-  };
+  const handleToggleActive = useCallback(async (template) => {
+    if (!services.template || !services.toast) return;
 
-  const confirmDelete = async () => {
     try {
-      await deleteTemplate(deleteConfirm.id);
-      toast.success('Vorlage erfolgreich gelöscht');
-      setDeleteConfirm(null);
-    } catch (error) {
-      console.error('Error deleting template:', error);
-      toast.error('Fehler beim Löschen der Vorlage');
-    }
-  };
-
-  const handleDuplicateTemplate = async (template) => {
-    try {
-      await duplicateTemplate(template.id);
-      toast.success('Vorlage erfolgreich dupliziert');
-    } catch (error) {
-      console.error('Error duplicating template:', error);
-      toast.error('Fehler beim Duplizieren der Vorlage');
-    }
-  };
-
-  const insertVariable = (variable) => {
-    const activeChannel = formData.channels[activeTab];
-    if (!activeChannel) return;
-
-    if (activeTab === 'email') {
-      // Insert at cursor position in body
-      const textarea = document.querySelector(`textarea[name="${activeTab}-body"]`);
-      if (textarea) {
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const text = textarea.value;
-        const newText = text.substring(0, start) + variable + text.substring(end);
-        
-        updateChannelData(activeTab, 'body', newText);
-        
-        // Restore cursor position
-        setTimeout(() => {
-          textarea.selectionStart = textarea.selectionEnd = start + variable.length;
-          textarea.focus();
-        }, 0);
-      }
-    } else if (activeTab === 'sms') {
-      const input = document.querySelector(`textarea[name="${activeTab}-message"]`);
-      if (input) {
-        const start = input.selectionStart;
-        const end = input.selectionEnd;
-        const text = input.value;
-        const newText = text.substring(0, start) + variable + text.substring(end);
-        
-        updateChannelData(activeTab, 'message', newText);
-      }
-    } else {
-      // For push and in-app, insert in body
-      const textarea = document.querySelector(`textarea[name="${activeTab}-body"]`);
-      if (textarea) {
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const text = textarea.value;
-        const newText = text.substring(0, start) + variable + text.substring(end);
-        
-        updateChannelData(activeTab, 'body', newText);
-      }
-    }
-  };
-
-  const updateChannelData = (channel, field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      channels: {
-        ...prev.channels,
-        [channel]: {
-          ...prev.channels[channel],
-          [field]: value
-        }
-      }
-    }));
-  };
-
-  const toggleChannel = (channel) => {
-    setFormData(prev => ({
-      ...prev,
-      channels: {
-        ...prev.channels,
-        [channel]: {
-          ...prev.channels[channel],
-          enabled: !prev.channels[channel].enabled
-        }
-      }
-    }));
-  };
-
-  const previewTemplate = (template) => {
-    // Replace variables with example data
-    const exampleData = {
-      customerName: 'Max Mustermann',
-      orderNumber: '12345',
-      orderTotal: 'CHF 45.90',
-      deliveryTime: '18:30 Uhr',
-      businessName: tenant?.name || 'EATECH Foodtruck',
-      productName: 'Burger Deluxe',
-      discountCode: 'SAVE10',
-      loyaltyPoints: '150',
-      date: new Date().toLocaleDateString('de-CH'),
-      time: new Date().toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' })
-    };
-
-    const replaceVariables = (text) => {
-      let result = text;
-      Object.entries(exampleData).forEach(([key, value]) => {
-        result = result.replace(new RegExp(`{{${key}}}`, 'g'), value);
+      await services.template.updateTemplate(tenant.id, template.id, {
+        ...template,
+        active: !template.active
       });
-      return result;
-    };
+      
+      // Update local state
+      setTemplates(prev => prev.map(t =>
+        t.id === template.id ? { ...t, active: !t.active } : t
+      ));
+      
+      services.toast.success(
+        template.active ? 'Vorlage deaktiviert' : 'Vorlage aktiviert'
+      );
+    } catch (error) {
+      console.error('Error toggling template:', error);
+      services.toast.error('Fehler beim Ändern des Status');
+    }
+  }, [tenant?.id, services.template, services.toast]);
 
-    const previewData = {
-      ...template,
-      channels: Object.entries(template.channels).reduce((acc, [channel, data]) => {
-        if (!data.enabled) return acc;
-        
-        acc[channel] = {
-          ...data,
-          subject: data.subject ? replaceVariables(data.subject) : undefined,
-          body: data.body ? replaceVariables(data.body) : undefined,
-          message: data.message ? replaceVariables(data.message) : undefined,
-          title: data.title ? replaceVariables(data.title) : undefined
-        };
-        
-        return acc;
-      }, {})
-    };
+  const handleBulkAction = useCallback(async (action) => {
+    if (!services.template || !services.toast || selectedTemplates.length === 0) return;
 
-    return previewData;
+    try {
+      switch (action) {
+        case 'activate':
+          await Promise.all(
+            selectedTemplates.map(id =>
+              services.template.updateTemplate(tenant.id, id, { active: true })
+            )
+          );
+          services.toast.success(`${selectedTemplates.length} Vorlagen aktiviert`);
+          break;
+          
+        case 'deactivate':
+          await Promise.all(
+            selectedTemplates.map(id =>
+              services.template.updateTemplate(tenant.id, id, { active: false })
+            )
+          );
+          services.toast.success(`${selectedTemplates.length} Vorlagen deaktiviert`);
+          break;
+          
+        case 'delete':
+          if (window.confirm(`Wirklich ${selectedTemplates.length} Vorlagen löschen?`)) {
+            await Promise.all(
+              selectedTemplates.map(id =>
+                services.template.deleteTemplate(tenant.id, id)
+              )
+            );
+            services.toast.success(`${selectedTemplates.length} Vorlagen gelöscht`);
+          }
+          break;
+          
+        case 'export':
+          const templatesToExport = templates.filter(t => selectedTemplates.includes(t.id));
+          await services.export.exportTemplates(templatesToExport, 'notification-templates');
+          services.toast.success('Vorlagen exportiert');
+          break;
+      }
+      
+      // Reload templates and clear selection
+      const data = await services.template.getTemplates(tenant.id);
+      setTemplates(data);
+      setSelectedTemplates([]);
+    } catch (error) {
+      console.error('Error performing bulk action:', error);
+      services.toast.error('Fehler bei der Ausführung der Aktion');
+    }
+  }, [selectedTemplates, tenant?.id, services]);
+
+  // Render template card
+  const renderTemplateCard = (template) => {
+    const isSelected = selectedTemplates.includes(template.id);
+    const type = TEMPLATE_TYPES[template.type] || TEMPLATE_TYPES.SYSTEM_ALERT;
+    const channel = CHANNELS[template.channel];
+
+    return (
+      <Card key={template.id} className={`${styles.templateCard} ${isSelected ? styles.selected : ''}`}>
+        <div className={styles.cardHeader}>
+          <div className={styles.selectWrapper}>
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedTemplates(prev => [...prev, template.id]);
+                } else {
+                  setSelectedTemplates(prev => prev.filter(id => id !== template.id));
+                }
+              }}
+              className={styles.checkbox}
+            />
+          </div>
+          
+          <div className={styles.templateInfo}>
+            <h3 className={styles.templateName}>{template.name}</h3>
+            <div className={styles.templateMeta}>
+              <Badge variant="secondary" size="sm">
+                <type.icon size={12} />
+                {type.label}
+              </Badge>
+              <Badge
+                variant="secondary"
+                size="sm"
+                style={{ backgroundColor: `${channel.color}20`, color: channel.color }}
+              >
+                <channel.icon size={12} />
+                {channel.name}
+              </Badge>
+              <Badge variant="secondary" size="sm">
+                <Globe size={12} />
+                {template.language.toUpperCase()}
+              </Badge>
+            </div>
+          </div>
+          
+          <div className={styles.cardActions}>
+            <button
+              className={`${styles.statusToggle} ${template.active ? styles.active : ''}`}
+              onClick={() => handleToggleActive(template)}
+              title={template.active ? 'Deaktivieren' : 'Aktivieren'}
+            >
+              <div className={styles.toggleTrack}>
+                <div className={styles.toggleThumb} />
+              </div>
+            </button>
+            
+            <div className={styles.actionMenu}>
+              <button className={styles.actionButton}>
+                <MoreVertical size={16} />
+              </button>
+              <div className={styles.dropdown}>
+                <button onClick={() => {
+                  setPreviewTemplate(template);
+                  setShowPreview(true);
+                }}>
+                  <Eye size={16} />
+                  Vorschau
+                </button>
+                <button onClick={() => handleEditTemplate(template)}>
+                  <Edit3 size={16} />
+                  Bearbeiten
+                </button>
+                <button onClick={() => {
+                  setTestTemplate(template);
+                  setShowTest(true);
+                }}>
+                  <Mail size={16} />
+                  Testen
+                </button>
+                <button onClick={() => handleDuplicateTemplate(template)}>
+                  <Copy size={16} />
+                  Duplizieren
+                </button>
+                <button
+                  onClick={() => {
+                    setDeleteTarget(template);
+                    setShowDeleteConfirm(true);
+                  }}
+                  className={styles.deleteButton}
+                >
+                  <Trash2 size={16} />
+                  Löschen
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {template.subject && (
+          <div className={styles.templateSubject}>
+            <span className={styles.label}>Betreff:</span>
+            <span className={styles.value}>{template.subject}</span>
+          </div>
+        )}
+        
+        <div className={styles.templatePreview}>
+          {template.content.substring(0, 150)}...
+        </div>
+        
+        <div className={styles.templateFooter}>
+          <span className={styles.lastModified}>
+            <Clock size={14} />
+            Zuletzt geändert: {new Date(template.updatedAt || template.createdAt).toLocaleDateString('de-CH')}
+          </span>
+          {template.variables && template.variables.length > 0 && (
+            <span className={styles.variableCount}>
+              <Hash size={14} />
+              {template.variables.length} Variablen
+            </span>
+          )}
+        </div>
+      </Card>
+    );
   };
 
-  // Render
-  if (loading) {
-    return <LoadingSpinner fullPage />;
+  // Main render
+  if (error && templates.length === 0) {
+    return (
+      <div className={styles.errorContainer}>
+        <p>{error}</p>
+        <Button onClick={() => window.location.reload()}>
+          <RefreshCw size={16} />
+          Neu laden
+        </Button>
+      </div>
+    );
   }
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Benachrichtigungs-Vorlagen</h1>
+      {/* Header */}
+      <header className={styles.header}>
+        <div className={styles.headerLeft}>
+          <h1 className={styles.title}>
+            <Bell size={28} />
+            Benachrichtigungs-Vorlagen
+          </h1>
           <p className={styles.subtitle}>
-            Erstellen und verwalten Sie Vorlagen für automatische Benachrichtigungen
+            Verwalten Sie E-Mail, SMS und Push-Benachrichtigungen
           </p>
         </div>
-        <Button
-          variant="primary"
-          icon={Plus}
-          onClick={handleCreateTemplate}
-        >
-          Neue Vorlage
-        </Button>
-      </div>
-
-      {/* Filters */}
-      <div className={styles.filters}>
-        <Select
-          value={selectedType}
-          onChange={(e) => setSelectedType(e.target.value)}
-          className={styles.filterSelect}
-        >
-          <option value="all">Alle Typen</option>
-          {Object.entries(TEMPLATE_TYPES).map(([key, value]) => (
-            <option key={key} value={key}>{value}</option>
-          ))}
-        </Select>
-        
-        <Select
-          value={selectedChannel}
-          onChange={(e) => setSelectedChannel(e.target.value)}
-          className={styles.filterSelect}
-        >
-          <option value="all">Alle Kanäle</option>
-          {Object.entries(CHANNELS).map(([key, value]) => (
-            <option key={key} value={key}>{value.name}</option>
-          ))}
-        </Select>
-      </div>
-
-      {/* Templates Grid */}
-      <div className={styles.templatesGrid}>
-        {filteredTemplates.map(template => (
-          <Card key={template.id} className={styles.templateCard}>
-            <div className={styles.templateHeader}>
-              <h3>{template.name}</h3>
-              <Badge variant="secondary">{TEMPLATE_TYPES[template.type]}</Badge>
-            </div>
-
-            <div className={styles.templateChannels}>
-              {Object.entries(template.channels).map(([channel, data]) => {
-                if (!data.enabled) return null;
-                const channelInfo = CHANNELS[channel];
-                const IconComponent = channelInfo.icon;
-                
-                return (
-                  <div
-                    key={channel}
-                    className={styles.channelBadge}
-                    style={{ backgroundColor: `${channelInfo.color}20` }}
-                  >
-                    <IconComponent size={14} style={{ color: channelInfo.color }} />
-                    <span>{channelInfo.name}</span>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className={styles.templateActions}>
-              <button
-                className={styles.actionButton}
-                onClick={() => setShowPreview(previewTemplate(template))}
-                title="Vorschau"
-              >
-                <Eye size={16} />
-              </button>
-              <button
-                className={styles.actionButton}
-                onClick={() => handleEditTemplate(template)}
-                title="Bearbeiten"
-              >
-                <Edit3 size={16} />
-              </button>
-              <button
-                className={styles.actionButton}
-                onClick={() => handleDuplicateTemplate(template)}
-                title="Duplizieren"
-              >
-                <Copy size={16} />
-              </button>
-              <button
-                className={styles.actionButton}
-                onClick={() => handleDeleteTemplate(template)}
-                title="Löschen"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      {/* Empty State */}
-      {filteredTemplates.length === 0 && (
-        <div className={styles.emptyState}>
-          <FileText size={48} />
-          <h3>Keine Vorlagen gefunden</h3>
-          <p>Erstellen Sie Ihre erste Benachrichtigungs-Vorlage</p>
+        <div className={styles.headerActions}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowImportExport(true)}
+          >
+            <Upload size={20} />
+            Import/Export
+          </Button>
           <Button
             variant="primary"
-            icon={Plus}
             onClick={handleCreateTemplate}
           >
-            Vorlage erstellen
+            <Plus size={20} />
+            Neue Vorlage
           </Button>
         </div>
+      </header>
+
+      {/* Controls */}
+      <div className={styles.controls}>
+        <div className={styles.controlsLeft}>
+          <div className={styles.searchBox}>
+            <Search size={20} />
+            <input
+              type="text"
+              placeholder="Suche nach Name, Betreff oder Inhalt..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={styles.searchInput}
+            />
+            {searchTerm && (
+              <button
+                className={styles.clearSearch}
+                onClick={() => setSearchTerm('')}
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+          
+          <Select
+            value={selectedType}
+            onChange={(e) => setSelectedType(e.target.value)}
+            className={styles.filterSelect}
+          >
+            <option value="all">Alle Typen</option>
+            {Object.entries(TEMPLATE_TYPES).map(([key, type]) => (
+              <option key={key} value={key}>{type.label}</option>
+            ))}
+          </Select>
+          
+          <Select
+            value={selectedChannel}
+            onChange={(e) => setSelectedChannel(e.target.value)}
+            className={styles.filterSelect}
+          >
+            <option value="all">Alle Kanäle</option>
+            {Object.entries(CHANNELS).map(([key, channel]) => (
+              <option key={key} value={key}>{channel.name}</option>
+            ))}
+          </Select>
+        </div>
+        
+        <div className={styles.controlsRight}>
+          <Tabs
+            value={selectedLanguage}
+            onChange={setSelectedLanguage}
+            className={styles.languageTabs}
+          >
+            {LANGUAGES.map(lang => (
+              <Tabs.Tab key={lang.value} value={lang.value}>
+                {lang.label}
+              </Tabs.Tab>
+            ))}
+          </Tabs>
+        </div>
+      </div>
+
+      {/* Bulk Actions */}
+      {selectedTemplates.length > 0 && (
+        <Suspense fallback={<div className={styles.bulkActionsSkeleton} />}>
+          <BulkActionsBar
+            selectedCount={selectedTemplates.length}
+            onSelectAll={() => {
+              if (selectedTemplates.length === filteredTemplates.length) {
+                setSelectedTemplates([]);
+              } else {
+                setSelectedTemplates(filteredTemplates.map(t => t.id));
+              }
+            }}
+            actions={[
+              { id: 'activate', label: 'Aktivieren', icon: CheckCircle },
+              { id: 'deactivate', label: 'Deaktivieren', icon: X },
+              { id: 'export', label: 'Exportieren', icon: Download },
+              { id: 'delete', label: 'Löschen', icon: Trash2, variant: 'danger' }
+            ]}
+            onAction={handleBulkAction}
+            onCancel={() => setSelectedTemplates([])}
+          />
+        </Suspense>
       )}
 
-      {/* Create/Edit Modal */}
-      <Modal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        title={editingTemplate ? 'Vorlage bearbeiten' : 'Neue Vorlage erstellen'}
-        maxWidth="800px"
-      >
-        <div className={styles.templateForm}>
-          <div className={styles.formHeader}>
-            <div className={styles.formField}>
-              <label>Name der Vorlage</label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="z.B. Bestellbestätigung Standard"
-              />
-            </div>
-            
-            <div className={styles.formField}>
-              <label>Ereignis-Typ</label>
-              <Select
-                value={formData.type}
-                onChange={(e) => {
-                  const type = e.target.value;
-                  const defaultTemplate = DEFAULT_TEMPLATES[type] || {};
-                  
-                  setFormData(prev => ({
-                    ...prev,
-                    type,
-                    channels: {
-                      email: defaultTemplate.email 
-                        ? { enabled: true, ...defaultTemplate.email }
-                        : prev.channels.email,
-                      sms: defaultTemplate.sms
-                        ? { enabled: true, ...defaultTemplate.sms }
-                        : prev.channels.sms,
-                      push: defaultTemplate.push
-                        ? { enabled: true, ...defaultTemplate.push }
-                        : prev.channels.push,
-                      in_app: prev.channels.in_app
-                    }
-                  }));
-                }}
-              >
-                {Object.entries(TEMPLATE_TYPES).map(([key, value]) => (
-                  <option key={key} value={key}>{value}</option>
-                ))}
-              </Select>
-            </div>
-          </div>
-
-          {/* Channel Tabs */}
-          <div className={styles.channelTabs}>
-            {Object.entries(CHANNELS).map(([channel, info]) => {
-              const IconComponent = info.icon;
-              const isActive = activeTab === channel;
-              const isEnabled = formData.channels[channel]?.enabled;
-              
-              return (
-                <button
-                  key={channel}
-                  className={`${styles.channelTab} ${isActive ? styles.active : ''}`}
-                  onClick={() => setActiveTab(channel)}
-                  style={isActive ? { borderColor: info.color } : {}}
-                >
-                  <input
-                    type="checkbox"
-                    checked={isEnabled}
-                    onChange={() => toggleChannel(channel)}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                  <IconComponent size={16} />
-                  <span>{info.name}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Channel Content */}
-          <div className={styles.channelContent}>
-            {activeTab === 'email' && (
-              <>
-                <div className={styles.formField}>
-                  <label>Betreff</label>
-                  <Input
-                    value={formData.channels.email.subject || ''}
-                    onChange={(e) => updateChannelData('email', 'subject', e.target.value)}
-                    placeholder="E-Mail Betreff"
-                    disabled={!formData.channels.email.enabled}
-                  />
-                </div>
-                <div className={styles.formField}>
-                  <label>Nachricht</label>
-                  <TextArea
-                    name="email-body"
-                    value={formData.channels.email.body || ''}
-                    onChange={(e) => updateChannelData('email', 'body', e.target.value)}
-                    placeholder="E-Mail Inhalt"
-                    rows={8}
-                    disabled={!formData.channels.email.enabled}
-                  />
-                </div>
-              </>
-            )}
-
-            {activeTab === 'sms' && (
-              <div className={styles.formField}>
-                <label>SMS Nachricht</label>
-                <TextArea
-                  name="sms-message"
-                  value={formData.channels.sms.message || ''}
-                  onChange={(e) => updateChannelData('sms', 'message', e.target.value)}
-                  placeholder="SMS Text (max. 160 Zeichen)"
-                  rows={3}
-                  maxLength={160}
-                  disabled={!formData.channels.sms.enabled}
-                />
-                <span className={styles.charCount}>
-                  {formData.channels.sms.message?.length || 0} / 160
-                </span>
-              </div>
-            )}
-
-            {(activeTab === 'push' || activeTab === 'in_app') && (
-              <>
-                <div className={styles.formField}>
-                  <label>Titel</label>
-                  <Input
-                    value={formData.channels[activeTab].title || ''}
-                    onChange={(e) => updateChannelData(activeTab, 'title', e.target.value)}
-                    placeholder="Benachrichtigungs-Titel"
-                    disabled={!formData.channels[activeTab].enabled}
-                  />
-                </div>
-                <div className={styles.formField}>
-                  <label>Nachricht</label>
-                  <TextArea
-                    name={`${activeTab}-body`}
-                    value={formData.channels[activeTab].body || ''}
-                    onChange={(e) => updateChannelData(activeTab, 'body', e.target.value)}
-                    placeholder="Benachrichtigungs-Text"
-                    rows={3}
-                    disabled={!formData.channels[activeTab].enabled}
-                  />
-                </div>
-              </>
-            )}
-
-            {/* Variables */}
-            <div className={styles.variablesSection}>
-              <h4>Verfügbare Variablen</h4>
-              <div className={styles.variablesList}>
-                {TEMPLATE_VARIABLES.map(variable => (
-                  <button
-                    key={variable.key}
-                    className={styles.variableButton}
-                    onClick={() => insertVariable(variable.key)}
-                    disabled={!formData.channels[activeTab]?.enabled}
-                    title={variable.description}
-                  >
-                    <Code size={14} />
-                    {variable.key}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className={styles.modalActions}>
+      {/* Templates Grid */}
+      {loading ? (
+        <div className={styles.templatesGrid}>
+          {[...Array(6)].map((_, i) => (
+            <TemplateCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : filteredTemplates.length === 0 ? (
+        <div className={styles.emptyState}>
+          <Bell size={48} className={styles.emptyIcon} />
+          <h3>Keine Vorlagen gefunden</h3>
+          <p>
+            {searchTerm || selectedType !== 'all' || selectedChannel !== 'all'
+              ? 'Versuchen Sie andere Filtereinstellungen'
+              : 'Erstellen Sie Ihre erste Benachrichtigungs-Vorlage'}
+          </p>
+          {(searchTerm || selectedType !== 'all' || selectedChannel !== 'all') && (
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={() => {
-                setShowCreateModal(false);
-                setEditingTemplate(null);
+                setSearchTerm('');
+                setSelectedType('all');
+                setSelectedChannel('all');
               }}
             >
-              Abbrechen
+              Filter zurücksetzen
             </Button>
-            <Button
-              variant="primary"
-              icon={Save}
-              onClick={handleSaveTemplate}
-            >
-              {editingTemplate ? 'Speichern' : 'Erstellen'}
-            </Button>
-          </div>
+          )}
         </div>
-      </Modal>
-
-      {/* Preview Modal */}
-      {showPreview && (
-        <Modal
-          isOpen={true}
-          onClose={() => setShowPreview(false)}
-          title="Vorlagen-Vorschau"
-          maxWidth="600px"
-        >
-          <div className={styles.preview}>
-            <h3>{showPreview.name}</h3>
-            <Badge variant="secondary" className={styles.previewBadge}>
-              {TEMPLATE_TYPES[showPreview.type]}
-            </Badge>
-
-            {Object.entries(showPreview.channels).map(([channel, data]) => {
-              const channelInfo = CHANNELS[channel];
-              const IconComponent = channelInfo.icon;
-              
-              return (
-                <div key={channel} className={styles.previewChannel}>
-                  <div className={styles.previewChannelHeader}>
-                    <IconComponent size={20} style={{ color: channelInfo.color }} />
-                    <h4>{channelInfo.name}</h4>
-                  </div>
-                  
-                  {channel === 'email' && (
-                    <>
-                      <div className={styles.previewField}>
-                        <strong>Betreff:</strong> {data.subject}
-                      </div>
-                      <div className={styles.previewField}>
-                        <strong>Nachricht:</strong>
-                        <pre>{data.body}</pre>
-                      </div>
-                    </>
-                  )}
-                  
-                  {channel === 'sms' && (
-                    <div className={styles.previewField}>
-                      <strong>SMS:</strong>
-                      <pre>{data.message}</pre>
-                    </div>
-                  )}
-                  
-                  {(channel === 'push' || channel === 'in_app') && (
-                    <>
-                      <div className={styles.previewField}>
-                        <strong>Titel:</strong> {data.title}
-                      </div>
-                      <div className={styles.previewField}>
-                        <strong>Nachricht:</strong> {data.body}
-                      </div>
-                    </>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </Modal>
+      ) : (
+        <div className={styles.templatesGrid}>
+          {filteredTemplates.map(renderTemplateCard)}
+        </div>
       )}
 
-      {/* Delete Confirmation */}
-      <ConfirmDialog
-        isOpen={!!deleteConfirm}
-        onClose={() => setDeleteConfirm(null)}
-        onConfirm={confirmDelete}
-        title="Vorlage löschen"
-        message={`Möchten Sie die Vorlage "${deleteConfirm?.name}" wirklich löschen?`}
-        confirmText="Löschen"
-        confirmVariant="danger"
-      />
+      {/* Modals */}
+      {showEditor && editingTemplate && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <Modal
+            isOpen={showEditor}
+            onClose={() => {
+              setShowEditor(false);
+              setEditingTemplate(null);
+            }}
+            title={editingTemplate.isNew ? 'Neue Vorlage erstellen' : 'Vorlage bearbeiten'}
+            size="xl"
+          >
+            <TemplateEditor
+              template={editingTemplate}
+              onSave={handleSaveTemplate}
+              onCancel={() => {
+                setShowEditor(false);
+                setEditingTemplate(null);
+              }}
+              services={services}
+            />
+          </Modal>
+        </Suspense>
+      )}
+
+      {showPreview && previewTemplate && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <Modal
+            isOpen={showPreview}
+            onClose={() => {
+              setShowPreview(false);
+              setPreviewTemplate(null);
+            }}
+            title="Vorlagen-Vorschau"
+            size="lg"
+          >
+            <TemplatePreview
+              template={previewTemplate}
+              onClose={() => {
+                setShowPreview(false);
+                setPreviewTemplate(null);
+              }}
+            />
+          </Modal>
+        </Suspense>
+      )}
+
+      {showTest && testTemplate && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <TemplateTestModal
+            template={testTemplate}
+            onClose={() => {
+              setShowTest(false);
+              setTestTemplate(null);
+            }}
+            services={services}
+          />
+        </Suspense>
+      )}
+
+      {showImportExport && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <ImportExportModal
+            onClose={() => setShowImportExport(false)}
+            onImport={async (importedTemplates) => {
+              // Handle import
+              const data = await services.template.getTemplates(tenant.id);
+              setTemplates(data);
+              setShowImportExport(false);
+            }}
+            templates={templates}
+            services={services}
+          />
+        </Suspense>
+      )}
+
+      {showDeleteConfirm && deleteTarget && (
+        <ConfirmDialog
+          isOpen={showDeleteConfirm}
+          onConfirm={handleDeleteTemplate}
+          onCancel={() => {
+            setShowDeleteConfirm(false);
+            setDeleteTarget(null);
+          }}
+          title="Vorlage löschen"
+          message={`Möchten Sie die Vorlage "${deleteTarget.name}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`}
+          confirmText="Löschen"
+          confirmVariant="danger"
+        />
+      )}
     </div>
   );
 };
 
-// ============================================================================
-// EXPORT
-// ============================================================================
 export default NotificationTemplates;

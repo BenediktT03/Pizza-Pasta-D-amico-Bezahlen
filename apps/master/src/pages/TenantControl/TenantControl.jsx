@@ -1,1160 +1,786 @@
 /**
  * EATECH - Tenant Control (Foodtruck Management)
- * Version: 25.0.0
- * Description: Zentrale Verwaltung aller Foodtrucks mit Live-Karte,
- *              Status-Management und Quick Actions
+ * Version: 26.0.0
+ * Description: Zentrale Verwaltung aller Foodtrucks mit Lazy Loading
  * Author: EATECH Development Team
- * Created: 2025-01-07
+ * Modified: 2025-01-08
  * File Path: /apps/master/src/pages/TenantControl/TenantControl.jsx
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { initializeApp } from 'firebase/app';
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  getDatabase, 
-  ref, 
-  onValue, 
-  update,
-  set,
-  push,
-  serverTimestamp,
-  off
-} from 'firebase/database';
-import { 
-  Search, 
-  Plus,
-  Filter,
-  MapPin,
-  Truck,
-  Users,
-  TrendingUp,
-  AlertCircle,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Calendar,
-  DollarSign,
-  Package,
-  Settings,
-  Power,
-  Pause,
-  Play,
-  Edit,
-  Trash2,
-  Mail,
-  Phone,
-  Globe,
-  Star,
-  Heart,
-  ChevronRight,
-  ChevronDown,
-  MoreVertical,
-  Navigation,
-  Activity,
-  Shield,
-  RefreshCw,
-  Download,
-  Upload,
-  Copy,
-  ExternalLink,
-  Info,
-  BarChart3,
-  Eye,
-  EyeOff,
-  Bell,
-  BellOff,
-  Zap,
-  Award,
-  Timer,
-  Utensils,
-  Coffee,
-  PizzaSlice,
-  Battery,
-  BatteryLow,
-  Signal,
-  SignalLow,
-  Wifi,
-  WifiOff,
-  CloudOff,
-  UserCheck,
-  Lock,
-  Unlock
+  Search, Plus, Filter, MapPin, Truck, Users, TrendingUp,
+  AlertCircle, CheckCircle, XCircle, Clock, Calendar, DollarSign,
+  Package, Settings, Power, Pause, Play, Edit, Trash2, Mail,
+  Phone, Globe, Star, Heart, ChevronRight, ChevronDown, MoreVertical,
+  Navigation, Activity, Shield, RefreshCw, Download, Upload, Copy,
+  ExternalLink, Info, BarChart3, Eye, EyeOff, Bell, BellOff,
+  Zap, Award, Timer, Utensils, Coffee, Battery, Signal, Wifi,
+  CloudOff, UserCheck, Lock, Unlock
 } from 'lucide-react';
 import styles from './TenantControl.module.css';
 
-// Import Swiss Map Component
-import SwitzerlandMap from '../../components/SwitzerlandMap/SwitzerlandMap';
+// Lazy loaded components
+const SwitzerlandMap = lazy(() => import('../../components/SwitzerlandMap/SwitzerlandMap'));
+const TenantDetailsModal = lazy(() => import('./components/TenantDetailsModal'));
+const TenantEditModal = lazy(() => import('./components/TenantEditModal'));
+const TenantMetricsCard = lazy(() => import('./components/TenantMetricsCard'));
+const TenantActionMenu = lazy(() => import('./components/TenantActionMenu'));
+const BulkActionsBar = lazy(() => import('./components/BulkActionsBar'));
 
-// ============================================================================
-// FIREBASE CONFIGURATION
-// ============================================================================
-const firebaseConfig = {
-  apiKey: "AIzaSyDFBlgWE81iHnACVwOmaU0jL7FV0l_tRmU",
-  authDomain: "eatech-foodtruck.firebaseapp.com",
-  databaseURL: "https://eatech-foodtruck-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "eatech-foodtruck",
-  storageBucket: "eatech-foodtruck.firebasestorage.app",
-  messagingSenderId: "261222802445",
-  appId: "1:261222802445:web:edde22580422fbced22144",
-  measurementId: "G-N0KHWJG9KP"
-};
+// Lazy loaded services
+const FirebaseService = lazy(() => import('../../services/firebase.service'));
+const NotificationService = lazy(() => import('../../services/notification.service'));
+const ExportService = lazy(() => import('../../services/export.service'));
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
+// Loading component
+const LoadingSpinner = () => (
+  <div className={styles.loadingContainer}>
+    <div className={styles.spinner}>
+      <Truck className={styles.spinnerIcon} size={24} />
+    </div>
+    <p className={styles.loadingText}>Lade Foodtrucks...</p>
+  </div>
+);
 
-// ============================================================================
-// CONSTANTS
-// ============================================================================
+// Constants
 const TENANT_STATUS = {
   active: { label: 'Aktiv', color: '#10b981', icon: CheckCircle },
   paused: { label: 'Pausiert', color: '#f59e0b', icon: Pause },
-  offline: { label: 'Offline', color: '#6b7280', icon: CloudOff },
-  suspended: { label: 'Gesperrt', color: '#ef4444', icon: XCircle }
+  suspended: { label: 'Gesperrt', color: '#ef4444', icon: XCircle },
+  trial: { label: 'Trial', color: '#3b82f6', icon: Clock },
+  onboarding: { label: 'Onboarding', color: '#8b5cf6', icon: Settings }
 };
 
-const TENANT_PLANS = {
-  basic: { label: 'Basic', color: '#6b7280', features: 8 },
-  pro: { label: 'Pro', color: '#3b82f6', features: 14 },
-  premium: { label: 'Premium', color: '#8b5cf6', features: 20 },
-  enterprise: { label: 'Enterprise', color: '#ff6b6b', features: 'Alle' }
+const VIEW_MODES = {
+  grid: { label: 'Karten', icon: Package },
+  list: { label: 'Liste', icon: BarChart3 },
+  map: { label: 'Karte', icon: MapPin }
 };
 
-const FOODTRUCK_TYPES = {
-  burger: { label: 'Burger', icon: '🍔', color: '#ff6b6b' },
-  pizza: { label: 'Pizza', icon: '🍕', color: '#f59e0b' },
-  asian: { label: 'Asiatisch', icon: '🥡', color: '#10b981' },
-  mexican: { label: 'Mexikanisch', icon: '🌮', color: '#ec4899' },
-  coffee: { label: 'Kaffee & Snacks', icon: '☕', color: '#6366f1' },
-  dessert: { label: 'Desserts', icon: '🍰', color: '#8b5cf6' },
-  vegan: { label: 'Vegan', icon: '🥗', color: '#84cc16' },
-  other: { label: 'Andere', icon: '🍴', color: '#6b7280' }
+const FILTER_OPTIONS = {
+  status: ['all', 'active', 'paused', 'suspended', 'trial', 'onboarding'],
+  plan: ['all', 'basic', 'pro', 'enterprise'],
+  region: ['all', 'zurich', 'bern', 'basel', 'geneva', 'lausanne', 'ticino']
 };
 
-const QUICK_ACTIONS = [
-  { 
-    id: 'pause', 
-    label: 'Pausieren', 
-    icon: Pause, 
-    color: '#f59e0b',
-    confirm: 'Möchten Sie diesen Foodtruck pausieren?'
-  },
-  { 
-    id: 'activate', 
-    label: 'Aktivieren', 
-    icon: Play, 
-    color: '#10b981',
-    confirm: 'Möchten Sie diesen Foodtruck aktivieren?'
-  },
-  { 
-    id: 'message', 
-    label: 'Nachricht', 
-    icon: Mail, 
-    color: '#3b82f6'
-  },
-  { 
-    id: 'analytics', 
-    label: 'Analytics', 
-    icon: BarChart3, 
-    color: '#8b5cf6'
-  },
-  { 
-    id: 'suspend', 
-    label: 'Sperren', 
-    icon: Lock, 
-    color: '#ef4444',
-    confirm: 'ACHTUNG: Möchten Sie diesen Foodtruck wirklich sperren?',
-    dangerous: true
-  }
-];
-
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
+// Main Component
 const TenantControl = () => {
   // State Management
   const [tenants, setTenants] = useState([]);
-  const [filteredTenants, setFilteredTenants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTenant, setSelectedTenant] = useState(null);
-  const [viewMode, setViewMode] = useState('grid'); // grid | list | map
+  const [viewMode, setViewMode] = useState('grid');
+  const [selectedTenants, setSelectedTenants] = useState([]);
+  const [filters, setFilters] = useState({
+    status: 'all',
+    plan: 'all',
+    region: 'all'
+  });
+  const [sortBy, setSortBy] = useState('name');
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedTenants, setSelectedTenants] = useState(new Set());
-  const [bulkActionMode, setBulkActionMode] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [lastSync, setLastSync] = useState(null);
-  
-  // Filters
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [planFilter, setPlanFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
-  const [cantonFilter, setCantonFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('name'); // name | revenue | orders | lastActive
-  
-  // Map State
-  const [mapHoveredTenant, setMapHoveredTenant] = useState(null);
-  const [mapSelectedCanton, setMapSelectedCanton] = useState(null);
-  
-  // ========================================================================
-  // FIREBASE SUBSCRIPTIONS
-  // ========================================================================
+  const [selectedTenant, setSelectedTenant] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showBulkActions, setShowBulkActions] = useState(false);
+  const [services, setServices] = useState({});
+  const [stats, setStats] = useState({
+    total: 0,
+    active: 0,
+    revenue: 0,
+    avgOrderValue: 0
+  });
+
+  // Load services on mount
   useEffect(() => {
-    const tenantsRef = ref(database, 'tenants');
-    
-    const unsubscribe = onValue(tenantsRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const tenantList = Object.entries(data).map(([id, tenant]) => {
-          // Calculate additional stats
-          const now = Date.now();
-          const lastOrderTime = tenant.stats?.lastOrderTime || 0;
-          const hoursSinceLastOrder = (now - lastOrderTime) / (1000 * 60 * 60);
-          
-          // Determine real-time status
-          let status = tenant.info?.status || 'offline';
-          if (status === 'active' && hoursSinceLastOrder > 24) {
-            status = 'offline'; // Auto-offline after 24h inactivity
-          }
-          
-          // Get current location if GPS is active
-          const currentLocation = tenant.location?.current || null;
-          
-          return {
-            id,
-            ...tenant.info,
-            status,
-            stats: {
-              ...tenant.stats,
-              hoursSinceLastOrder,
-              isOnline: hoursSinceLastOrder < 1,
-              dailyRevenue: tenant.stats?.dailyRevenue || 0,
-              dailyOrders: tenant.stats?.dailyOrders || 0,
-              totalRevenue: tenant.stats?.totalRevenue || 0,
-              totalOrders: tenant.stats?.totalOrders || 0,
-              averageOrderValue: tenant.stats?.totalOrders > 0 
-                ? (tenant.stats?.totalRevenue / tenant.stats?.totalOrders).toFixed(2)
-                : 0,
-              favoriteCount: tenant.stats?.favoriteCount || 0,
-              regularCustomers: tenant.stats?.regularCustomers || 0,
-              rating: tenant.stats?.rating || 0,
-              reviewCount: tenant.stats?.reviewCount || 0
-            },
-            location: currentLocation,
-            features: tenant.features || {},
-            contact: tenant.contact || {},
-            schedule: tenant.schedule || {},
-            notifications: tenant.notifications || { enabled: true }
-          };
-        });
-        
-        setTenants(tenantList);
-        setLastSync(new Date());
+    const loadServices = async () => {
+      try {
+        const [firebase, notification, exportSvc] = await Promise.all([
+          import('../../services/firebase.service'),
+          import('../../services/notification.service'),
+          import('../../services/export.service')
+        ]);
+        setServices({ firebase, notification, export: exportSvc });
+      } catch (error) {
+        console.error('Failed to load services:', error);
       }
-      setLoading(false);
-    }, (error) => {
-      console.error('Error loading tenants:', error);
-      setError('Fehler beim Laden der Foodtrucks');
-      setLoading(false);
-    });
-    
-    // Cleanup
-    return () => off(tenantsRef);
+    };
+    loadServices();
   }, []);
-  
-  // ========================================================================
-  // FILTERING & SORTING
-  // ========================================================================
+
+  // Load tenant data
   useEffect(() => {
+    const loadTenants = async () => {
+      if (!services.firebase) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const { database, dbRef, onValue } = services.firebase;
+        const tenantsRef = dbRef(database, 'tenants');
+
+        const unsubscribe = onValue(tenantsRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            const tenantList = Object.entries(data).map(([id, tenant]) => ({
+              id,
+              ...tenant,
+              lastActive: tenant.lastActive || Date.now(),
+              revenue: tenant.revenue || 0,
+              orderCount: tenant.orderCount || 0,
+              customerCount: tenant.customerCount || 0
+            }));
+
+            setTenants(tenantList);
+            calculateStats(tenantList);
+          }
+          setLoading(false);
+        }, (error) => {
+          console.error('Error loading tenants:', error);
+          setError('Fehler beim Laden der Foodtrucks');
+          setLoading(false);
+        });
+
+        return () => unsubscribe();
+      } catch (error) {
+        console.error('Error in loadTenants:', error);
+        setError('Fehler beim Initialisieren');
+        setLoading(false);
+      }
+    };
+
+    loadTenants();
+  }, [services.firebase]);
+
+  // Calculate statistics
+  const calculateStats = (tenantList) => {
+    const stats = {
+      total: tenantList.length,
+      active: tenantList.filter(t => t.status === 'active').length,
+      revenue: tenantList.reduce((sum, t) => sum + (t.revenue || 0), 0),
+      avgOrderValue: tenantList.reduce((sum, t) => sum + (t.avgOrderValue || 0), 0) / tenantList.length
+    };
+    setStats(stats);
+  };
+
+  // Filter and sort tenants
+  const filteredAndSortedTenants = useMemo(() => {
     let filtered = [...tenants];
-    
+
     // Search filter
     if (searchTerm) {
-      filtered = filtered.filter(tenant => 
-        tenant.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tenant.owner?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tenant.address?.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tenant.id.toLowerCase().includes(searchTerm.toLowerCase())
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(t =>
+        t.name?.toLowerCase().includes(term) ||
+        t.email?.toLowerCase().includes(term) ||
+        t.subdomain?.toLowerCase().includes(term) ||
+        t.location?.city?.toLowerCase().includes(term)
       );
     }
-    
+
     // Status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(tenant => tenant.status === statusFilter);
+    if (filters.status !== 'all') {
+      filtered = filtered.filter(t => t.status === filters.status);
     }
-    
+
     // Plan filter
-    if (planFilter !== 'all') {
-      filtered = filtered.filter(tenant => tenant.plan === planFilter);
+    if (filters.plan !== 'all') {
+      filtered = filtered.filter(t => t.plan === filters.plan);
     }
-    
-    // Type filter
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter(tenant => tenant.type === typeFilter);
+
+    // Region filter
+    if (filters.region !== 'all') {
+      filtered = filtered.filter(t => t.location?.region === filters.region);
     }
-    
-    // Canton filter
-    if (cantonFilter !== 'all') {
-      filtered = filtered.filter(tenant => tenant.canton === cantonFilter);
-    }
-    
+
     // Sorting
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'name':
           return a.name.localeCompare(b.name);
         case 'revenue':
-          return (b.stats?.dailyRevenue || 0) - (a.stats?.dailyRevenue || 0);
+          return b.revenue - a.revenue;
         case 'orders':
-          return (b.stats?.dailyOrders || 0) - (a.stats?.dailyOrders || 0);
+          return b.orderCount - a.orderCount;
         case 'lastActive':
-          return (a.stats?.hoursSinceLastOrder || 999) - (b.stats?.hoursSinceLastOrder || 999);
+          return b.lastActive - a.lastActive;
         default:
           return 0;
       }
     });
-    
-    setFilteredTenants(filtered);
-  }, [tenants, searchTerm, statusFilter, planFilter, typeFilter, cantonFilter, sortBy]);
-  
-  // ========================================================================
-  // COMPUTED VALUES
-  // ========================================================================
-  const stats = useMemo(() => {
-    const active = tenants.filter(t => t.status === 'active').length;
-    const paused = tenants.filter(t => t.status === 'paused').length;
-    const offline = tenants.filter(t => t.status === 'offline').length;
-    const suspended = tenants.filter(t => t.status === 'suspended').length;
-    
-    const totalRevenue = tenants.reduce((sum, t) => sum + (t.stats?.dailyRevenue || 0), 0);
-    const totalOrders = tenants.reduce((sum, t) => sum + (t.stats?.dailyOrders || 0), 0);
-    const avgRating = tenants.reduce((sum, t) => sum + (t.stats?.rating || 0), 0) / (tenants.length || 1);
-    
-    const cantonStats = {};
-    tenants.forEach(tenant => {
-      const canton = tenant.canton || 'unknown';
-      if (!cantonStats[canton]) {
-        cantonStats[canton] = { count: 0, revenue: 0 };
-      }
-      cantonStats[canton].count++;
-      cantonStats[canton].revenue += tenant.stats?.dailyRevenue || 0;
-    });
-    
-    return {
-      total: tenants.length,
-      active,
-      paused,
-      offline,
-      suspended,
-      totalRevenue,
-      totalOrders,
-      avgRating: avgRating.toFixed(1),
-      cantonStats
-    };
-  }, [tenants]);
-  
-  const mapData = useMemo(() => {
-    // Prepare data for map visualization
-    const cantonData = {};
-    
-    tenants.forEach(tenant => {
-      const canton = tenant.canton;
-      if (!canton) return;
-      
-      if (!cantonData[canton]) {
-        cantonData[canton] = {
-          trucks: [],
-          totalRevenue: 0,
-          activeCount: 0,
-          avgRating: 0
-        };
-      }
-      
-      cantonData[canton].trucks.push({
-        id: tenant.id,
-        name: tenant.name,
-        status: tenant.status,
-        location: tenant.location,
-        type: tenant.type,
-        rating: tenant.stats?.rating || 0
-      });
-      
-      cantonData[canton].totalRevenue += tenant.stats?.dailyRevenue || 0;
-      if (tenant.status === 'active') cantonData[canton].activeCount++;
-      cantonData[canton].avgRating += tenant.stats?.rating || 0;
-    });
-    
-    // Calculate averages
-    Object.keys(cantonData).forEach(canton => {
-      const data = cantonData[canton];
-      data.avgRating = data.trucks.length > 0 
-        ? (data.avgRating / data.trucks.length).toFixed(1)
-        : 0;
-    });
-    
-    return cantonData;
-  }, [tenants]);
-  
-  // ========================================================================
-  // HANDLERS
-  // ========================================================================
-  const handleQuickAction = useCallback(async (tenantId, action) => {
-    const tenant = tenants.find(t => t.id === tenantId);
-    if (!tenant) return;
-    
-    // Confirm dangerous actions
-    if (action.confirm) {
-      if (!confirm(action.confirm)) return;
+
+    return filtered;
+  }, [tenants, searchTerm, filters, sortBy]);
+
+  // Handlers
+  const handleSelectTenant = useCallback((tenantId) => {
+    setSelectedTenants(prev =>
+      prev.includes(tenantId)
+        ? prev.filter(id => id !== tenantId)
+        : [...prev, tenantId]
+    );
+  }, []);
+
+  const handleSelectAll = useCallback(() => {
+    if (selectedTenants.length === filteredAndSortedTenants.length) {
+      setSelectedTenants([]);
+    } else {
+      setSelectedTenants(filteredAndSortedTenants.map(t => t.id));
     }
-    
+  }, [selectedTenants.length, filteredAndSortedTenants]);
+
+  const handleTenantAction = useCallback(async (action, tenantId) => {
+    if (!services.firebase) return;
+
     try {
-      switch (action.id) {
-        case 'pause':
-          await updateTenantStatus(tenantId, 'paused');
-          break;
-          
+      const { database, dbRef, update } = services.firebase;
+      const tenantRef = dbRef(database, `tenants/${tenantId}`);
+
+      switch (action) {
         case 'activate':
-          await updateTenantStatus(tenantId, 'active');
+          await update(tenantRef, { status: 'active', lastModified: Date.now() });
           break;
-          
+        case 'pause':
+          await update(tenantRef, { status: 'paused', lastModified: Date.now() });
+          break;
         case 'suspend':
-          await updateTenantStatus(tenantId, 'suspended');
+          await update(tenantRef, { status: 'suspended', lastModified: Date.now() });
           break;
-          
-        case 'message':
-          // Open message modal
-          console.log('Send message to', tenant.name);
-          break;
-          
-        case 'analytics':
-          // Navigate to tenant analytics
-          console.log('Show analytics for', tenant.name);
-          break;
-      }
-    } catch (error) {
-      console.error('Error executing quick action:', error);
-      alert('Fehler bei der Ausführung der Aktion');
-    }
-  }, [tenants]);
-  
-  const updateTenantStatus = async (tenantId, newStatus) => {
-    const updates = {
-      [`tenants/${tenantId}/info/status`]: newStatus,
-      [`tenants/${tenantId}/info/lastStatusChange`]: serverTimestamp(),
-      [`tenants/${tenantId}/info/lastModifiedBy`]: 'master@eatech.ch'
-    };
-    
-    // Log status change
-    const logRef = push(ref(database, 'logs/statusChanges'));
-    updates[`logs/statusChanges/${logRef.key}`] = {
-      tenantId,
-      previousStatus: tenants.find(t => t.id === tenantId)?.status,
-      newStatus,
-      timestamp: serverTimestamp(),
-      changedBy: 'master@eatech.ch'
-    };
-    
-    await update(ref(database), updates);
-  };
-  
-  const handleBulkAction = useCallback(async (action) => {
-    if (selectedTenants.size === 0) {
-      alert('Bitte wählen Sie mindestens einen Foodtruck aus');
-      return;
-    }
-    
-    if (action.confirm) {
-      if (!confirm(`${action.confirm} (${selectedTenants.size} Foodtrucks)`)) return;
-    }
-    
-    try {
-      const updates = {};
-      const logs = [];
-      
-      selectedTenants.forEach(tenantId => {
-        switch (action.id) {
-          case 'pause':
-            updates[`tenants/${tenantId}/info/status`] = 'paused';
-            break;
-          case 'activate':
-            updates[`tenants/${tenantId}/info/status`] = 'active';
-            break;
-          case 'message':
-            // Bulk message logic
-            break;
-        }
-        
-        logs.push({
-          tenantId,
-          action: action.id,
-          timestamp: serverTimestamp()
-        });
-      });
-      
-      if (Object.keys(updates).length > 0) {
-        await update(ref(database), updates);
-      }
-      
-      // Clear selection
-      setSelectedTenants(new Set());
-      setBulkActionMode(false);
-      
-      alert(`Aktion für ${selectedTenants.size} Foodtrucks ausgeführt`);
-    } catch (error) {
-      console.error('Error executing bulk action:', error);
-      alert('Fehler bei der Bulk-Aktion');
-    }
-  }, [selectedTenants]);
-  
-  const handleExportData = useCallback(() => {
-    const exportData = {
-      exportDate: new Date().toISOString(),
-      totalTenants: tenants.length,
-      tenants: filteredTenants.map(t => ({
-        id: t.id,
-        name: t.name,
-        status: t.status,
-        plan: t.plan,
-        type: t.type,
-        canton: t.canton,
-        revenue: t.stats?.totalRevenue,
-        orders: t.stats?.totalOrders,
-        rating: t.stats?.rating,
-        created: t.created
-      })),
-      stats: stats
-    };
-    
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `foodtrucks-export-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [filteredTenants, tenants, stats]);
-  
-  // ========================================================================
-  // RENDER HELPERS
-  // ========================================================================
-  const renderTenantCard = (tenant) => {
-    const isSelected = selectedTenants.has(tenant.id);
-    const statusConfig = TENANT_STATUS[tenant.status] || TENANT_STATUS.offline;
-    const planConfig = TENANT_PLANS[tenant.plan] || TENANT_PLANS.basic;
-    const typeConfig = FOODTRUCK_TYPES[tenant.type] || FOODTRUCK_TYPES.other;
-    const StatusIcon = statusConfig.icon;
-    
-    return (
-      <div 
-        key={tenant.id}
-        className={`${styles.tenantCard} ${isSelected ? styles.selected : ''}`}
-        onClick={() => {
-          if (bulkActionMode) {
-            setSelectedTenants(prev => {
-              const newSet = new Set(prev);
-              if (newSet.has(tenant.id)) {
-                newSet.delete(tenant.id);
-              } else {
-                newSet.add(tenant.id);
-              }
-              return newSet;
-            });
-          } else {
-            setSelectedTenant(tenant);
-            setShowDetailModal(true);
+        case 'delete':
+          if (window.confirm('Wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.')) {
+            await update(tenantRef, { status: 'deleted', deletedAt: Date.now() });
           }
-        }}
+          break;
+      }
+
+      // Show success notification
+      if (services.notification) {
+        services.notification.show({
+          type: 'success',
+          message: `Aktion "${action}" erfolgreich ausgeführt`
+        });
+      }
+    } catch (error) {
+      console.error('Error performing tenant action:', error);
+      if (services.notification) {
+        services.notification.show({
+          type: 'error',
+          message: 'Fehler bei der Ausführung der Aktion'
+        });
+      }
+    }
+  }, [services]);
+
+  const handleBulkAction = useCallback(async (action) => {
+    if (selectedTenants.length === 0) return;
+
+    const confirmMessage = `Möchten Sie diese Aktion für ${selectedTenants.length} Foodtrucks ausführen?`;
+    if (!window.confirm(confirmMessage)) return;
+
+    setShowBulkActions(false);
+    
+    // Process each selected tenant
+    for (const tenantId of selectedTenants) {
+      await handleTenantAction(action, tenantId);
+    }
+
+    setSelectedTenants([]);
+  }, [selectedTenants, handleTenantAction]);
+
+  const handleExport = useCallback(async () => {
+    if (!services.export) return;
+
+    try {
+      const dataToExport = selectedTenants.length > 0
+        ? tenants.filter(t => selectedTenants.includes(t.id))
+        : filteredAndSortedTenants;
+
+      await services.export.exportToExcel(dataToExport, 'foodtrucks-export');
+      
+      if (services.notification) {
+        services.notification.show({
+          type: 'success',
+          message: 'Export erfolgreich erstellt'
+        });
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
+  }, [services, selectedTenants, filteredAndSortedTenants, tenants]);
+
+  // Render helpers
+  const renderStatsCard = (title, value, icon, color) => (
+    <div className={styles.statsCard}>
+      <div className={styles.statsIcon} style={{ backgroundColor: `${color}20`, color }}>
+        {icon}
+      </div>
+      <div className={styles.statsContent}>
+        <p className={styles.statsLabel}>{title}</p>
+        <h3 className={styles.statsValue}>{value}</h3>
+      </div>
+    </div>
+  );
+
+  const renderTenantCard = (tenant) => {
+    const status = TENANT_STATUS[tenant.status] || TENANT_STATUS.active;
+    const isSelected = selectedTenants.includes(tenant.id);
+
+    return (
+      <motion.div
+        key={tenant.id}
+        layout
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className={`${styles.tenantCard} ${isSelected ? styles.selected : ''}`}
       >
-        {bulkActionMode && (
+        <div className={styles.cardHeader}>
+          <div className={styles.selectWrapper}>
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => handleSelectTenant(tenant.id)}
+              className={styles.checkbox}
+            />
+          </div>
+          <div className={styles.tenantInfo}>
+            <h3 className={styles.tenantName}>{tenant.name}</h3>
+            <p className={styles.tenantSubdomain}>{tenant.subdomain}.eatech.ch</p>
+          </div>
+          <div className={styles.statusBadge} style={{ backgroundColor: `${status.color}20`, color: status.color }}>
+            <status.icon size={14} />
+            <span>{status.label}</span>
+          </div>
+        </div>
+
+        <Suspense fallback={<div className={styles.metricsSkeleton} />}>
+          <TenantMetricsCard tenant={tenant} />
+        </Suspense>
+
+        <div className={styles.cardActions}>
+          <button
+            className={styles.viewButton}
+            onClick={() => {
+              setSelectedTenant(tenant);
+              setShowDetailsModal(true);
+            }}
+          >
+            <Eye size={16} />
+            Details
+          </button>
+          <Suspense fallback={<button className={styles.actionButton}><MoreVertical size={16} /></button>}>
+            <TenantActionMenu
+              tenant={tenant}
+              onAction={(action) => handleTenantAction(action, tenant.id)}
+              onEdit={() => {
+                setSelectedTenant(tenant);
+                setShowEditModal(true);
+              }}
+            />
+          </Suspense>
+        </div>
+      </motion.div>
+    );
+  };
+
+  // Render tenant list item (for list view)
+  const renderTenantListItem = (tenant) => {
+    const status = TENANT_STATUS[tenant.status] || TENANT_STATUS.active;
+    const isSelected = selectedTenants.includes(tenant.id);
+
+    return (
+      <div
+        key={tenant.id}
+        className={`${styles.tenantListItem} ${isSelected ? styles.selected : ''}`}
+      >
+        <div className={styles.listItemLeft}>
           <input
             type="checkbox"
             checked={isSelected}
-            onChange={() => {}}
+            onChange={() => handleSelectTenant(tenant.id)}
             className={styles.checkbox}
-            onClick={(e) => e.stopPropagation()}
           />
-        )}
-        
-        {/* Header */}
-        <div className={styles.cardHeader}>
-          <div className={styles.tenantInfo}>
-            <div className={styles.tenantIcon}>
-              <span>{typeConfig.icon}</span>
-            </div>
-            <div>
-              <h3>{tenant.name}</h3>
-              <p className={styles.tenantId}>#{tenant.id}</p>
-            </div>
-          </div>
-          
-          <div className={styles.statusBadge} style={{ backgroundColor: statusConfig.color }}>
-            <StatusIcon size={14} />
-            {statusConfig.label}
+          <div className={styles.tenantBasicInfo}>
+            <h4>{tenant.name}</h4>
+            <p>{tenant.subdomain}.eatech.ch</p>
           </div>
         </div>
         
-        {/* Location & Type */}
-        <div className={styles.tenantMeta}>
-          <span>
-            <MapPin size={14} />
-            {tenant.address?.city || 'Unbekannt'}, {tenant.canton || 'XX'}
-          </span>
-          <span className={styles.tenantType}>
-            {typeConfig.label}
-          </span>
-        </div>
-        
-        {/* Stats Grid */}
-        <div className={styles.statsGrid}>
-          <div className={styles.stat}>
-            <span className={styles.statValue}>CHF {tenant.stats?.dailyRevenue || 0}</span>
-            <span className={styles.statLabel}>Heute</span>
+        <div className={styles.listItemCenter}>
+          <div className={styles.statusBadge} style={{ backgroundColor: `${status.color}20`, color: status.color }}>
+            <status.icon size={14} />
+            <span>{status.label}</span>
           </div>
-          <div className={styles.stat}>
-            <span className={styles.statValue}>{tenant.stats?.dailyOrders || 0}</span>
-            <span className={styles.statLabel}>Bestellungen</span>
-          </div>
-          <div className={styles.stat}>
-            <span className={styles.statValue}>
-              <Star size={12} />
-              {tenant.stats?.rating || '-'}
-            </span>
-            <span className={styles.statLabel}>Bewertung</span>
-          </div>
-        </div>
-        
-        {/* Activity Indicator */}
-        <div className={styles.activityBar}>
-          {tenant.stats?.isOnline ? (
-            <span className={styles.online}>
-              <Activity size={14} />
-              Online
-            </span>
-          ) : (
-            <span className={styles.offline}>
-              <Clock size={14} />
-              Zuletzt aktiv vor {Math.round(tenant.stats?.hoursSinceLastOrder || 0)}h
+          <span className={styles.planBadge}>{tenant.plan?.toUpperCase()}</span>
+          {tenant.location?.city && (
+            <span className={styles.locationBadge}>
+              <MapPin size={14} />
+              {tenant.location.city}
             </span>
           )}
         </div>
-        
-        {/* Quick Actions */}
-        {!bulkActionMode && (
-          <div className={styles.quickActions}>
-            {QUICK_ACTIONS.slice(0, 3).map(action => {
-              const ActionIcon = action.icon;
-              return (
-                <button
-                  key={action.id}
-                  className={styles.quickActionBtn}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleQuickAction(tenant.id, action);
-                  }}
-                  title={action.label}
-                >
-                  <ActionIcon size={16} />
-                </button>
-              );
-            })}
-            <button
-              className={styles.moreBtn}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedTenant(tenant);
-                setShowDetailModal(true);
-              }}
-            >
-              <MoreVertical size={16} />
-            </button>
+
+        <div className={styles.listItemMetrics}>
+          <div className={styles.metric}>
+            <span className={styles.metricValue}>CHF {(tenant.revenue || 0).toLocaleString()}</span>
+            <span className={styles.metricLabel}>Umsatz</span>
           </div>
-        )}
-        
-        {/* Plan Badge */}
-        <div className={styles.planBadge} style={{ backgroundColor: `${planConfig.color}20`, color: planConfig.color }}>
-          {planConfig.label}
+          <div className={styles.metric}>
+            <span className={styles.metricValue}>{tenant.orderCount || 0}</span>
+            <span className={styles.metricLabel}>Bestellungen</span>
+          </div>
+          <div className={styles.metric}>
+            <span className={styles.metricValue}>{tenant.customerCount || 0}</span>
+            <span className={styles.metricLabel}>Kunden</span>
+          </div>
         </div>
-        
-        {/* Notifications Status */}
-        {tenant.notifications?.enabled === false && (
-          <div className={styles.notificationOff}>
-            <BellOff size={12} />
-          </div>
-        )}
+
+        <div className={styles.listItemActions}>
+          <button
+            className={styles.viewButton}
+            onClick={() => {
+              setSelectedTenant(tenant);
+              setShowDetailsModal(true);
+            }}
+          >
+            <Eye size={16} />
+          </button>
+          <Suspense fallback={<button className={styles.actionButton}><MoreVertical size={16} /></button>}>
+            <TenantActionMenu
+              tenant={tenant}
+              onAction={(action) => handleTenantAction(action, tenant.id)}
+              onEdit={() => {
+                setSelectedTenant(tenant);
+                setShowEditModal(true);
+              }}
+            />
+          </Suspense>
+        </div>
       </div>
     );
   };
-  
-  // ========================================================================
-  // RENDER
-  // ========================================================================
-  if (loading) {
-    return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.spinner} />
-        <p>Lade Foodtrucks...</p>
-      </div>
-    );
+
+  // Main render
+  if (loading && tenants.length === 0) {
+    return <LoadingSpinner />;
   }
-  
+
   if (error) {
     return (
       <div className={styles.errorContainer}>
-        <AlertCircle size={48} />
-        <h2>Fehler</h2>
+        <AlertCircle size={48} className={styles.errorIcon} />
+        <h2>Fehler beim Laden</h2>
         <p>{error}</p>
-        <button onClick={() => window.location.reload()}>
+        <button onClick={() => window.location.reload()} className={styles.retryButton}>
           <RefreshCw size={20} />
-          Neu laden
+          Erneut versuchen
         </button>
       </div>
     );
   }
-  
+
   return (
     <div className={styles.container}>
       {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerContent}>
-          <div className={styles.headerLeft}>
-            <h1>Foodtruck Management</h1>
-            <p>Verwalten Sie alle Foodtrucks und deren Status</p>
-          </div>
-          <div className={styles.headerRight}>
-            <div className={styles.connectionStatus}>
-              <CheckCircle size={16} />
-              {tenants.length} Foodtrucks
-              {lastSync && (
-                <span className={styles.lastSync}>
-                  Sync: {lastSync.toLocaleTimeString()}
-                </span>
-              )}
-            </div>
-            <button className={styles.addButton} onClick={() => setShowAddModal(true)}>
-              <Plus size={20} />
-              Neuer Foodtruck
-            </button>
-            <button className={styles.exportButton} onClick={handleExportData}>
-              <Download size={20} />
-              Export
-            </button>
-          </div>
+      <header className={styles.header}>
+        <div className={styles.headerLeft}>
+          <h1 className={styles.title}>
+            <Truck size={28} />
+            Foodtruck Verwaltung
+          </h1>
+          <p className={styles.subtitle}>
+            Verwalten Sie alle {stats.total} registrierten Foodtrucks
+          </p>
         </div>
+        <div className={styles.headerActions}>
+          <button 
+            className={styles.refreshButton} 
+            onClick={() => window.location.reload()}
+            title="Aktualisieren"
+          >
+            <RefreshCw size={20} />
+          </button>
+          <button 
+            className={styles.exportButton} 
+            onClick={handleExport}
+            title="Exportieren"
+          >
+            <Download size={20} />
+            Export
+          </button>
+          <button className={styles.addButton}>
+            <Plus size={20} />
+            Neuer Foodtruck
+          </button>
+        </div>
+      </header>
+
+      {/* Stats */}
+      <div className={styles.statsGrid}>
+        {renderStatsCard('Gesamt', stats.total, <Truck size={20} />, '#3b82f6')}
+        {renderStatsCard('Aktiv', stats.active, <Activity size={20} />, '#10b981')}
+        {renderStatsCard('Umsatz (Monat)', `CHF ${stats.revenue.toLocaleString()}`, <DollarSign size={20} />, '#f59e0b')}
+        {renderStatsCard('Ø Bestellung', `CHF ${stats.avgOrderValue.toFixed(2)}`, <TrendingUp size={20} />, '#8b5cf6')}
       </div>
-      
-      {/* Stats Overview */}
-      <div className={styles.statsOverview}>
-        <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ backgroundColor: '#10b98120' }}>
-            <Truck size={24} style={{ color: '#10b981' }} />
+
+      {/* Controls */}
+      <div className={styles.controls}>
+        <div className={styles.controlsLeft}>
+          <div className={styles.searchBox}>
+            <Search size={20} />
+            <input
+              type="text"
+              placeholder="Suche nach Name, E-Mail, Subdomain, Stadt..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={styles.searchInput}
+            />
+            {searchTerm && (
+              <button 
+                className={styles.clearSearchButton}
+                onClick={() => setSearchTerm('')}
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
-          <div className={styles.statContent}>
-            <h3>{stats.active}</h3>
-            <p>Aktive Foodtrucks</p>
-          </div>
-        </div>
-        
-        <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ backgroundColor: '#3b82f620' }}>
-            <DollarSign size={24} style={{ color: '#3b82f6' }} />
-          </div>
-          <div className={styles.statContent}>
-            <h3>CHF {stats.totalRevenue.toLocaleString()}</h3>
-            <p>Heutiger Umsatz</p>
-          </div>
-        </div>
-        
-        <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ backgroundColor: '#8b5cf620' }}>
-            <Package size={24} style={{ color: '#8b5cf6' }} />
-          </div>
-          <div className={styles.statContent}>
-            <h3>{stats.totalOrders}</h3>
-            <p>Bestellungen heute</p>
-          </div>
-        </div>
-        
-        <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ backgroundColor: '#f59e0b20' }}>
-            <Star size={24} style={{ color: '#f59e0b' }} />
-          </div>
-          <div className={styles.statContent}>
-            <h3>{stats.avgRating}</h3>
-            <p>Ø Bewertung</p>
-          </div>
-        </div>
-      </div>
-      
-      {/* Action Bar */}
-      <div className={styles.actionBar}>
-        <div className={styles.searchBar}>
-          <Search size={20} />
-          <input
-            type="text"
-            placeholder="Suche nach Name, Ort, ID..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        
-        <div className={styles.actions}>
           <button
-            className={styles.filterButton}
+            className={`${styles.filterButton} ${showFilters ? styles.active : ''}`}
             onClick={() => setShowFilters(!showFilters)}
           >
             <Filter size={20} />
             Filter
-            {(statusFilter !== 'all' || planFilter !== 'all' || typeFilter !== 'all' || cantonFilter !== 'all') && (
-              <span className={styles.filterBadge}>!</span>
+            {Object.values(filters).some(f => f !== 'all') && (
+              <span className={styles.filterBadge}>
+                {Object.values(filters).filter(f => f !== 'all').length}
+              </span>
             )}
           </button>
-          
-          <button
-            className={`${styles.bulkButton} ${bulkActionMode ? styles.active : ''}`}
-            onClick={() => {
-              setBulkActionMode(!bulkActionMode);
-              setSelectedTenants(new Set());
-            }}
-          >
-            <Copy size={20} />
-            Bulk Actions
-          </button>
-          
-          <div className={styles.viewToggle}>
-            <button
-              className={viewMode === 'grid' ? styles.active : ''}
-              onClick={() => setViewMode('grid')}
-              title="Grid View"
-            >
-              <Package size={20} />
-            </button>
-            <button
-              className={viewMode === 'list' ? styles.active : ''}
-              onClick={() => setViewMode('list')}
-              title="List View"
-            >
-              <Settings size={20} />
-            </button>
-            <button
-              className={viewMode === 'map' ? styles.active : ''}
-              onClick={() => setViewMode('map')}
-              title="Map View"
-            >
-              <MapPin size={20} />
-            </button>
+        </div>
+        <div className={styles.controlsRight}>
+          <div className={styles.viewModeSelector}>
+            {Object.entries(VIEW_MODES).map(([mode, config]) => (
+              <button
+                key={mode}
+                className={`${styles.viewModeButton} ${viewMode === mode ? styles.active : ''}`}
+                onClick={() => setViewMode(mode)}
+                title={config.label}
+              >
+                <config.icon size={20} />
+              </button>
+            ))}
           </div>
+          <select
+            className={styles.sortSelect}
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <option value="name">Name (A-Z)</option>
+            <option value="revenue">Umsatz (Hoch-Niedrig)</option>
+            <option value="orders">Bestellungen (Hoch-Niedrig)</option>
+            <option value="lastActive">Letzte Aktivität</option>
+          </select>
         </div>
       </div>
-      
-      {/* Filters */}
+
+      {/* Filters Panel */}
       {showFilters && (
-        <div className={styles.filterBar}>
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          className={styles.filtersPanel}
+        >
           <div className={styles.filterGroup}>
             <label>Status</label>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <option value="all">Alle Status</option>
-              {Object.entries(TENANT_STATUS).map(([key, config]) => (
-                <option key={key} value={key}>{config.label}</option>
+            <select
+              value={filters.status}
+              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+            >
+              {FILTER_OPTIONS.status.map(option => (
+                <option key={option} value={option}>
+                  {option === 'all' ? 'Alle Status' : TENANT_STATUS[option]?.label || option}
+                </option>
               ))}
             </select>
           </div>
-          
           <div className={styles.filterGroup}>
             <label>Plan</label>
-            <select value={planFilter} onChange={(e) => setPlanFilter(e.target.value)}>
-              <option value="all">Alle Pläne</option>
-              {Object.entries(TENANT_PLANS).map(([key, config]) => (
-                <option key={key} value={key}>{config.label}</option>
+            <select
+              value={filters.plan}
+              onChange={(e) => setFilters(prev => ({ ...prev, plan: e.target.value }))}
+            >
+              {FILTER_OPTIONS.plan.map(option => (
+                <option key={option} value={option}>
+                  {option === 'all' ? 'Alle Pläne' : option.toUpperCase()}
+                </option>
               ))}
             </select>
           </div>
-          
           <div className={styles.filterGroup}>
-            <label>Typ</label>
-            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-              <option value="all">Alle Typen</option>
-              {Object.entries(FOODTRUCK_TYPES).map(([key, config]) => (
-                <option key={key} value={key}>{config.icon} {config.label}</option>
+            <label>Region</label>
+            <select
+              value={filters.region}
+              onChange={(e) => setFilters(prev => ({ ...prev, region: e.target.value }))}
+            >
+              {FILTER_OPTIONS.region.map(option => (
+                <option key={option} value={option}>
+                  {option === 'all' ? 'Alle Regionen' : option.charAt(0).toUpperCase() + option.slice(1)}
+                </option>
               ))}
             </select>
           </div>
-          
-          <div className={styles.filterGroup}>
-            <label>Kanton</label>
-            <select value={cantonFilter} onChange={(e) => setCantonFilter(e.target.value)}>
-              <option value="all">Alle Kantone</option>
-              <option value="ZH">Zürich</option>
-              <option value="BE">Bern</option>
-              <option value="LU">Luzern</option>
-              <option value="UR">Uri</option>
-              <option value="SZ">Schwyz</option>
-              <option value="OW">Obwalden</option>
-              <option value="NW">Nidwalden</option>
-              <option value="GL">Glarus</option>
-              <option value="ZG">Zug</option>
-              <option value="FR">Freiburg</option>
-              <option value="SO">Solothurn</option>
-              <option value="BS">Basel-Stadt</option>
-              <option value="BL">Basel-Landschaft</option>
-              <option value="SH">Schaffhausen</option>
-              <option value="AR">Appenzell Ausserrhoden</option>
-              <option value="AI">Appenzell Innerrhoden</option>
-              <option value="SG">St. Gallen</option>
-              <option value="GR">Graubünden</option>
-              <option value="AG">Aargau</option>
-              <option value="TG">Thurgau</option>
-              <option value="TI">Tessin</option>
-              <option value="VD">Waadt</option>
-              <option value="VS">Wallis</option>
-              <option value="NE">Neuenburg</option>
-              <option value="GE">Genf</option>
-              <option value="JU">Jura</option>
-            </select>
-          </div>
-          
-          <div className={styles.filterGroup}>
-            <label>Sortierung</label>
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-              <option value="name">Name</option>
-              <option value="revenue">Umsatz (Heute)</option>
-              <option value="orders">Bestellungen</option>
-              <option value="lastActive">Letzte Aktivität</option>
-            </select>
-          </div>
-        </div>
+          <button
+            className={styles.clearFiltersButton}
+            onClick={() => {
+              setFilters({ status: 'all', plan: 'all', region: 'all' });
+              setSearchTerm('');
+            }}
+          >
+            <X size={16} />
+            Alle Filter zurücksetzen
+          </button>
+        </motion.div>
       )}
-      
-      {/* Bulk Actions Bar */}
-      {bulkActionMode && selectedTenants.size > 0 && (
-        <div className={styles.bulkActionsBar}>
-          <span>{selectedTenants.size} Foodtrucks ausgewählt</span>
-          <div className={styles.bulkActions}>
-            <button onClick={() => handleBulkAction({ id: 'pause', confirm: 'Ausgewählte Foodtrucks pausieren?' })}>
-              <Pause size={16} />
-              Pausieren
-            </button>
-            <button onClick={() => handleBulkAction({ id: 'activate', confirm: 'Ausgewählte Foodtrucks aktivieren?' })}>
-              <Play size={16} />
-              Aktivieren
-            </button>
-            <button onClick={() => handleBulkAction({ id: 'message' })}>
-              <Mail size={16} />
-              Nachricht
-            </button>
-            <button onClick={() => setSelectedTenants(new Set())}>
-              Auswahl aufheben
-            </button>
-          </div>
-        </div>
+
+      {/* Bulk Actions */}
+      {selectedTenants.length > 0 && (
+        <Suspense fallback={<div className={styles.bulkActionsSkeleton} />}>
+          <BulkActionsBar
+            selectedCount={selectedTenants.length}
+            totalCount={filteredAndSortedTenants.length}
+            onSelectAll={handleSelectAll}
+            onAction={handleBulkAction}
+            onCancel={() => setSelectedTenants([])}
+          />
+        </Suspense>
       )}
-      
-      {/* Content Area */}
-      <div className={styles.contentArea}>
+
+      {/* Content based on view mode */}
+      <div className={styles.content}>
         {viewMode === 'map' ? (
-          <div className={styles.mapContainer}>
-            <SwitzerlandMap
-              data={mapData}
-              onCantonClick={(canton) => setCantonFilter(canton)}
-              onTruckClick={(truck) => {
-                const tenant = tenants.find(t => t.id === truck.id);
-                if (tenant) {
+          <Suspense fallback={<LoadingSpinner />}>
+            <div className={styles.mapContainer}>
+              <SwitzerlandMap
+                tenants={filteredAndSortedTenants}
+                onTenantClick={(tenant) => {
                   setSelectedTenant(tenant);
-                  setShowDetailModal(true);
-                }
-              }}
-              selectedCanton={cantonFilter !== 'all' ? cantonFilter : null}
-              hoveredTruck={mapHoveredTenant}
-            />
-            
-            {/* Map Legend */}
-            <div className={styles.mapLegend}>
-              <h4>Legende</h4>
-              <div className={styles.legendItem}>
-                <div className={styles.legendColor} style={{ backgroundColor: '#10b981' }} />
-                <span>Hohe Aktivität</span>
-              </div>
-              <div className={styles.legendItem}>
-                <div className={styles.legendColor} style={{ backgroundColor: '#f59e0b' }} />
-                <span>Mittlere Aktivität</span>
-              </div>
-              <div className={styles.legendItem}>
-                <div className={styles.legendColor} style={{ backgroundColor: '#ef4444' }} />
-                <span>Niedrige Aktivität</span>
-              </div>
+                  setShowDetailsModal(true);
+                }}
+                selectedTenants={selectedTenants}
+                onTenantSelect={handleSelectTenant}
+              />
             </div>
-            
-            {/* Canton Info */}
-            {cantonFilter !== 'all' && mapData[cantonFilter] && (
-              <div className={styles.cantonInfo}>
-                <h4>{cantonFilter}</h4>
-                <p>{mapData[cantonFilter].trucks.length} Foodtrucks</p>
-                <p>CHF {mapData[cantonFilter].totalRevenue.toLocaleString()} Umsatz</p>
-                <p>{mapData[cantonFilter].activeCount} aktiv</p>
-                <p>⭐ {mapData[cantonFilter].avgRating} Bewertung</p>
-              </div>
-            )}
-          </div>
-        ) : viewMode === 'list' ? (
-          <div className={styles.listContainer}>
-            <table className={styles.tenantTable}>
-              <thead>
-                <tr>
-                  {bulkActionMode && <th></th>}
-                  <th>Name</th>
-                  <th>Typ</th>
-                  <th>Status</th>
-                  <th>Ort</th>
-                  <th>Plan</th>
-                  <th>Umsatz (Heute)</th>
-                  <th>Bestellungen</th>
-                  <th>Bewertung</th>
-                  <th>Aktionen</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTenants.map(tenant => {
-                  const isSelected = selectedTenants.has(tenant.id);
-                  const statusConfig = TENANT_STATUS[tenant.status] || TENANT_STATUS.offline;
-                  const typeConfig = FOODTRUCK_TYPES[tenant.type] || FOODTRUCK_TYPES.other;
-                  
-                  return (
-                    <tr 
-                      key={tenant.id}
-                      className={isSelected ? styles.selected : ''}
-                      onClick={() => {
-                        if (bulkActionMode) {
-                          setSelectedTenants(prev => {
-                            const newSet = new Set(prev);
-                            if (newSet.has(tenant.id)) {
-                              newSet.delete(tenant.id);
-                            } else {
-                              newSet.add(tenant.id);
-                            }
-                            return newSet;
-                          });
-                        }
-                      }}
-                    >
-                      {bulkActionMode && (
-                        <td>
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => {}}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </td>
-                      )}
-                      <td>
-                        <div className={styles.nameCell}>
-                          <span className={styles.tenantIcon}>{typeConfig.icon}</span>
-                          <div>
-                            <strong>{tenant.name}</strong>
-                            <span className={styles.tenantId}>#{tenant.id}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{typeConfig.label}</td>
-                      <td>
-                        <span className={styles.statusBadge} style={{ backgroundColor: statusConfig.color }}>
-                          {statusConfig.label}
-                        </span>
-                      </td>
-                      <td>{tenant.address?.city}, {tenant.canton}</td>
-                      <td>
-                        <span className={styles.planBadge} style={{ color: TENANT_PLANS[tenant.plan]?.color }}>
-                          {TENANT_PLANS[tenant.plan]?.label}
-                        </span>
-                      </td>
-                      <td>CHF {tenant.stats?.dailyRevenue || 0}</td>
-                      <td>{tenant.stats?.dailyOrders || 0}</td>
-                      <td>
-                        <span className={styles.rating}>
-                          <Star size={14} />
-                          {tenant.stats?.rating || '-'}
-                        </span>
-                      </td>
-                      <td>
-                        <div className={styles.tableActions}>
-                          {QUICK_ACTIONS.slice(0, 2).map(action => {
-                            const ActionIcon = action.icon;
-                            return (
-                              <button
-                                key={action.id}
-                                className={styles.actionBtn}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleQuickAction(tenant.id, action);
-                                }}
-                                title={action.label}
-                              >
-                                <ActionIcon size={14} />
-                              </button>
-                            );
-                          })}
-                          <button
-                            className={styles.actionBtn}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedTenant(tenant);
-                              setShowDetailModal(true);
-                            }}
-                          >
-                            <MoreVertical size={14} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className={styles.gridContainer}>
-            {filteredTenants.length === 0 ? (
+          </Suspense>
+        ) : viewMode === 'grid' ? (
+          <div className={styles.tenantsGrid}>
+            {filteredAndSortedTenants.length === 0 ? (
               <div className={styles.emptyState}>
-                <Truck size={48} />
+                <Truck size={48} className={styles.emptyIcon} />
                 <h3>Keine Foodtrucks gefunden</h3>
-                <p>Versuchen Sie es mit anderen Filtereinstellungen</p>
+                <p>Versuchen Sie andere Filtereinstellungen oder Suchbegriffe</p>
+                {(searchTerm || Object.values(filters).some(f => f !== 'all')) && (
+                  <button
+                    className={styles.resetButton}
+                    onClick={() => {
+                      setSearchTerm('');
+                      setFilters({ status: 'all', plan: 'all', region: 'all' });
+                    }}
+                  >
+                    Filter zurücksetzen
+                  </button>
+                )}
               </div>
             ) : (
-              filteredTenants.map(tenant => renderTenantCard(tenant))
+              <AnimatePresence>
+                {filteredAndSortedTenants.map(renderTenantCard)}
+              </AnimatePresence>
+            )}
+          </div>
+        ) : (
+          <div className={styles.tenantsList}>
+            {filteredAndSortedTenants.length === 0 ? (
+              <div className={styles.emptyState}>
+                <Truck size={48} className={styles.emptyIcon} />
+                <h3>Keine Foodtrucks gefunden</h3>
+                <p>Versuchen Sie andere Filtereinstellungen oder Suchbegriffe</p>
+              </div>
+            ) : (
+              <>
+                <div className={styles.listHeader}>
+                  <div className={styles.listHeaderLeft}>
+                    <input
+                      type="checkbox"
+                      checked={selectedTenants.length === filteredAndSortedTenants.length && filteredAndSortedTenants.length > 0}
+                      onChange={handleSelectAll}
+                      className={styles.checkbox}
+                    />
+                    <span>Foodtruck</span>
+                  </div>
+                  <span>Status & Details</span>
+                  <span>Metriken</span>
+                  <span>Aktionen</span>
+                </div>
+                <div className={styles.listContent}>
+                  {filteredAndSortedTenants.map(renderTenantListItem)}
+                </div>
+              </>
             )}
           </div>
         )}
       </div>
-      
-      {/* Detail Modal */}
-      {showDetailModal && selectedTenant && (
-        <div className={styles.modal}>
-          <div className={styles.modalContent}>
-            <div className={styles.modalHeader}>
-              <h2>{selectedTenant.name}</h2>
-              <button onClick={() => setShowDetailModal(false)}>
-                <X size={24} />
-              </button>
-            </div>
-            
-            <div className={styles.modalBody}>
-              {/* Tenant details would go here */}
-              <p>Details für {selectedTenant.name}</p>
-              <pre>{JSON.stringify(selectedTenant, null, 2)}</pre>
-            </div>
-            
-            <div className={styles.modalFooter}>
-              <button className={styles.cancelButton} onClick={() => setShowDetailModal(false)}>
-                Schließen
-              </button>
-              <button className={styles.primaryButton}>
-                <Edit size={16} />
-                Bearbeiten
-              </button>
-            </div>
-          </div>
-        </div>
+
+      {/* Modals */}
+      {showDetailsModal && selectedTenant && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <TenantDetailsModal
+            tenant={selectedTenant}
+            onClose={() => {
+              setShowDetailsModal(false);
+              setSelectedTenant(null);
+            }}
+            onEdit={() => {
+              setShowDetailsModal(false);
+              setShowEditModal(true);
+            }}
+            services={services}
+          />
+        </Suspense>
+      )}
+
+      {showEditModal && selectedTenant && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <TenantEditModal
+            tenant={selectedTenant}
+            onClose={() => {
+              setShowEditModal(false);
+              setSelectedTenant(null);
+            }}
+            onSave={async (updatedData) => {
+              if (services.firebase) {
+                const { database, dbRef, update } = services.firebase;
+                const tenantRef = dbRef(database, `tenants/${selectedTenant.id}`);
+                await update(tenantRef, {
+                  ...updatedData,
+                  lastModified: Date.now()
+                });
+                
+                if (services.notification) {
+                  services.notification.show({
+                    type: 'success',
+                    message: 'Foodtruck erfolgreich aktualisiert'
+                  });
+                }
+              }
+              setShowEditModal(false);
+              setSelectedTenant(null);
+            }}
+            services={services}
+          />
+        </Suspense>
       )}
     </div>
   );

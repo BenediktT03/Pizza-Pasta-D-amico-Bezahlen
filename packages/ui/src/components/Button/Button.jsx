@@ -1,86 +1,135 @@
 /**
- * EATECH Button Component
- * Reusable button with multiple variants and states
+ * EATECH - Button Component
+ * Version: 2.0.0
+ * Description: Wiederverwendbare Button-Komponente mit Lazy Loading für Icons
+ * Author: EATECH Development Team
+ * Modified: 2025-01-08
  * File Path: /packages/ui/src/components/Button/Button.jsx
  */
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, lazy, Suspense } from 'react';
+import PropTypes from 'prop-types';
 import styled, { css, keyframes } from 'styled-components';
-import { Loader2 } from 'lucide-react';
+
+// Lazy load icon components
+const Loader2 = lazy(() => import('lucide-react').then(mod => ({ default: mod.Loader2 })));
 
 // Animations
 const spin = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 `;
 
-// Base Button Styles
+const ripple = keyframes`
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+`;
+
+// Base button styles
 const buttonBase = css`
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-family: ${props => props.theme?.fonts?.body || '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'};
+  font-family: inherit;
   font-weight: 500;
-  border: none;
-  border-radius: ${props => props.theme?.radii?.[props.rounded] || '8px'};
-  cursor: pointer;
-  transition: all 0.2s ease;
+  line-height: 1;
   white-space: nowrap;
   text-decoration: none;
-  outline: none;
+  cursor: pointer;
   user-select: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  outline: none;
+  overflow: hidden;
   
   &:focus-visible {
-    box-shadow: 0 0 0 3px ${props => props.theme?.colors?.focus || 'rgba(255, 107, 107, 0.2)'};
+    outline: 2px solid ${props => props.theme?.colors?.focus || '#3b82f6'};
+    outline-offset: 2px;
   }
   
   &:disabled {
+    opacity: 0.5;
     cursor: not-allowed;
-    opacity: 0.6;
+    pointer-events: none;
+  }
+  
+  /* Ripple effect */
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+  }
+  
+  &:active::after {
+    animation: ${ripple} 0.6s ease-out;
   }
 `;
 
-// Size Variants
+// Size variants
 const sizeVariants = {
   xs: css`
-    height: 32px;
-    padding: 0 12px;
+    height: 28px;
+    padding: 0 8px;
     font-size: 12px;
+    border-radius: 4px;
   `,
   sm: css`
-    height: 36px;
-    padding: 0 16px;
+    height: 32px;
+    padding: 0 12px;
     font-size: 13px;
+    border-radius: 5px;
   `,
   md: css`
-    height: 40px;
-    padding: 0 20px;
+    height: 36px;
+    padding: 0 16px;
     font-size: 14px;
+    border-radius: 6px;
   `,
   lg: css`
-    height: 48px;
-    padding: 0 24px;
+    height: 40px;
+    padding: 0 20px;
     font-size: 16px;
+    border-radius: 8px;
   `,
   xl: css`
-    height: 56px;
-    padding: 0 32px;
+    height: 48px;
+    padding: 0 24px;
     font-size: 18px;
+    border-radius: 10px;
   `
 };
 
-// Style Variants
+// Style variants
 const variants = {
   primary: css`
     background: ${props => props.theme?.colors?.primary || '#ff6b6b'};
     color: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     
     &:hover:not(:disabled) {
       background: ${props => props.theme?.colors?.primaryDark || '#ff5252'};
+      box-shadow: 0 4px 8px rgba(255, 107, 107, 0.25);
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
     }
     
     &:active:not(:disabled) {
@@ -136,7 +185,7 @@ const variants = {
   `
 };
 
-// Styled Button
+// Styled components
 const StyledButton = styled.button`
   ${buttonBase}
   ${props => sizeVariants[props.size]}
@@ -154,141 +203,181 @@ const StyledButton = styled.button`
   ${props => props.iconOnly && css`
     padding: 0;
     width: ${props => {
-      const sizes = { xs: '32px', sm: '36px', md: '40px', lg: '48px', xl: '56px' };
+      const sizes = { xs: '28px', sm: '32px', md: '36px', lg: '40px', xl: '48px' };
       return sizes[props.size];
     }};
   `}
 `;
 
-// Loading Spinner
-const LoadingSpinner = styled(Loader2)`
+const LoadingSpinner = styled.span`
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  animation: ${spin} 0.8s linear infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: currentColor;
+  
+  svg {
+    animation: ${spin} 0.8s linear infinite;
+  }
 `;
 
-// Icon Wrapper
 const IconWrapper = styled.span`
   display: inline-flex;
   align-items: center;
+  line-height: 0;
   
   ${props => props.position === 'left' && css`
-    margin-right: ${props => props.iconOnly ? 0 : '4px'};
+    margin-right: ${props => props.iconOnly ? 0 : '6px'};
   `}
   
   ${props => props.position === 'right' && css`
-    margin-left: ${props => props.iconOnly ? 0 : '4px'};
+    margin-left: ${props => props.iconOnly ? 0 : '6px'};
   `}
 `;
 
-// Button Component
-const Button = forwardRef((
-  {
-    children,
-    variant = 'primary',
-    size = 'md',
-    type = 'button',
-    disabled = false,
-    loading = false,
-    fullWidth = false,
-    leftIcon = null,
-    rightIcon = null,
-    iconOnly = false,
-    rounded = 'md',
-    className,
-    onClick,
-    ...props
-  },
-  ref
-) => {
+// Loading fallback for icons
+const IconLoading = () => (
+  <span style={{ display: 'inline-block', width: '1em', height: '1em' }} />
+);
+
+// Button component
+const Button = forwardRef(({
+  children,
+  variant = 'primary',
+  size = 'md',
+  fullWidth = false,
+  loading = false,
+  disabled = false,
+  leftIcon,
+  rightIcon,
+  iconOnly = false,
+  type = 'button',
+  as,
+  href,
+  target,
+  rel,
+  onClick,
+  className,
+  style,
+  ...props
+}, ref) => {
+  // Determine component type
+  const Component = as || (href ? 'a' : StyledButton);
+  
+  // Handle click
   const handleClick = (e) => {
     if (loading || disabled) {
       e.preventDefault();
       return;
     }
+    
+    // Add ripple effect coordinates
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    e.currentTarget.style.setProperty('--ripple-x', `${x}px`);
+    e.currentTarget.style.setProperty('--ripple-y', `${y}px`);
+    
     if (onClick) {
       onClick(e);
     }
   };
-
-  // Icon size based on button size
-  const iconSize = {
-    xs: 14,
-    sm: 16,
-    md: 18,
-    lg: 20,
-    xl: 24
-  }[size];
-
+  
+  // Prepare props
+  const buttonProps = {
+    ref,
+    variant,
+    size,
+    fullWidth,
+    loading: loading ? 'true' : undefined,
+    disabled: disabled || loading,
+    iconOnly,
+    type: Component === StyledButton ? type : undefined,
+    href,
+    target,
+    rel: target === '_blank' ? 'noopener noreferrer' : rel,
+    onClick: handleClick,
+    className,
+    style,
+    ...props
+  };
+  
   return (
-    <StyledButton
-      ref={ref}
-      type={type}
-      variant={variant}
-      size={size}
-      disabled={disabled || loading}
-      loading={loading}
-      fullWidth={fullWidth}
-      iconOnly={iconOnly}
-      rounded={rounded}
-      className={className}
-      onClick={handleClick}
-      {...props}
-    >
-      {loading && <LoadingSpinner size={iconSize} />}
-      
+    <Component {...buttonProps}>
+      {/* Left Icon */}
       {leftIcon && !loading && (
         <IconWrapper position="left" iconOnly={iconOnly}>
-          {React.cloneElement(leftIcon, { size: iconSize })}
+          <Suspense fallback={<IconLoading />}>
+            {typeof leftIcon === 'function' ? leftIcon() : leftIcon}
+          </Suspense>
         </IconWrapper>
       )}
       
+      {/* Content */}
       {!iconOnly && children}
       
+      {/* Right Icon */}
       {rightIcon && !loading && (
         <IconWrapper position="right" iconOnly={iconOnly}>
-          {React.cloneElement(rightIcon, { size: iconSize })}
+          <Suspense fallback={<IconLoading />}>
+            {typeof rightIcon === 'function' ? rightIcon() : rightIcon}
+          </Suspense>
         </IconWrapper>
       )}
-    </StyledButton>
+      
+      {/* Loading Spinner */}
+      {loading && (
+        <LoadingSpinner>
+          <Suspense fallback={<span>...</span>}>
+            <Loader2 size={size === 'xs' ? 14 : size === 'sm' ? 16 : 18} />
+          </Suspense>
+        </LoadingSpinner>
+      )}
+    </Component>
   );
 });
 
 Button.displayName = 'Button';
 
-// Button Group Component
-export const ButtonGroup = styled.div`
-  display: inline-flex;
-  gap: ${props => props.gap || '8px'};
-  
-  ${props => props.vertical && css`
-    flex-direction: column;
-  `}
-  
-  ${props => props.attached && css`
-    gap: 0;
-    
-    ${StyledButton} {
-      border-radius: 0;
-      
-      &:first-child {
-        border-top-left-radius: ${props => props.theme?.radii?.md || '8px'};
-        border-bottom-left-radius: ${props => props.theme?.radii?.md || '8px'};
-      }
-      
-      &:last-child {
-        border-top-right-radius: ${props => props.theme?.radii?.md || '8px'};
-        border-bottom-right-radius: ${props => props.theme?.radii?.md || '8px'};
-      }
-      
-      &:not(:last-child) {
-        border-right: 1px solid rgba(0, 0, 0, 0.1);
-      }
-    }
-  `}
-`;
+Button.propTypes = {
+  children: PropTypes.node,
+  variant: PropTypes.oneOf(['primary', 'secondary', 'outline', 'ghost', 'danger', 'success']),
+  size: PropTypes.oneOf(['xs', 'sm', 'md', 'lg', 'xl']),
+  fullWidth: PropTypes.bool,
+  loading: PropTypes.bool,
+  disabled: PropTypes.bool,
+  leftIcon: PropTypes.oneOfType([PropTypes.element, PropTypes.func]),
+  rightIcon: PropTypes.oneOfType([PropTypes.element, PropTypes.func]),
+  iconOnly: PropTypes.bool,
+  type: PropTypes.oneOf(['button', 'submit', 'reset']),
+  as: PropTypes.elementType,
+  href: PropTypes.string,
+  target: PropTypes.string,
+  rel: PropTypes.string,
+  onClick: PropTypes.func,
+  className: PropTypes.string,
+  style: PropTypes.object
+};
+
+// Export variants for external use
+export const ButtonVariants = {
+  PRIMARY: 'primary',
+  SECONDARY: 'secondary',
+  OUTLINE: 'outline',
+  GHOST: 'ghost',
+  DANGER: 'danger',
+  SUCCESS: 'success'
+};
+
+export const ButtonSizes = {
+  XS: 'xs',
+  SM: 'sm',
+  MD: 'md',
+  LG: 'lg',
+  XL: 'xl'
+};
 
 export default Button;

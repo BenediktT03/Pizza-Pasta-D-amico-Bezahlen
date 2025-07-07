@@ -60,7 +60,7 @@ jobs:
           file_pattern: CHANGELOG.md package.json pnpm-lock.yaml
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.release.outputs.version }}
           name: Release v${{ steps.release.outputs.version }}

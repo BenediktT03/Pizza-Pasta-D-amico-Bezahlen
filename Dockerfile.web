@@ -3,7 +3,7 @@
 # Optimized for PWA, performance and security
 
 # Base image with Node.js 18 Alpine
-FROM node:18-alpine AS base
+FROM node:24-alpine AS base
 LABEL maintainer="benedikt@thomma.ch"
 LABEL description="EATECH Customer PWA - Next.js 14"
 LABEL version="3.0.0"

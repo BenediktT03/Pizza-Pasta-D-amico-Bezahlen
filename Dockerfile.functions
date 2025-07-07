@@ -3,7 +3,7 @@
 # Optimized for serverless execution and local development
 
 # Base image with Node.js 18 - Google Functions Runtime Compatible
-FROM node:18-slim AS base
+FROM node:24-slim AS base
 LABEL maintainer="benedikt@thomma.ch"
 LABEL description="EATECH Firebase Functions - Node.js 18"
 LABEL version="3.0.0"

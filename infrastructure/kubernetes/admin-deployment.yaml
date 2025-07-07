@@ -1,0 +1,528 @@
+# EATECH V3.0 - Admin Dashboard Kubernetes Deployment
+# React 18 with real-time capabilities and security hardening
+# Swiss data residency with high availability
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eatech-admin
+  namespace: eatech-production
+  labels:
+    app: eatech-admin
+    component: admin-dashboard
+    tier: frontend
+    version: v3.0.0
+    environment: production
+    security-level: high
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    description: "EATECH Admin Dashboard - React 18"
+    maintainer: "benedikt@thomma.ch"
+    security.policy: "restricted-access"
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: eatech-admin
+      component: admin-dashboard
+  template:
+    metadata:
+      labels:
+        app: eatech-admin
+        component: admin-dashboard
+        tier: frontend
+        version: v3.0.0
+        security-level: high
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+        prometheus.io/path: "/metrics"
+        security.policy/network: "restricted"
+        backup.policy: "daily"
+    spec:
+      # Enhanced Security Context
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: "OnRootMismatch"
+        seccompProfile:
+          type: RuntimeDefault
+        supplementalGroups: [1001]
+
+      # Swiss Data Residency with Enhanced Placement
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: topology.kubernetes.io/region
+                operator: In
+                values:
+                - europe-west6  # Zurich (Primary)
+              - key: node.kubernetes.io/instance-type
+                operator: In
+                values:
+                - e2-standard-4  # Higher performance for admin
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - eatech-admin
+            topologyKey: kubernetes.io/hostname
+
+      # Tolerations for dedicated admin nodes
+      tolerations:
+      - key: "node-type"
+        operator: "Equal"
+        value: "admin"
+        effect: "NoSchedule"
+      - key: "region"
+        operator: "Equal"
+        value: "switzerland"
+        effect: "NoSchedule"
+
+      containers:
+      - name: admin-dashboard
+        image: eatech/admin:3.0.0
+        imagePullPolicy: Always
+
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+
+        # Environment Variables with Security Focus
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: REACT_APP_ENV
+          value: "production"
+        - name: REACT_APP_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: eatech-config
+              key: api-url
+        - name: REACT_APP_WS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: eatech-config
+              key: websocket-url
+        - name: REACT_APP_CDN_URL
+          valueFrom:
+            configMapKeyRef:
+              name: eatech-config
+              key: cdn-url
+        - name: REACT_APP_SENTRY_DSN
+          valueFrom:
+            secretKeyRef:
+              name: eatech-secrets
+              key: sentry-dsn-admin
+        - name: REACT_APP_MIXPANEL_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: eatech-secrets
+              key: mixpanel-token
+        - name: REACT_APP_SECURITY_KEY
+          valueFrom:
+            secretKeyRef:
+              name: eatech-secrets
+              key: admin-security-key
+
+        # Enhanced Resource Allocation
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+            ephemeral-storage: "512Mi"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+            ephemeral-storage: "1Gi"
+
+        # Comprehensive Health Checks
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+            httpHeaders:
+            - name: Host
+              value: "admin.eatech.ch"
+            - name: User-Agent
+              value: "Kubernetes-HealthCheck/1.0"
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 80
+            httpHeaders:
+            - name: Host
+              value: "admin.eatech.ch"
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 2
+          successThreshold: 1
+
+        startupProbe:
+          httpGet:
+            path: /startup
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 12
+          successThreshold: 1
+
+        # Maximum Security Container Context
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
+          runAsGroup: 1001
+          capabilities:
+            drop:
+            - ALL
+          seccompProfile:
+            type: RuntimeDefault
+
+        # Volume Mounts for Nginx and Security
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: var-cache-nginx
+          mountPath: /var/cache/nginx
+        - name: var-run
+          mountPath: /var/run
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d
+          readOnly: true
+        - name: security-config
+          mountPath: /etc/nginx/security
+          readOnly: true
+        - name: logs
+          mountPath: /var/log/nginx
+
+      # Sidecar for Enhanced Security Monitoring
+      - name: security-monitor
+        image: eatech/security-monitor:latest
+        imagePullPolicy: Always
+
+        ports:
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+
+        env:
+        - name: TARGET_SERVICE
+          value: "admin-dashboard"
+        - name: LOG_LEVEL
+          value: "INFO"
+
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1002
+          capabilities:
+            drop:
+            - ALL
+
+        volumeMounts:
+        - name: logs
+          mountPath: /var/log/nginx
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+
+      # Init Containers for Setup and Validation
+      initContainers:
+      - name: security-init
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+        - |
+          echo "Initializing security configuration..."
+          echo "Setting up file permissions..."
+          chmod 755 /tmp
+          chmod 755 /var/cache/nginx
+          chmod 755 /var/run
+          echo "Security initialization complete"
+        securityContext:
+          runAsUser: 1001
+          runAsGroup: 1001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: var-cache-nginx
+          mountPath: /var/cache/nginx
+        - name: var-run
+          mountPath: /var/run
+
+      - name: wait-for-api
+        image: curlimages/curl:latest
+        command: ['sh', '-c']
+        args:
+        - |
+          until curl -f -s https://api.eatech.ch/health; do
+            echo "Waiting for API service..."
+            sleep 5
+          done
+          echo "API service is ready!"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+
+      # Volumes for Security and Performance
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: "50Mi"
+      - name: var-cache-nginx
+        emptyDir:
+          sizeLimit: "100Mi"
+      - name: var-run
+        emptyDir:
+          sizeLimit: "10Mi"
+      - name: logs
+        emptyDir:
+          sizeLimit: "100Mi"
+      - name: nginx-config
+        configMap:
+          name: nginx-admin-config
+          defaultMode: 0644
+      - name: security-config
+        secret:
+          secretName: nginx-security-config
+          defaultMode: 0644
+
+      # DNS Configuration for Security
+      dnsPolicy: ClusterFirst
+      dnsConfig:
+        options:
+        - name: ndots
+          value: "2"
+        - name: edns0
+        searches:
+        - eatech-production.svc.cluster.local
+        - svc.cluster.local
+        - cluster.local
+
+      # Enhanced Image Pull Security
+      imagePullSecrets:
+      - name: eatech-registry-secret
+
+      # Dedicated Service Account with Minimal Permissions
+      serviceAccountName: eatech-admin-sa
+      automountServiceAccountToken: false
+
+      # Restart Policy
+      restartPolicy: Always
+
+      # Extended Termination Grace Period for Graceful Shutdown
+      terminationGracePeriodSeconds: 60
+
+      # Priority Class for Admin Services
+      priorityClassName: eatech-admin-priority
+
+---
+# Horizontal Pod Autoscaler with Advanced Metrics
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: eatech-admin-hpa
+  namespace: eatech-production
+  labels:
+    app: eatech-admin
+    component: autoscaler
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: eatech-admin
+  minReplicas: 2
+  maxReplicas: 8
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 70
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 120
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 25
+        periodSeconds: 60
+      selectPolicy: Min
+
+---
+# Pod Disruption Budget for High Availability
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: eatech-admin-pdb
+  namespace: eatech-production
+  labels:
+    app: eatech-admin
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: eatech-admin
+      component: admin-dashboard
+
+---
+# Service Account with Restricted Permissions
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eatech-admin-sa
+  namespace: eatech-production
+  labels:
+    app: eatech-admin
+    component: security
+  annotations:
+    description: "Service account for EATECH admin dashboard"
+    security.policy: "minimal-permissions"
+automountServiceAccountToken: false
+
+---
+# Restrictive Network Policy for Admin Security
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: eatech-admin-netpol
+  namespace: eatech-production
+  labels:
+    app: eatech-admin
+    component: security
+spec:
+  podSelector:
+    matchLabels:
+      app: eatech-admin
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    - podSelector:
+        matchLabels:
+          app: nginx-ingress
+    ports:
+    - protocol: TCP
+      port: 80
+  egress:
+  # Allow API access
+  - to:
+    - podSelector:
+        matchLabels:
+          app: eatech-functions
+    ports:
+    - protocol: TCP
+      port: 8080
+  # Allow WebSocket connections
+  - to:
+    - podSelector:
+        matchLabels:
+          app: eatech-websocket
+    ports:
+    - protocol: TCP
+      port: 3001
+  # Allow external HTTPS for Firebase/APIs
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  # Allow DNS
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+
+---
+# Priority Class for Admin Services
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: eatech-admin-priority
+value: 100
+globalDefault: false
+description: "Priority class for EATECH admin services"
+
+---
+# Service Monitor for Prometheus Metrics
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: eatech-admin-monitor
+  namespace: eatech-production
+  labels:
+    app: eatech-admin
+    component: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: eatech-admin
+      component: admin-dashboard
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    honorLabels: true
+  - port: metrics
+    path: /security-metrics
+    interval: 60s
+    scrapeTimeout: 10s

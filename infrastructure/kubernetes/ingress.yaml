@@ -1,0 +1,411 @@
+# EATECH V3.0 - Kubernetes Ingress Configuration
+# NGINX Ingress with SSL termination and Swiss data compliance
+# Load balancing, rate limiting and security headers
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eatech-main-ingress
+  namespace: eatech-production
+  labels:
+    app: eatech
+    component: ingress
+    environment: production
+  annotations:
+    # NGINX Ingress Controller
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+
+    # SSL Configuration
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-protocols: "TLSv1.2 TLSv1.3"
+    nginx.ingress.kubernetes.io/ssl-ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256,ECDHE-RSA-AES128-GCM-SHA256,ECDHE-ECDSA-AES256-GCM-SHA384,ECDHE-RSA-AES256-GCM-SHA384"
+
+    # Security Headers
+    nginx.ingress.kubernetes.io/server-snippet: |
+      add_header X-Frame-Options "SAMEORIGIN" always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+      add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://checkout.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.eatech.ch wss://ws.eatech.ch https://api.stripe.com; frame-src 'self' https://js.stripe.com https://hooks.stripe.com; object-src 'none'; base-uri 'self'; form-action 'self';" always;
+      add_header Permissions-Policy "camera=(), microphone=(self), geolocation=(self), payment=(self)" always;
+
+    # Rate Limiting
+    nginx.ingress.kubernetes.io/rate-limit-connections: "10"
+    nginx.ingress.kubernetes.io/rate-limit-requests-per-minute: "300"
+    nginx.ingress.kubernetes.io/rate-limit-requests-per-second: "5"
+
+    # CORS Configuration
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.eatech.ch,https://admin.eatech.ch,https://master.eatech.ch"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Authorization,Content-Type,Accept,Origin,User-Agent,DNT,Cache-Control,X-Mx-ReqToken,Keep-Alive,X-Requested-With,If-Modified-Since,X-CSRF-Token"
+    nginx.ingress.kubernetes.io/cors-max-age: "86400"
+
+    # Performance Optimizations
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/client-body-buffer-size: "1m"
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "4k"
+
+    # Compression
+    nginx.ingress.kubernetes.io/enable-brotli: "true"
+    nginx.ingress.kubernetes.io/brotli-level: "6"
+    nginx.ingress.kubernetes.io/brotli-types: "text/xml image/svg+xml application/x-font-ttf image/vnd.microsoft.icon application/x-font-opentype application/json font/eot application/vnd.ms-fontobject application/javascript font/otf application/xml application/xhtml+xml text/javascript application/x-javascript text/plain application/x-font-truetype application/xml+rss image/x-icon font/opentype text/css image/x-win-bitmap"
+
+    # Caching
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header Vary "Accept-Encoding";
+      }
+
+      location ~* \.(html|htm)$ {
+        expires 1h;
+        add_header Cache-Control "public, must-revalidate";
+      }
+
+      location /api/ {
+        expires -1;
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        add_header Pragma "no-cache";
+      }
+
+    # Swiss Data Residency
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/affinity-mode: "persistent"
+    nginx.ingress.kubernetes.io/session-cookie-name: "eatech-lb"
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "86400"
+
+    # Monitoring
+    nginx.ingress.kubernetes.io/enable-access-log: "true"
+    nginx.ingress.kubernetes.io/enable-rewrite-log: "false"
+
+spec:
+  tls:
+  - hosts:
+    - app.eatech.ch
+    - api.eatech.ch
+    - cdn.eatech.ch
+    - ws.eatech.ch
+    secretName: eatech-tls-certificate
+  - hosts:
+    - admin.eatech.ch
+    secretName: eatech-admin-tls-certificate
+  - hosts:
+    - master.eatech.ch
+    secretName: eatech-master-tls-certificate
+
+  rules:
+  # Customer PWA (app.eatech.ch)
+  - host: app.eatech.ch
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-web-service
+            port:
+              number: 3000
+
+  # API Endpoints (api.eatech.ch)
+  - host: api.eatech.ch
+    http:
+      paths:
+      # Main API
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-functions-service
+            port:
+              number: 8080
+      # AI Services
+      - path: /ai
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-functions-service
+            port:
+              number: 8081
+      # Webhooks
+      - path: /webhooks
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-functions-service
+            port:
+              number: 8082
+
+  # WebSocket (ws.eatech.ch)
+  - host: ws.eatech.ch
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-websocket-service
+            port:
+              number: 3001
+
+---
+# Admin Dashboard Ingress with Enhanced Security
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eatech-admin-ingress
+  namespace: eatech-production
+  labels:
+    app: eatech-admin
+    component: ingress
+    security-level: high
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+
+    # Enhanced Security for Admin
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"  # Internal networks only
+
+    # Advanced Rate Limiting for Admin
+    nginx.ingress.kubernetes.io/rate-limit-connections: "5"
+    nginx.ingress.kubernetes.io/rate-limit-requests-per-minute: "100"
+    nginx.ingress.kubernetes.io/rate-limit-requests-per-second: "2"
+
+    # Admin-specific headers
+    nginx.ingress.kubernetes.io/server-snippet: |
+      add_header X-Admin-Security "enabled" always;
+      add_header X-Frame-Options "DENY" always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+      add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://api.eatech.ch wss://ws.eatech.ch; frame-ancestors 'none';" always;
+
+    # Authentication required
+    nginx.ingress.kubernetes.io/auth-type: "basic"
+    nginx.ingress.kubernetes.io/auth-secret: "eatech-admin-auth"
+    nginx.ingress.kubernetes.io/auth-realm: "EATECH Admin Dashboard - Authentication Required"
+
+spec:
+  tls:
+  - hosts:
+    - admin.eatech.ch
+    secretName: eatech-admin-tls-certificate
+
+  rules:
+  - host: admin.eatech.ch
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-admin-service
+            port:
+              number: 80
+
+---
+# Master Control Ingress with Maximum Security
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eatech-master-ingress
+  namespace: eatech-production
+  labels:
+    app: eatech-master
+    component: ingress
+    security-level: maximum
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+
+    # Maximum Security
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8"  # Very restrictive
+
+    # Very strict rate limiting
+    nginx.ingress.kubernetes.io/rate-limit-connections: "2"
+    nginx.ingress.kubernetes.io/rate-limit-requests-per-minute: "30"
+    nginx.ingress.kubernetes.io/rate-limit-requests-per-second: "1"
+
+    # Client certificate authentication
+    nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+    nginx.ingress.kubernetes.io/auth-tls-secret: "eatech-production/eatech-master-client-ca"
+    nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
+    nginx.ingress.kubernetes.io/auth-tls-error-page: "https://eatech.ch/403"
+
+    # Maximum security headers
+    nginx.ingress.kubernetes.io/server-snippet: |
+      add_header X-Master-Security "maximum" always;
+      add_header X-Frame-Options "DENY" always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+      add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self' https://api.eatech.ch; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" always;
+      add_header Referrer-Policy "no-referrer" always;
+      add_header X-Permitted-Cross-Domain-Policies "none" always;
+
+    # Request size limit
+    nginx.ingress.kubernetes.io/proxy-body-size: "1m"
+
+    # Timeout settings for security
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30"
+
+spec:
+  tls:
+  - hosts:
+    - master.eatech.ch
+    secretName: eatech-master-tls-certificate
+
+  rules:
+  - host: master.eatech.ch
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-master-service
+            port:
+              number: 80
+
+---
+# CDN Ingress for Static Assets
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eatech-cdn-ingress
+  namespace: eatech-production
+  labels:
+    app: eatech-cdn
+    component: ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+
+    # CDN optimizations
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+
+    # Aggressive caching for CDN
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|webp|avif)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header Vary "Accept-Encoding";
+        add_header X-CDN-Cache "HIT";
+      }
+
+      location ~* \.(pdf|doc|docx|zip)$ {
+        expires 30d;
+        add_header Cache-Control "public";
+        add_header X-CDN-Cache "HIT";
+      }
+
+    # CORS for CDN
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, HEAD, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Origin,Accept,Content-Type"
+
+    # Performance
+    nginx.ingress.kubernetes.io/enable-brotli: "true"
+    nginx.ingress.kubernetes.io/brotli-level: "6"
+
+spec:
+  tls:
+  - hosts:
+    - cdn.eatech.ch
+    secretName: eatech-cdn-tls-certificate
+
+  rules:
+  - host: cdn.eatech.ch
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-cdn-service
+            port:
+              number: 80
+
+---
+# IngressClass for NGINX
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+spec:
+  controller: k8s.io/ingress-nginx
+
+---
+# Default Backend for 404 errors
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-default-backend
+  namespace: eatech-production
+  labels:
+    app: eatech-default-backend
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: eatech-default-backend
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eatech-default-backend
+  namespace: eatech-production
+  labels:
+    app: eatech-default-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: eatech-default-backend
+  template:
+    metadata:
+      labels:
+        app: eatech-default-backend
+    spec:
+      containers:
+      - name: default-backend
+        image: registry.k8s.io/defaultbackend-amd64:1.5
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "10m"
+          limits:
+            memory: "64Mi"
+            cpu: "20m"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 65534
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL

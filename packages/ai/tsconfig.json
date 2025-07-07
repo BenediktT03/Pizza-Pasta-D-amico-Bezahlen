@@ -1,0 +1,165 @@
+{
+  "compilerOptions": {
+    // Language and Environment
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowJs": true,
+    "checkJs": false,
+    "jsx": "preserve",
+    "jsxImportSource": "react",
+
+    // Module System
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": false,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "removeComments": false,
+    "importHelpers": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "preserveSymlinks": true,
+
+    // Type Checking
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
+
+    // Emit
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+
+    // Interop Constraints
+    "resolveJsonModule": true,
+    "allowArbitraryExtensions": false,
+
+    // Path Mapping für EATECH AI Package
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/config/*": ["./src/config/*"],
+      "@/services/*": ["./src/services/*"],
+      "@/middleware/*": ["./src/middleware/*"],
+      "@/utils/*": ["./src/utils/*"],
+      "@/types/*": ["./src/types/*"],
+      "@/models/*": ["./src/models/*"],
+      "@/monitoring/*": ["./src/monitoring/*"],
+      "@/privacy/*": ["./src/privacy/*"],
+      "@/emergency/*": ["./src/emergency/*"],
+      "@/pricing/*": ["./src/pricing/*"],
+      "@/forecasting/*": ["./src/forecasting/*"],
+      "@/voice/*": ["./src/voice/*"],
+      "@/insights/*": ["./src/insights/*"],
+      "@/core": ["../core/src"],
+      "@/types-pkg": ["../types/src"],
+      "@/utils-pkg": ["../utils/src"]
+    },
+
+    // Incremental Compilation
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+
+    // Advanced Options
+    "preserveWatchOutput": true,
+    "pretty": true,
+    "assumeChangesOnlyAffectDirectDependencies": true
+  },
+
+  // Include patterns
+  "include": [
+    "src/**/*",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.json",
+    "**/*.d.ts",
+    "next-env.d.ts"
+  ],
+
+  // Exclude patterns
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".next",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "coverage",
+    "docs",
+    "examples"
+  ],
+
+  // TypeScript Project References für Monorepo
+  "references": [
+    {
+      "path": "../core"
+    },
+    {
+      "path": "../types"
+    },
+    {
+      "path": "../utils"
+    }
+  ],
+
+  // Compiler Options für spezifische EATECH AI Features
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node",
+    "compilerOptions": {
+      "module": "ESNext",
+      "target": "ES2022"
+    }
+  },
+
+  // Watch Options für Development
+  "watchOptions": {
+    "watchFile": "useFsEvents",
+    "watchDirectory": "useFsEvents",
+    "fallbackPolling": "dynamicPriority",
+    "synchronousWatchDirectory": true,
+    "excludeDirectories": [
+      "**/node_modules",
+      "**/.git",
+      "**/dist",
+      "**/coverage"
+    ]
+  },
+
+  // Type Acquisition für bessere IntelliSense
+  "typeAcquisition": {
+    "enable": true,
+    "include": [
+      "node",
+      "express",
+      "react",
+      "jest",
+      "openai"
+    ],
+    "exclude": [
+      "jquery"
+    ]
+  }
+}

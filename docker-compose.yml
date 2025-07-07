@@ -1,0 +1,228 @@
+# EATECH V3.0 - Development Docker Compose
+# Multi-Tenant Foodtruck Bestellsystem
+# Development Environment with Hot Reload
+
+version: '3.8'
+
+services:
+  # Next.js Web App (Customer PWA)
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      target: development
+    container_name: eatech-web-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - FIREBASE_PROJECT_ID=eatech-dev
+      - STRIPE_PUBLISHABLE_KEY=pk_test_51234567890
+    env_file:
+      - .env.local
+    depends_on:
+      - redis
+      - functions
+    networks:
+      - eatech-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Admin Dashboard
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile.admin
+      target: development
+    container_name: eatech-admin-dev
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./apps/admin:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_API_URL=http://localhost:3001
+      - REACT_APP_WS_URL=ws://localhost:3001
+    env_file:
+      - .env.local
+    depends_on:
+      - functions
+      - redis
+    networks:
+      - eatech-network
+    restart: unless-stopped
+
+  # Master Control System
+  master:
+    build:
+      context: .
+      dockerfile: Dockerfile.master
+      target: development
+    container_name: eatech-master-dev
+    ports:
+      - "3002:3000"
+    volumes:
+      - ./apps/master:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_API_URL=http://localhost:3001
+      - REACT_APP_MASTER_KEY=dev_master_key_123
+    env_file:
+      - .env.local
+    depends_on:
+      - functions
+      - redis
+    networks:
+      - eatech-network
+    restart: unless-stopped
+
+  # Firebase Functions (API Backend)
+  functions:
+    build:
+      context: .
+      dockerfile: Dockerfile.functions
+      target: development
+    container_name: eatech-functions-dev
+    ports:
+      - "5001:5001"  # Firebase Functions port
+      - "8080:8080"  # Admin API port
+    volumes:
+      - ./functions:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - FIREBASE_PROJECT_ID=eatech-dev
+      - GCLOUD_PROJECT=eatech-dev
+      - FUNCTIONS_EMULATOR=true
+    env_file:
+      - .env.local
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - eatech-network
+    restart: unless-stopped
+    command: npm run serve
+
+  # Redis Cache & Session Store
+  redis:
+    image: redis:7-alpine
+    container_name: eatech-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./infrastructure/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - eatech-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # PostgreSQL (Analytics & Reporting)
+  postgres:
+    image: postgres:15-alpine
+    container_name: eatech-postgres-dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_DB=eatech_analytics
+      - POSTGRES_USER=eatech
+      - POSTGRES_PASSWORD=dev_password_123
+    networks:
+      - eatech-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eatech"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Nginx Proxy & Load Balancer
+  nginx:
+    image: nginx:alpine
+    container_name: eatech-nginx-dev
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infrastructure/nginx/nginx.dev.conf:/etc/nginx/nginx.conf
+      - ./infrastructure/nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - web
+      - admin
+      - master
+      - functions
+    networks:
+      - eatech-network
+    restart: unless-stopped
+
+  # Monitoring & Logging
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: eatech-prometheus-dev
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - eatech-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: eatech-grafana-dev
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - eatech-network
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+    driver: local
+  postgres_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  eatech-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

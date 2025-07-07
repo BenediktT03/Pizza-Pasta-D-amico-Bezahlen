@@ -1,0 +1,193 @@
+{
+  // ======================================
+  // EATECH V3.0 - VS CODE WORKSPACE SETTINGS
+  // Optimiert für Monorepo mit Turbo + TypeScript
+  // ======================================
+
+  // === GENERAL WORKSPACE ===
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit",
+    "source.removeUnusedImports": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // === TYPESCRIPT SETTINGS ===
+  "typescript.suggest.autoImports": true,
+  "typescript.suggest.includeCompletionsForModuleExports": true,
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.suggest.completeJSDocs": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.inlayHints.parameterNames.enabled": "literals",
+  "typescript.inlayHints.variableTypes.enabled": true,
+  "typescript.inlayHints.propertyDeclarationTypes.enabled": true,
+  "typescript.inlayHints.functionLikeReturnTypes.enabled": true,
+
+  // === ESLINT CONFIGURATION ===
+  "eslint.workingDirectories": [
+    "apps/web",
+    "apps/admin",
+    "apps/master",
+    "apps/landing",
+    "packages/core",
+    "packages/ui",
+    "packages/types"
+  ],
+  "eslint.validate": [
+    "javascript",
+    "typescript",
+    "javascriptreact",
+    "typescriptreact"
+  ],
+
+  // === FILE ASSOCIATIONS ===
+  "files.associations": {
+    "*.css": "css",
+    "*.module.css": "css",
+    "turbo.json": "jsonc",
+    ".env.example": "properties",
+    ".env.production.example": "properties"
+  },
+
+  // === SEARCH & EXCLUDE PATTERNS ===
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.next": true,
+    "**/build": true,
+    "**/.turbo": true,
+    "**/coverage": true,
+    "**/.vscode": false
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/.turbo": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.next/**": true,
+    "**/dist/**": true,
+    "**/.turbo/**": true
+  },
+
+  // === MONOREPO SPECIFIC ===
+  "npm.packageManager": "npm",
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  "typescript.workspaceSymbols.scope": "allOpenProjects",
+
+  // === PRETTIER SETTINGS ===
+  "prettier.configPath": "./.prettierrc",
+  "prettier.ignorePath": "./.prettierignore",
+
+  // === EMMET ===
+  "emmet.includeLanguages": {
+    "typescript": "html",
+    "typescriptreact": "html"
+  },
+
+  // === CSS MODULES SUPPORT ===
+  "css.validate": true,
+  "scss.validate": true,
+  "less.validate": true,
+
+  // === NEXT.JS SPECIFIC ===
+  "typescript.preferences.includeCompletionsForModuleExports": true,
+  "typescript.suggest.includeAutomaticOptionalChainCompletions": true,
+
+  // === FIREBASE TOOLS ===
+  "firebase.useFrameworks": true,
+
+  // === GIT SETTINGS ===
+  "git.ignoreLimitWarning": true,
+  "git.enableSmartCommit": true,
+  "git.autofetch": true,
+
+  // === TERMINAL ===
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+
+  // === EXTENSIONS SPECIFIC ===
+  "totalTypeScript.hideAllTips": false,
+  "totalTypeScript.hideBasicTips": true,
+
+  // === WORKSPACE TRUST ===
+  "security.workspace.trust.untrustedFiles": "open",
+
+  // === BREADCRUMBS ===
+  "breadcrumbs.enabled": true,
+  "breadcrumbs.showFiles": true,
+  "breadcrumbs.showModules": true,
+
+  // === EXPLORER ===
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "*.tsx": "$(capture).test.tsx, $(capture).stories.tsx, $(capture).module.css",
+    "*.ts": "$(capture).test.ts, $(capture).spec.ts",
+    "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml",
+    "next.config.js": "next-env.d.ts",
+    "turbo.json": ".turbo/",
+    ".env.example": ".env, .env.local, .env.production, .env.development"
+  },
+
+  // === LANGUAGE SPECIFIC ===
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.wordWrap": "on"
+  },
+
+  // === TAILWIND INTELLISENSE ===
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ],
+
+  // === PERFORMANCE ===
+  "editor.suggest.maxVisibleSuggestions": 8,
+  "editor.quickSuggestionsDelay": 0,
+  "files.trimTrailingWhitespace": true,
+  "files.trimFinalNewlines": true,
+  "files.insertFinalNewline": true
+}

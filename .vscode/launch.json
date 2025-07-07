@@ -1,0 +1,329 @@
+{
+  // ======================================
+  // EATECH V3.0 - DEBUG CONFIGURATIONS
+  // Multi-App Debugging für Monorepo Setup
+  // ======================================
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "🌐 Debug Web App (Customer PWA)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/next",
+      "args": ["dev", "--port", "3000"],
+      "cwd": "${workspaceFolder}/apps/web",
+      "env": {
+        "NODE_ENV": "development",
+        "NEXT_DEV": "true"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "presentation": {
+        "group": "frontend",
+        "order": 1
+      },
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "ready on http://localhost:([0-9]+)",
+        "uriFormat": "http://localhost:%s"
+      }
+    },
+    {
+      "name": "🏪 Debug Admin Dashboard",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/react-scripts",
+      "args": ["start"],
+      "cwd": "${workspaceFolder}/apps/admin",
+      "env": {
+        "NODE_ENV": "development",
+        "PORT": "3001",
+        "BROWSER": "none"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "presentation": {
+        "group": "frontend",
+        "order": 2
+      },
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "Local:\\s+http://localhost:([0-9]+)",
+        "uriFormat": "http://localhost:%s"
+      }
+    },
+    {
+      "name": "🎛️ Debug Master Control",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/react-scripts",
+      "args": ["start"],
+      "cwd": "${workspaceFolder}/apps/master",
+      "env": {
+        "NODE_ENV": "development",
+        "PORT": "3002",
+        "BROWSER": "none"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "presentation": {
+        "group": "frontend",
+        "order": 3
+      },
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "Local:\\s+http://localhost:([0-9]+)",
+        "uriFormat": "http://localhost:%s"
+      }
+    },
+    {
+      "name": "🚀 Debug Landing Page",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/react-scripts",
+      "args": ["start"],
+      "cwd": "${workspaceFolder}/apps/landing",
+      "env": {
+        "NODE_ENV": "development",
+        "PORT": "3003",
+        "BROWSER": "none"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "presentation": {
+        "group": "frontend",
+        "order": 4
+      }
+    },
+    {
+      "name": "🔥 Debug Firebase Functions",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/firebase",
+      "args": ["emulators:start", "--only", "functions"],
+      "cwd": "${workspaceFolder}/functions",
+      "env": {
+        "NODE_ENV": "development",
+        "FUNCTIONS_EMULATOR": "true"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "presentation": {
+        "group": "backend",
+        "order": 1
+      }
+    },
+    {
+      "name": "🧪 Debug Jest Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": [
+        "--runInBand",
+        "--no-cache",
+        "--no-coverage",
+        "--watchAll=false"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "env": {
+        "NODE_ENV": "test"
+      },
+      "presentation": {
+        "group": "testing",
+        "order": 1
+      }
+    },
+    {
+      "name": "🎯 Debug Current Test File",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": [
+        "${fileBasenameNoExtension}",
+        "--runInBand",
+        "--no-cache",
+        "--no-coverage",
+        "--watchAll=false"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "env": {
+        "NODE_ENV": "test"
+      },
+      "presentation": {
+        "group": "testing",
+        "order": 2
+      }
+    },
+    {
+      "name": "🌊 Debug Cypress E2E",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/cypress",
+      "args": ["open"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "env": {
+        "NODE_ENV": "test",
+        "CYPRESS_baseUrl": "http://localhost:3000"
+      },
+      "presentation": {
+        "group": "testing",
+        "order": 3
+      }
+    },
+    {
+      "name": "🎭 Debug Playwright E2E",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/playwright",
+      "args": ["test", "--headed"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "env": {
+        "NODE_ENV": "test"
+      },
+      "presentation": {
+        "group": "testing",
+        "order": 4
+      }
+    },
+    {
+      "name": "📊 Debug Storybook",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/storybook",
+      "args": ["dev", "-p", "6006"],
+      "cwd": "${workspaceFolder}/packages/ui",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "presentation": {
+        "group": "tools",
+        "order": 1
+      },
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "Local:\\s+http://localhost:([0-9]+)",
+        "uriFormat": "http://localhost:%s"
+      }
+    },
+    {
+      "name": "⚡ Debug TypeScript Compilation",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/tsc",
+      "args": ["--noEmit", "--watch"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "presentation": {
+        "group": "tools",
+        "order": 2
+      }
+    },
+    {
+      "name": "🌐 Attach to Chrome (Web App)",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "url": "http://localhost:3000",
+      "sourceMaps": true,
+      "webRoot": "${workspaceFolder}/apps/web",
+      "presentation": {
+        "group": "browser",
+        "order": 1
+      }
+    },
+    {
+      "name": "🏪 Attach to Chrome (Admin)",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "url": "http://localhost:3001",
+      "sourceMaps": true,
+      "webRoot": "${workspaceFolder}/apps/admin",
+      "presentation": {
+        "group": "browser",
+        "order": 2
+      }
+    },
+    {
+      "name": "🎛️ Attach to Chrome (Master)",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "url": "http://localhost:3002",
+      "sourceMaps": true,
+      "webRoot": "${workspaceFolder}/apps/master",
+      "presentation": {
+        "group": "browser",
+        "order": 3
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "🚀 Launch All Frontend Apps",
+      "configurations": [
+        "🌐 Debug Web App (Customer PWA)",
+        "🏪 Debug Admin Dashboard",
+        "🎛️ Debug Master Control"
+      ],
+      "presentation": {
+        "group": "compounds",
+        "order": 1
+      },
+      "stopAll": true
+    },
+    {
+      "name": "🔬 Full Development Stack",
+      "configurations": [
+        "🌐 Debug Web App (Customer PWA)",
+        "🏪 Debug Admin Dashboard",
+        "🎛️ Debug Master Control",
+        "🔥 Debug Firebase Functions"
+      ],
+      "presentation": {
+        "group": "compounds",
+        "order": 2
+      },
+      "stopAll": true
+    },
+    {
+      "name": "🧪 Testing Environment",
+      "configurations": [
+        "🌐 Debug Web App (Customer PWA)",
+        "🧪 Debug Jest Tests",
+        "🌊 Debug Cypress E2E"
+      ],
+      "presentation": {
+        "group": "compounds",
+        "order": 3
+      },
+      "stopAll": true
+    },
+    {
+      "name": "🎨 Design System Development",
+      "configurations": [
+        "📊 Debug Storybook",
+        "⚡ Debug TypeScript Compilation"
+      ],
+      "presentation": {
+        "group": "compounds",
+        "order": 4
+      },
+      "stopAll": true
+    }
+  ]
+}

@@ -1,0 +1,1065 @@
+name: 🚀 Lighthouse Performance Testing
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
+  schedule:
+    # Run performance tests daily at 3 AM UTC
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: 'Target environment for testing'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+          - preview
+      test_type:
+        description: 'Type of performance test'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - mobile
+          - desktop
+          - core-vitals
+          - accessibility
+      custom_url:
+        description: 'Custom URL to test (optional)'
+        required: false
+        type: string
+
+env:
+  NODE_VERSION: '18.19.0'
+  LIGHTHOUSE_CI_TOKEN: ${{ secrets.LIGHTHOUSE_CI_TOKEN }}
+  TARGET_ENV: ${{ inputs.target_environment || 'staging' }}
+  TEST_TYPE: ${{ inputs.test_type || 'full' }}
+
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ===== SETUP & URL DETERMINATION =====
+  setup:
+    name: 🔧 Setup Performance Testing
+    runs-on: ubuntu-latest
+    outputs:
+      test-urls: ${{ steps.urls.outputs.urls }}
+      should-test: ${{ steps.should-test.outputs.result }}
+      baseline-scores: ${{ steps.baseline.outputs.scores }}
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🌐 Determine Test URLs
+        id: urls
+        run: |
+          if [[ -n "${{ inputs.custom_url }}" ]]; then
+            URLS='["${{ inputs.custom_url }}"]'
+          elif [[ "${{ env.TARGET_ENV }}" == "production" ]]; then
+            URLS='[
+              "https://app.eatech.ch",
+              "https://app.eatech.ch/menu",
+              "https://app.eatech.ch/checkout",
+              "https://admin.eatech.ch",
+              "https://admin.eatech.ch/dashboard",
+              "https://master.eatech.ch"
+            ]'
+          elif [[ "${{ env.TARGET_ENV }}" == "staging" ]]; then
+            URLS='[
+              "https://staging.eatech.ch",
+              "https://staging.eatech.ch/menu",
+              "https://staging.eatech.ch/checkout",
+              "https://admin-staging.eatech.ch",
+              "https://master-staging.eatech.ch"
+            ]'
+          else
+            # Preview environment
+            PR_NUMBER="${{ github.event.number }}"
+            URLS='[
+              "https://pr-'$PR_NUMBER'.eatech-preview.ch",
+              "https://pr-'$PR_NUMBER'.eatech-preview.ch/menu"
+            ]'
+          fi
+          
+          echo "urls=$URLS" >> $GITHUB_OUTPUT
+          echo "Testing URLs: $URLS"
+
+      - name: 🚦 Should Test?
+        id: should-test
+        run: |
+          # Always test on main/develop pushes and manual triggers
+          if [[ "${{ github.ref_name }}" == "main" ]] || [[ "${{ github.ref_name }}" == "develop" ]] || [[ "${{ github.event_name }}" == "workflow_dispatch" ]] || [[ "${{ github.event_name }}" == "schedule" ]]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+            echo "✅ Performance testing enabled"
+          # Test PRs only if frontend files changed
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # Check if frontend files changed
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }})
+            if echo "$CHANGED_FILES" | grep -E '^apps/|^packages/' > /dev/null; then
+              echo "result=true" >> $GITHUB_OUTPUT
+              echo "✅ Frontend changes detected, performance testing enabled"
+            else
+              echo "result=false" >> $GITHUB_OUTPUT
+              echo "⏭️ No frontend changes, skipping performance tests"
+            fi
+          else
+            echo "result=false" >> $GITHUB_OUTPUT
+            echo "⏭️ Performance testing not required"
+          fi
+
+      - name: 📊 Get Baseline Scores
+        id: baseline
+        run: |
+          # Fetch historical performance data
+          BASELINE_SCORES='{
+            "performance": 90,
+            "accessibility": 95,
+            "best-practices": 90,
+            "seo": 95,
+            "pwa": 90,
+            "first-contentful-paint": 1.5,
+            "largest-contentful-paint": 2.5,
+            "cumulative-layout-shift": 0.1,
+            "first-input-delay": 100,
+            "total-blocking-time": 300
+          }'
+          echo "scores=$BASELINE_SCORES" >> $GITHUB_OUTPUT
+
+  # ===== LIGHTHOUSE CORE WEB VITALS =====
+  core-web-vitals:
+    name: 📊 Core Web Vitals
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.should-test == 'true' && (contains(fromJSON('["full", "core-vitals"]'), env.TEST_TYPE))
+    strategy:
+      matrix:
+        url: ${{ fromJSON(needs.setup.outputs.test-urls) }}
+        device: [mobile, desktop]
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm install -g @lhci/cli lighthouse
+          npm ci --prefer-offline --no-audit
+
+      - name: 🎭 Install Chromium
+        run: npx playwright install chromium
+
+      - name: 🔍 Wait for URL Availability
+        run: |
+          echo "🔍 Checking if ${{ matrix.url }} is available..."
+          for i in {1..10}; do
+            if curl -f -s --max-time 10 "${{ matrix.url }}" > /dev/null; then
+              echo "✅ URL is available"
+              break
+            fi
+            echo "⏳ Waiting for URL to be available... (attempt $i/10)"
+            sleep 30
+          done
+
+      - name: 🚀 Run Lighthouse CI - ${{ matrix.device }}
+        run: |
+          # Create Lighthouse CI config
+          cat > lighthouserc.json << EOF
+          {
+            "ci": {
+              "collect": {
+                "numberOfRuns": 3,
+                "settings": {
+                  "preset": "${{ matrix.device }}",
+                  "throttling": {
+                    "rttMs": ${{ matrix.device == 'mobile' && '150' || '40' }},
+                    "throughputKbps": ${{ matrix.device == 'mobile' && '1600' || '10240' }},
+                    "cpuSlowdownMultiplier": ${{ matrix.device == 'mobile' && '4' || '1' }}
+                  },
+                  "emulatedFormFactor": "${{ matrix.device }}",
+                  "onlyCategories": ["performance", "accessibility", "best-practices", "seo", "pwa"]
+                },
+                "url": ["${{ matrix.url }}"]
+              },
+              "assert": {
+                "assertions": {
+                  "categories:performance": ["error", {"minScore": 0.85}],
+                  "categories:accessibility": ["error", {"minScore": 0.95}],
+                  "categories:best-practices": ["error", {"minScore": 0.90}],
+                  "categories:seo": ["error", {"minScore": 0.90}],
+                  "categories:pwa": ["warn", {"minScore": 0.80}],
+                  "first-contentful-paint": ["error", {"maxNumericValue": 2000}],
+                  "largest-contentful-paint": ["error", {"maxNumericValue": 4000}],
+                  "cumulative-layout-shift": ["error", {"maxNumericValue": 0.15}],
+                  "total-blocking-time": ["error", {"maxNumericValue": 500}],
+                  "speed-index": ["warn", {"maxNumericValue": 4000}]
+                }
+              },
+              "upload": {
+                "target": "temporary-public-storage"
+              }
+            }
+          }
+          EOF
+          
+          # Run Lighthouse CI
+          lhci autorun
+
+      - name: 📊 Parse Results
+        id: results
+        run: |
+          # Parse the latest lighthouse results
+          RESULTS_FILE=$(find .lighthouseci -name "lhr-*.json" | head -1)
+          if [[ -f "$RESULTS_FILE" ]]; then
+            PERFORMANCE=$(cat "$RESULTS_FILE" | jq '.categories.performance.score * 100')
+            ACCESSIBILITY=$(cat "$RESULTS_FILE" | jq '.categories.accessibility.score * 100')
+            BEST_PRACTICES=$(cat "$RESULTS_FILE" | jq '."categories"."best-practices".score * 100')
+            SEO=$(cat "$RESULTS_FILE" | jq '.categories.seo.score * 100')
+            PWA=$(cat "$RESULTS_FILE" | jq '.categories.pwa.score * 100')
+            
+            FCP=$(cat "$RESULTS_FILE" | jq '.audits."first-contentful-paint".numericValue')
+            LCP=$(cat "$RESULTS_FILE" | jq '.audits."largest-contentful-paint".numericValue')
+            CLS=$(cat "$RESULTS_FILE" | jq '.audits."cumulative-layout-shift".numericValue')
+            FID=$(cat "$RESULTS_FILE" | jq '.audits."max-potential-fid".numericValue // 0')
+            TBT=$(cat "$RESULTS_FILE" | jq '.audits."total-blocking-time".numericValue')
+            
+            echo "performance=$PERFORMANCE" >> $GITHUB_OUTPUT
+            echo "accessibility=$ACCESSIBILITY" >> $GITHUB_OUTPUT
+            echo "best-practices=$BEST_PRACTICES" >> $GITHUB_OUTPUT
+            echo "seo=$SEO" >> $GITHUB_OUTPUT
+            echo "pwa=$PWA" >> $GITHUB_OUTPUT
+            echo "fcp=$FCP" >> $GITHUB_OUTPUT
+            echo "lcp=$LCP" >> $GITHUB_OUTPUT
+            echo "cls=$CLS" >> $GITHUB_OUTPUT
+            echo "fid=$FID" >> $GITHUB_OUTPUT
+            echo "tbt=$TBT" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 📤 Upload Lighthouse Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: lighthouse-reports-${{ matrix.device }}-${{ strategy.job-index }}
+          path: |
+            .lighthouseci/
+            lighthouserc.json
+          retention-days: 30
+
+      - name: 📝 Create Performance Summary
+        run: |
+          cat > performance-summary-${{ matrix.device }}-${{ strategy.job-index }}.json << EOF
+          {
+            "url": "${{ matrix.url }}",
+            "device": "${{ matrix.device }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "scores": {
+              "performance": ${{ steps.results.outputs.performance }},
+              "accessibility": ${{ steps.results.outputs.accessibility }},
+              "bestPractices": ${{ steps.results.outputs.best-practices }},
+              "seo": ${{ steps.results.outputs.seo }},
+              "pwa": ${{ steps.results.outputs.pwa }}
+            },
+            "metrics": {
+              "firstContentfulPaint": ${{ steps.results.outputs.fcp }},
+              "largestContentfulPaint": ${{ steps.results.outputs.lcp }},
+              "cumulativeLayoutShift": ${{ steps.results.outputs.cls }},
+              "firstInputDelay": ${{ steps.results.outputs.fid }},
+              "totalBlockingTime": ${{ steps.results.outputs.tbt }}
+            }
+          }
+          EOF
+
+      - name: 📤 Upload Performance Summary
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-summary-${{ matrix.device }}-${{ strategy.job-index }}
+          path: performance-summary-${{ matrix.device }}-${{ strategy.job-index }}.json
+          retention-days: 90
+
+  # ===== MOBILE SPECIFIC TESTS =====
+  mobile-performance:
+    name: 📱 Mobile Performance Deep Dive
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.should-test == 'true' && (contains(fromJSON('["full", "mobile"]'), env.TEST_TYPE))
+    strategy:
+      matrix:
+        url: ${{ fromJSON(needs.setup.outputs.test-urls) }}
+        network: [slow-3g, fast-3g, 4g]
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm install -g @lhci/cli lighthouse
+          npm ci --prefer-offline --no-audit
+
+      - name: 🎭 Install Chromium
+        run: npx playwright install chromium
+
+      - name: 📱 Mobile Performance Test - ${{ matrix.network }}
+        run: |
+          # Network throttling configurations
+          case "${{ matrix.network }}" in
+            "slow-3g")
+              RTT=2000
+              THROUGHPUT=400
+              CPU_SLOWDOWN=4
+              ;;
+            "fast-3g")
+              RTT=562.5
+              THROUGHPUT=1600
+              CPU_SLOWDOWN=4
+              ;;
+            "4g")
+              RTT=150
+              THROUGHPUT=9000
+              CPU_SLOWDOWN=2
+              ;;
+          esac
+          
+          # Create network-specific config
+          cat > lighthouserc-${{ matrix.network }}.json << EOF
+          {
+            "ci": {
+              "collect": {
+                "numberOfRuns": 3,
+                "settings": {
+                  "preset": "mobile",
+                  "throttling": {
+                    "rttMs": $RTT,
+                    "throughputKbps": $THROUGHPUT,
+                    "cpuSlowdownMultiplier": $CPU_SLOWDOWN
+                  },
+                  "emulatedFormFactor": "mobile",
+                  "onlyCategories": ["performance"],
+                  "onlyAudits": [
+                    "first-contentful-paint",
+                    "largest-contentful-paint",
+                    "cumulative-layout-shift",
+                    "total-blocking-time",
+                    "speed-index",
+                    "interactive",
+                    "max-potential-fid"
+                  ]
+                },
+                "url": ["${{ matrix.url }}"]
+              }
+            }
+          }
+          EOF
+          
+          # Run Lighthouse with network throttling
+          lhci autorun --config=lighthouserc-${{ matrix.network }}.json
+
+      - name: 📊 Analyze Mobile Performance
+        run: |
+          RESULTS_FILE=$(find .lighthouseci -name "lhr-*.json" | head -1)
+          if [[ -f "$RESULTS_FILE" ]]; then
+            echo "📊 Mobile Performance Results for ${{ matrix.network }}:"
+            echo "FCP: $(cat "$RESULTS_FILE" | jq '.audits."first-contentful-paint".displayValue')"
+            echo "LCP: $(cat "$RESULTS_FILE" | jq '.audits."largest-contentful-paint".displayValue')"
+            echo "CLS: $(cat "$RESULTS_FILE" | jq '.audits."cumulative-layout-shift".displayValue')"
+            echo "TBT: $(cat "$RESULTS_FILE" | jq '.audits."total-blocking-time".displayValue')"
+            echo "Speed Index: $(cat "$RESULTS_FILE" | jq '.audits."speed-index".displayValue')"
+            echo "TTI: $(cat "$RESULTS_FILE" | jq '.audits."interactive".displayValue')"
+          fi
+
+      - name: 📤 Upload Mobile Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: mobile-performance-${{ matrix.network }}-${{ strategy.job-index }}
+          path: |
+            .lighthouseci/
+            lighthouserc-${{ matrix.network }}.json
+          retention-days: 30
+
+  # ===== ACCESSIBILITY DEEP DIVE =====
+  accessibility-audit:
+    name: ♿ Accessibility Deep Dive
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.should-test == 'true' && (contains(fromJSON('["full", "accessibility"]'), env.TEST_TYPE))
+    strategy:
+      matrix:
+        url: ${{ fromJSON(needs.setup.outputs.test-urls) }}
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm install -g @lhci/cli lighthouse pa11y pa11y-ci axe-core
+          npm ci --prefer-offline --no-audit
+
+      - name: 🎭 Install Chromium
+        run: npx playwright install chromium
+
+      - name: ♿ Lighthouse Accessibility Audit
+        run: |
+          cat > lighthouserc-a11y.json << EOF
+          {
+            "ci": {
+              "collect": {
+                "numberOfRuns": 1,
+                "settings": {
+                  "onlyCategories": ["accessibility"],
+                  "onlyAudits": [
+                    "accesskeys",
+                    "aria-allowed-attr",
+                    "aria-hidden-body",
+                    "aria-hidden-focus",
+                    "aria-input-field-name",
+                    "aria-required-attr",
+                    "aria-roles",
+                    "aria-valid-attr",
+                    "aria-valid-attr-value",
+                    "button-name",
+                    "bypass",
+                    "color-contrast",
+                    "definition-list",
+                    "dlitem",
+                    "document-title",
+                    "duplicate-id",
+                    "form-field-multiple-labels",
+                    "frame-title",
+                    "heading-order",
+                    "html-has-lang",
+                    "html-lang-valid",
+                    "image-alt",
+                    "input-image-alt",
+                    "label",
+                    "layout-table",
+                    "link-name",
+                    "list",
+                    "listitem",
+                    "meta-refresh",
+                    "meta-viewport",
+                    "object-alt",
+                    "tabindex",
+                    "td-headers-attr",
+                    "th-has-data-cells",
+                    "valid-lang"
+                  ]
+                },
+                "url": ["${{ matrix.url }}"]
+              },
+              "assert": {
+                "assertions": {
+                  "categories:accessibility": ["error", {"minScore": 0.95}]
+                }
+              }
+            }
+          }
+          EOF
+          
+          lhci autorun --config=lighthouserc-a11y.json
+
+      - name: ♿ Pa11y Accessibility Test
+        run: |
+          echo "Running Pa11y accessibility test..."
+          pa11y ${{ matrix.url }} \
+            --standard WCAG2AA \
+            --reporter json \
+            --level error \
+            --threshold 5 \
+            > pa11y-results.json || true
+
+      - name: ♿ Axe-Core Accessibility Test
+        run: |
+          node << 'EOF'
+          const puppeteer = require('puppeteer');
+          const AxePuppeteer = require('@axe-core/puppeteer').default;
+          const fs = require('fs');
+          
+          (async () => {
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+            
+            try {
+              await page.goto('${{ matrix.url }}', { waitUntil: 'networkidle0' });
+              
+              const results = await new AxePuppeteer(page)
+                .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+                .analyze();
+              
+              fs.writeFileSync('axe-results.json', JSON.stringify(results, null, 2));
+              
+              console.log(`Found ${results.violations.length} accessibility violations`);
+              if (results.violations.length > 0) {
+                console.log('Violations:');
+                results.violations.forEach(violation => {
+                  console.log(`- ${violation.description} (${violation.impact})`);
+                });
+              }
+            } catch (error) {
+              console.error('Error running axe:', error);
+            } finally {
+              await browser.close();
+            }
+          })();
+          EOF
+
+      - name: 📊 Accessibility Summary
+        run: |
+          echo "📊 Accessibility Test Summary for ${{ matrix.url }}:"
+          
+          # Lighthouse results
+          LIGHTHOUSE_SCORE=$(find .lighthouseci -name "lhr-*.json" | head -1 | xargs cat | jq '.categories.accessibility.score * 100')
+          echo "Lighthouse Accessibility Score: $LIGHTHOUSE_SCORE/100"
+          
+          # Pa11y results
+          if [[ -f "pa11y-results.json" ]]; then
+            PA11Y_ISSUES=$(cat pa11y-results.json | jq 'length')
+            echo "Pa11y Issues Found: $PA11Y_ISSUES"
+          fi
+          
+          # Axe results
+          if [[ -f "axe-results.json" ]]; then
+            AXE_VIOLATIONS=$(cat axe-results.json | jq '.violations | length')
+            echo "Axe Violations Found: $AXE_VIOLATIONS"
+          fi
+
+      - name: 📤 Upload Accessibility Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: accessibility-reports-${{ strategy.job-index }}
+          path: |
+            .lighthouseci/
+            pa11y-results.json
+            axe-results.json
+            lighthouserc-a11y.json
+          retention-days: 30
+
+  # ===== PROGRESSIVE WEB APP AUDIT =====
+  pwa-audit:
+    name: 📱 PWA Audit
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.should-test == 'true' && contains(fromJSON('["full"]'), env.TEST_TYPE)
+    strategy:
+      matrix:
+        url: ${{ fromJSON(needs.setup.outputs.test-urls) }}
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm install -g @lhci/cli lighthouse
+          npm ci --prefer-offline --no-audit
+
+      - name: 🎭 Install Chromium
+        run: npx playwright install chromium
+
+      - name: 📱 PWA Lighthouse Audit
+        run: |
+          cat > lighthouserc-pwa.json << EOF
+          {
+            "ci": {
+              "collect": {
+                "numberOfRuns": 1,
+                "settings": {
+                  "onlyCategories": ["pwa"],
+                  "onlyAudits": [
+                    "installable-manifest",
+                    "splash-screen",
+                    "themed-omnibox",
+                    "content-width",
+                    "viewport",
+                    "apple-touch-icon",
+                    "maskable-icon",
+                    "service-worker",
+                    "offline-start-url",
+                    "without-javascript",
+                    "is-on-https",
+                    "redirects-http"
+                  ]
+                },
+                "url": ["${{ matrix.url }}"]
+              },
+              "assert": {
+                "assertions": {
+                  "categories:pwa": ["warn", {"minScore": 0.80}],
+                  "installable-manifest": ["error", {"minScore": 1}],
+                  "service-worker": ["error", {"minScore": 1}],
+                  "is-on-https": ["error", {"minScore": 1}]
+                }
+              }
+            }
+          }
+          EOF
+          
+          lhci autorun --config=lighthouserc-pwa.json
+
+      - name: 📱 PWA Manifest Validation
+        run: |
+          echo "🔍 Validating PWA Manifest..."
+          curl -f "${{ matrix.url }}/manifest.json" | jq . > manifest-validation.json
+          
+          # Check required manifest fields
+          node << 'EOF'
+          const fs = require('fs');
+          const manifest = JSON.parse(fs.readFileSync('manifest-validation.json', 'utf8'));
+          
+          const requiredFields = ['name', 'short_name', 'start_url', 'display', 'theme_color', 'background_color', 'icons'];
+          const missingFields = requiredFields.filter(field => !manifest[field]);
+          
+          if (missingFields.length > 0) {
+            console.error('❌ Missing required manifest fields:', missingFields);
+            process.exit(1);
+          }
+          
+          // Check icon sizes
+          const requiredSizes = ['72x72', '96x96', '128x128', '144x144', '152x152', '192x192', '384x384', '512x512'];
+          const availableSizes = manifest.icons.map(icon => icon.sizes);
+          const missingSizes = requiredSizes.filter(size => !availableSizes.includes(size));
+          
+          if (missingSizes.length > 0) {
+            console.warn('⚠️ Missing recommended icon sizes:', missingSizes);
+          }
+          
+          console.log('✅ PWA Manifest validation passed');
+          EOF
+
+      - name: 🔍 Service Worker Validation
+        run: |
+          echo "🔍 Validating Service Worker..."
+          curl -f "${{ matrix.url }}/service-worker.js" > service-worker-validation.js
+          
+          # Basic service worker validation
+          if grep -q "install" service-worker-validation.js && grep -q "fetch" service-worker-validation.js; then
+            echo "✅ Service Worker has install and fetch handlers"
+          else
+            echo "❌ Service Worker missing required handlers"
+            exit 1
+          fi
+
+      - name: 📤 Upload PWA Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: pwa-reports-${{ strategy.job-index }}
+          path: |
+            .lighthouseci/
+            manifest-validation.json
+            service-worker-validation.js
+            lighthouserc-pwa.json
+          retention-days: 30
+
+  # ===== PERFORMANCE REGRESSION DETECTION =====
+  regression-detection:
+    name: 📈 Performance Regression Detection
+    runs-on: ubuntu-latest
+    needs: [setup, core-web-vitals]
+    if: always() && needs.setup.outputs.should-test == 'true' && github.event_name == 'pull_request'
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 📥 Download All Performance Results
+        uses: actions/download-artifact@v3
+        with:
+          path: performance-results/
+
+      - name: 📊 Analyze Performance Regression
+        id: regression-analysis
+        run: |
+          python3 << 'EOF'
+          import json
+          import os
+          import glob
+          
+          # Collect all performance summaries
+          summaries = []
+          for file_path in glob.glob('performance-results/**/performance-summary-*.json', recursive=True):
+              with open(file_path, 'r') as f:
+                  summaries.append(json.load(f))
+          
+          # Baseline scores from setup
+          baseline = ${{ needs.setup.outputs.baseline-scores }}
+          
+          regressions = []
+          improvements = []
+          
+          for summary in summaries:
+              url = summary['url']
+              device = summary['device']
+              scores = summary['scores']
+              metrics = summary['metrics']
+              
+              # Check performance score regression
+              if scores['performance'] < baseline['performance'] - 5:
+                  regressions.append({
+                      'type': 'performance_score',
+                      'url': url,
+                      'device': device,
+                      'current': scores['performance'],
+                      'baseline': baseline['performance'],
+                      'diff': scores['performance'] - baseline['performance']
+                  })
+              
+              # Check Core Web Vitals regressions
+              if metrics['largestContentfulPaint'] > baseline['largest-contentful-paint'] * 1000 * 1.2:
+                  regressions.append({
+                      'type': 'lcp',
+                      'url': url,
+                      'device': device,
+                      'current': metrics['largestContentfulPaint'],
+                      'baseline': baseline['largest-contentful-paint'] * 1000,
+                      'diff': metrics['largestContentfulPaint'] - (baseline['largest-contentful-paint'] * 1000)
+                  })
+              
+              if metrics['cumulativeLayoutShift'] > baseline['cumulative-layout-shift'] * 1.5:
+                  regressions.append({
+                      'type': 'cls',
+                      'url': url,
+                      'device': device,
+                      'current': metrics['cumulativeLayoutShift'],
+                      'baseline': baseline['cumulative-layout-shift'],
+                      'diff': metrics['cumulativeLayoutShift'] - baseline['cumulative-layout-shift']
+                  })
+          
+          # Output results
+          if regressions:
+              print("❌ Performance regressions detected:")
+              for reg in regressions:
+                  print(f"  - {reg['type']} on {reg['url']} ({reg['device']}): {reg['current']} vs {reg['baseline']} (diff: {reg['diff']:.2f})")
+              
+              with open('regressions.json', 'w') as f:
+                  json.dump(regressions, f, indent=2)
+          else:
+              print("✅ No significant performance regressions detected")
+              
+          print(f"has_regressions={'true' if regressions else 'false'}")
+          EOF
+
+      - name: 📝 Create Regression Report
+        if: hashFiles('regressions.json') != ''
+        run: |
+          echo "📊 Performance Regression Report" > regression-report.md
+          echo "=====================================" >> regression-report.md
+          echo "" >> regression-report.md
+          
+          python3 << 'EOF'
+          import json
+          
+          with open('regressions.json', 'r') as f:
+              regressions = json.load(f)
+          
+          report = []
+          report.append("## ⚠️ Performance Regressions Detected\n")
+          report.append("The following performance regressions were found compared to baseline:\n")
+          
+          for reg in regressions:
+              report.append(f"### {reg['type'].upper()} Regression")
+              report.append(f"- **URL:** {reg['url']}")
+              report.append(f"- **Device:** {reg['device']}")
+              report.append(f"- **Current:** {reg['current']}")
+              report.append(f"- **Baseline:** {reg['baseline']}")
+              report.append(f"- **Difference:** {reg['diff']:.2f}")
+              report.append("")
+          
+          with open('regression-report.md', 'a') as f:
+              f.write('\n'.join(report))
+          EOF
+
+      - name: 💬 Comment Regression Report on PR
+        if: hashFiles('regressions.json') != ''
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('regression-report.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+
+  # ===== AGGREGATE RESULTS & REPORTING =====
+  aggregate-results:
+    name: 📋 Aggregate Performance Results
+    runs-on: ubuntu-latest
+    needs: [setup, core-web-vitals, mobile-performance, accessibility-audit, pwa-audit]
+    if: always() && needs.setup.outputs.should-test == 'true'
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 📥 Download All Results
+        uses: actions/download-artifact@v3
+        with:
+          path: all-results/
+
+      - name: 📊 Generate Performance Dashboard
+        run: |
+          python3 << 'EOF'
+          import json
+          import os
+          import glob
+          from datetime import datetime
+          
+          # Collect all performance data
+          dashboard_data = {
+              "timestamp": datetime.now().isoformat(),
+              "repository": "${{ github.repository }}",
+              "branch": "${{ github.ref_name }}",
+              "commit": "${{ github.sha }}",
+              "environment": "${{ env.TARGET_ENV }}",
+              "results": {
+                  "core_web_vitals": [],
+                  "mobile_performance": [],
+                  "accessibility": [],
+                  "pwa": []
+              }
+          }
+          
+          # Process core web vitals results
+          for file_path in glob.glob('all-results/**/performance-summary-*.json', recursive=True):
+              try:
+                  with open(file_path, 'r') as f:
+                      data = json.load(f)
+                      dashboard_data["results"]["core_web_vitals"].append(data)
+              except:
+                  continue
+          
+          # Generate HTML dashboard
+          html_content = f"""
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>EATECH Performance Dashboard</title>
+              <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+              <style>
+                  body {{ font-family: Arial, sans-serif; margin: 40px; }}
+                  .header {{ background: #f8f9fa; padding: 20px; border-left: 4px solid #007bff; }}
+                  .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0; }}
+                  .card {{ background: white; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }}
+                  .score {{ font-size: 2em; font-weight: bold; }}
+                  .green {{ color: #28a745; }}
+                  .yellow {{ color: #ffc107; }}
+                  .red {{ color: #dc3545; }}
+                  .chart {{ width: 100%; height: 300px; }}
+              </style>
+          </head>
+          <body>
+              <div class="header">
+                  <h1>🚀 EATECH Performance Dashboard</h1>
+                  <p>Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+                  <p>Environment: ${{ env.TARGET_ENV }} | Branch: ${{ github.ref_name }}</p>
+              </div>
+              
+              <div class="grid">
+                  <div class="card">
+                      <h3>📊 Core Web Vitals</h3>
+                      <canvas id="coreWebVitalsChart" class="chart"></canvas>
+                  </div>
+                  <div class="card">
+                      <h3>♿ Accessibility Scores</h3>
+                      <canvas id="accessibilityChart" class="chart"></canvas>
+                  </div>
+                  <div class="card">
+                      <h3>📱 PWA Score</h3>
+                      <canvas id="pwaChart" class="chart"></canvas>
+                  </div>
+                  <div class="card">
+                      <h3>📈 Performance Trend</h3>
+                      <canvas id="trendChart" class="chart"></canvas>
+                  </div>
+              </div>
+              
+              <script>
+                  const dashboardData = {json.dumps(dashboard_data, indent=2)};
+                  
+                  // Initialize charts here
+                  // (Chart.js implementation would go here)
+                  console.log('Dashboard data:', dashboardData);
+              </script>
+          </body>
+          </html>
+          """
+          
+          with open("performance-dashboard.html", "w") as f:
+              f.write(html_content)
+          
+          with open("performance-dashboard.json", "w") as f:
+              json.dump(dashboard_data, f, indent=2)
+          EOF
+
+      - name: 📤 Upload Performance Dashboard
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-dashboard
+          path: |
+            performance-dashboard.html
+            performance-dashboard.json
+          retention-days: 90
+
+      - name: 🌐 Deploy Dashboard to GitHub Pages
+        if: github.ref == 'refs/heads/main' && env.TARGET_ENV == 'production'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+          destination_dir: performance-dashboard
+          keep_files: true
+
+  # ===== NOTIFICATIONS =====
+  notify:
+    name: 📢 Performance Notifications
+    runs-on: ubuntu-latest
+    needs: [core-web-vitals, mobile-performance, accessibility-audit, pwa-audit, aggregate-results]
+    if: always()
+    steps:
+      - name: 📊 Calculate Overall Performance Score
+        id: performance-score
+        run: |
+          # Calculate weighted performance score
+          CORE_STATUS="${{ needs.core-web-vitals.result }}"
+          MOBILE_STATUS="${{ needs.mobile-performance.result }}"
+          A11Y_STATUS="${{ needs.accessibility-audit.result }}"
+          PWA_STATUS="${{ needs.pwa-audit.result }}"
+          
+          SCORE=0
+          TOTAL=100
+          
+          # Core Web Vitals (40%)
+          [[ "$CORE_STATUS" == "success" ]] && SCORE=$((SCORE + 40))
+          
+          # Mobile Performance (25%)
+          [[ "$MOBILE_STATUS" == "success" ]] && SCORE=$((SCORE + 25))
+          
+          # Accessibility (20%)
+          [[ "$A11Y_STATUS" == "success" ]] && SCORE=$((SCORE + 20))
+          
+          # PWA (15%)
+          [[ "$PWA_STATUS" == "success" ]] && SCORE=$((SCORE + 15))
+          
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          
+          if [ $SCORE -ge 90 ]; then
+            echo "grade=A" >> $GITHUB_OUTPUT
+            echo "emoji=🏆" >> $GITHUB_OUTPUT
+          elif [ $SCORE -ge 80 ]; then
+            echo "grade=B" >> $GITHUB_OUTPUT
+            echo "emoji=✅" >> $GITHUB_OUTPUT
+          elif [ $SCORE -ge 70 ]; then
+            echo "grade=C" >> $GITHUB_OUTPUT
+            echo "emoji=⚠️" >> $GITHUB_OUTPUT
+          else
+            echo "grade=F" >> $GITHUB_OUTPUT
+            echo "emoji=❌" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 📧 Slack Performance Report
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ steps.performance-score.outputs.grade != 'F' && 'success' || 'failure' }}
+          text: |
+            🚀 **Performance Test Report**
+            
+            **Overall Grade:** ${{ steps.performance-score.outputs.emoji }} ${{ steps.performance-score.outputs.grade }} (${{ steps.performance-score.outputs.score }}/100)
+            **Environment:** ${{ env.TARGET_ENV }}
+            **Branch:** ${{ github.ref_name }}
+            
+            **Test Results:**
+            • Core Web Vitals: ${{ needs.core-web-vitals.result }}
+            • Mobile Performance: ${{ needs.mobile-performance.result }}
+            • Accessibility: ${{ needs.accessibility-audit.result }}
+            • PWA: ${{ needs.pwa-audit.result }}
+            
+            ${{ steps.performance-score.outputs.grade == 'F' && '⚠️ **ACTION REQUIRED**: Performance issues detected!' || '✅ Performance metrics are within acceptable ranges.' }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: 💬 Performance Summary PR Comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const grade = '${{ steps.performance-score.outputs.grade }}';
+            const score = '${{ steps.performance-score.outputs.score }}';
+            const emoji = '${{ steps.performance-score.outputs.emoji }}';
+            
+            const body = `## ${emoji} Performance Test Results
+            
+            **Overall Performance Grade: ${grade} (${score}/100)**
+            
+            | Category | Status | Weight |
+            |----------|--------|--------|
+            | Core Web Vitals | ${{ needs.core-web-vitals.result }} | 40% |
+            | Mobile Performance | ${{ needs.mobile-performance.result }} | 25% |
+            | Accessibility | ${{ needs.accessibility-audit.result }} | 20% |
+            | PWA | ${{ needs.pwa-audit.result }} | 15% |
+            
+            ### 📊 Key Metrics
+            - **Environment:** ${{ env.TARGET_ENV }}
+            - **Test Type:** ${{ env.TEST_TYPE }}
+            - **Branch:** ${{ github.ref_name }}
+            
+            ${grade === 'F' ? '⚠️ **Performance issues detected!** Please review the detailed reports.' : '✅ Performance metrics are within acceptable ranges.'}
+            
+            [📊 View Detailed Dashboard](https://benediktt03.github.io/Eatech/performance-dashboard/)
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: 📧 Email Performance Alert
+        if: steps.performance-score.outputs.grade == 'F'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "⚠️ EATECH Performance Alert - Grade ${{ steps.performance-score.outputs.grade }}"
+          to: performance@eatech.ch,benedikt@thomma.ch
+          from: alerts@eatech.ch
+          html_body: |
+            <h2>⚠️ EATECH Performance Alert</h2>
+            <p><strong>Performance Grade:</strong> ${{ steps.performance-score.outputs.grade }} (${{ steps.performance-score.outputs.score }}/100)</p>
+            <p><strong>Environment:</strong> ${{ env.TARGET_ENV }}</p>
+            <p><strong>Branch:</strong> ${{ github.ref_name }}</p>
+            <p><strong>Critical Issue:</strong> Performance has degraded below acceptable thresholds.</p>
+            <p><strong>Action Required:</strong> Please investigate and address performance issues immediately.</p>
+            <p><a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Detailed Report</a></p>

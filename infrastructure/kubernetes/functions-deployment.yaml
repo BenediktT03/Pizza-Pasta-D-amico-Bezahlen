@@ -1,0 +1,674 @@
+# EATECH V3.0 - Firebase Functions Kubernetes Deployment
+# Node.js 18 serverless functions with auto-scaling
+# Swiss data residency with high performance and reliability
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eatech-functions
+  namespace: eatech-production
+  labels:
+    app: eatech-functions
+    component: backend-api
+    tier: api
+    version: v3.0.0
+    environment: production
+    runtime: nodejs18
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    description: "EATECH Firebase Functions - Node.js 18 API"
+    maintainer: "benedikt@thomma.ch"
+    functions.framework: "google-cloud-functions"
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: eatech-functions
+      component: backend-api
+  template:
+    metadata:
+      labels:
+        app: eatech-functions
+        component: backend-api
+        tier: api
+        version: v3.0.0
+        runtime: nodejs18
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+        functions.config: "production"
+    spec:
+      # Security Context
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+
+      # Swiss Data Residency
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: topology.kubernetes.io/region
+                operator: In
+                values:
+                - europe-west6  # Zurich
+                - europe-west3  # Frankfurt (backup)
+              - key: node.kubernetes.io/instance-type
+                operator: In
+                values:
+                - e2-standard-4
+                - e2-highmem-2
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - eatech-functions
+              topologyKey: kubernetes.io/hostname
+
+      # Tolerations
+      tolerations:
+      - key: "region"
+        operator: "Equal"
+        value: "switzerland"
+        effect: "NoSchedule"
+
+      containers:
+      - name: functions-api
+        image: eatech/functions:3.0.0
+        imagePullPolicy: Always
+
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        - name: admin
+          containerPort: 9090
+          protocol: TCP
+
+        # Environment Variables for Firebase Functions
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "8080"
+        - name: HOST
+          value: "0.0.0.0"
+        - name: FIREBASE_CONFIG
+          valueFrom:
+            secretKeyRef:
+              name: eatech-secrets
+              key: firebase-config
+        - name: GCLOUD_PROJECT
+          valueFrom:
+            configMapKeyRef:
+              name: eatech-config
+              key: firebase-project-id
+        - name: FUNCTION_TARGET
+          value: "api"
+        - name: FUNCTIONS_FRAMEWORK_VERSION
+          value: "3.0.0"
+
+        # Firebase Service Account
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/secrets/firebase/service-account.json"
+
+        # Database Connections
+        - name: FIRESTORE_EMULATOR_HOST
+          value: ""  # Use production Firestore
+        - name: FIREBASE_AUTH_EMULATOR_HOST
+          value: ""  # Use production Auth
+
+        # External Service Keys
+        - name: STRIPE_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: eatech-secrets
+              key: stripe-secret-key
+        - name: STRIPE_WEBHOOK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: eatech-secrets
+              key: stripe-webhook-secret
+        - name: TWILIO_ACCOUNT_SID
+          valueFrom:
+            secretKeyRef:
+              name: eatech-secrets
+              key: twilio-account-sid
+        - name: TWILIO_AUTH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: eatech-secrets
+              key: twilio-auth-token
+        - name: SENDGRID_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: eatech-secrets
+              key: sendgrid-api-key
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: eatech-secrets
+              key: openai-api-key
+
+        # Monitoring & Logging
+        - name: SENTRY_DSN
+          valueFrom:
+            secretKeyRef:
+              name: eatech-secrets
+              key: sentry-dsn-functions
+        - name: LOG_LEVEL
+          value: "info"
+        - name: ENABLE_METRICS
+          value: "true"
+
+        # Redis Connection
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: eatech-secrets
+              key: redis-url
+
+        # Performance Tuning
+        - name: NODE_OPTIONS
+          value: "--max-old-space-size=1024 --enable-source-maps"
+        - name: UV_THREADPOOL_SIZE
+          value: "20"
+
+        # Resource Allocation
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+            ephemeral-storage: "2Gi"
+          limits:
+            memory: "2Gi"
+            cpu: "1500m"
+            ephemeral-storage: "4Gi"
+
+        # Health Checks
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+            httpHeaders:
+            - name: Host
+              value: "api.eatech.ch"
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+            httpHeaders:
+            - name: Host
+              value: "api.eatech.ch"
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+
+        startupProbe:
+          httpGet:
+            path: /startup
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 20
+          successThreshold: 1
+
+        # Security Context
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
+          runAsGroup: 1001
+          capabilities:
+            drop:
+            - ALL
+
+        # Volume Mounts
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: app-cache
+          mountPath: /app/.cache
+        - name: logs
+          mountPath: /app/logs
+        - name: firebase-secrets
+          mountPath: /secrets/firebase
+          readOnly: true
+        - name: functions-config
+          mountPath: /app/config
+          readOnly: true
+
+      # AI Functions Sidecar for OpenAI Integration
+      - name: ai-functions
+        image: eatech/functions:3.0.0
+        imagePullPolicy: Always
+
+        ports:
+        - name: ai-http
+          containerPort: 8081
+          protocol: TCP
+
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "8081"
+        - name: FUNCTION_TARGET
+          value: "aiServices"
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: eatech-secrets
+              key: openai-api-key
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/secrets/firebase/service-account.json"
+
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
+          capabilities:
+            drop:
+            - ALL
+
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: firebase-secrets
+          mountPath: /secrets/firebase
+          readOnly: true
+
+      # Webhook Functions Sidecar
+      - name: webhook-functions
+        image: eatech/functions:3.0.0
+        imagePullPolicy: Always
+
+        ports:
+        - name: webhook-http
+          containerPort: 8082
+          protocol: TCP
+
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "8082"
+        - name: FUNCTION_TARGET
+          value: "webhooks"
+        - name: STRIPE_WEBHOOK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: eatech-secrets
+              key: stripe-webhook-secret
+        - name: TWILIO_AUTH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: eatech-secrets
+              key: twilio-auth-token
+
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "125m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
+          capabilities:
+            drop:
+            - ALL
+
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: firebase-secrets
+          mountPath: /secrets/firebase
+          readOnly: true
+
+      # Init Containers
+      initContainers:
+      - name: functions-init
+        image: eatech/functions:3.0.0
+        command: ['sh', '-c']
+        args:
+        - |
+          echo "Initializing Firebase Functions..."
+
+          # Verify Firebase configuration
+          node -e "console.log('Node.js version:', process.version)"
+          node -e "console.log('Firebase config valid:', !!process.env.FIREBASE_CONFIG)"
+
+          # Test Firebase connection
+          node -e "
+            const admin = require('firebase-admin');
+            const serviceAccount = require('/secrets/firebase/service-account.json');
+            admin.initializeApp({
+              credential: admin.credential.cert(serviceAccount),
+              projectId: process.env.GCLOUD_PROJECT
+            });
+            console.log('Firebase Admin SDK initialized successfully');
+          "
+
+          # Pre-warm function containers
+          echo "Pre-warming function containers..."
+
+          echo "Functions initialization complete"
+        env:
+        - name: GCLOUD_PROJECT
+          valueFrom:
+            configMapKeyRef:
+              name: eatech-config
+              key: firebase-project-id
+        securityContext:
+          runAsUser: 1001
+          runAsGroup: 1001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: firebase-secrets
+          mountPath: /secrets/firebase
+          readOnly: true
+
+      - name: wait-for-dependencies
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+        - |
+          echo "Waiting for dependencies..."
+
+          # Wait for Redis
+          until nc -z eatech-redis-service 6379; do
+            echo "Waiting for Redis..."
+            sleep 2
+          done
+
+          # Wait for PostgreSQL (analytics)
+          until nc -z eatech-postgres-service 5432; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+
+          echo "All dependencies are ready!"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+
+      # Volumes
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: "500Mi"
+      - name: app-cache
+        emptyDir:
+          sizeLimit: "1Gi"
+      - name: logs
+        emptyDir:
+          sizeLimit: "500Mi"
+      - name: firebase-secrets
+        secret:
+          secretName: firebase-service-account
+          defaultMode: 0400
+      - name: functions-config
+        configMap:
+          name: functions-config
+          defaultMode: 0644
+
+      # DNS Configuration
+      dnsPolicy: ClusterFirst
+      dnsConfig:
+        options:
+        - name: ndots
+          value: "2"
+        - name: edns0
+
+      # Image Pull Secrets
+      imagePullSecrets:
+      - name: eatech-registry-secret
+
+      # Service Account
+      serviceAccountName: eatech-functions-sa
+      automountServiceAccountToken: false
+
+      # Restart Policy
+      restartPolicy: Always
+
+      # Termination Grace Period
+      terminationGracePeriodSeconds: 60
+
+---
+# Horizontal Pod Autoscaler with Custom Metrics
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: eatech-functions-hpa
+  namespace: eatech-production
+  labels:
+    app: eatech-functions
+    component: autoscaler
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: eatech-functions
+  minReplicas: 3
+  maxReplicas: 50
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  - type: Pods
+    pods:
+      metric:
+        name: http_requests_per_second
+      target:
+        type: AverageValue
+        averageValue: "50"
+  - type: Pods
+    pods:
+      metric:
+        name: function_invocations_per_second
+      target:
+        type: AverageValue
+        averageValue: "100"
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 60
+      - type: Pods
+        value: 5
+        periodSeconds: 60
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 20
+        periodSeconds: 60
+      selectPolicy: Min
+
+---
+# Pod Disruption Budget
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: eatech-functions-pdb
+  namespace: eatech-production
+  labels:
+    app: eatech-functions
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: eatech-functions
+      component: backend-api
+
+---
+# Service Account
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eatech-functions-sa
+  namespace: eatech-production
+  labels:
+    app: eatech-functions
+    component: security
+  annotations:
+    description: "Service account for EATECH Firebase Functions"
+automountServiceAccountToken: false
+
+---
+# Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: eatech-functions-netpol
+  namespace: eatech-production
+  labels:
+    app: eatech-functions
+    component: security
+spec:
+  podSelector:
+    matchLabels:
+      app: eatech-functions
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    - podSelector:
+        matchLabels:
+          app: nginx-ingress
+    - podSelector:
+        matchLabels:
+          app: eatech-web
+    - podSelector:
+        matchLabels:
+          app: eatech-admin
+    - podSelector:
+        matchLabels:
+          app: eatech-master
+    ports:
+    - protocol: TCP
+      port: 8080
+    - protocol: TCP
+      port: 8081
+    - protocol: TCP
+      port: 8082
+  egress:
+  # Allow Redis
+  - to:
+    - podSelector:
+        matchLabels:
+          app: eatech-redis
+    ports:
+    - protocol: TCP
+      port: 6379
+  # Allow PostgreSQL
+  - to:
+    - podSelector:
+        matchLabels:
+          app: eatech-postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow external HTTPS (Firebase, Stripe, Twilio, etc.)
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  # Allow DNS
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+
+---
+# Service Monitor for Prometheus
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: eatech-functions-monitor
+  namespace: eatech-production
+  labels:
+    app: eatech-functions
+    component: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: eatech-functions
+      component: backend-api
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    honorLabels: true
+  - port: admin
+    path: /admin/metrics
+    interval: 60s
+    scrapeTimeout: 15s

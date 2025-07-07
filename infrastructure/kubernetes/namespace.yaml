@@ -1,0 +1,581 @@
+# EATECH V3.0 - Kubernetes Namespaces Configuration
+# Isolated environments for security and resource management
+# Swiss data residency with comprehensive governance
+
+# Production Namespace - Main EATECH Application
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eatech-production
+  labels:
+    name: eatech-production
+    environment: production
+    app: eatech
+    version: v3.0.0
+    data-residency: switzerland
+    compliance: gdpr-dsg
+    security-level: high
+    cost-center: "eatech-ops"
+    team: "platform"
+  annotations:
+    description: "EATECH V3.0 Production Environment"
+    owner: "benedikt@thomma.ch"
+    created-by: "platform-team"
+    compliance.gdpr: "enabled"
+    compliance.dsg: "enabled"
+    data-classification: "confidential"
+    backup-policy: "daily"
+    monitoring: "enabled"
+    alerting: "enabled"
+    network-policy: "strict"
+spec:
+  finalizers:
+  - kubernetes
+
+---
+# Staging Namespace - Pre-production Testing
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eatech-staging
+  labels:
+    name: eatech-staging
+    environment: staging
+    app: eatech
+    version: v3.0.0
+    data-residency: switzerland
+    security-level: medium
+    cost-center: "eatech-dev"
+    team: "development"
+  annotations:
+    description: "EATECH V3.0 Staging Environment for testing"
+    owner: "benedikt@thomma.ch"
+    purpose: "pre-production-testing"
+    auto-cleanup: "enabled"
+    backup-policy: "weekly"
+    monitoring: "enabled"
+spec:
+  finalizers:
+  - kubernetes
+
+---
+# Development Namespace - Developer Environment
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eatech-development
+  labels:
+    name: eatech-development
+    environment: development
+    app: eatech
+    version: v3.0.0-dev
+    security-level: low
+    cost-center: "eatech-dev"
+    team: "development"
+    auto-scale: "disabled"
+  annotations:
+    description: "EATECH V3.0 Development Environment"
+    owner: "benedikt@thomma.ch"
+    purpose: "feature-development"
+    auto-cleanup: "enabled"
+    cleanup-schedule: "0 2 * * 0"  # Weekly cleanup on Sunday 2 AM
+    resource-quota: "limited"
+    backup-policy: "none"
+spec:
+  finalizers:
+  - kubernetes
+
+---
+# Monitoring Namespace - Observability Stack
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eatech-monitoring
+  labels:
+    name: eatech-monitoring
+    environment: production
+    component: observability
+    app: monitoring-stack
+    security-level: medium
+    cost-center: "eatech-ops"
+    team: "platform"
+  annotations:
+    description: "Monitoring and observability infrastructure"
+    owner: "platform-team@eatech.ch"
+    purpose: "metrics-logs-traces"
+    retention-policy: "90-days"
+    backup-policy: "daily"
+    critical-service: "true"
+spec:
+  finalizers:
+  - kubernetes
+
+---
+# Security Namespace - Security Tools and Scanning
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eatech-security
+  labels:
+    name: eatech-security
+    environment: production
+    component: security
+    app: security-stack
+    security-level: maximum
+    cost-center: "eatech-ops"
+    team: "security"
+  annotations:
+    description: "Security tools, scanning, and compliance"
+    owner: "security-team@eatech.ch"
+    purpose: "security-scanning-compliance"
+    access-control: "restricted"
+    audit-logging: "enabled"
+    critical-service: "true"
+spec:
+  finalizers:
+  - kubernetes
+
+---
+# CI/CD Namespace - Build and Deployment Pipeline
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eatech-cicd
+  labels:
+    name: eatech-cicd
+    environment: infrastructure
+    component: cicd
+    app: build-pipeline
+    security-level: medium
+    cost-center: "eatech-ops"
+    team: "platform"
+  annotations:
+    description: "CI/CD pipeline infrastructure"
+    owner: "platform-team@eatech.ch"
+    purpose: "build-test-deploy"
+    auto-cleanup: "enabled"
+    cleanup-retention: "30-days"
+    resource-quota: "high"
+spec:
+  finalizers:
+  - kubernetes
+
+---
+# Backup Namespace - Backup and Recovery Services
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eatech-backup
+  labels:
+    name: eatech-backup
+    environment: infrastructure
+    component: backup
+    app: backup-stack
+    security-level: high
+    cost-center: "eatech-ops"
+    team: "platform"
+    data-classification: "confidential"
+  annotations:
+    description: "Backup and disaster recovery services"
+    owner: "platform-team@eatech.ch"
+    purpose: "backup-recovery"
+    retention-policy: "7-years"
+    encryption: "enabled"
+    compliance: "gdpr-dsg"
+spec:
+  finalizers:
+  - kubernetes
+
+---
+# Emergency Namespace - Emergency Mode Services
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eatech-emergency
+  labels:
+    name: eatech-emergency
+    environment: production
+    component: emergency
+    app: emergency-stack
+    security-level: high
+    cost-center: "eatech-ops"
+    team: "platform"
+    criticality: maximum
+  annotations:
+    description: "Emergency mode and disaster recovery services"
+    owner: "platform-team@eatech.ch"
+    purpose: "emergency-response"
+    priority: "critical"
+    always-available: "true"
+    resource-guarantee: "enabled"
+spec:
+  finalizers:
+  - kubernetes
+
+---
+# External Services Namespace - External Integrations
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eatech-external
+  labels:
+    name: eatech-external
+    environment: production
+    component: external-integrations
+    app: external-stack
+    security-level: medium
+    cost-center: "eatech-ops"
+    team: "platform"
+  annotations:
+    description: "External service integrations and proxies"
+    owner: "platform-team@eatech.ch"
+    purpose: "external-integrations"
+    network-policy: "restricted-egress"
+    monitoring: "enabled"
+spec:
+  finalizers:
+  - kubernetes
+
+---
+# Testing Namespace - Automated Testing
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eatech-testing
+  labels:
+    name: eatech-testing
+    environment: testing
+    component: testing
+    app: test-stack
+    security-level: low
+    cost-center: "eatech-dev"
+    team: "qa"
+  annotations:
+    description: "Automated testing infrastructure"
+    owner: "qa-team@eatech.ch"
+    purpose: "automated-testing"
+    auto-cleanup: "enabled"
+    cleanup-schedule: "0 6 * * *"  # Daily cleanup at 6 AM
+    resource-quota: "medium"
+spec:
+  finalizers:
+  - kubernetes
+
+---
+# Resource Quotas for Production Namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: eatech-production-quota
+  namespace: eatech-production
+  labels:
+    app: eatech
+    component: resource-management
+  annotations:
+    description: "Resource quota for production environment"
+spec:
+  hard:
+    # Compute Resources
+    requests.cpu: "20"
+    requests.memory: "40Gi"
+    requests.storage: "500Gi"
+    limits.cpu: "40"
+    limits.memory: "80Gi"
+
+    # Object Counts
+    pods: "100"
+    services: "20"
+    secrets: "50"
+    configmaps: "50"
+    persistentvolumeclaims: "20"
+
+    # LoadBalancer and NodePort services
+    services.loadbalancers: "5"
+    services.nodeports: "0"
+
+    # Request/Limit Ratios
+    requests.nvidia.com/gpu: "0"
+    limits.nvidia.com/gpu: "0"
+
+---
+# Resource Quota for Staging Namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: eatech-staging-quota
+  namespace: eatech-staging
+  labels:
+    app: eatech
+    component: resource-management
+  annotations:
+    description: "Resource quota for staging environment"
+spec:
+  hard:
+    requests.cpu: "10"
+    requests.memory: "20Gi"
+    requests.storage: "200Gi"
+    limits.cpu: "20"
+    limits.memory: "40Gi"
+    pods: "50"
+    services: "10"
+    secrets: "25"
+    configmaps: "25"
+    persistentvolumeclaims: "10"
+
+---
+# Resource Quota for Development Namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: eatech-development-quota
+  namespace: eatech-development
+  labels:
+    app: eatech
+    component: resource-management
+  annotations:
+    description: "Resource quota for development environment"
+spec:
+  hard:
+    requests.cpu: "5"
+    requests.memory: "10Gi"
+    requests.storage: "100Gi"
+    limits.cpu: "10"
+    limits.memory: "20Gi"
+    pods: "25"
+    services: "5"
+    secrets: "15"
+    configmaps: "15"
+    persistentvolumeclaims: "5"
+
+---
+# Limit Range for Production Namespace
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: eatech-production-limits
+  namespace: eatech-production
+  labels:
+    app: eatech
+    component: resource-management
+  annotations:
+    description: "Resource limits for production environment"
+spec:
+  limits:
+  # Container limits
+  - type: Container
+    default:
+      cpu: "500m"
+      memory: "1Gi"
+      ephemeral-storage: "2Gi"
+    defaultRequest:
+      cpu: "100m"
+      memory: "256Mi"
+      ephemeral-storage: "1Gi"
+    max:
+      cpu: "4"
+      memory: "8Gi"
+      ephemeral-storage: "10Gi"
+    min:
+      cpu: "50m"
+      memory: "128Mi"
+      ephemeral-storage: "500Mi"
+
+  # Pod limits
+  - type: Pod
+    max:
+      cpu: "4"
+      memory: "8Gi"
+    min:
+      cpu: "50m"
+      memory: "128Mi"
+
+  # PVC limits
+  - type: PersistentVolumeClaim
+    max:
+      storage: "100Gi"
+    min:
+      storage: "1Gi"
+
+---
+# Network Policies for Namespace Isolation
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: eatech-production-netpol
+  namespace: eatech-production
+  labels:
+    app: eatech
+    component: network-security
+  annotations:
+    description: "Network policy for production namespace isolation"
+spec:
+  podSelector: {}  # Apply to all pods in namespace
+  policyTypes:
+  - Ingress
+  - Egress
+
+  ingress:
+  # Allow ingress from ingress controller
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+
+  # Allow ingress from monitoring namespace
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: eatech-monitoring
+
+  # Allow inter-pod communication within namespace
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: eatech-production
+
+  egress:
+  # Allow egress to monitoring namespace
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: eatech-monitoring
+
+  # Allow egress to external services namespace
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: eatech-external
+
+  # Allow egress for DNS
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+
+  # Allow egress for HTTPS
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+
+---
+# RBAC for Namespace Access
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: eatech-production-reader
+  namespace: eatech-production
+  labels:
+    app: eatech
+    component: rbac
+  annotations:
+    description: "Read-only access to production namespace"
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: eatech-production-admin
+  namespace: eatech-production
+  labels:
+    app: eatech
+    component: rbac
+  annotations:
+    description: "Administrative access to production namespace"
+rules:
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]
+
+---
+# Service Account for Production Operations
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eatech-production-operator
+  namespace: eatech-production
+  labels:
+    app: eatech
+    component: service-account
+  annotations:
+    description: "Service account for production operations"
+automountServiceAccountToken: true
+
+---
+# RoleBinding for Production Operators
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: eatech-production-operators
+  namespace: eatech-production
+  labels:
+    app: eatech
+    component: rbac
+subjects:
+- kind: ServiceAccount
+  name: eatech-production-operator
+  namespace: eatech-production
+- kind: User
+  name: benedikt@thomma.ch
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: eatech-production-admin
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# Monitoring Service Account
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eatech-monitoring-reader
+  namespace: eatech-monitoring
+  labels:
+    app: monitoring
+    component: service-account
+  annotations:
+    description: "Service account for monitoring access across namespaces"
+
+---
+# ClusterRole for Cross-Namespace Monitoring
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: eatech-monitoring-reader
+  labels:
+    app: monitoring
+    component: rbac
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "services", "endpoints", "pods"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get"]
+- nonResourceURLs: ["/metrics"]
+  verbs: ["get"]
+
+---
+# ClusterRoleBinding for Monitoring
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: eatech-monitoring-reader
+  labels:
+    app: monitoring
+    component: rbac
+subjects:
+- kind: ServiceAccount
+  name: eatech-monitoring-reader
+  namespace: eatech-monitoring
+roleRef:
+  kind: ClusterRole
+  name: eatech-monitoring-reader
+  apiGroup: rbac.authorization.k8s.io

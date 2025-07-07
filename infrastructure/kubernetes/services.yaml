@@ -1,0 +1,641 @@
+# EATECH V3.0 - Kubernetes Services Configuration
+# Load balancing and service discovery for all components
+# Swiss data residency with high availability
+
+# Customer PWA Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-web-service
+  namespace: eatech-production
+  labels:
+    app: eatech-web
+    component: frontend
+    tier: web
+    version: v3.0.0
+  annotations:
+    description: "Customer PWA Next.js service"
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "3000"
+    prometheus.io/path: "/api/metrics"
+spec:
+  type: ClusterIP
+  sessionAffinity: None
+  ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+    protocol: TCP
+  selector:
+    app: eatech-web
+    component: frontend
+
+---
+# Admin Dashboard Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-admin-service
+  namespace: eatech-production
+  labels:
+    app: eatech-admin
+    component: admin-dashboard
+    tier: frontend
+    security-level: high
+  annotations:
+    description: "Admin Dashboard React service"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "80"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 3600  # 1 hour session timeout
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  selector:
+    app: eatech-admin
+    component: admin-dashboard
+
+---
+# Master Control Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-master-service
+  namespace: eatech-production
+  labels:
+    app: eatech-master
+    component: master-control
+    tier: control-plane
+    security-level: maximum
+  annotations:
+    description: "Master Control System service"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "80"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 1800  # 30 minutes session timeout
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  - name: secure-admin
+    port: 8443
+    targetPort: 8443
+    protocol: TCP
+  selector:
+    app: eatech-master
+    component: master-control
+
+---
+# Firebase Functions API Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-functions-service
+  namespace: eatech-production
+  labels:
+    app: eatech-functions
+    component: backend-api
+    tier: api
+    runtime: nodejs18
+  annotations:
+    description: "Firebase Functions Node.js API service"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  sessionAffinity: None
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  - name: ai-services
+    port: 8081
+    targetPort: 8081
+    protocol: TCP
+  - name: webhooks
+    port: 8082
+    targetPort: 8082
+    protocol: TCP
+  - name: admin
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  selector:
+    app: eatech-functions
+    component: backend-api
+
+---
+# Redis Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-redis-service
+  namespace: eatech-production
+  labels:
+    app: eatech-redis
+    component: cache
+    tier: data
+  annotations:
+    description: "Redis cache and session store"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9121"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  ports:
+  - name: redis
+    port: 6379
+    targetPort: 6379
+    protocol: TCP
+  - name: metrics
+    port: 9121
+    targetPort: 9121
+    protocol: TCP
+  selector:
+    app: eatech-redis
+    component: cache
+
+---
+# Redis Headless Service for Cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-redis-headless
+  namespace: eatech-production
+  labels:
+    app: eatech-redis
+    component: cache-cluster
+  annotations:
+    description: "Redis headless service for cluster discovery"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: redis
+    port: 6379
+    targetPort: 6379
+    protocol: TCP
+  - name: cluster
+    port: 16379
+    targetPort: 16379
+    protocol: TCP
+  selector:
+    app: eatech-redis
+
+---
+# PostgreSQL Service (Analytics)
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-postgres-service
+  namespace: eatech-production
+  labels:
+    app: eatech-postgres
+    component: database
+    tier: data
+  annotations:
+    description: "PostgreSQL database for analytics"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9187"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: 5432
+    protocol: TCP
+  - name: metrics
+    port: 9187
+    targetPort: 9187
+    protocol: TCP
+  selector:
+    app: eatech-postgres
+    component: database
+
+---
+# WebSocket Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-websocket-service
+  namespace: eatech-production
+  labels:
+    app: eatech-websocket
+    component: realtime
+    tier: communication
+  annotations:
+    description: "WebSocket service for real-time communication"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "3001"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 3600
+  ports:
+  - name: websocket
+    port: 3001
+    targetPort: 3001
+    protocol: TCP
+  selector:
+    app: eatech-websocket
+    component: realtime
+
+---
+# CDN Service for Static Assets
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-cdn-service
+  namespace: eatech-production
+  labels:
+    app: eatech-cdn
+    component: static-assets
+    tier: content
+  annotations:
+    description: "CDN service for static assets"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "80"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  selector:
+    app: eatech-cdn
+    component: static-assets
+
+---
+# Monitoring Services
+
+# Prometheus Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-prometheus-service
+  namespace: eatech-production
+  labels:
+    app: eatech-prometheus
+    component: monitoring
+    tier: observability
+  annotations:
+    description: "Prometheus monitoring service"
+spec:
+  type: ClusterIP
+  ports:
+  - name: prometheus
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  selector:
+    app: eatech-prometheus
+    component: monitoring
+
+---
+# Grafana Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-grafana-service
+  namespace: eatech-production
+  labels:
+    app: eatech-grafana
+    component: visualization
+    tier: observability
+  annotations:
+    description: "Grafana visualization service"
+spec:
+  type: ClusterIP
+  ports:
+  - name: grafana
+    port: 3000
+    targetPort: 3000
+    protocol: TCP
+  selector:
+    app: eatech-grafana
+    component: visualization
+
+---
+# Loki Service (Log Aggregation)
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-loki-service
+  namespace: eatech-production
+  labels:
+    app: eatech-loki
+    component: logs
+    tier: observability
+  annotations:
+    description: "Loki log aggregation service"
+spec:
+  type: ClusterIP
+  ports:
+  - name: loki
+    port: 3100
+    targetPort: 3100
+    protocol: TCP
+  selector:
+    app: eatech-loki
+    component: logs
+
+---
+# Jaeger Service (Distributed Tracing)
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-jaeger-service
+  namespace: eatech-production
+  labels:
+    app: eatech-jaeger
+    component: tracing
+    tier: observability
+  annotations:
+    description: "Jaeger distributed tracing service"
+spec:
+  type: ClusterIP
+  ports:
+  - name: jaeger-ui
+    port: 16686
+    targetPort: 16686
+    protocol: TCP
+  - name: jaeger-collector
+    port: 14268
+    targetPort: 14268
+    protocol: TCP
+  - name: jaeger-agent
+    port: 6831
+    targetPort: 6831
+    protocol: UDP
+  selector:
+    app: eatech-jaeger
+    component: tracing
+
+---
+# External Services
+
+# External Load Balancer for Public Access
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-external-lb
+  namespace: eatech-production
+  labels:
+    app: eatech
+    component: load-balancer
+    tier: ingress
+  annotations:
+    description: "External load balancer for public traffic"
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:eu-central-1:123456789:certificate/your-cert-arn"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+spec:
+  type: LoadBalancer
+  loadBalancerSourceRanges:
+  - 0.0.0.0/0
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  - name: https
+    port: 443
+    targetPort: 80
+    protocol: TCP
+  selector:
+    app: nginx-ingress-controller
+
+---
+# Health Check Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-health-service
+  namespace: eatech-production
+  labels:
+    app: eatech-health
+    component: health-check
+    tier: monitoring
+  annotations:
+    description: "Centralized health check service"
+spec:
+  type: ClusterIP
+  ports:
+  - name: health
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: eatech-health
+    component: health-check
+
+---
+# Service for AI/ML Workloads
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-ai-service
+  namespace: eatech-production
+  labels:
+    app: eatech-ai
+    component: ai-ml
+    tier: intelligence
+  annotations:
+    description: "AI/ML processing service"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  ports:
+  - name: ai-api
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  - name: ml-inference
+    port: 8081
+    targetPort: 8081
+    protocol: TCP
+  selector:
+    app: eatech-ai
+    component: ai-ml
+
+---
+# Emergency Services (For Emergency Mode)
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-emergency-service
+  namespace: eatech-production
+  labels:
+    app: eatech-emergency
+    component: emergency-mode
+    tier: emergency
+    criticality: high
+  annotations:
+    description: "Emergency mode service for critical situations"
+spec:
+  type: ClusterIP
+  ports:
+  - name: emergency-api
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  - name: emergency-dashboard
+    port: 3000
+    targetPort: 3000
+    protocol: TCP
+  selector:
+    app: eatech-emergency
+    component: emergency-mode
+
+---
+# Headless Service for Service Discovery
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-discovery
+  namespace: eatech-production
+  labels:
+    app: eatech
+    component: service-discovery
+  annotations:
+    description: "Headless service for internal service discovery"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: discovery
+    port: 53
+    targetPort: 53
+    protocol: UDP
+  - name: discovery-tcp
+    port: 53
+    targetPort: 53
+    protocol: TCP
+
+---
+# NodePort Service for Development/Testing
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-nodeport-dev
+  namespace: eatech-production
+  labels:
+    app: eatech
+    component: development
+    environment: testing
+  annotations:
+    description: "NodePort service for development and testing"
+spec:
+  type: NodePort
+  ports:
+  - name: web-dev
+    port: 3000
+    targetPort: 3000
+    nodePort: 30000
+    protocol: TCP
+  - name: admin-dev
+    port: 3001
+    targetPort: 80
+    nodePort: 30001
+    protocol: TCP
+  - name: api-dev
+    port: 8080
+    targetPort: 8080
+    nodePort: 30080
+    protocol: TCP
+  selector:
+    app: eatech-web
+
+---
+# ExternalName Service for External Dependencies
+apiVersion: v1
+kind: Service
+metadata:
+  name: firebase-external
+  namespace: eatech-production
+  labels:
+    app: eatech
+    component: external-service
+    provider: firebase
+  annotations:
+    description: "External service reference for Firebase"
+spec:
+  type: ExternalName
+  externalName: firestore.googleapis.com
+  ports:
+  - port: 443
+    protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stripe-external
+  namespace: eatech-production
+  labels:
+    app: eatech
+    component: external-service
+    provider: stripe
+  annotations:
+    description: "External service reference for Stripe"
+spec:
+  type: ExternalName
+  externalName: api.stripe.com
+  ports:
+  - port: 443
+    protocol: TCP
+
+---
+# Service Mesh Configuration (if using Istio)
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-mesh-gateway
+  namespace: eatech-production
+  labels:
+    app: eatech
+    component: service-mesh
+    tier: infrastructure
+  annotations:
+    description: "Service mesh gateway for microservices communication"
+spec:
+  type: ClusterIP
+  ports:
+  - name: mesh-http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  - name: mesh-grpc
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  selector:
+    app: istio-gateway

@@ -1,0 +1,622 @@
+# EATECH V3.0 - Master Control System Kubernetes Deployment
+# Maximum security configuration for platform administration
+# Single instance with failover and comprehensive monitoring
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eatech-master
+  namespace: eatech-production
+  labels:
+    app: eatech-master
+    component: master-control
+    tier: control-plane
+    version: v3.0.0
+    environment: production
+    security-level: maximum
+    criticality: high
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    description: "EATECH Master Control System - Maximum Security"
+    maintainer: "benedikt@thomma.ch"
+    security.policy: "maximum-security"
+    audit.policy: "comprehensive"
+spec:
+  replicas: 1  # Single instance for centralized control
+  strategy:
+    type: Recreate  # Ensure only one instance at a time
+  selector:
+    matchLabels:
+      app: eatech-master
+      component: master-control
+  template:
+    metadata:
+      labels:
+        app: eatech-master
+        component: master-control
+        tier: control-plane
+        version: v3.0.0
+        security-level: maximum
+        criticality: high
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+        prometheus.io/path: "/metrics"
+        security.policy/network: "maximum-restricted"
+        security.policy/access: "admin-only"
+        backup.policy: "real-time"
+        audit.policy: "full-logging"
+    spec:
+      # Maximum Security Context
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: "Always"
+        seccompProfile:
+          type: RuntimeDefault
+        supplementalGroups: [1001]
+        sysctls:
+        - name: net.core.somaxconn
+          value: "1024"
+
+      # Dedicated Node Placement for Security
+      nodeSelector:
+        node-type: master-control
+        security-zone: high
+        region: switzerland
+
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: topology.kubernetes.io/region
+                operator: In
+                values:
+                - europe-west6  # Zurich only
+              - key: node.kubernetes.io/instance-type
+                operator: In
+                values:
+                - e2-highmem-4  # High memory for analytics
+              - key: security-cleared
+                operator: In
+                values:
+                - "true"
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: security-level
+                operator: In
+                values:
+                - maximum
+            topologyKey: kubernetes.io/hostname
+
+      # Strict Tolerations for Dedicated Hardware
+      tolerations:
+      - key: "master-control"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+      - key: "security-zone"
+        operator: "Equal"
+        value: "high"
+        effect: "NoSchedule"
+
+      containers:
+      - name: master-control
+        image: eatech/master:3.0.0
+        imagePullPolicy: Always
+
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+        - name: secure-admin
+          containerPort: 8443
+          protocol: TCP
+
+        # Environment Variables with Maximum Security
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: REACT_APP_ENV
+          value: "production"
+        - name: REACT_APP_SECURITY_MODE
+          value: "maximum"
+        - name: REACT_APP_API_URL
+          valueFrom:
+            secretKeyRef:
+              name: eatech-master-secrets
+              key: api-url
+        - name: REACT_APP_MASTER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: eatech-master-secrets
+              key: master-control-key
+        - name: REACT_APP_ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: eatech-master-secrets
+              key: encryption-key
+        - name: REACT_APP_JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: eatech-master-secrets
+              key: jwt-secret
+        - name: REACT_APP_AUDIT_KEY
+          valueFrom:
+            secretKeyRef:
+              name: eatech-master-secrets
+              key: audit-key
+        - name: REACT_APP_SENTRY_DSN
+          valueFrom:
+            secretKeyRef:
+              name: eatech-master-secrets
+              key: sentry-dsn-master
+        - name: REACT_APP_SECURITY_HEADERS
+          value: "strict"
+        - name: SESSION_TIMEOUT
+          value: "1800"  # 30 minutes
+        - name: MAX_FAILED_LOGINS
+          value: "3"
+
+        # Enhanced Resource Allocation for Analytics
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+            ephemeral-storage: "2Gi"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+            ephemeral-storage: "4Gi"
+
+        # Strict Health Checks with Security Validation
+        livenessProbe:
+          httpGet:
+            path: /health/secure
+            port: 8443
+            scheme: HTTPS
+            httpHeaders:
+            - name: Host
+              value: "master.eatech.ch"
+            - name: Authorization
+              value: "Bearer HEALTH_CHECK_TOKEN"
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 15
+          failureThreshold: 2
+          successThreshold: 1
+
+        readinessProbe:
+          httpGet:
+            path: /ready/secure
+            port: 8443
+            scheme: HTTPS
+            httpHeaders:
+            - name: Host
+              value: "master.eatech.ch"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 2
+          successThreshold: 1
+
+        startupProbe:
+          httpGet:
+            path: /startup/secure
+            port: 8443
+            scheme: HTTPS
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 6
+          successThreshold: 1
+
+        # Maximum Security Container Context
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
+          runAsGroup: 1001
+          capabilities:
+            drop:
+            - ALL
+          seccompProfile:
+            type: RuntimeDefault
+
+        # Volume Mounts with Security Focus
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: var-cache-nginx
+          mountPath: /var/cache/nginx
+        - name: var-run
+          mountPath: /var/run
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d
+          readOnly: true
+        - name: ssl-certs
+          mountPath: /etc/nginx/ssl
+          readOnly: true
+        - name: security-config
+          mountPath: /etc/nginx/security
+          readOnly: true
+        - name: audit-logs
+          mountPath: /var/log/audit
+        - name: master-config
+          mountPath: /app/config
+          readOnly: true
+
+      # Security Monitoring Sidecar
+      - name: security-monitor
+        image: eatech/security-monitor:latest
+        imagePullPolicy: Always
+
+        ports:
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+        - name: alerts
+          containerPort: 9091
+          protocol: TCP
+
+        env:
+        - name: TARGET_SERVICE
+          value: "master-control"
+        - name: LOG_LEVEL
+          value: "DEBUG"
+        - name: ALERT_WEBHOOK
+          valueFrom:
+            secretKeyRef:
+              name: eatech-master-secrets
+              key: security-alert-webhook
+        - name: AUDIT_MODE
+          value: "STRICT"
+
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1002
+          capabilities:
+            drop:
+            - ALL
+
+        volumeMounts:
+        - name: audit-logs
+          mountPath: /var/log/audit
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+
+      # Audit Logger Sidecar
+      - name: audit-logger
+        image: eatech/audit-logger:latest
+        imagePullPolicy: Always
+
+        env:
+        - name: AUDIT_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: eatech-master-secrets
+              key: audit-endpoint
+        - name: ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: eatech-master-secrets
+              key: audit-encryption-key
+
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1003
+          capabilities:
+            drop:
+            - ALL
+
+        volumeMounts:
+        - name: audit-logs
+          mountPath: /var/log/audit
+        - name: tmp
+          mountPath: /tmp
+
+      # Init Containers for Security Setup
+      initContainers:
+      - name: security-init
+        image: eatech/security-init:latest
+        command: ['sh', '-c']
+        args:
+        - |
+          echo "Initializing maximum security configuration..."
+
+          # Verify SSL certificates
+          openssl verify /ssl-certs/tls.crt
+
+          # Set up audit directories
+          mkdir -p /var/log/audit/access
+          mkdir -p /var/log/audit/security
+          mkdir -p /var/log/audit/admin
+
+          # Set proper permissions
+          chmod 750 /var/log/audit
+          chmod 740 /var/log/audit/access
+          chmod 740 /var/log/audit/security
+          chmod 740 /var/log/audit/admin
+
+          # Generate security headers
+          echo "X-Frame-Options: DENY" > /security/headers.conf
+          echo "X-Content-Type-Options: nosniff" >> /security/headers.conf
+          echo "X-XSS-Protection: 1; mode=block" >> /security/headers.conf
+          echo "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload" >> /security/headers.conf
+          echo "Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://api.eatech.ch; frame-ancestors 'none';" >> /security/headers.conf
+
+          echo "Security initialization complete"
+        securityContext:
+          runAsUser: 1001
+          runAsGroup: 1001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: var-cache-nginx
+          mountPath: /var/cache/nginx
+        - name: var-run
+          mountPath: /var/run
+        - name: audit-logs
+          mountPath: /var/log/audit
+        - name: ssl-certs
+          mountPath: /ssl-certs
+          readOnly: true
+        - name: security-config
+          mountPath: /security
+
+      - name: connectivity-check
+        image: curlimages/curl:latest
+        command: ['sh', '-c']
+        args:
+        - |
+          echo "Verifying secure connectivity..."
+
+          # Check API with certificate validation
+          curl --cacert /ssl-certs/ca.crt -f -s https://api.eatech.ch/health/secure
+
+          # Check database connectivity
+          nc -z eatech-postgres-service 5432
+
+          # Check Redis connectivity
+          nc -z eatech-redis-service 6379
+
+          echo "Connectivity check complete"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: ssl-certs
+          mountPath: /ssl-certs
+          readOnly: true
+
+      # Enhanced Security Volumes
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: "100Mi"
+      - name: var-cache-nginx
+        emptyDir:
+          sizeLimit: "200Mi"
+      - name: var-run
+        emptyDir:
+          sizeLimit: "50Mi"
+      - name: audit-logs
+        emptyDir:
+          sizeLimit: "1Gi"
+      - name: nginx-config
+        configMap:
+          name: nginx-master-config
+          defaultMode: 0644
+      - name: ssl-certs
+        secret:
+          secretName: eatech-master-tls
+          defaultMode: 0400
+      - name: security-config
+        secret:
+          secretName: eatech-master-security
+          defaultMode: 0600
+      - name: master-config
+        secret:
+          secretName: eatech-master-config
+          defaultMode: 0600
+
+      # Enhanced DNS Configuration
+      dnsPolicy: ClusterFirst
+      dnsConfig:
+        options:
+        - name: ndots
+          value: "1"
+        - name: edns0
+        - name: timeout
+          value: "5"
+        - name: attempts
+          value: "2"
+
+      # Secure Image Pull
+      imagePullSecrets:
+      - name: eatech-registry-secret
+
+      # Dedicated Service Account with Audit Permissions
+      serviceAccountName: eatech-master-sa
+      automountServiceAccountToken: false
+
+      # Restart Policy
+      restartPolicy: Always
+
+      # Extended Grace Period for Audit Log Flush
+      terminationGracePeriodSeconds: 120
+
+      # Highest Priority
+      priorityClassName: eatech-master-priority
+
+---
+# Master Control Service Account with RBAC
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eatech-master-sa
+  namespace: eatech-production
+  labels:
+    app: eatech-master
+    component: security
+  annotations:
+    description: "Service account for EATECH master control system"
+    security.policy: "maximum-privileges"
+automountServiceAccountToken: false
+
+---
+# Maximum Security Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: eatech-master-netpol
+  namespace: eatech-production
+  labels:
+    app: eatech-master
+    component: security
+spec:
+  podSelector:
+    matchLabels:
+      app: eatech-master
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Only allow ingress from specific admin IPs through ingress controller
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    - ipBlock:
+        cidr: 10.0.0.0/8  # Internal cluster only
+    ports:
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 8443
+  egress:
+  # Strictly controlled egress
+  - to:
+    - podSelector:
+        matchLabels:
+          app: eatech-functions
+    ports:
+    - protocol: TCP
+      port: 8080
+  - to:
+    - podSelector:
+        matchLabels:
+          app: eatech-postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          app: eatech-redis
+    ports:
+    - protocol: TCP
+      port: 6379
+  # External HTTPS for Firebase Admin SDK
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  # DNS
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+
+---
+# Highest Priority Class
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: eatech-master-priority
+value: 1000
+globalDefault: false
+description: "Highest priority for EATECH master control system"
+
+---
+# Pod Disruption Budget - No Disruption Allowed
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: eatech-master-pdb
+  namespace: eatech-production
+  labels:
+    app: eatech-master
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: eatech-master
+      component: master-control
+
+---
+# Comprehensive Service Monitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: eatech-master-monitor
+  namespace: eatech-production
+  labels:
+    app: eatech-master
+    component: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: eatech-master
+      component: master-control
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 15s  # Frequent monitoring
+    scrapeTimeout: 10s
+    honorLabels: true
+  - port: metrics
+    path: /security-metrics
+    interval: 30s
+    scrapeTimeout: 10s
+  - port: alerts
+    path: /alert-metrics
+    interval: 10s
+    scrapeTimeout: 5s

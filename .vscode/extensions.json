@@ -1,0 +1,121 @@
+{
+  // ======================================
+  // EATECH V3.0 - VS CODE EXTENSIONS
+  // Kuratierte Extension-Liste für optimale DX
+  // ======================================
+  "recommendations": [
+    // === ESSENTIAL DEVELOPMENT ===
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-typescript-next",
+
+    // === REACT & NEXT.JS ===
+    "dsznajder.es7-react-js-snippets",
+    "burkeholland.simple-react-snippets",
+    "formulahendry.auto-rename-tag",
+    "ms-vscode.vscode-json",
+
+    // === FIREBASE ===
+    "toba.vsfire",
+    "bradlc.vscode-firebase",
+
+    // === TESTING ===
+    "orta.vscode-jest",
+    "ms-playwright.playwright",
+    "shelex.vscode-cy",
+
+    // === CODE QUALITY ===
+    "streetsidesoftware.code-spell-checker",
+    "christian-kohler.path-intellisense",
+    "christian-kohler.npm-intellisense",
+    "ms-vscode.vscode-typescript-next",
+
+    // === PRODUCTIVITY ===
+    "ms-vscode.vscode-json",
+    "redhat.vscode-yaml",
+    "ms-vscode.vscode-markdown",
+    "bierner.markdown-preview-github-styles",
+    "ms-vscode.vscode-markdown-emoji",
+
+    // === GIT & VERSION CONTROL ===
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+    "donjayamanne.githistory",
+
+    // === MONOREPO TOOLS ===
+    "ms-vscode.vscode-npm-script",
+    "formulahendry.terminal-runner",
+    "ms-vscode.vscode-workspaces",
+
+    // === UI/UX DEVELOPMENT ===
+    "steoates.autoimport-es6-ts",
+    "naumovs.color-highlight",
+    "ms-vscode.vscode-css-peek",
+    "zignd.html-css-class-completion",
+
+    // === API & BACKEND ===
+    "humao.rest-client",
+    "ms-vscode.vscode-graphql",
+    "ms-vscode.vscode-dotenv",
+
+    // === DEBUGGING & PERFORMANCE ===
+    "ms-vscode.vscode-js-debug",
+    "ms-vscode.vscode-json-languageservice",
+    "firefox-devtools.vscode-firefox-debug",
+
+    // === DOCUMENTATION ===
+    "shd101wyy.markdown-preview-enhanced",
+    "yzhang.markdown-all-in-one",
+    "bierner.docs-view",
+
+    // === THEME & APPEARANCE ===
+    "pkief.material-icon-theme",
+    "ms-vscode.theme-tomorrow-kit",
+    "github.github-vscode-theme",
+
+    // === ADVANCED TYPESCRIPT ===
+    "total-typescript.ts-reset",
+    "usernamehw.errorlens",
+    "ms-vscode.vscode-typescript-tslint-plugin",
+
+    // === SWISS LOCALIZATION ===
+    "ms-ceintl.vscode-language-pack-de",
+    "ms-ceintl.vscode-language-pack-fr",
+
+    // === DOCKER & DEPLOYMENT ===
+    "ms-vscode-remote.remote-containers",
+    "ms-azuretools.vscode-docker",
+
+    // === SECURITY ===
+    "snyk-security.snyk-vulnerability-scanner",
+
+    // === ANALYTICS & MONITORING ===
+    "ms-vscode.vscode-json-languageservice",
+
+    // === PWA DEVELOPMENT ===
+    "ms-vscode.vscode-html-languageservice",
+    "ms-vscode.vscode-css-languageservice",
+
+    // === AI ASSISTANCE ===
+    "github.copilot",
+    "github.copilot-chat"
+  ],
+  "unwantedRecommendations": [
+    // Konflikte mit unseren gewählten Extensions
+    "ms-vscode.vscode-typescript",
+    "hookyqr.beautify",
+    "rbbit.typescript-hero",
+    "ms-vscode.vscode-js-debug-companion",
+
+    // Performance-Probleme in Monorepos
+    "ms-python.python",
+    "ms-dotnettools.csharp",
+    "redhat.java",
+    "golang.go",
+
+    // Überschneidungen mit besseren Alternativen
+    "ms-vscode.vscode-json",
+    "ms-vscode.vscode-html-languageservice"
+  ]
+}

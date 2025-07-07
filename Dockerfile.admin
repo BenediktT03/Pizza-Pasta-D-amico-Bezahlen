@@ -1,0 +1,208 @@
+# EATECH V3.0 - Admin Dashboard Dockerfile
+# React 18 + Vite for high-performance development
+# Optimized for real-time admin operations
+
+# Base image with Node.js 18 Alpine
+FROM node:18-alpine AS base
+LABEL maintainer="benedikt@thomma.ch"
+LABEL description="EATECH Admin Dashboard - React 18"
+LABEL version="3.0.0"
+
+# Install system dependencies
+RUN apk add --no-cache \
+    libc6-compat \
+    dumb-init \
+    curl \
+    git \
+    && rm -rf /var/cache/apk/*
+
+# Set working directory
+WORKDIR /app
+
+# Create non-root user for security
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 react
+
+# Dependencies stage
+FROM base AS deps
+COPY package*.json ./
+COPY apps/admin/package*.json ./apps/admin/
+COPY packages/ ./packages/
+
+# Install dependencies
+RUN npm ci --only=production --ignore-scripts
+RUN npm cache clean --force
+
+# Development stage
+FROM base AS development
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages ./packages
+
+# Copy source code
+COPY apps/admin ./apps/admin
+COPY packages ./packages
+COPY turbo.json ./
+COPY package*.json ./
+
+# Install all dependencies including dev dependencies
+RUN npm ci --ignore-scripts
+
+# Set environment
+ENV NODE_ENV=development
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+ENV CHOKIDAR_USEPOLLING=true
+ENV FAST_REFRESH=true
+
+# Expose port
+EXPOSE 3000
+
+# Switch to non-root user
+USER react
+
+# Development command with Vite dev server
+CMD ["npm", "run", "dev", "--workspace=@eatech/admin"]
+
+# Builder stage for production
+FROM base AS builder
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages ./packages
+
+# Copy source code
+COPY apps/admin ./apps/admin
+COPY packages ./packages
+COPY turbo.json ./
+COPY package*.json ./
+
+# Install all dependencies
+RUN npm ci --ignore-scripts
+
+# Set build environment variables
+ENV NODE_ENV=production
+ENV GENERATE_SOURCEMAP=false
+ENV INLINE_RUNTIME_CHUNK=false
+
+# Build the React application
+WORKDIR /app/apps/admin
+RUN npm run build
+
+# Verify build output
+RUN ls -la dist/
+
+# Production runner stage with Nginx
+FROM nginx:alpine AS production
+ENV NODE_ENV=production
+
+# Install additional packages for health checks
+RUN apk add --no-cache curl
+
+# Copy custom Nginx configuration
+COPY infrastructure/nginx/admin.nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy built React application
+COPY --from=builder /app/apps/admin/dist /usr/share/nginx/html
+
+# Copy additional assets
+COPY apps/admin/public /usr/share/nginx/html/
+
+# Create nginx user and set permissions
+RUN addgroup -g 1001 -S nginx-app
+RUN adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G nginx-app -g nginx-app nginx-app
+RUN chown -R nginx-app:nginx-app /usr/share/nginx/html
+RUN chown -R nginx-app:nginx-app /var/cache/nginx
+RUN chown -R nginx-app:nginx-app /var/log/nginx
+RUN chmod -R 755 /usr/share/nginx/html
+
+# Security: Remove default Nginx user
+RUN deluser nginx || true
+
+# Create necessary directories
+RUN mkdir -p /var/cache/nginx/client_temp
+RUN mkdir -p /var/cache/nginx/proxy_temp
+RUN mkdir -p /var/cache/nginx/fastcgi_temp
+RUN mkdir -p /var/cache/nginx/uwsgi_temp
+RUN mkdir -p /var/cache/nginx/scgi_temp
+
+# Set proper permissions for Nginx directories
+RUN chown -R nginx-app:nginx-app /var/cache/nginx
+RUN chmod -R 755 /var/cache/nginx
+
+# Expose port
+EXPOSE 80
+
+# Health check for admin dashboard
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost/health || exit 1
+
+# Add health endpoint
+RUN echo '<!DOCTYPE html><html><head><title>Health Check</title></head><body><h1>Admin Dashboard Healthy</h1></body></html>' \
+    > /usr/share/nginx/html/health
+
+# Switch to non-root user
+USER nginx-app
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
+
+# Development stage for debugging
+FROM node:18-alpine AS debug
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY apps/admin ./apps/admin
+COPY packages ./packages
+
+# Install debugging tools
+RUN npm install -g nodemon
+RUN apk add --no-cache strace
+
+ENV NODE_ENV=development
+ENV DEBUG=*
+EXPOSE 3000 9229
+
+# Debug command
+CMD ["nodemon", "--inspect=0.0.0.0:9229", "apps/admin/src/index.js"]
+
+# Multi-architecture support
+FROM production AS production-arm64
+LABEL arch="arm64"
+
+FROM production AS production-amd64
+LABEL arch="amd64"
+
+# Default to production
+FROM production AS final
+
+# Metadata
+LABEL org.opencontainers.image.title="EATECH Admin Dashboard"
+LABEL org.opencontainers.image.description="Real-time admin dashboard for foodtruck management"
+LABEL org.opencontainers.image.version="3.0.0"
+LABEL org.opencontainers.image.created="2025-01-07"
+LABEL org.opencontainers.image.revision="main"
+LABEL org.opencontainers.image.licenses="Proprietary"
+LABEL org.opencontainers.image.vendor="EATECH"
+LABEL org.opencontainers.image.authors="benedikt@thomma.ch"
+LABEL org.opencontainers.image.url="https://admin.eatech.ch"
+LABEL org.opencontainers.image.documentation="https://docs.eatech.ch/admin"
+LABEL org.opencontainers.image.source="https://github.com/BenediktT03/Eatech"
+
+# Build arguments for CI/CD
+ARG BUILD_DATE
+ARG BUILD_VERSION
+ARG VCS_REF
+LABEL build-date=$BUILD_DATE
+LABEL build-version=$BUILD_VERSION
+LABEL vcs-ref=$VCS_REF
+
+# Security headers and configurations
+RUN echo 'add_header X-Frame-Options "SAMEORIGIN" always;' >> /etc/nginx/conf.d/security.conf
+RUN echo 'add_header X-XSS-Protection "1; mode=block" always;' >> /etc/nginx/conf.d/security.conf
+RUN echo 'add_header X-Content-Type-Options "nosniff" always;' >> /etc/nginx/conf.d/security.conf
+RUN echo 'add_header Referrer-Policy "no-referrer-when-downgrade" always;' >> /etc/nginx/conf.d/security.conf
+RUN echo 'add_header Content-Security-Policy "default-src '\''self'\''; script-src '\''self'\''; style-src '\''self'\'' '\''unsafe-inline'\''; img-src '\''self'\'' data: https:; font-src '\''self'\''; connect-src '\''self'\'' https://api.eatech.ch wss://ws.eatech.ch;" always;' >> /etc/nginx/conf.d/security.conf
+
+# Final verification
+RUN nginx -t
+RUN echo "EATECH Admin Dashboard built successfully for production"

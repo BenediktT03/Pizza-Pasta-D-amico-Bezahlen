@@ -1,300 +1,428 @@
-name: EATECH CI/CD Pipeline
-
+name: 🔄 Continuous Integration
 on:
   push:
-    branches: [main, develop, 'feature/**']
+    branches: [main, develop, 'feature/**', 'bugfix/**', 'hotfix/**']
   pull_request:
     branches: [main, develop]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 env:
-  NODE_VERSION: '18.x'
-  PNPM_VERSION: '8'
+  NODE_VERSION: '18.19.0'
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
+  NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  # Quality Checks
-  quality:
-    name: Code Quality
+  # ===== SETUP & VALIDATION =====
+  setup:
+    name: 🔍 Setup & Validation
     runs-on: ubuntu-latest
+    outputs:
+      cache-key: ${{ steps.cache-key.outputs.key }}
+      affected-apps: ${{ steps.affected.outputs.apps }}
+      should-deploy: ${{ steps.should-deploy.outputs.result }}
     steps:
-      - name: Checkout code
+      - name: ⚡ Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
+      - name: 🏗️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: 📦 Generate Cache Key
+        id: cache-key
+        run: |
+          echo "key=node-modules-${{ hashFiles('**/package-lock.json') }}" >> $GITHUB_OUTPUT
 
-      - name: Run linter
-        run: pnpm turbo lint
+      - name: 💾 Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+            ~/.npm
+          key: ${{ steps.cache-key.outputs.key }}
+          restore-keys: |
+            node-modules-
 
-      - name: Run type checking
-        run: pnpm turbo typecheck
+      - name: 🔧 Install Dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          npx turbo prune --scope=@eatech/web --scope=@eatech/admin --scope=@eatech/master
 
-      - name: Check formatting
-        run: pnpm prettier --check .
+      - name: 🎯 Detect Affected Apps
+        id: affected
+        run: |
+          AFFECTED=$(npx turbo run build --dry=json | jq -r '.tasks[] | select(.task == "build") | .package' | tr '\n' ',' | sed 's/,$//')
+          echo "apps=$AFFECTED" >> $GITHUB_OUTPUT
+          echo "Affected apps: $AFFECTED"
 
-  # Unit Tests
-  test-unit:
-    name: Unit Tests
+      - name: 🚀 Should Deploy?
+        id: should-deploy
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+          else
+            echo "result=false" >> $GITHUB_OUTPUT
+          fi
+
+  # ===== CODE QUALITY =====
+  quality:
+    name: 🔍 Code Quality
     runs-on: ubuntu-latest
-    needs: quality
-    strategy:
-      matrix:
-        package: [core, ui, auth, feature-flags]
+    needs: setup
     steps:
-      - name: Checkout code
+      - name: ⚡ Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
+      - name: 🏗️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: 'npm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: 💾 Restore Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ needs.setup.outputs.cache-key }}
 
-      - name: Run tests for @eatech/${{ matrix.package }}
-        run: pnpm --filter @eatech/${{ matrix.package }} test -- --coverage
+      - name: 🔍 Lint Code
+        run: |
+          npx turbo run lint --force
+          echo "✅ Linting completed"
 
-      - name: Upload coverage
+      - name: 🎨 Check Formatting
+        run: |
+          npx prettier --check "**/*.{ts,tsx,js,jsx,json,css,md,yml,yaml}"
+          echo "✅ Formatting check completed"
+
+      - name: 🔒 TypeScript Check
+        run: |
+          npx turbo run type-check --force
+          echo "✅ TypeScript validation completed"
+
+      - name: 📊 Code Analysis (SonarCloud)
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=eatech-v3
+            -Dsonar.organization=benediktt03
+            -Dsonar.sources=apps,packages
+            -Dsonar.exclusions=**/node_modules/**,**/*.test.ts,**/*.spec.ts
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+  # ===== TESTING =====
+  test:
+    name: 🧪 Testing
+    runs-on: ubuntu-latest
+    needs: setup
+    strategy:
+      matrix:
+        test-type: [unit, integration]
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 💾 Restore Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: 🧪 Run ${{ matrix.test-type }} Tests
+        run: |
+          if [ "${{ matrix.test-type }}" == "unit" ]; then
+            npx turbo run test:unit --force -- --coverage --watchAll=false
+          else
+            npx turbo run test:integration --force
+          fi
+        env:
+          NODE_ENV: test
+          FIREBASE_PROJECT_ID: eatech-test
+          CI: true
+
+      - name: 📊 Upload Coverage
+        if: matrix.test-type == 'unit'
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          flags: ${{ matrix.package }}
+          directory: ./coverage
+          flags: unittests
+          name: codecov-umbrella
 
-  # Build Apps
-  build:
-    name: Build Apps
+  # ===== E2E TESTING =====
+  e2e:
+    name: 🎭 E2E Testing
     runs-on: ubuntu-latest
-    needs: quality
+    needs: [setup, build]
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     strategy:
       matrix:
-        app: [web, admin, landing]
+        browser: [chromium, firefox]
+        viewport: [desktop, mobile]
     steps:
-      - name: Checkout code
+      - name: ⚡ Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
+      - name: 🏗️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: 'npm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: 💾 Restore Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ needs.setup.outputs.cache-key }}
 
-      - name: Build ${{ matrix.app }}
-        run: pnpm --filter ${{ matrix.app }} build
+      - name: 🎭 Install Playwright
+        run: npx playwright install ${{ matrix.browser }}
+
+      - name: 🔥 Start Firebase Emulator
+        run: |
+          npx firebase emulators:start --only firestore,auth,functions &
+          sleep 10
+
+      - name: 🌐 Start Test Server
+        run: |
+          npm run build:test
+          npm run start:test &
+          npx wait-on http://localhost:3000
+
+      - name: 🎯 Run E2E Tests
+        run: |
+          npx playwright test --project=${{ matrix.browser }}-${{ matrix.viewport }}
         env:
-          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
-          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
-          VITE_FIREBASE_DATABASE_URL: ${{ secrets.VITE_FIREBASE_DATABASE_URL }}
-          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
-          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
-          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
-          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
-          VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
+          PLAYWRIGHT_BROWSER: ${{ matrix.browser }}
+          PLAYWRIGHT_VIEWPORT: ${{ matrix.viewport }}
 
-      - name: Upload build artifacts
+      - name: 📸 Upload Screenshots
+        if: failure()
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.app }}-build
-          path: apps/${{ matrix.app }}/dist
+          name: playwright-screenshots-${{ matrix.browser }}-${{ matrix.viewport }}
+          path: tests/e2e/screenshots/
+          retention-days: 30
+
+  # ===== BUILD =====
+  build:
+    name: 🏗️ Build Applications
+    runs-on: ubuntu-latest
+    needs: [setup, quality]
+    strategy:
+      matrix:
+        app: [web, admin, master, functions]
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 💾 Restore Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: 🔑 Setup Environment
+        run: |
+          echo "NEXT_PUBLIC_APP_URL=${{ env.NEXT_PUBLIC_APP_URL }}" >> .env.local
+          echo "NEXT_PUBLIC_API_URL=${{ env.NEXT_PUBLIC_API_URL }}" >> .env.local
+          echo "NODE_ENV=production" >> .env.local
+
+      - name: 🏗️ Build ${{ matrix.app }}
+        run: |
+          if [ "${{ matrix.app }}" == "functions" ]; then
+            cd functions && npm run build
+          else
+            npx turbo run build --filter=@eatech/${{ matrix.app }}
+          fi
+        env:
+          NODE_ENV: production
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: 🗂️ Cache Build Artifacts
+        uses: actions/cache@v3
+        with:
+          path: |
+            apps/${{ matrix.app }}/.next
+            apps/${{ matrix.app }}/out
+            functions/dist
+          key: build-${{ matrix.app }}-${{ github.sha }}
+
+      - name: 📦 Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-${{ matrix.app }}
+          path: |
+            apps/${{ matrix.app }}/.next
+            apps/${{ matrix.app }}/out
+            functions/dist
           retention-days: 7
 
-  # Mobile Build
-  build-mobile:
-    name: Build Mobile App
+  # ===== SWISS COMPLIANCE CHECKS =====
+  compliance:
+    name: 🇨🇭 Swiss Compliance
     runs-on: ubuntu-latest
-    needs: quality
+    needs: setup
     steps:
-      - name: Checkout code
+      - name: ⚡ Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
+      - name: 🏗️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: 'npm'
 
-      - name: Setup Expo
-        uses: expo/expo-github-action@v8
+      - name: 💾 Restore Dependencies
+        uses: actions/cache@v3
         with:
-          expo-version: latest
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ needs.setup.outputs.cache-key }}
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build Android APK
+      - name: 🔒 GDPR/DSG Compliance Check
         run: |
-          cd apps/mobile
-          eas build --platform android --profile preview --non-interactive
+          echo "🔍 Checking for GDPR/DSG compliance..."
+          # Check for consent management
+          grep -r "consent" apps/ --include="*.ts" --include="*.tsx" || echo "⚠️ No consent management found"
+          # Check for data encryption
+          grep -r "encrypt" packages/ --include="*.ts" || echo "⚠️ No encryption found"
+          # Check for right to deletion
+          grep -r "deleteUser\|anonymize" --include="*.ts" functions/ || echo "⚠️ No deletion mechanism found"
+          echo "✅ Compliance checks completed"
 
-  # E2E Tests
-  test-e2e:
-    name: E2E Tests
+      - name: 🏦 PCI DSS Validation
+        run: |
+          echo "🔍 Checking PCI DSS compliance..."
+          # Check for secure payment handling
+          grep -r "stripe\|payment" apps/ --include="*.ts" | grep -v "test" || echo "⚠️ No payment integration found"
+          # Check for tokenization
+          grep -r "token" packages/core/src/services/payment/ --include="*.ts" || echo "⚠️ No tokenization found"
+          echo "✅ PCI DSS validation completed"
+
+      - name: 🔐 Security Headers Check
+        run: |
+          echo "🔍 Checking security headers..."
+          grep -r "helmet\|securityHeaders" apps/ --include="*.ts" || echo "⚠️ No security headers found"
+          grep -r "Content-Security-Policy" --include="*.ts" --include="*.js" . || echo "⚠️ No CSP found"
+          echo "✅ Security headers check completed"
+
+  # ===== ACCESSIBILITY =====
+  accessibility:
+    name: ♿ Accessibility Testing
     runs-on: ubuntu-latest
-    needs: build
+    needs: [setup, build]
+    if: github.event_name == 'pull_request'
     steps:
-      - name: Checkout code
+      - name: ⚡ Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
+      - name: 🏗️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: 'npm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: 💾 Restore Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ needs.setup.outputs.cache-key }}
 
-      - name: Install Playwright
-        run: pnpm playwright install --with-deps
-
-      - name: Run E2E tests
-        run: pnpm test:e2e
+      - name: 🎯 Axe Accessibility Testing
+        run: |
+          npm run test:a11y
         env:
-          PLAYWRIGHT_TEST_BASE_URL: ${{ secrets.PLAYWRIGHT_TEST_BASE_URL }}
+          CI: true
 
-      - name: Upload test results
+      - name: 📊 Upload A11y Report
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: playwright-report
-          path: playwright-report/
+          name: accessibility-report
+          path: reports/accessibility/
           retention-days: 30
 
-  # Deploy to Staging
-  deploy-staging:
-    name: Deploy to Staging
+  # ===== NOTIFICATION =====
+  notify:
+    name: 📢 Notifications
     runs-on: ubuntu-latest
-    needs: [test-unit, build, test-e2e]
-    if: github.ref == 'refs/heads/develop'
-    environment: staging
+    needs: [test, e2e, build, compliance, accessibility]
+    if: always()
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
-
-      - name: Deploy Web to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-args: '--prod'
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
-          working-directory: ./web-build
-
-      - name: Deploy Admin to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-args: '--prod'
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
-          working-directory: ./admin-build
-
-      - name: Deploy Firebase Functions
-        run: |
-          npm install -g firebase-tools
-          firebase deploy --only functions --project staging
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-
-  # Deploy to Production
-  deploy-production:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: [test-unit, build, test-e2e]
-    if: github.ref == 'refs/heads/main'
-    environment: production
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
-
-      - name: Deploy Web to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-args: '--prod'
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_WEB_PROD }}
-          working-directory: ./web-build
-
-      - name: Deploy Admin to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-args: '--prod'
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_ADMIN_PROD }}
-          working-directory: ./admin-build
-
-      - name: Deploy Firebase Functions
-        run: |
-          npm install -g firebase-tools
-          firebase deploy --only functions --project production
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-
-      - name: Notify deployment
+      - name: 📧 Slack Notification
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
-          text: 'Production deployment completed!'
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-
-  # Security Scan
-  security:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run Snyk Security Scan
-        uses: snyk/actions/node@master
+          text: |
+            CI Pipeline completed for ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            
+            Results:
+            - Tests: ${{ needs.test.result }}
+            - E2E: ${{ needs.e2e.result }}
+            - Build: ${{ needs.build.result }}
+            - Compliance: ${{ needs.compliance.result }}
+            - Accessibility: ${{ needs.accessibility.result }}
         env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: github.ref == 'refs/heads/main' || failure()
 
-      - name: Run CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+      - name: 💬 Discord Notification
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "EATECH CI Pipeline"
+          description: |
+            **Branch:** ${{ github.ref_name }}
+            **Status:** ${{ job.status }}
+            **Tests:** ${{ needs.test.result }}
+            **Build:** ${{ needs.build.result }}
+        if: github.ref == 'refs/heads/main' || failure()

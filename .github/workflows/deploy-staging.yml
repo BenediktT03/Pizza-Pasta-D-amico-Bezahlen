@@ -1,0 +1,617 @@
+name: 🎭 Staging Deployment
+on:
+  push:
+    branches: [develop, 'feature/**', 'bugfix/**']
+  pull_request:
+    branches: [develop]
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      deploy_pr:
+        description: 'Deploy specific PR number'
+        required: false
+        type: string
+      test_feature:
+        description: 'Feature flag to test'
+        required: false
+        type: string
+
+env:
+  NODE_VERSION: '18.19.0'
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  DEPLOYMENT_ENVIRONMENT: 'staging'
+
+concurrency:
+  group: staging-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ===== DETERMINE DEPLOYMENT STRATEGY =====
+  setup:
+    name: 🔧 Setup & Strategy
+    runs-on: ubuntu-latest
+    outputs:
+      deploy-url: ${{ steps.deploy-config.outputs.url }}
+      environment: ${{ steps.deploy-config.outputs.environment }}
+      should-deploy: ${{ steps.should-deploy.outputs.result }}
+      pr-number: ${{ steps.pr-info.outputs.number }}
+      branch-name: ${{ steps.branch-info.outputs.name }}
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🌿 Extract Branch Info
+        id: branch-info
+        run: |
+          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
+          SAFE_BRANCH=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9-]/-/g' | tr '[:upper:]' '[:lower:]')
+          echo "name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "safe=$SAFE_BRANCH" >> $GITHUB_OUTPUT
+
+      - name: 🔍 Get PR Info
+        id: pr-info
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "number=${{ github.event.number }}" >> $GITHUB_OUTPUT
+          elif [ -n "${{ inputs.deploy_pr }}" ]; then
+            echo "number=${{ inputs.deploy_pr }}" >> $GITHUB_OUTPUT
+          else
+            echo "number=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🌐 Configure Deployment
+        id: deploy-config
+        run: |
+          BRANCH="${{ steps.branch-info.outputs.safe }}"
+          PR="${{ steps.pr-info.outputs.number }}"
+          
+          if [ "${{ github.ref_name }}" == "develop" ]; then
+            echo "url=https://staging.eatech.ch" >> $GITHUB_OUTPUT
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          elif [ -n "$PR" ]; then
+            echo "url=https://pr-$PR.eatech-preview.ch" >> $GITHUB_OUTPUT
+            echo "environment=preview-pr-$PR" >> $GITHUB_OUTPUT
+          else
+            echo "url=https://$BRANCH.eatech-preview.ch" >> $GITHUB_OUTPUT
+            echo "environment=preview-$BRANCH" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🚦 Should Deploy?
+        id: should-deploy
+        run: |
+          # Always deploy develop branch
+          if [ "${{ github.ref_name }}" == "develop" ]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+            echo "✅ Deploying develop branch to staging"
+          # Deploy PRs if requested
+          elif [ "${{ github.event_name }}" == "pull_request" ] || [ -n "${{ inputs.deploy_pr }}" ]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+            echo "✅ Deploying PR to preview environment"
+          # Deploy feature branches with manual trigger
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+            echo "✅ Manual deployment triggered"
+          else
+            echo "result=false" >> $GITHUB_OUTPUT
+            echo "⏭️ Skipping deployment for this branch"
+          fi
+
+  # ===== BUILD STAGING =====
+  build:
+    name: 🏗️ Build for Staging
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.should-deploy == 'true'
+    strategy:
+      matrix:
+        app: [web, admin, master]
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🔑 Setup Staging Environment
+        run: |
+          echo "NODE_ENV=staging" >> .env.staging
+          echo "NEXT_PUBLIC_APP_URL=${{ needs.setup.outputs.deploy-url }}" >> .env.staging
+          echo "NEXT_PUBLIC_API_URL=https://api-staging.eatech.ch" >> .env.staging
+          echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.SENTRY_DSN_STAGING }}" >> .env.staging
+          echo "NEXT_PUBLIC_PLAUSIBLE_DOMAIN=staging.eatech.ch" >> .env.staging
+          # Feature flags for staging
+          echo "NEXT_PUBLIC_FEATURE_VOICE_COMMERCE=true" >> .env.staging
+          echo "NEXT_PUBLIC_FEATURE_AI_PRICING=true" >> .env.staging
+          echo "NEXT_PUBLIC_FEATURE_BLOCKCHAIN=false" >> .env.staging
+          # Test-specific feature flag
+          if [ -n "${{ inputs.test_feature }}" ]; then
+            echo "NEXT_PUBLIC_FEATURE_${{ inputs.test_feature }}=true" >> .env.staging
+          fi
+
+      - name: 🏗️ Build ${{ matrix.app }}
+        run: |
+          npx turbo run build --filter=@eatech/${{ matrix.app }} --force
+        env:
+          NODE_ENV: staging
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: 🗜️ Compress Build
+        run: |
+          tar -czf ${{ matrix.app }}-staging-build.tar.gz apps/${{ matrix.app }}/.next
+
+      - name: 📦 Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.app }}-staging-build
+          path: ${{ matrix.app }}-staging-build.tar.gz
+          retention-days: 7
+
+  # ===== DEPLOY FIREBASE STAGING =====
+  deploy-firebase-staging:
+    name: 🔥 Deploy Firebase Staging
+    runs-on: ubuntu-latest
+    needs: [setup, build]
+    if: needs.setup.outputs.should-deploy == 'true'
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          cd functions && npm ci
+
+      - name: 🔑 Firebase Auth
+        run: echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_STAGING }}" | base64 -d > /tmp/firebase-key.json
+
+      - name: 🏗️ Build Functions
+        run: |
+          cd functions
+          npm run build
+        env:
+          NODE_ENV: staging
+          FIREBASE_PROJECT_ID: eatech-staging
+
+      - name: 🚀 Deploy to Staging Project
+        run: |
+          npx firebase use eatech-staging --token "${{ secrets.FIREBASE_TOKEN }}"
+          npx firebase deploy --only functions --force --token "${{ secrets.FIREBASE_TOKEN }}"
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/firebase-key.json
+
+      - name: 🔒 Deploy Firestore Rules (Staging)
+        run: |
+          # Copy staging rules that allow more permissive access for testing
+          cp firestore.rules.staging firestore.rules
+          npx firebase deploy --only firestore:rules --token "${{ secrets.FIREBASE_TOKEN }}"
+
+      - name: 🗑️ Cleanup
+        if: always()
+        run: rm -f /tmp/firebase-key.json
+
+  # ===== DEPLOY TO VERCEL =====
+  deploy-vercel:
+    name: ▲ Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: [setup, build, deploy-firebase-staging]
+    if: needs.setup.outputs.should-deploy == 'true'
+    strategy:
+      matrix:
+        app: [web, admin, master]
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 📥 Download Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ matrix.app }}-staging-build
+
+      - name: 🗜️ Extract Build
+        run: tar -xzf ${{ matrix.app }}-staging-build.tar.gz
+
+      - name: 🚀 Deploy ${{ matrix.app }} to Vercel
+        uses: amondnet/vercel-action@v25
+        id: vercel-deploy
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_${{ matrix.app }}_STAGING }}
+          working-directory: apps/${{ matrix.app }}
+          vercel-args: '--force'
+          github-comment: ${{ github.event_name == 'pull_request' }}
+
+      - name: 🏷️ Set Custom Domain
+        if: needs.setup.outputs.environment == 'staging'
+        run: |
+          npx vercel alias ${{ steps.vercel-deploy.outputs.preview-url }} ${{ matrix.app == 'web' && 'staging.eatech.ch' || format('{0}-staging.eatech.ch', matrix.app) }} --token ${{ secrets.VERCEL_TOKEN }}
+
+  # ===== SEED TEST DATA =====
+  seed-test-data:
+    name: 🌱 Seed Test Data
+    runs-on: ubuntu-latest
+    needs: [deploy-vercel]
+    if: needs.setup.outputs.should-deploy == 'true'
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 🔑 Firebase Auth
+        run: echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_STAGING }}" | base64 -d > /tmp/firebase-key.json
+
+      - name: 🌱 Seed Staging Data
+        run: |
+          node scripts/seed-staging.js
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/firebase-key.json
+          FIREBASE_PROJECT_ID: eatech-staging
+
+      - name: 👤 Create Test Users
+        run: |
+          node scripts/create-test-users.js
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/firebase-key.json
+
+  # ===== STAGING TESTS =====
+  staging-tests:
+    name: 🧪 Staging Environment Tests
+    runs-on: ubuntu-latest
+    needs: [setup, deploy-vercel, seed-test-data]
+    if: needs.setup.outputs.should-deploy == 'true'
+    strategy:
+      matrix:
+        test-suite: [smoke, integration, e2e]
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🎭 Install Playwright
+        if: matrix.test-suite == 'e2e'
+        run: npx playwright install
+
+      - name: 🧪 Run ${{ matrix.test-suite }} Tests
+        run: |
+          case "${{ matrix.test-suite }}" in
+            smoke)
+              npm run test:smoke:staging
+              ;;
+            integration)
+              npm run test:integration:staging
+              ;;
+            e2e)
+              npm run test:e2e:staging
+              ;;
+          esac
+        env:
+          BASE_URL: ${{ needs.setup.outputs.deploy-url }}
+          API_URL: https://api-staging.eatech.ch
+          TEST_USER_EMAIL: test@eatech.ch
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+
+      - name: 📸 Upload Test Screenshots
+        if: failure() && matrix.test-suite == 'e2e'
+        uses: actions/upload-artifact@v3
+        with:
+          name: staging-test-screenshots-${{ matrix.test-suite }}
+          path: tests/screenshots/
+          retention-days: 7
+
+  # ===== PERFORMANCE TESTING =====
+  performance:
+    name: ⚡ Performance Testing
+    runs-on: ubuntu-latest
+    needs: [setup, deploy-vercel]
+    if: needs.setup.outputs.should-deploy == 'true'
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🎭 Install Playwright
+        run: npx playwright install chromium
+
+      - name: 🚀 Lighthouse CI
+        run: |
+          npx lhci autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+          LHCI_BUILD_CONTEXT__CURRENT_BRANCH: ${{ needs.setup.outputs.branch-name }}
+          LHCI_BUILD_CONTEXT__COMMIT_SHA: ${{ github.sha }}
+
+      - name: 📊 Bundle Analysis
+        run: |
+          npx turbo run analyze --filter=@eatech/web
+          npx turbo run analyze --filter=@eatech/admin
+
+      - name: 📈 Upload Performance Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-reports
+          path: |
+            .lighthouseci/
+            apps/*/bundle-analysis/
+          retention-days: 30
+
+  # ===== SECURITY SCAN =====
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    needs: [setup, deploy-vercel]
+    if: needs.setup.outputs.should-deploy == 'true'
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔍 OWASP ZAP Scan
+        uses: zaproxy/action-full-scan@v0.7.0
+        with:
+          target: ${{ needs.setup.outputs.deploy-url }}
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a'
+
+      - name: 🔐 Nuclei Security Scan
+        uses: projectdiscovery/nuclei-action@main
+        with:
+          target: ${{ needs.setup.outputs.deploy-url }}
+          github-report: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📋 Upload Security Reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            report_html.html
+            nuclei-github.sarif
+          retention-days: 30
+
+  # ===== ACCESSIBILITY TESTING =====
+  accessibility:
+    name: ♿ Accessibility Testing
+    runs-on: ubuntu-latest
+    needs: [setup, deploy-vercel]
+    if: needs.setup.outputs.should-deploy == 'true'
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🎭 Install Playwright
+        run: npx playwright install
+
+      - name: ♿ Run Pa11y Tests
+        run: |
+          npx pa11y-ci --sitemap ${{ needs.setup.outputs.deploy-url }}/sitemap.xml \
+            --reporter html \
+            --threshold 5
+        continue-on-error: true
+
+      - name: 🧪 Axe-Core Testing
+        run: |
+          npx playwright test tests/accessibility/ --project=chromium
+        env:
+          BASE_URL: ${{ needs.setup.outputs.deploy-url }}
+
+      - name: 📊 Upload A11y Reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: accessibility-reports
+          path: |
+            pa11y-ci-report.html
+            tests/accessibility/reports/
+          retention-days: 30
+
+  # ===== VISUAL REGRESSION =====
+  visual-regression:
+    name: 👀 Visual Regression Testing
+    runs-on: ubuntu-latest
+    needs: [setup, deploy-vercel]
+    if: needs.setup.outputs.should-deploy == 'true' && github.event_name == 'pull_request'
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🎭 Install Playwright
+        run: npx playwright install
+
+      - name: 📸 Visual Regression Tests
+        run: |
+          npx playwright test tests/visual/ --project=chromium
+        env:
+          BASE_URL: ${{ needs.setup.outputs.deploy-url }}
+          UPDATE_SNAPSHOTS: false
+
+      - name: 📊 Upload Visual Diff Reports
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: visual-regression-diffs
+          path: tests/visual/screenshots-diff/
+          retention-days: 7
+
+  # ===== FEATURE FLAG TESTING =====
+  feature-flag-test:
+    name: 🚩 Feature Flag Testing
+    runs-on: ubuntu-latest
+    needs: [setup, deploy-vercel]
+    if: needs.setup.outputs.should-deploy == 'true' && inputs.test_feature != ''
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🧪 Test Feature Flag: ${{ inputs.test_feature }}
+        run: |
+          npm run test:feature-flag -- --feature=${{ inputs.test_feature }}
+        env:
+          BASE_URL: ${{ needs.setup.outputs.deploy-url }}
+          FEATURE_UNDER_TEST: ${{ inputs.test_feature }}
+
+  # ===== CLEANUP OLD DEPLOYMENTS =====
+  cleanup:
+    name: 🧹 Cleanup Old Deployments
+    runs-on: ubuntu-latest
+    needs: [staging-tests]
+    if: always() && needs.setup.outputs.should-deploy == 'true'
+    steps:
+      - name: 🗑️ Remove Old Preview Deployments
+        run: |
+          # Keep only last 5 preview deployments per PR
+          npx vercel ls --token ${{ secrets.VERCEL_TOKEN }} | grep "eatech-preview" | tail -n +6 | while read deployment; do
+            echo "Removing old deployment: $deployment"
+            npx vercel rm $deployment --yes --token ${{ secrets.VERCEL_TOKEN }}
+          done
+
+      - name: 🧹 Cleanup Old Artifacts
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId,
+            });
+            
+            // Delete artifacts older than 7 days
+            const cutoff = new Date();
+            cutoff.setDate(cutoff.getDate() - 7);
+            
+            for (const artifact of artifacts.data.artifacts) {
+              if (new Date(artifact.created_at) < cutoff) {
+                await github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id,
+                });
+              }
+            }
+
+  # ===== NOTIFICATIONS =====
+  notify:
+    name: 📢 Staging Notifications
+    runs-on: ubuntu-latest
+    needs: [setup, staging-tests, performance, security-scan, accessibility]
+    if: always() && needs.setup.outputs.should-deploy == 'true'
+    steps:
+      - name: 📝 Generate Deployment Report
+        id: report
+        run: |
+          TESTS_STATUS="${{ needs.staging-tests.result }}"
+          PERF_STATUS="${{ needs.performance.result }}"
+          SECURITY_STATUS="${{ needs.security-scan.result }}"
+          A11Y_STATUS="${{ needs.accessibility.result }}"
+          
+          REPORT="**Staging Deployment Report**\n"
+          REPORT="$REPORT🌐 **URL:** ${{ needs.setup.outputs.deploy-url }}\n"
+          REPORT="$REPORT🌿 **Branch:** ${{ needs.setup.outputs.branch-name }}\n"
+          REPORT="$REPORT📝 **Environment:** ${{ needs.setup.outputs.environment }}\n\n"
+          REPORT="$REPORT**Test Results:**\n"
+          REPORT="$REPORT• Tests: $([[ $TESTS_STATUS == 'success' ]] && echo '✅ Passed' || echo '❌ Failed')\n"
+          REPORT="$REPORT• Performance: $([[ $PERF_STATUS == 'success' ]] && echo '✅ Passed' || echo '❌ Failed')\n"
+          REPORT="$REPORT• Security: $([[ $SECURITY_STATUS == 'success' ]] && echo '✅ Passed' || echo '❌ Failed')\n"
+          REPORT="$REPORT• Accessibility: $([[ $A11Y_STATUS == 'success' ]] && echo '✅ Passed' || echo '❌ Failed')\n"
+          
+          echo "report=$REPORT" >> $GITHUB_OUTPUT
+
+      - name: 💬 Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const report = `${{ steps.report.outputs.report }}`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+
+      - name: 📧 Slack Notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            🎭 **Staging Deployment Complete**
+            
+            **Environment:** ${{ needs.setup.outputs.environment }}
+            **URL:** ${{ needs.setup.outputs.deploy-url }}
+            **Branch:** ${{ needs.setup.outputs.branch-name }}
+            
+            ${{ steps.report.outputs.report }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: 📱 Teams Notification
+        if: failure()
+        uses: skitionek/notify-microsoft-teams@master
+        with:
+          webhook_url: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          title: "🚨 Staging Deployment Failed"
+          message: |
+            Staging deployment failed for branch ${{ needs.setup.outputs.branch-name }}
+            URL: ${{ needs.setup.outputs.deploy-url }}
+            Please check the logs and fix the issues.

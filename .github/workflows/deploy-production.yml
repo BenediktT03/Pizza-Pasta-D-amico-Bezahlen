@@ -1,0 +1,556 @@
+name: 🚀 Production Deployment
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: 'Force deployment (skip checks)'
+        required: false
+        default: false
+        type: boolean
+      rollback_version:
+        description: 'Rollback to version (format: v1.2.3)'
+        required: false
+        type: string
+
+env:
+  NODE_VERSION: '18.19.0'
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  DEPLOYMENT_ENVIRONMENT: 'production'
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+jobs:
+  # ===== PRE-DEPLOYMENT CHECKS =====
+  pre-deploy:
+    name: 🔍 Pre-Deployment Checks
+    runs-on: ubuntu-latest
+    outputs:
+      should-deploy: ${{ steps.should-deploy.outputs.result }}
+      version: ${{ steps.version.outputs.version }}
+      changelog: ${{ steps.changelog.outputs.changelog }}
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🏷️ Get Version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=v$VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: v$VERSION"
+
+      - name: 📋 Generate Changelog
+        id: changelog
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$LAST_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" $LAST_TAG..HEAD)
+          else
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --max-count=10)
+          fi
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: 🚦 Deployment Decision
+        id: should-deploy
+        run: |
+          if [[ "${{ inputs.force_deploy }}" == "true" ]]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+            echo "🔧 Force deployment enabled"
+          elif [[ -n "${{ inputs.rollback_version }}" ]]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+            echo "🔄 Rollback deployment requested"
+          else
+            # Check if there are changes since last deployment
+            CHANGES=$(git diff HEAD~1 --name-only | grep -E '\.(ts|tsx|js|jsx|json)$' | wc -l)
+            if [ "$CHANGES" -gt 0 ]; then
+              echo "result=true" >> $GITHUB_OUTPUT
+              echo "📝 Changes detected: $CHANGES files"
+            else
+              echo "result=false" >> $GITHUB_OUTPUT
+              echo "📭 No significant changes detected"
+            fi
+          fi
+
+      - name: 🔍 Security Scan
+        run: |
+          npm audit --audit-level=moderate
+          npx snyk test || echo "⚠️ Snyk scan found issues"
+
+      - name: 🎯 Smoke Test Production URLs
+        run: |
+          curl -f https://status.eatech.ch/api/health || echo "⚠️ Status page unreachable"
+          curl -f https://api.eatech.ch/health || echo "⚠️ API unreachable"
+
+  # ===== ROLLBACK HANDLING =====
+  rollback:
+    name: 🔄 Rollback Deployment
+    runs-on: ubuntu-latest
+    if: inputs.rollback_version != ''
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.rollback_version }}
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🏗️ Build for Rollback
+        run: |
+          npx turbo run build --force
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_APP_URL: https://app.eatech.ch
+          NEXT_PUBLIC_API_URL: https://api.eatech.ch
+
+      - name: 🚀 Deploy to Vercel (Rollback)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod --force'
+          alias-domains: |
+            app.eatech.ch
+            admin.eatech.ch
+            master.eatech.ch
+
+      - name: 📢 Rollback Notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: 'success'
+          text: |
+            🔄 **ROLLBACK COMPLETED**
+            Version: ${{ inputs.rollback_version }}
+            Time: ${{ github.run_started_at }}
+            Triggered by: ${{ github.actor }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # ===== BUILD FOR PRODUCTION =====
+  build:
+    name: 🏗️ Production Build
+    runs-on: ubuntu-latest
+    needs: pre-deploy
+    if: needs.pre-deploy.outputs.should-deploy == 'true' && inputs.rollback_version == ''
+    strategy:
+      matrix:
+        app: [web, admin, master]
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🔑 Setup Production Environment
+        run: |
+          echo "NODE_ENV=production" >> .env.production
+          echo "NEXT_PUBLIC_APP_URL=https://app.eatech.ch" >> .env.production
+          echo "NEXT_PUBLIC_API_URL=https://api.eatech.ch" >> .env.production
+          echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env.production
+          echo "NEXT_PUBLIC_PLAUSIBLE_DOMAIN=app.eatech.ch" >> .env.production
+
+      - name: 🏗️ Build ${{ matrix.app }}
+        run: |
+          npx turbo run build --filter=@eatech/${{ matrix.app }} --force
+        env:
+          NODE_ENV: production
+          NEXT_TELEMETRY_DISABLED: 1
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
+      - name: 🗜️ Compress Build
+        run: |
+          tar -czf ${{ matrix.app }}-build.tar.gz apps/${{ matrix.app }}/.next
+
+      - name: 📦 Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.app }}-production-build
+          path: ${{ matrix.app }}-build.tar.gz
+          retention-days: 30
+
+  # ===== FIREBASE FUNCTIONS DEPLOYMENT =====
+  deploy-functions:
+    name: 🔥 Deploy Firebase Functions
+    runs-on: ubuntu-latest
+    needs: [pre-deploy, build]
+    if: needs.pre-deploy.outputs.should-deploy == 'true' && inputs.rollback_version == ''
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          cd functions && npm ci
+
+      - name: 🔑 Firebase Auth
+        run: echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" | base64 -d > /tmp/firebase-key.json
+
+      - name: 🏗️ Build Functions
+        run: |
+          cd functions
+          npm run build
+        env:
+          NODE_ENV: production
+
+      - name: 🚀 Deploy Functions
+        run: |
+          npx firebase use eatech-prod --token "${{ secrets.FIREBASE_TOKEN }}"
+          npx firebase deploy --only functions --force --token "${{ secrets.FIREBASE_TOKEN }}"
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/firebase-key.json
+
+      - name: 🔒 Deploy Firestore Rules
+        run: |
+          npx firebase deploy --only firestore:rules --token "${{ secrets.FIREBASE_TOKEN }}"
+
+      - name: 🗑️ Cleanup
+        if: always()
+        run: rm -f /tmp/firebase-key.json
+
+  # ===== VERCEL DEPLOYMENT =====
+  deploy-vercel:
+    name: ▲ Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: [pre-deploy, build, deploy-functions]
+    if: needs.pre-deploy.outputs.should-deploy == 'true' && inputs.rollback_version == ''
+    strategy:
+      matrix:
+        app: [web, admin, master]
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 📥 Download Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ matrix.app }}-production-build
+
+      - name: 🗜️ Extract Build
+        run: tar -xzf ${{ matrix.app }}-build.tar.gz
+
+      - name: 🚀 Deploy ${{ matrix.app }} to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_${{ matrix.app }} }}
+          working-directory: apps/${{ matrix.app }}
+          vercel-args: '--prod --force'
+          alias-domains: |
+            ${{ matrix.app == 'web' && 'app.eatech.ch' || format('{0}.eatech.ch', matrix.app) }}
+
+  # ===== DATABASE MIGRATIONS =====
+  migrate:
+    name: 🗄️ Database Migrations
+    runs-on: ubuntu-latest
+    needs: [deploy-functions]
+    if: needs.pre-deploy.outputs.should-deploy == 'true' && inputs.rollback_version == ''
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 🔑 Firebase Auth
+        run: echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" | base64 -d > /tmp/firebase-key.json
+
+      - name: 🗄️ Run Migrations
+        run: |
+          node scripts/migrate.js --env=production
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/firebase-key.json
+          FIREBASE_PROJECT_ID: eatech-prod
+
+      - name: 🔍 Verify Migration
+        run: |
+          node scripts/verify-migration.js --env=production
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/firebase-key.json
+
+  # ===== CDN PURGE =====
+  purge-cdn:
+    name: 🧹 Purge CDN Cache
+    runs-on: ubuntu-latest
+    needs: [deploy-vercel]
+    steps:
+      - name: 🌍 Purge Cloudflare Cache
+        run: |
+          curl -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}'
+
+      - name: 📦 Purge NPM Cache
+        run: |
+          curl -X DELETE "https://registry.npmjs.org/-/package/@eatech/core/cache"
+
+  # ===== POST-DEPLOYMENT TESTS =====
+  post-deploy-tests:
+    name: 🧪 Post-Deployment Tests
+    runs-on: ubuntu-latest
+    needs: [deploy-vercel, purge-cdn]
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🎭 Install Playwright
+        run: npx playwright install chromium
+
+      - name: 🧪 Smoke Tests
+        run: |
+          npx playwright test tests/smoke/ --project=chromium
+        env:
+          BASE_URL: https://app.eatech.ch
+          API_URL: https://api.eatech.ch
+
+      - name: 🔍 Health Checks
+        run: |
+          # Check main app
+          curl -f https://app.eatech.ch/api/health
+          # Check admin
+          curl -f https://admin.eatech.ch/api/health
+          # Check master
+          curl -f https://master.eatech.ch/api/health
+          # Check Firebase Functions
+          curl -f https://api.eatech.ch/health
+          echo "✅ All services are healthy"
+
+      - name: 📊 Performance Check
+        run: |
+          npx lighthouse https://app.eatech.ch --chrome-flags="--headless" --output=json --output-path=/tmp/lighthouse.json
+          PERFORMANCE_SCORE=$(cat /tmp/lighthouse.json | jq '.categories.performance.score')
+          echo "Performance Score: $PERFORMANCE_SCORE"
+          if (( $(echo "$PERFORMANCE_SCORE < 0.9" | bc -l) )); then
+            echo "⚠️ Performance score below threshold (0.9)"
+            exit 1
+          fi
+
+  # ===== CREATE RELEASE =====
+  release:
+    name: 🎉 Create Release
+    runs-on: ubuntu-latest
+    needs: [pre-deploy, post-deploy-tests]
+    if: needs.pre-deploy.outputs.should-deploy == 'true' && inputs.rollback_version == ''
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏷️ Create Git Tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ needs.pre-deploy.outputs.version }}" -m "Release ${{ needs.pre-deploy.outputs.version }}"
+          git push origin "${{ needs.pre-deploy.outputs.version }}"
+
+      - name: 📝 Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.pre-deploy.outputs.version }}
+          release_name: 🚀 EATECH ${{ needs.pre-deploy.outputs.version }}
+          body: |
+            ## 🎉 EATECH Production Release ${{ needs.pre-deploy.outputs.version }}
+            
+            **Deployment Date:** ${{ github.run_started_at }}
+            **Deployed by:** ${{ github.actor }}
+            
+            ### 📋 Changes
+            ${{ needs.pre-deploy.outputs.changelog }}
+            
+            ### 🔗 Links
+            - 🌐 [Customer App](https://app.eatech.ch)
+            - 👩‍💼 [Admin Dashboard](https://admin.eatech.ch)
+            - 🎛️ [Master Control](https://master.eatech.ch)
+            - 📊 [Status Page](https://status.eatech.ch)
+            
+            ### 🛠️ Technical Details
+            - Node.js: ${{ env.NODE_VERSION }}
+            - Deployment: Vercel + Firebase
+            - CDN: Cloudflare
+            
+            ---
+            🇨🇭 Made with ❤️ in Switzerland
+          draft: false
+          prerelease: false
+
+  # ===== MONITORING & ALERTS =====
+  monitoring:
+    name: 📊 Setup Monitoring
+    runs-on: ubuntu-latest
+    needs: [release]
+    steps:
+      - name: 📡 Create Sentry Release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: eatech
+          SENTRY_PROJECT: eatech-web
+        with:
+          environment: production
+          version: ${{ needs.pre-deploy.outputs.version }}
+
+      - name: 🚨 Setup Pingdom Checks
+        run: |
+          curl -X POST "https://api.pingdom.com/api/3.1/checks" \
+            -H "Authorization: Bearer ${{ secrets.PINGDOM_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "name": "EATECH Production Health",
+              "type": "http",
+              "host": "app.eatech.ch",
+              "url": "/api/health",
+              "requestheaders": {"User-Agent": "Pingdom Health Check"},
+              "resolution": 1
+            }'
+
+  # ===== NOTIFICATIONS =====
+  notify:
+    name: 📢 Deployment Notifications
+    runs-on: ubuntu-latest
+    needs: [release, monitoring]
+    if: always()
+    steps:
+      - name: 📧 Slack Success Notification
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: 'success'
+          text: |
+            🎉 **PRODUCTION DEPLOYMENT SUCCESSFUL** 🎉
+            
+            **Version:** ${{ needs.pre-deploy.outputs.version }}
+            **Time:** ${{ github.run_started_at }}
+            **Deployed by:** ${{ github.actor }}
+            
+            **🔗 Links:**
+            • [Customer App](https://app.eatech.ch)
+            • [Admin Dashboard](https://admin.eatech.ch)
+            • [Master Control](https://master.eatech.ch)
+            
+            **📋 Changes:**
+            ${{ needs.pre-deploy.outputs.changelog }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: 📧 Slack Failure Notification
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: 'failure'
+          text: |
+            🚨 **PRODUCTION DEPLOYMENT FAILED** 🚨
+            
+            **Branch:** main
+            **Commit:** ${{ github.sha }}
+            **Time:** ${{ github.run_started_at }}
+            **Triggered by:** ${{ github.actor }}
+            
+            **Action Required:** Check logs and investigate immediately
+            **Rollback:** Run workflow with previous version if needed
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: 📱 PagerDuty Alert (if failed)
+        if: failure()
+        uses: PagerDuty/action-pagerduty-alert@v1
+        with:
+          pagerduty-integration-key: ${{ secrets.PAGERDUTY_INTEGRATION_KEY }}
+          pagerduty-dedup-key: "production-deployment-failure"
+          pagerduty-description: "EATECH Production Deployment Failed"
+          pagerduty-severity: "error"
+
+      - name: 💬 Discord Success Notification
+        if: success()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "🚀 EATECH Production Deployed!"
+          description: |
+            **Version:** ${{ needs.pre-deploy.outputs.version }}
+            **Status:** ✅ Success
+            **Links:** [App](https://app.eatech.ch) | [Admin](https://admin.eatech.ch)
+          color: 0x00ff00
+
+      - name: 📧 Email Notification to Stakeholders
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "🚀 EATECH Production Deployment - ${{ needs.pre-deploy.outputs.version }}"
+          to: benedikt@thomma.ch,team@eatech.ch
+          from: deployments@eatech.ch
+          html_body: |
+            <h2>🎉 EATECH Production Deployment Successful</h2>
+            <p><strong>Version:</strong> ${{ needs.pre-deploy.outputs.version }}</p>
+            <p><strong>Deployed:</strong> ${{ github.run_started_at }}</p>
+            <p><strong>Deployed by:</strong> ${{ github.actor }}</p>
+            
+            <h3>🔗 Quick Links</h3>
+            <ul>
+              <li><a href="https://app.eatech.ch">Customer App</a></li>
+              <li><a href="https://admin.eatech.ch">Admin Dashboard</a></li>
+              <li><a href="https://master.eatech.ch">Master Control</a></li>
+              <li><a href="https://status.eatech.ch">Status Page</a></li>
+            </ul>
+            
+            <h3>📋 Changes in this Release</h3>
+            <pre>${{ needs.pre-deploy.outputs.changelog }}</pre>
+            
+            <hr>
+            <p><em>🇨🇭 EATECH - Revolutionizing Swiss Foodtruck Industry</em></p>

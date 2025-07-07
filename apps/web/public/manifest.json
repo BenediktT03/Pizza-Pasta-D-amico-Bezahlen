@@ -1,170 +1,242 @@
 {
-  "name": "EATECH - Premium Foodtruck Bestellsystem",
+  "name": "EATECH - Schweizer Foodtruck Bestellsystem",
   "short_name": "EATECH",
-  "description": "Das revolutionäre Multi-Tenant Foodtruck Bestellsystem für die Schweiz",
-  "lang": "de-CH",
-  "start_url": "/?source=pwa",
-  "display": "standalone",
-  "orientation": "any",
-  "theme_color": "#FF6B6B",
-  "background_color": "#0A0A0A",
-  "dir": "ltr",
-  "scope": "/",
+  "description": "Das revolutionäre Multi-Tenant PWA Bestellsystem für Schweizer Foodtrucks. Bestellen, bezahlen und geniessen - alles offline-fähig.",
+  "version": "3.0.0",
   "id": "ch.eatech.app",
-  
-  "icons": [
+  "scope": "/",
+  "start_url": "/?utm_source=pwa&utm_medium=homescreen",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#FF6B35",
+  "background_color": "#FFFFFF",
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "protocol_handlers": [
     {
-      "src": "/images/icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/images/icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/images/icons/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/images/icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/images/icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/images/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/images/icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/images/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/images/icons/icon-512x512-maskable.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "protocol": "web+eatech",
+      "url": "/order?data=%s"
     }
   ],
-  
-  "screenshots": [
-    {
-      "src": "/images/screenshots/home-mobile.png",
-      "sizes": "412x915",
-      "type": "image/png",
-      "platform": "narrow",
-      "label": "EATECH Speisekarte"
-    },
-    {
-      "src": "/images/screenshots/order-mobile.png",
-      "sizes": "412x915",
-      "type": "image/png",
-      "platform": "narrow",
-      "label": "Bestellprozess"
-    },
-    {
-      "src": "/images/screenshots/home-desktop.png",
-      "sizes": "1920x1080",
-      "type": "image/png",
-      "platform": "wide",
-      "label": "EATECH Desktop-Ansicht"
-    },
-    {
-      "src": "/images/screenshots/admin-desktop.png",
-      "sizes": "1920x1080",
-      "type": "image/png",
-      "platform": "wide",
-      "label": "Admin Dashboard"
-    }
-  ],
-  
-  "shortcuts": [
-    {
-      "name": "Neue Bestellung",
-      "short_name": "Bestellen",
-      "description": "Direkt zur Speisekarte",
-      "url": "/?source=shortcut&action=order",
-      "icons": [
-        {
-          "src": "/images/icons/shortcut-order.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Bestellung verfolgen",
-      "short_name": "Tracking",
-      "description": "Status Ihrer Bestellung",
-      "url": "/track?source=shortcut",
-      "icons": [
-        {
-          "src": "/images/icons/shortcut-track.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Admin Login",
-      "short_name": "Admin",
-      "description": "Zum Admin-Bereich",
-      "url": "/admin?source=shortcut",
-      "icons": [
-        {
-          "src": "/images/icons/shortcut-admin.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    }
-  ],
-  
   "categories": [
     "food",
     "business",
     "productivity",
-    "lifestyle"
+    "lifestyle",
+    "shopping"
   ],
-  
+  "lang": "de-CH",
+  "dir": "ltr",
+  "prefer_related_applications": false,
   "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
-  
   "related_applications": [
     {
-      "platform": "play",
-      "url": "https://play.google.com/store/apps/details?id=ch.eatech.app",
-      "id": "ch.eatech.app"
-    },
-    {
-      "platform": "itunes",
-      "url": "https://apps.apple.com/ch/app/eatech/id1234567890"
+      "platform": "webapp",
+      "url": "https://app.eatech.ch/manifest.json"
     }
   ],
-  
-  "prefer_related_applications": false,
-  
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any",
+      "density": "1.5"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any",
+      "density": "2.0"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any",
+      "density": "2.7"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any",
+      "density": "3.0"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any",
+      "density": "3.2"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any",
+      "density": "4.0"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any",
+      "density": "8.0"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any",
+      "density": "10.7"
+    },
+    {
+      "src": "/icons/icon-192x192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512x512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/badge-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "badge"
+    },
+    {
+      "src": "/icons/monochrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "monochrome"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/mobile-menu.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Interaktive Speisekarte mit Voice Commerce"
+    },
+    {
+      "src": "/screenshots/mobile-cart.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Warenkorb und Checkout-Prozess"
+    },
+    {
+      "src": "/screenshots/mobile-order-tracking.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Live Order Tracking mit Standort"
+    },
+    {
+      "src": "/screenshots/mobile-voice.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Voice Commerce - 'Hey EATECH' Sprachbestellung"
+    },
+    {
+      "src": "/screenshots/tablet-overview.png",
+      "sizes": "1194x834",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Tablet-optimierte Übersicht für Foodtruck-Staff"
+    },
+    {
+      "src": "/screenshots/desktop-admin.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Admin Dashboard mit Live Analytics"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Neue Bestellung",
+      "short_name": "Bestellen",
+      "description": "Schnell eine neue Bestellung bei einem Foodtruck aufgeben",
+      "url": "/order?shortcut=new",
+      "icons": [
+        {
+          "src": "/icons/shortcut-order.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Speisekarte",
+      "short_name": "Menü",
+      "description": "Aktuelle Speisekarte und Tagesangebote anzeigen",
+      "url": "/menu?shortcut=menu",
+      "icons": [
+        {
+          "src": "/icons/shortcut-menu.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Meine Bestellungen",
+      "short_name": "Bestellungen",
+      "description": "Aktuelle und vergangene Bestellungen verwalten",
+      "url": "/orders?shortcut=history",
+      "icons": [
+        {
+          "src": "/icons/shortcut-history.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Foodtrucks finden",
+      "short_name": "Standorte",
+      "description": "Foodtrucks in der Nähe mit GPS-Navigation finden",
+      "url": "/map?shortcut=location",
+      "icons": [
+        {
+          "src": "/icons/shortcut-map.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Voice Bestellung",
+      "short_name": "Sprechen",
+      "description": "Per Sprachbefehl bestellen - 'Hey EATECH'",
+      "url": "/voice?shortcut=voice",
+      "icons": [
+        {
+          "src": "/icons/shortcut-voice.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "/handle-qr",
+      "accept": {
+        "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"]
+      }
+    }
+  ],
   "share_target": {
     "action": "/share",
     "method": "POST",
@@ -175,64 +247,150 @@
       "url": "url",
       "files": [
         {
-          "name": "image",
+          "name": "images",
           "accept": ["image/*"]
         }
       ]
     }
   },
-  
-  "protocol_handlers": [
-    {
-      "protocol": "web+eatech",
-      "url": "/order?foodtruck=%s"
-    }
-  ],
-  
-  "edge_side_panel": {
-    "preferred_width": 400
-  },
-  
+  "capture_links": "existing-client-navigate",
   "launch_handler": {
-    "client_mode": ["navigate-existing", "auto"]
+    "client_mode": "focus-existing"
   },
-  
+  "permissions": [
+    "geolocation",
+    "notifications",
+    "microphone",
+    "camera",
+    "payment-handler"
+  ],
+  "features": [
+    "CrossOriginEmbedderPolicy",
+    "CrossOriginOpenerPolicy",
+    "PaymentRequest",
+    "WebShare",
+    "BackgroundSync",
+    "VoiceRecognition",
+    "Geolocation",
+    "PushMessaging"
+  ],
   "display_override": [
     "window-controls-overlay",
-    "standalone",
     "minimal-ui",
-    "browser"
+    "standalone",
+    "fullscreen"
   ],
-  
-  "file_handlers": [
-    {
-      "action": "/import-menu",
-      "accept": {
-        "text/csv": [".csv"],
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"]
+  "user_preferences": {
+    "color_scheme_dark": {
+      "theme_color": "#1a1a1a",
+      "background_color": "#000000"
+    }
+  },
+  "handle_links": "preferred",
+  "offline_enabled": true,
+  "offline_fallback": "/offline.html",
+  "serviceworker": {
+    "src": "/service-worker.js",
+    "scope": "/",
+    "type": "module",
+    "update_via_cache": "none"
+  },
+  "gcm_sender_id": "103953800507",
+  "fcm_options": {
+    "analytics_label": "eatech-pwa-analytics"
+  },
+  "background_sync": [
+    "order-sync",
+    "analytics-sync",
+    "voice-command-sync"
+  ],
+  "web_push": {
+    "vapid_public_key": "BLU2Q2v2DhJrCqEQNZ6s_jnKjzQl7P8DYlvf6KH8a5R4J7sP_8C5M2b_B3J7e_9f",
+    "registration_endpoint": "https://api.eatech.ch/push/register"
+  },
+  "custom": {
+    "eatech_config": {
+      "api_base_url": "https://api.eatech.ch",
+      "websocket_url": "wss://ws.eatech.ch",
+      "cdn_base_url": "https://cdn.eatech.ch",
+      "voice_wake_word": "Hey EATECH",
+      "supported_languages": ["de-CH", "fr-CH", "it-CH", "en-CH"],
+      "supported_payment_methods": ["card", "twint", "cash", "postfinance"],
+      "offline_capabilities": [
+        "menu_browsing",
+        "cart_management",
+        "order_creation",
+        "voice_commands",
+        "customer_data",
+        "analytics_tracking"
+      ],
+      "swiss_features": {
+        "qr_invoice_support": true,
+        "twint_integration": true,
+        "postfinance_support": true,
+        "swiss_tax_calculation": true,
+        "multi_language_canton_support": true,
+        "vat_number_validation": true
+      },
+      "performance_targets": {
+        "first_contentful_paint": 1500,
+        "largest_contentful_paint": 2500,
+        "first_input_delay": 100,
+        "cumulative_layout_shift": 0.1,
+        "offline_first_load": 3000
+      },
+      "accessibility": {
+        "high_contrast_support": true,
+        "voice_navigation": true,
+        "screen_reader_optimized": true,
+        "dyslexia_friendly_fonts": true,
+        "cognitive_assistance": true
       }
     }
-  ],
-  
-  "handle_links": "preferred",
-  
-  "features": {
-    "payments": true,
-    "geolocation": true,
-    "notifications": true,
-    "camera": true,
-    "microphone": true,
-    "storage": true,
-    "clipboard": true,
-    "share": true,
-    "contacts": false,
-    "bluetooth": false
-  }
-}": "narrow",
-      "label": "EATECH Startseite"
-    },
+  },
+  "workbox": {
+    "runtimeCaching": [
+      {
+        "urlPattern": "https://api.eatech.ch/.*",
+        "handler": "NetworkFirst",
+        "options": {
+          "cacheName": "api-cache",
+          "networkTimeoutSeconds": 3,
+          "expiration": {
+            "maxEntries": 100,
+            "maxAgeSeconds": 300
+          }
+        }
+      },
+      {
+        "urlPattern": "https://cdn.eatech.ch/.*",
+        "handler": "CacheFirst",
+        "options": {
+          "cacheName": "cdn-cache",
+          "expiration": {
+            "maxEntries": 200,
+            "maxAgeSeconds": 2592000
+          }
+        }
+      }
+    ],
+    "skipWaiting": true,
+    "clientsClaim": true
+  },
+  "contact_info": {
+    "support_email": "support@eatech.ch",
+    "support_phone": "+41 44 123 45 67",
+    "website": "https://eatech.ch",
+    "privacy_policy": "https://eatech.ch/privacy",
+    "terms_of_service": "https://eatech.ch/terms"
+  },
+  "monetization": "$ilp.uphold.com/WMbkRyiNgM8W",
+  "payment": [
     {
-      "src": "/images/screenshots/menu-mobile.png",
-      "sizes": "412x915",
-      "type": "image/png",
-      "platform
+      "supported_methods": ["https://eatech.ch/pay"],
+      "data": {
+        "supported_types": ["twint", "card", "postfinance"]
+      }
+    }
+  ]
+}

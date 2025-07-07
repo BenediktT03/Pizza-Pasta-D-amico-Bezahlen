@@ -1,0 +1,768 @@
+name: 🔥 Firebase Functions Testing
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'functions/**'
+      - 'packages/core/**'
+      - '.github/workflows/test-functions.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'functions/**'
+      - 'packages/core/**'
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of test to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - unit
+          - integration
+          - performance
+          - security
+      deploy_to_emulator:
+        description: 'Deploy to Firebase Emulator'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  NODE_VERSION: '18.19.0'
+  FIREBASE_PROJECT_ID: eatech-test
+  FIRESTORE_EMULATOR_HOST: localhost:8080
+  FIREBASE_AUTH_EMULATOR_HOST: localhost:9099
+  FIREBASE_FUNCTIONS_EMULATOR_HOST: localhost:5001
+  TEST_TYPE: ${{ inputs.test_type || 'all' }}
+
+concurrency:
+  group: functions-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ===== SETUP & VALIDATION =====
+  setup:
+    name: 🔧 Setup & Validation
+    runs-on: ubuntu-latest
+    outputs:
+      functions-changed: ${{ steps.changes.outputs.functions }}
+      should-test: ${{ steps.should-test.outputs.result }}
+      test-matrix: ${{ steps.test-matrix.outputs.matrix }}
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          cd functions && npm ci
+
+      - name: 🔍 Detect Changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            functions:
+              - 'functions/**'
+              - 'packages/core/**'
+              - 'firestore.rules'
+              - 'firebase.json'
+
+      - name: 🚦 Should Test?
+        id: should-test
+        run: |
+          if [[ "${{ steps.changes.outputs.functions }}" == "true" ]] || [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+            echo "✅ Functions testing required"
+          else
+            echo "result=false" >> $GITHUB_OUTPUT
+            echo "⏭️ No functions changes detected"
+          fi
+
+      - name: 🎯 Generate Test Matrix
+        id: test-matrix
+        run: |
+          if [[ "${{ env.TEST_TYPE }}" == "all" ]]; then
+            MATRIX='["unit", "integration", "performance", "security"]'
+          else
+            MATRIX='["${{ env.TEST_TYPE }}"]'
+          fi
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+
+      - name: 🔍 Validate Functions Structure
+        run: |
+          echo "🔍 Validating functions structure..."
+          # Check required files exist
+          test -f functions/package.json || (echo "❌ functions/package.json missing" && exit 1)
+          test -f functions/src/index.ts || (echo "❌ functions/src/index.ts missing" && exit 1)
+          test -f firestore.rules || (echo "❌ firestore.rules missing" && exit 1)
+          test -f firebase.json || (echo "❌ firebase.json missing" && exit 1)
+          echo "✅ Functions structure validation passed"
+
+      - name: 🔧 Lint Functions
+        run: |
+          cd functions
+          npm run lint
+          echo "✅ Functions linting passed"
+
+      - name: 🏗️ Build Functions
+        run: |
+          cd functions
+          npm run build
+          echo "✅ Functions build successful"
+
+  # ===== UNIT TESTING =====
+  unit-tests:
+    name: 🧪 Unit Tests
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.should-test == 'true' && contains(fromJSON(needs.setup.outputs.test-matrix), 'unit')
+    strategy:
+      matrix:
+        test-suite: [auth, orders, products, analytics, ai, payments]
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          cd functions && npm ci
+
+      - name: 🧪 Run Unit Tests - ${{ matrix.test-suite }}
+        run: |
+          cd functions
+          npm run test:unit -- --testPathPattern=${{ matrix.test-suite }} --coverage --coverageDirectory=../coverage/${{ matrix.test-suite }}
+        env:
+          NODE_ENV: test
+          FIREBASE_PROJECT_ID: ${{ env.FIREBASE_PROJECT_ID }}
+
+      - name: 📊 Upload Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          directory: ./coverage/${{ matrix.test-suite }}
+          flags: functions-${{ matrix.test-suite }}
+          name: functions-${{ matrix.test-suite }}-coverage
+
+      - name: 📋 Test Report
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: 'Functions Unit Tests - ${{ matrix.test-suite }}'
+          path: 'functions/test-results/${{ matrix.test-suite }}-junit.xml'
+          reporter: jest-junit
+
+  # ===== INTEGRATION TESTING =====
+  integration-tests:
+    name: 🔗 Integration Tests
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.should-test == 'true' && contains(fromJSON(needs.setup.outputs.test-matrix), 'integration')
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          cd functions && npm ci
+
+      - name: ☕ Install Java (for Firebase Emulators)
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: 🔥 Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: 🔧 Setup Firebase Emulators
+        run: |
+          firebase setup:emulators:firestore
+          firebase setup:emulators:auth
+          firebase setup:emulators:functions
+
+      - name: 🚀 Start Firebase Emulators
+        run: |
+          firebase emulators:start --only firestore,auth,functions --project ${{ env.FIREBASE_PROJECT_ID }} &
+          # Wait for emulators to be ready
+          sleep 30
+          curl -f http://localhost:4000 || echo "⚠️ Emulator UI not ready"
+
+      - name: 🌱 Seed Test Data
+        run: |
+          cd functions
+          npm run seed:test
+        env:
+          FIRESTORE_EMULATOR_HOST: ${{ env.FIRESTORE_EMULATOR_HOST }}
+          FIREBASE_AUTH_EMULATOR_HOST: ${{ env.FIREBASE_AUTH_EMULATOR_HOST }}
+
+      - name: 🔗 Run Integration Tests
+        run: |
+          cd functions
+          npm run test:integration
+        env:
+          NODE_ENV: test
+          FIREBASE_PROJECT_ID: ${{ env.FIREBASE_PROJECT_ID }}
+          FIRESTORE_EMULATOR_HOST: ${{ env.FIRESTORE_EMULATOR_HOST }}
+          FIREBASE_AUTH_EMULATOR_HOST: ${{ env.FIREBASE_AUTH_EMULATOR_HOST }}
+          FIREBASE_FUNCTIONS_EMULATOR_HOST: ${{ env.FIREBASE_FUNCTIONS_EMULATOR_HOST }}
+          REDIS_URL: redis://localhost:6379
+
+      - name: 🧪 API Endpoint Tests
+        run: |
+          # Test health endpoint
+          curl -f http://localhost:5001/${{ env.FIREBASE_PROJECT_ID }}/us-central1/api/health
+          
+          # Test authentication
+          curl -X POST http://localhost:5001/${{ env.FIREBASE_PROJECT_ID }}/us-central1/api/auth/test \
+            -H "Content-Type: application/json" \
+            -d '{"test": true}'
+          
+          # Test order creation
+          curl -X POST http://localhost:5001/${{ env.FIREBASE_PROJECT_ID }}/us-central1/api/orders \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer test-token" \
+            -d '{"tenantId": "test-tenant", "items": [{"productId": "test-product", "quantity": 1}]}'
+
+      - name: 🔍 Validate Firestore Rules
+        run: |
+          cd functions
+          npm run test:rules
+        env:
+          FIRESTORE_EMULATOR_HOST: ${{ env.FIRESTORE_EMULATOR_HOST }}
+
+      - name: 📊 Upload Integration Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: integration-test-results
+          path: |
+            functions/test-results/
+            functions/coverage/
+          retention-days: 30
+
+      - name: 🛑 Stop Firebase Emulators
+        if: always()
+        run: |
+          pkill -f "firebase.*emulators" || true
+
+  # ===== PERFORMANCE TESTING =====
+  performance-tests:
+    name: ⚡ Performance Tests
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.should-test == 'true' && contains(fromJSON(needs.setup.outputs.test-matrix), 'performance')
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          cd functions && npm ci
+
+      - name: ☕ Install Java (for Firebase Emulators)
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: 🔥 Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: 🚀 Start Firebase Emulators
+        run: |
+          firebase emulators:start --only firestore,auth,functions --project ${{ env.FIREBASE_PROJECT_ID }} &
+          sleep 30
+
+      - name: 🌱 Seed Performance Test Data
+        run: |
+          cd functions
+          npm run seed:performance
+        env:
+          FIRESTORE_EMULATOR_HOST: ${{ env.FIRESTORE_EMULATOR_HOST }}
+          FIREBASE_AUTH_EMULATOR_HOST: ${{ env.FIREBASE_AUTH_EMULATOR_HOST }}
+
+      - name: ⚡ Load Testing with Artillery
+        run: |
+          npx artillery run tests/performance/artillery-config.yml
+        env:
+          TARGET_URL: http://localhost:5001/${{ env.FIREBASE_PROJECT_ID }}/us-central1/api
+
+      - name: 📊 Memory & CPU Profiling
+        run: |
+          cd functions
+          npm run profile:memory
+          npm run profile:cpu
+        env:
+          NODE_ENV: test
+          FIRESTORE_EMULATOR_HOST: ${{ env.FIRESTORE_EMULATOR_HOST }}
+
+      - name: 🔥 Firebase Performance Testing
+        run: |
+          cd functions
+          # Test cold start performance
+          npm run test:cold-start
+          # Test concurrent requests
+          npm run test:concurrent
+          # Test database operations performance
+          npm run test:db-performance
+
+      - name: 📈 Analyze Performance Results
+        run: |
+          cd functions
+          npm run analyze:performance
+          
+          # Check performance thresholds
+          node << 'EOF'
+          const fs = require('fs');
+          const results = JSON.parse(fs.readFileSync('performance-results.json', 'utf8'));
+          
+          const thresholds = {
+            coldStart: 3000, // 3 seconds
+            averageResponse: 500, // 500ms
+            p95Response: 1000, // 1 second
+            memoryUsage: 256 // 256MB
+          };
+          
+          let failed = false;
+          
+          if (results.coldStart > thresholds.coldStart) {
+            console.error(`❌ Cold start too slow: ${results.coldStart}ms > ${thresholds.coldStart}ms`);
+            failed = true;
+          }
+          
+          if (results.averageResponse > thresholds.averageResponse) {
+            console.error(`❌ Average response too slow: ${results.averageResponse}ms > ${thresholds.averageResponse}ms`);
+            failed = true;
+          }
+          
+          if (results.p95Response > thresholds.p95Response) {
+            console.error(`❌ P95 response too slow: ${results.p95Response}ms > ${thresholds.p95Response}ms`);
+            failed = true;
+          }
+          
+          if (results.memoryUsage > thresholds.memoryUsage) {
+            console.error(`❌ Memory usage too high: ${results.memoryUsage}MB > ${thresholds.memoryUsage}MB`);
+            failed = true;
+          }
+          
+          if (failed) {
+            process.exit(1);
+          } else {
+            console.log('✅ All performance thresholds met');
+          }
+          EOF
+
+      - name: 📊 Upload Performance Reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-test-results
+          path: |
+            functions/performance-results.json
+            functions/profiles/
+            artillery-report.html
+          retention-days: 30
+
+  # ===== SECURITY TESTING =====
+  security-tests:
+    name: 🔒 Security Tests
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.should-test == 'true' && contains(fromJSON(needs.setup.outputs.test-matrix), 'security')
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          cd functions && npm ci
+
+      - name: ☕ Install Java (for Firebase Emulators)
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: 🔥 Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: 🚀 Start Firebase Emulators
+        run: |
+          firebase emulators:start --only firestore,auth,functions --project ${{ env.FIREBASE_PROJECT_ID }} &
+          sleep 30
+
+      - name: 🔐 Authentication Security Tests
+        run: |
+          cd functions
+          npm run test:security:auth
+        env:
+          FIRESTORE_EMULATOR_HOST: ${{ env.FIRESTORE_EMULATOR_HOST }}
+          FIREBASE_AUTH_EMULATOR_HOST: ${{ env.FIREBASE_AUTH_EMULATOR_HOST }}
+
+      - name: 🛡️ Authorization Tests
+        run: |
+          cd functions
+          npm run test:security:authz
+        env:
+          FIRESTORE_EMULATOR_HOST: ${{ env.FIRESTORE_EMULATOR_HOST }}
+          FIREBASE_AUTH_EMULATOR_HOST: ${{ env.FIREBASE_AUTH_EMULATOR_HOST }}
+
+      - name: 🔍 Input Validation Tests
+        run: |
+          cd functions
+          npm run test:security:validation
+
+      - name: 🛡️ SQL Injection Tests
+        run: |
+          cd functions
+          # Test NoSQL injection prevention
+          npm run test:security:nosql-injection
+
+      - name: 🔐 CORS Configuration Tests
+        run: |
+          cd functions
+          npm run test:security:cors
+
+      - name: 🔒 Rate Limiting Tests
+        run: |
+          cd functions
+          npm run test:security:rate-limit
+
+      - name: 🛡️ Swiss Security Compliance
+        run: |
+          cd functions
+          # Test GDPR compliance
+          npm run test:security:gdpr
+          # Test data encryption
+          npm run test:security:encryption
+          # Test audit logging
+          npm run test:security:audit
+
+      - name: 📊 Upload Security Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-test-results
+          path: |
+            functions/security-test-results/
+          retention-days: 30
+
+  # ===== DEPLOY TO EMULATOR (OPTIONAL) =====
+  deploy-emulator:
+    name: 🔥 Deploy to Emulator
+    runs-on: ubuntu-latest
+    needs: [setup, unit-tests, integration-tests]
+    if: |
+      needs.setup.outputs.should-test == 'true' && 
+      (inputs.deploy_to_emulator == true || github.event_name == 'workflow_dispatch') &&
+      success()
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          cd functions && npm ci
+
+      - name: ☕ Install Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: 🔥 Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: 🏗️ Build Functions
+        run: |
+          cd functions
+          npm run build
+
+      - name: 🚀 Deploy to Emulator
+        run: |
+          firebase emulators:start --only functions --project ${{ env.FIREBASE_PROJECT_ID }} &
+          EMULATOR_PID=$!
+          
+          # Wait for emulator to start
+          sleep 15
+          
+          # Test deployment
+          curl -f http://localhost:5001/${{ env.FIREBASE_PROJECT_ID }}/us-central1/api/health
+          
+          echo "Functions successfully deployed to emulator!"
+          echo "Emulator URL: http://localhost:5001/${{ env.FIREBASE_PROJECT_ID }}/us-central1/api"
+          
+          # Keep emulator running for a short time for manual testing
+          sleep 300
+          
+          # Stop emulator
+          kill $EMULATOR_PID
+
+  # ===== E2E FUNCTIONS TESTING =====
+  e2e-functions:
+    name: 🎭 E2E Functions Testing
+    runs-on: ubuntu-latest
+    needs: [setup, integration-tests]
+    if: needs.setup.outputs.should-test == 'true' && github.event_name == 'pull_request'
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          cd functions && npm ci
+
+      - name: 🎭 Install Playwright
+        run: npx playwright install
+
+      - name: ☕ Install Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: 🔥 Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: 🚀 Start Full Test Environment
+        run: |
+          # Start Firebase emulators
+          firebase emulators:start --project ${{ env.FIREBASE_PROJECT_ID }} &
+          
+          # Start frontend test server
+          cd apps/web && npm run build && npm run start &
+          
+          # Wait for services to be ready
+          sleep 30
+
+      - name: 🌱 Seed E2E Test Data
+        run: |
+          cd functions
+          npm run seed:e2e
+        env:
+          FIRESTORE_EMULATOR_HOST: ${{ env.FIRESTORE_EMULATOR_HOST }}
+          FIREBASE_AUTH_EMULATOR_HOST: ${{ env.FIREBASE_AUTH_EMULATOR_HOST }}
+
+      - name: 🎭 Run E2E Tests
+        run: |
+          npx playwright test tests/e2e/functions/ --project=chromium
+        env:
+          BASE_URL: http://localhost:3000
+          API_URL: http://localhost:5001/${{ env.FIREBASE_PROJECT_ID }}/us-central1/api
+
+      - name: 📸 Upload E2E Screenshots
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e-functions-screenshots
+          path: tests/e2e/functions/screenshots/
+          retention-days: 7
+
+  # ===== FUNCTIONS DOCUMENTATION =====
+  documentation:
+    name: 📚 Generate Documentation
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests]
+    if: success() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    steps:
+      - name: ⚡ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          cd functions && npm ci
+
+      - name: 📚 Generate API Documentation
+        run: |
+          cd functions
+          npm run docs:generate
+          
+          # Generate OpenAPI spec
+          npm run docs:openapi
+          
+          # Generate function signatures
+          npm run docs:typedoc
+
+      - name: 📤 Upload Documentation
+        uses: actions/upload-artifact@v3
+        with:
+          name: functions-documentation
+          path: |
+            functions/docs/
+            functions/openapi.json
+          retention-days: 90
+
+      - name: 🌐 Deploy Documentation
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: functions/docs
+          destination_dir: functions-docs
+
+  # ===== NOTIFICATIONS =====
+  notify:
+    name: 📢 Functions Test Notifications
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests, performance-tests, security-tests]
+    if: always()
+    steps:
+      - name: 📊 Calculate Test Score
+        id: test-score
+        run: |
+          UNIT_STATUS="${{ needs.unit-tests.result }}"
+          INTEGRATION_STATUS="${{ needs.integration-tests.result }}"
+          PERFORMANCE_STATUS="${{ needs.performance-tests.result }}"
+          SECURITY_STATUS="${{ needs.security-tests.result }}"
+          
+          SCORE=0
+          TOTAL=0
+          
+          if [[ "$UNIT_STATUS" != "skipped" ]]; then
+            TOTAL=$((TOTAL + 25))
+            [[ "$UNIT_STATUS" == "success" ]] && SCORE=$((SCORE + 25))
+          fi
+          
+          if [[ "$INTEGRATION_STATUS" != "skipped" ]]; then
+            TOTAL=$((TOTAL + 30))
+            [[ "$INTEGRATION_STATUS" == "success" ]] && SCORE=$((SCORE + 30))
+          fi
+          
+          if [[ "$PERFORMANCE_STATUS" != "skipped" ]]; then
+            TOTAL=$((TOTAL + 25))
+            [[ "$PERFORMANCE_STATUS" == "success" ]] && SCORE=$((SCORE + 25))
+          fi
+          
+          if [[ "$SECURITY_STATUS" != "skipped" ]]; then
+            TOTAL=$((TOTAL + 20))
+            [[ "$SECURITY_STATUS" == "success" ]] && SCORE=$((SCORE + 20))
+          fi
+          
+          PERCENTAGE=$((SCORE * 100 / TOTAL))
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+          echo "percentage=$PERCENTAGE" >> $GITHUB_OUTPUT
+
+      - name: 📧 Slack Notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ steps.test-score.outputs.percentage >= 80 && 'success' || 'failure' }}
+          text: |
+            🔥 **Firebase Functions Test Report**
+            
+            **Score:** ${{ steps.test-score.outputs.score }}/${{ steps.test-score.outputs.total }} (${{ steps.test-score.outputs.percentage }}%)
+            **Branch:** ${{ github.ref_name }}
+            **Commit:** ${{ github.sha }}
+            
+            **Test Results:**
+            • Unit Tests: ${{ needs.unit-tests.result }}
+            • Integration Tests: ${{ needs.integration-tests.result }}
+            • Performance Tests: ${{ needs.performance-tests.result }}
+            • Security Tests: ${{ needs.security-tests.result }}
+            
+            ${{ steps.test-score.outputs.percentage >= 80 && '✅ Functions are ready for deployment!' || '⚠️ Functions need attention before deployment.' }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: 💬 Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const score = ${{ steps.test-score.outputs.score }};
+            const total = ${{ steps.test-score.outputs.total }};
+            const percentage = ${{ steps.test-score.outputs.percentage }};
+            
+            const status = percentage >= 80 ? '✅' : '⚠️';
+            const emoji = percentage >= 80 ? '🎉' : '🔧';
+            
+            const body = `## ${emoji} Firebase Functions Test Results
+            
+            **Overall Score: ${score}/${total} (${percentage}%)**
+            
+            | Test Suite | Status |
+            |------------|--------|
+            | Unit Tests | ${{ needs.unit-tests.result }} |
+            | Integration Tests | ${{ needs.integration-tests.result }} |
+            | Performance Tests | ${{ needs.performance-tests.result }} |
+            | Security Tests | ${{ needs.security-tests.result }} |
+            
+            ${status} **Status:** ${percentage >= 80 ? 'Ready for deployment' : 'Needs attention'}
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

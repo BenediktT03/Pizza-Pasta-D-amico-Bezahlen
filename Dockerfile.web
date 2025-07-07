@@ -1,0 +1,167 @@
+# EATECH V3.0 - Customer PWA Dockerfile
+# Multi-stage build for Next.js 14 with App Router
+# Optimized for PWA, performance and security
+
+# Base image with Node.js 18 Alpine
+FROM node:18-alpine AS base
+LABEL maintainer="benedikt@thomma.ch"
+LABEL description="EATECH Customer PWA - Next.js 14"
+LABEL version="3.0.0"
+
+# Install system dependencies
+RUN apk add --no-cache \
+    libc6-compat \
+    dumb-init \
+    curl \
+    && rm -rf /var/cache/apk/*
+
+# Set working directory
+WORKDIR /app
+
+# Create non-root user for security
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Dependencies stage
+FROM base AS deps
+COPY package*.json ./
+COPY apps/web/package*.json ./apps/web/
+COPY packages/ ./packages/
+
+# Install dependencies with exact versions for reproducibility
+RUN npm ci --only=production --ignore-scripts
+RUN npm cache clean --force
+
+# Development stage
+FROM base AS development
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages ./packages
+
+# Copy source code
+COPY apps/web ./apps/web
+COPY packages ./packages
+COPY turbo.json ./
+COPY package*.json ./
+
+# Install all dependencies including dev dependencies
+RUN npm ci --ignore-scripts
+
+# Set environment
+ENV NODE_ENV=development
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Expose port
+EXPOSE 3000
+
+# Switch to non-root user
+USER nextjs
+
+# Development command with hot reload
+CMD ["npm", "run", "dev", "--workspace=@eatech/web"]
+
+# Builder stage for production
+FROM base AS builder
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages ./packages
+
+# Copy source code
+COPY apps/web ./apps/web
+COPY packages ./packages
+COPY turbo.json ./
+COPY package*.json ./
+
+# Install all dependencies
+RUN npm ci --ignore-scripts
+
+# Set build environment variables
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV SKIP_ENV_VALIDATION=1
+
+# Generate Prisma client (if used)
+# RUN npx prisma generate
+
+# Build the application
+WORKDIR /app/apps/web
+RUN npm run build
+
+# Production runner stage
+FROM base AS production
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Create cache directory
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+# Copy built application
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./public
+
+# Copy package.json for metadata
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/package.json ./package.json
+
+# Security: Run as non-root user
+USER nextjs
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/api/health || exit 1
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start the application
+CMD ["node", "server.js"]
+
+# Multi-architecture support
+FROM production AS production-arm64
+LABEL arch="arm64"
+
+FROM production AS production-amd64
+LABEL arch="amd64"
+
+# Default to production
+FROM production AS final
+
+# Metadata
+LABEL org.opencontainers.image.title="EATECH Customer PWA"
+LABEL org.opencontainers.image.description="Progressive Web App for Swiss Foodtruck ordering"
+LABEL org.opencontainers.image.version="3.0.0"
+LABEL org.opencontainers.image.created="2025-01-07"
+LABEL org.opencontainers.image.revision="main"
+LABEL org.opencontainers.image.licenses="Proprietary"
+LABEL org.opencontainers.image.vendor="EATECH"
+LABEL org.opencontainers.image.authors="benedikt@thomma.ch"
+LABEL org.opencontainers.image.url="https://eatech.ch"
+LABEL org.opencontainers.image.documentation="https://docs.eatech.ch"
+LABEL org.opencontainers.image.source="https://github.com/BenediktT03/Eatech"
+
+# Build arguments for CI/CD
+ARG BUILD_DATE
+ARG BUILD_VERSION
+ARG VCS_REF
+LABEL build-date=$BUILD_DATE
+LABEL build-version=$BUILD_VERSION
+LABEL vcs-ref=$VCS_REF
+
+# Security best practices
+# Remove package managers
+RUN rm -rf /usr/local/lib/node_modules/npm
+RUN rm -rf /usr/local/bin/npm
+RUN rm -rf /usr/local/bin/npx
+
+# Set file permissions
+RUN chmod -R 755 /app
+RUN chmod 644 /app/package.json
+
+# Final verification
+RUN node --version
+RUN echo "EATECH Customer PWA built successfully for production"

@@ -1,0 +1,350 @@
+# EATECH V3.0 - Production Docker Compose
+# Multi-Tenant Foodtruck Bestellsystem
+# Production Environment with Auto-Scaling & High Availability
+
+version: '3.8'
+
+services:
+  # Next.js Web App (Customer PWA) - Production
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      target: production
+    image: eatech/web:latest
+    container_name: eatech-web-prod
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_APP_URL=https://app.eatech.ch
+      - NEXT_PUBLIC_API_URL=https://api.eatech.ch
+      - NEXT_PUBLIC_CDN_URL=https://cdn.eatech.ch
+      - FIREBASE_PROJECT_ID=eatech-prod
+    env_file:
+      - .env.production
+    depends_on:
+      - redis-cluster
+    networks:
+      - eatech-prod-network
+    restart: always
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Admin Dashboard - Production
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile.admin
+      target: production
+    image: eatech/admin:latest
+    container_name: eatech-admin-prod
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_API_URL=https://api.eatech.ch
+      - REACT_APP_WS_URL=wss://ws.eatech.ch
+    env_file:
+      - .env.production
+    depends_on:
+      - redis-cluster
+    networks:
+      - eatech-prod-network
+    restart: always
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Master Control System - Production
+  master:
+    build:
+      context: .
+      dockerfile: Dockerfile.master
+      target: production
+    image: eatech/master:latest
+    container_name: eatech-master-prod
+    ports:
+      - "3002:3000"
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_API_URL=https://api.eatech.ch
+      - REACT_APP_MASTER_KEY=${MASTER_CONTROL_KEY}
+    env_file:
+      - .env.production
+    depends_on:
+      - redis-cluster
+    networks:
+      - eatech-prod-network
+    restart: always
+    deploy:
+      replicas: 1  # Single instance for master control
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Redis Cluster for High Availability
+  redis-cluster:
+    image: redis:7-alpine
+    container_name: eatech-redis-cluster
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_prod_data:/data
+      - ./infrastructure/redis/redis.prod.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - eatech-prod-network
+    restart: always
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Nginx Load Balancer with SSL
+  nginx:
+    image: nginx:alpine
+    container_name: eatech-nginx-prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infrastructure/nginx/nginx.prod.conf:/etc/nginx/nginx.conf
+      - ./infrastructure/nginx/ssl:/etc/nginx/ssl
+      - nginx_cache:/var/cache/nginx
+    depends_on:
+      - web
+      - admin
+      - master
+    networks:
+      - eatech-prod-network
+    restart: always
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Monitoring Stack
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: eatech-prometheus-prod
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/prometheus/prometheus.prod.yml:/etc/prometheus/prometheus.yml
+      - prometheus_prod_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    networks:
+      - eatech-prod-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: eatech-grafana-prod
+    ports:
+      - "3003:3000"
+    volumes:
+      - grafana_prod_data:/var/lib/grafana
+      - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SECURITY_SECRET_KEY=${GRAFANA_SECRET_KEY}
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
+    networks:
+      - eatech-prod-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Log Aggregation
+  loki:
+    image: grafana/loki:latest
+    container_name: eatech-loki-prod
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./infrastructure/loki/loki.yml:/etc/loki/local-config.yaml
+      - loki_prod_data:/tmp/loki
+    networks:
+      - eatech-prod-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Security Scanner
+  trivy:
+    image: aquasec/trivy:latest
+    container_name: eatech-security-scanner
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - trivy_cache:/root/.cache
+    command: ["server", "--listen", "0.0.0.0:4954"]
+    networks:
+      - eatech-prod-network
+    restart: always
+
+volumes:
+  redis_prod_data:
+    driver: local
+  prometheus_prod_data:
+    driver: local
+  grafana_prod_data:
+    driver: local
+  loki_prod_data:
+    driver: local
+  nginx_cache:
+    driver: local
+  trivy_cache:
+    driver: local
+
+networks:
+  eatech-prod-network:
+    driver: overlay
+    attachable: true
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
+
+# Production-specific configurations
+configs:
+  nginx_prod_config:
+    file: ./infrastructure/nginx/nginx.prod.conf
+  redis_prod_config:
+    file: ./infrastructure/redis/redis.prod.conf
+
+secrets:
+  ssl_certificate:
+    file: ./infrastructure/ssl/certificate.pem
+  ssl_private_key:
+    file: ./infrastructure/ssl/private.key
+  firebase_service_account:
+    file: ./infrastructure/secrets/firebase-service-account.json

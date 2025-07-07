@@ -3,7 +3,7 @@
 // ============================================================================
 // File: /apps/web/src/services/aiService.js
 // Type: OpenAI Integration for Swiss Foodtruck Operations
-// Features: Voice processing, Menu recommendations, Customer support
+// Features: Voice processing, Menu recommendations, Customer supporrt
 // ============================================================================
 
 import OpenAI from 'openai';
@@ -24,7 +24,7 @@ const openai = new OpenAI({
 const SWISS_LANGUAGE_CONFIG = {
   'de-CH': {
     name: 'Schweizerdeutsch',
-    greeting: 'Grüezi! Wie chan ich Ihne helfe?',
+    greeting: 'Grüezi! Wie chan ich Ihhne helfe?',
     orderConfirm: 'Alles klar! Das mache mer gern für Sie.',
     error: 'Entschuldigung, das han ich nöd verstande. Chönd Sie das wiederhole?'
   },

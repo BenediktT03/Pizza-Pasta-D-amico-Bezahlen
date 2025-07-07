@@ -1,0 +1,904 @@
+/**
+ * EATECH - Voice Analytics Component Styles
+ * Version: 4.1.0
+ * Description: Comprehensive styling for voice analytics dashboard and charts
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * 
+ * File Path: /apps/web/src/features/voice/components/VoiceAnalytics.module.css
+ */
+
+/* ============================================================================
+   CSS CUSTOM PROPERTIES
+   ============================================================================ */
+
+.voiceAnalytics {
+  --primary-color: #3b82f6;
+  --secondary-color: #10b981;
+  --accent-color: #f59e0b;
+  --error-color: #ef4444;
+  --success-color: #22c55e;
+  --warning-color: #f97316;
+  --info-color: #06b6d4;
+  --neutral-color: #6b7280;
+  
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --text-inverse: #ffffff;
+  --text-chart: #374151;
+  
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --bg-overlay: rgba(0, 0, 0, 0.8);
+  --bg-glass: rgba(255, 255, 255, 0.95);
+  --bg-chart: #ffffff;
+  --bg-metric: linear-gradient(135deg, #f9fafb, #ffffff);
+  
+  --border-color: #e5e7eb;
+  --border-color-light: #f3f4f6;
+  --border-radius: 8px;
+  --border-radius-sm: 4px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+  
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  
+  --z-index-modal: 1050;
+  --z-index-loading: 1060;
+}
+
+/* ============================================================================
+   MAIN ANALYTICS CONTAINER
+   ============================================================================ */
+
+.voiceAnalytics {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-index-modal);
+  padding: var(--spacing-lg);
+  backdrop-filter: blur(8px);
+  animation: fadeIn var(--transition-normal) ease-out;
+}
+
+.voiceAnalytics > div {
+  background: var(--bg-glass);
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-2xl);
+  max-width: 1400px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  animation: slideUp var(--transition-normal) ease-out;
+}
+
+/* ============================================================================
+   HEADER SECTION
+   ============================================================================ */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-xl);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.titleSection h2 {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.titleSection svg {
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.periodSelector {
+  display: flex;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.periodButton {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.periodButton:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.periodButton.active {
+  background: var(--primary-color);
+  color: var(--text-inverse);
+  font-weight: var(--font-weight-semibold);
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--secondary-color);
+  border: 1px solid var(--secondary-color);
+  border-radius: var(--border-radius);
+  color: var(--text-inverse);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.actionButton:hover {
+  background: var(--info-color);
+  border-color: var(--info-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.closeButton:hover {
+  background: var(--error-color);
+  border-color: var(--error-color);
+  color: var(--text-inverse);
+  transform: scale(1.05);
+}
+
+/* ============================================================================
+   METRICS GRID
+   ============================================================================ */
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+  padding: var(--spacing-xl);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.metricCard {
+  background: var(--bg-metric);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.metricCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+}
+
+.metricCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-color);
+}
+
+.metricHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.metricHeader svg {
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.metricTitle {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metricValue {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-extrabold);
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: var(--spacing-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.metricTrend {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.metricTrend.up {
+  color: var(--success-color);
+}
+
+.metricTrend.down {
+  color: var(--error-color);
+}
+
+.metricTrend.stable {
+  color: var(--neutral-color);
+}
+
+.trendLabel {
+  color: var(--text-muted);
+  margin-left: var(--spacing-xs);
+}
+
+/* ============================================================================
+   CHARTS SECTION
+   ============================================================================ */
+
+.chartsSection {
+  flex: 1;
+  padding: var(--spacing-xl);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.chartsSection::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chartsSection::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+}
+
+.chartsSection::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.chartsSection::-webkit-scrollbar-thumb:hover {
+  background: var(--neutral-color);
+}
+
+.chartContainer {
+  background: var(--bg-chart);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.chartHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+}
+
+.chartHeader h4 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+}
+
+.chartControls {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.chartTypeSelector {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+}
+
+.bottomChartsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+}
+
+/* ============================================================================
+   COMMAND FREQUENCY SECTION
+   ============================================================================ */
+
+.commandFrequencySection {
+  background: var(--bg-chart);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.commandFrequencySection h4 {
+  margin: 0 0 var(--spacing-lg) 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+}
+
+.commandList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.commandItem {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--spacing-md);
+  align-items: center;
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  transition: all var(--transition-fast);
+}
+
+.commandItem:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--primary-color);
+  transform: translateX(4px);
+}
+
+.commandRank {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.commandDetails {
+  min-width: 0;
+}
+
+.commandName {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.commandStats {
+  display: flex;
+  gap: var(--spacing-md);
+  font-size: var(--font-size-xs);
+}
+
+.commandCount {
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.commandSuccess {
+  color: var(--success-color);
+  font-weight: var(--font-weight-semibold);
+}
+
+.commandBar {
+  position: relative;
+  width: 60px;
+  height: 8px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.commandBarFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width var(--transition-normal);
+  position: relative;
+}
+
+.commandBarFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
+}
+
+/* ============================================================================
+   METRIC TOGGLES
+   ============================================================================ */
+
+.metricToggles {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+}
+
+.metricToggles h4 {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+}
+
+.toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.metricToggle {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: transparent;
+  border: 2px solid;
+  border-radius: var(--border-radius-lg);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.metricToggle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left var(--transition-normal);
+}
+
+.metricToggle:hover::before {
+  left: 100%;
+}
+
+.metricToggle:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.metricToggle.active {
+  color: var(--text-inverse);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================================================
+   LOADING OVERLAY
+   ============================================================================ */
+
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-index-loading);
+  backdrop-filter: blur(4px);
+}
+
+.loadingSpinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  text-align: center;
+}
+
+.loadingSpinner span {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 1200px) {
+  .voiceAnalytics {
+    padding: var(--spacing-md);
+  }
+  
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: var(--spacing-lg);
+  }
+  
+  .bottomChartsRow {
+    grid-template-columns: 1fr;
+  }
+  
+  .chartsSection {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 768px) {
+  .voiceAnalytics {
+    padding: var(--spacing-sm);
+  }
+  
+  .voiceAnalytics > div {
+    border-radius: var(--border-radius-lg);
+    max-height: 95vh;
+  }
+  
+  .header {
+    padding: var(--spacing-lg);
+    flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: stretch;
+  }
+  
+  .headerActions {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .periodSelector {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .periodButton {
+    flex: 1;
+  }
+  
+  .metricsGrid {
+    grid-template-columns: 1fr;
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+  }
+  
+  .metricCard {
+    padding: var(--spacing-md);
+  }
+  
+  .metricValue {
+    font-size: var(--font-size-2xl);
+  }
+  
+  .chartsSection {
+    padding: var(--spacing-md);
+    gap: var(--spacing-lg);
+  }
+  
+  .chartContainer,
+  .commandFrequencySection {
+    padding: var(--spacing-md);
+  }
+  
+  .commandItem {
+    grid-template-columns: auto 1fr;
+    gap: var(--spacing-sm);
+  }
+  
+  .commandBar {
+    grid-column: 1 / -1;
+    width: 100%;
+    margin-top: var(--spacing-xs);
+  }
+  
+  .toggles {
+    flex-direction: column;
+  }
+  
+  .metricToggle {
+    justify-content: center;
+  }
+  
+  .metricToggles {
+    padding: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .titleSection {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .titleSection h2 {
+    font-size: var(--font-size-xl);
+  }
+  
+  .commandItem {
+    padding: var(--spacing-sm);
+  }
+  
+  .commandName {
+    font-size: var(--font-size-sm);
+  }
+  
+  .commandStats {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+}
+
+/* ============================================================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================================================ */
+
+.periodButton:focus,
+.actionButton:focus,
+.closeButton:focus,
+.chartTypeSelector:focus,
+.metricToggle:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+@media (prefers-contrast: high) {
+  .voiceAnalytics {
+    --border-color: #000000;
+    border-width: 2px;
+  }
+  
+  .metricCard,
+  .chartContainer,
+  .commandFrequencySection,
+  .commandItem,
+  .periodButton,
+  .actionButton,
+  .closeButton,
+  .metricToggle {
+    border-width: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voiceAnalytics *,
+  .voiceAnalytics *::before,
+  .voiceAnalytics *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .metricCard:hover,
+  .commandItem:hover,
+  .actionButton:hover,
+  .metricToggle:hover {
+    transform: none;
+  }
+  
+  .metricToggle::before {
+    display: none;
+  }
+  
+  .commandBarFill::after {
+    display: none;
+  }
+}
+
+@media print {
+  .voiceAnalytics {
+    position: static;
+    background: white !important;
+    padding: 0 !important;
+  }
+  
+  .headerActions,
+  .metricToggles,
+  .loadingOverlay {
+    display: none !important;
+  }
+  
+  .metricsGrid,
+  .chartsSection {
+    break-inside: avoid;
+  }
+  
+  .chartContainer,
+  .commandFrequencySection {
+    page-break-inside: avoid;
+  }
+}
+
+/* ============================================================================
+   DARK MODE SUPPORT
+   ============================================================================ */
+
+@media (prefers-color-scheme: dark) {
+  .voiceAnalytics {
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+    --text-inverse: #111827;
+    --text-chart: #d1d5db;
+    
+    --bg-primary: #111827;
+    --bg-secondary: #1f2937;
+    --bg-tertiary: #374151;
+    --bg-glass: rgba(17, 24, 39, 0.95);
+    --bg-chart: #1f2937;
+    --bg-metric: linear-gradient(135deg, #1f2937, #374151);
+    
+    --border-color: #374151;
+    --border-color-light: #4b5563;
+  }
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+
+.fadeIn {
+  animation: fadeIn var(--transition-normal) ease-out;
+}
+
+.slideUp {
+  animation: slideUp var(--transition-normal) ease-out;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}

@@ -1,85 +1,39 @@
-{
+﻿{
   "name": "@eatech/master",
   "version": "3.0.0",
   "private": true,
-  "description": "EATECH Master Control System - Ultimate admin panel for multi-tenant foodtruck management",
-  "author": "EATECH Development Team",
-  "license": "PROPRIETARY",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "vite --port 3002",
+    "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage",
-    "lint": "eslint . --ext .js,.jsx",
-    "lint:fix": "eslint . --ext .js,.jsx --fix",
-    "format": "prettier --write \"src/**/*.{js,jsx,css,md}\"",
-    "analyze": "vite-bundle-visualizer",
-    "type-check": "tsc --noEmit"
+    "lint": "eslint src --ext .ts,.tsx",
+    "clean": "rimraf dist .turbo node_modules"
   },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.21.1",
-    "lucide-react": "^0.312.0",
-    "recharts": "^2.10.4",
-    "date-fns": "^3.2.0",
-    "crypto-js": "^4.2.0",
-    "axios": "^1.6.5",
-    "socket.io-client": "^4.7.4",
-    "react-hot-toast": "^2.4.1",
-    "react-hook-form": "^7.48.2",
-    "react-query": "^3.39.3",
+    "react-router-dom": "^6.20.0",
     "zustand": "^4.4.7",
-    "immer": "^10.0.3",
-    "react-select": "^5.8.0",
-    "react-datepicker": "^4.25.0",
-    "react-table": "^7.8.0",
-    "react-dropzone": "^14.2.3",
-    "react-modal": "^3.16.1",
-    "@dnd-kit/sortable": "^8.0.0",
-    "@dnd-kit/core": "^6.1.0",
-    "framer-motion": "^10.18.0"
+    "@tanstack/react-query": "^5.12.0",
+    "lucide-react": "^0.303.0",
+    "date-fns": "^3.0.0",
+    "clsx": "^2.0.0",
+    "@eatech/core": "workspace:*",
+    "@eatech/ui": "workspace:*",
+    "@eatech/types": "workspace:*",
+    "@eatech/utils": "workspace:*"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.2.1",
-    "vite": "^5.0.11",
-    "vite-plugin-pwa": "^0.17.4",
-    "@types/react": "^18.2.47",
+    "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
+    "@vitejs/plugin-react": "^4.2.0",
+    "vite": "^5.0.0",
+    "vite-plugin-pwa": "^0.17.0",
     "typescript": "^5.3.3",
-    "eslint": "^8.56.0",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.5",
-    "prettier": "^3.2.2",
-    "vitest": "^1.2.0",
-    "@vitest/ui": "^1.2.0",
+    "vitest": "^1.1.0",
     "@testing-library/react": "^14.1.2",
-    "@testing-library/jest-dom": "^6.2.0",
-    "@testing-library/user-event": "^14.5.2",
-    "jsdom": "^23.2.0",
-    "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.33",
-    "tailwindcss": "^3.4.1",
-    "vite-bundle-visualizer": "^0.10.3",
-    "sass": "^1.69.7"
-  },
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "@testing-library/jest-dom": "^6.1.5",
+    "jsdom": "^23.0.1"
   }
 }

@@ -1,0 +1,783 @@
+/**
+ * EATECH - Command Visualizer Component Styles
+ * Version: 4.1.0
+ * Description: Comprehensive styling for voice command visualization
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * 
+ * File Path: /apps/web/src/features/voice/components/CommandVisualizer.module.css
+ */
+
+/* ============================================================================
+   CSS CUSTOM PROPERTIES
+   ============================================================================ */
+
+.commandVisualizer {
+  --primary-color: #3b82f6;
+  --secondary-color: #10b981;
+  --accent-color: #f59e0b;
+  --error-color: #ef4444;
+  --success-color: #22c55e;
+  --warning-color: #f97316;
+  --info-color: #06b6d4;
+  --neutral-color: #6b7280;
+  
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --text-inverse: #ffffff;
+  
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --bg-overlay: rgba(0, 0, 0, 0.5);
+  --bg-glass: rgba(255, 255, 255, 0.8);
+  
+  --border-color: #e5e7eb;
+  --border-radius: 8px;
+  --border-radius-sm: 4px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+  
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  
+  --z-index-dropdown: 1000;
+  --z-index-modal: 1050;
+  --z-index-tooltip: 1100;
+}
+
+/* ============================================================================
+   MAIN COMPONENT CONTAINER
+   ============================================================================ */
+
+.commandVisualizer {
+  position: relative;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: all var(--transition-normal);
+  min-height: 200px;
+}
+
+.commandVisualizer.active {
+  border-color: var(--primary-color);
+  box-shadow: 
+    var(--shadow-lg),
+    0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.commandVisualizer.inactive {
+  opacity: 0.7;
+  border-color: var(--neutral-color);
+}
+
+.commandVisualizer.highContrast {
+  border-width: 2px;
+  border-color: #000000;
+  background: #ffffff;
+  color: #000000;
+}
+
+.commandVisualizer.reducedMotion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* ============================================================================
+   MODE SELECTOR
+   ============================================================================ */
+
+.modeSelector {
+  display: flex;
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  gap: var(--spacing-xs);
+}
+
+.modeButton {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.modeButton:hover {
+  background: var(--bg-primary);
+  border-color: var(--primary-color);
+  color: var(--text-primary);
+}
+
+.modeButton.active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--text-inverse);
+  font-weight: 600;
+}
+
+.modeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================================
+   VISUALIZATION CONTENT
+   ============================================================================ */
+
+.visualizationContent {
+  padding: var(--spacing-lg);
+  min-height: 300px;
+}
+
+/* ============================================================================
+   REALTIME MODE
+   ============================================================================ */
+
+.realtimeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.commandDisplay {
+  position: relative;
+  padding: var(--spacing-lg);
+  background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.commandText {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 2em;
+  display: flex;
+  align-items: center;
+}
+
+.commandText:empty::before {
+  content: 'Sprechen Sie einen Befehl...';
+  color: var(--text-muted);
+  font-style: italic;
+  font-weight: normal;
+}
+
+.processingIndicator {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--info-color);
+  color: var(--text-inverse);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.processingIcon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================================
+   CONFIDENCE SECTION
+   ============================================================================ */
+
+.confidenceContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.confidenceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.confidenceBar {
+  position: relative;
+  height: 8px;
+  background: var(--bg-tertiary);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.confidenceFill {
+  height: 100%;
+  border-radius: var(--border-radius);
+  transition: width var(--transition-normal);
+  position: relative;
+}
+
+.confidenceFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.confidenceLevel {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-align: center;
+  margin-top: var(--spacing-xs);
+}
+
+/* ============================================================================
+   INTENT SECTION
+   ============================================================================ */
+
+.intentContainer {
+  padding: var(--spacing-md);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  backdrop-filter: blur(8px);
+}
+
+.intentHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.intentTag {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  border: 1px solid;
+}
+
+/* ============================================================================
+   DIALECT SECTION
+   ============================================================================ */
+
+.dialectContainer {
+  padding: var(--spacing-md);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  backdrop-filter: blur(8px);
+}
+
+.dialectHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.dialectInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dialectRegion {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dialectConfidence {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius);
+}
+
+/* ============================================================================
+   CONFIDENCE MODE
+   ============================================================================ */
+
+.confidenceModeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.confidenceChart {
+  height: 300px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.confidenceCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.confidenceStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  text-align: center;
+}
+
+.stat span:first-child {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat span:last-child {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ============================================================================
+   SUGGESTIONS SECTION
+   ============================================================================ */
+
+.suggestionsContainer {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.suggestionsHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.suggestionsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.suggestionItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.suggestionItem:hover {
+  border-color: var(--primary-color);
+  background: var(--bg-glass);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.suggestionItem:active {
+  transform: translateY(0);
+}
+
+.suggestionItem:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.suggestionText {
+  flex: 1;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.suggestionConfidence {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius);
+  margin-right: var(--spacing-sm);
+}
+
+.suggestionArrow {
+  color: var(--primary-color);
+  transition: transform var(--transition-fast);
+}
+
+.suggestionItem:hover .suggestionArrow {
+  transform: translateX(2px);
+}
+
+/* ============================================================================
+   DEBUG INFO
+   ============================================================================ */
+
+.debugInfo {
+  position: absolute;
+  bottom: var(--spacing-sm);
+  right: var(--spacing-sm);
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(0, 0, 0, 0.8);
+  color: var(--text-inverse);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-xs);
+  font-family: 'Monaco', 'Menlo', monospace;
+  z-index: var(--z-index-tooltip);
+}
+
+.debugInfo div {
+  white-space: nowrap;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .commandVisualizer {
+    margin: var(--spacing-sm);
+    border-radius: var(--border-radius);
+  }
+  
+  .modeSelector {
+    flex-wrap: wrap;
+    padding: var(--spacing-sm);
+  }
+  
+  .modeButton {
+    flex: 1;
+    min-width: 80px;
+    justify-content: center;
+    font-size: var(--font-size-xs);
+  }
+  
+  .visualizationContent {
+    padding: var(--spacing-md);
+  }
+  
+  .realtimeContainer {
+    gap: var(--spacing-md);
+  }
+  
+  .commandDisplay {
+    padding: var(--spacing-md);
+  }
+  
+  .commandText {
+    font-size: var(--font-size-base);
+  }
+  
+  .confidenceStats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+  }
+  
+  .stat {
+    padding: var(--spacing-sm);
+  }
+  
+  .suggestionsContainer {
+    padding: var(--spacing-md);
+  }
+  
+  .suggestionItem {
+    padding: var(--spacing-sm);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+  
+  .suggestionArrow {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .modeSelector {
+    flex-direction: column;
+  }
+  
+  .modeButton {
+    width: 100%;
+  }
+  
+  .confidenceStats {
+    grid-template-columns: 1fr;
+  }
+  
+  .dialectInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+  
+  .debugInfo {
+    position: static;
+    margin-top: var(--spacing-md);
+    justify-content: center;
+  }
+}
+
+/* ============================================================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================================================ */
+
+/* Focus indicators */
+.modeButton:focus,
+.suggestionItem:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .commandVisualizer {
+    border-width: 2px;
+    border-color: #000000;
+  }
+  
+  .modeButton {
+    border-width: 2px;
+  }
+  
+  .suggestionItem {
+    border-width: 2px;
+  }
+  
+  .confidenceBar {
+    border: 1px solid #000000;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .commandVisualizer *,
+  .commandVisualizer *::before,
+  .commandVisualizer *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .suggestionItem:hover {
+    transform: none;
+  }
+  
+  .processingIcon {
+    animation: none;
+  }
+  
+  .confidenceFill::after {
+    animation: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .commandVisualizer {
+    background: white !important;
+    border: 2px solid black !important;
+    box-shadow: none !important;
+  }
+  
+  .modeSelector {
+    display: none !important;
+  }
+  
+  .debugInfo {
+    display: none !important;
+  }
+  
+  .processingIndicator {
+    display: none !important;
+  }
+  
+  .confidenceFill::after {
+    display: none !important;
+  }
+}
+
+/* ============================================================================
+   DARK MODE SUPPORT
+   ============================================================================ */
+
+@media (prefers-color-scheme: dark) {
+  .commandVisualizer {
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+    --text-inverse: #111827;
+    
+    --bg-primary: #111827;
+    --bg-secondary: #1f2937;
+    --bg-tertiary: #374151;
+    --bg-glass: rgba(31, 41, 55, 0.8);
+    
+    --border-color: #374151;
+  }
+}
+
+/* ============================================================================
+   LOADING STATES
+   ============================================================================ */
+
+.commandVisualizer.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.commandVisualizer.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border: 2px solid var(--border-color);
+  border-top: 2px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  z-index: var(--z-index-modal);
+}
+
+/* ============================================================================
+   ERROR STATES
+   ============================================================================ */
+
+.commandVisualizer.error {
+  border-color: var(--error-color);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.commandVisualizer.error .commandText {
+  color: var(--error-color);
+}
+
+.commandVisualizer.error .confidenceFill {
+  background: var(--error-color);
+}
+
+/* ============================================================================
+   SUCCESS STATES
+   ============================================================================ */
+
+.commandVisualizer.success {
+  border-color: var(--success-color);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.commandVisualizer.success .confidenceFill {
+  background: var(--success-color);
+}
+
+/* ============================================================================
+   ANIMATION UTILITIES
+   ============================================================================ */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.fadeIn {
+  animation: fadeIn var(--transition-normal) ease-out;
+}
+
+.slideIn {
+  animation: slideIn var(--transition-normal) ease-out;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}

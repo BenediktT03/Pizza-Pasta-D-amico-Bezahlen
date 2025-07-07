@@ -1,0 +1,17 @@
+﻿{
+  "version": "3.0.0",
+  "npmClient": "npm",
+  "workspaces": ["apps/*", "packages/*"],
+  "command": {
+    "publish": {
+      "conventionalCommits": true,
+      "message": "chore(release): publish",
+      "registry": "https://npm.pkg.github.com",
+      "allowBranch": ["main", "develop"]
+    },
+    "version": {
+      "allowBranch": ["main", "develop"],
+      "conventionalCommits": true
+    }
+  }
+}

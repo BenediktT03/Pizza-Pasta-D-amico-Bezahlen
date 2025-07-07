@@ -1,0 +1,489 @@
+{
+  "version": "3.0.0",
+  "generator": "EATECH PWA Icon Generator",
+  "metadata": {
+    "created": "2025-01-07",
+    "brand": "EATECH",
+    "theme": "Swiss Foodtruck Revolution",
+    "primary_color": "#FF6B35",
+    "secondary_color": "#004E89",
+    "accent_color": "#F7931E"
+  },
+  "design_system": {
+    "logo_guidelines": {
+      "safe_area": "20% margin from edges",
+      "background": "Solid color or transparent",
+      "contrast_ratio": "4.5:1 minimum",
+      "corner_radius": "18% of icon size",
+      "shadow": "Optional, subtle"
+    },
+    "color_variants": {
+      "light_theme": {
+        "background": "#FFFFFF",
+        "foreground": "#FF6B35",
+        "accent": "#F7931E"
+      },
+      "dark_theme": {
+        "background": "#1A1A1A",
+        "foreground": "#FF6B35",
+        "accent": "#F7931E"
+      },
+      "maskable": {
+        "background": "#FF6B35",
+        "foreground": "#FFFFFF",
+        "safe_zone": true
+      }
+    }
+  },
+  "icon_specifications": {
+    "favicon": {
+      "sizes": ["16x16", "32x32", "48x48"],
+      "format": "ico",
+      "purpose": "Browser tab icon",
+      "files": [
+        {
+          "src": "/favicon.ico",
+          "sizes": "16x16 32x32 48x48",
+          "type": "image/x-icon"
+        }
+      ]
+    },
+    "web_app_icons": {
+      "sizes": ["72x72", "96x96", "128x128", "144x144", "152x152", "192x192", "384x384", "512x512"],
+      "format": "png",
+      "purpose": "PWA installation and display",
+      "density_support": true,
+      "files": [
+        {
+          "src": "/icons/icon-72x72.png",
+          "sizes": "72x72",
+          "type": "image/png",
+          "purpose": "any",
+          "density": "1.5",
+          "platform": "android",
+          "description": "Android launcher icon (MDPI)"
+        },
+        {
+          "src": "/icons/icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png",
+          "purpose": "any",
+          "density": "2.0",
+          "platform": "android",
+          "description": "Android launcher icon (HDPI)"
+        },
+        {
+          "src": "/icons/icon-128x128.png",
+          "sizes": "128x128",
+          "type": "image/png",
+          "purpose": "any",
+          "density": "2.7",
+          "platform": "android",
+          "description": "Android launcher icon (XHDPI)"
+        },
+        {
+          "src": "/icons/icon-144x144.png",
+          "sizes": "144x144",
+          "type": "image/png",
+          "purpose": "any",
+          "density": "3.0",
+          "platform": "android",
+          "description": "Android launcher icon (XXHDPI)"
+        },
+        {
+          "src": "/icons/icon-152x152.png",
+          "sizes": "152x152",
+          "type": "image/png",
+          "purpose": "any",
+          "density": "3.2",
+          "platform": "ios",
+          "description": "iOS home screen icon (iPad)"
+        },
+        {
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "any",
+          "density": "4.0",
+          "platform": "android",
+          "description": "Android launcher icon (XXXHDPI)"
+        },
+        {
+          "src": "/icons/icon-384x384.png",
+          "sizes": "384x384",
+          "type": "image/png",
+          "purpose": "any",
+          "density": "8.0",
+          "platform": "universal",
+          "description": "High resolution display icon"
+        },
+        {
+          "src": "/icons/icon-512x512.png",
+          "sizes": "512x512",
+          "type": "image/png",
+          "purpose": "any",
+          "density": "10.7",
+          "platform": "universal",
+          "description": "Splash screen and high-DPI displays"
+        }
+      ]
+    },
+    "maskable_icons": {
+      "purpose": "maskable",
+      "description": "Adaptive icons for Android with safe zone",
+      "safe_zone": "20% from edges",
+      "files": [
+        {
+          "src": "/icons/icon-192x192-maskable.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "maskable",
+          "platform": "android",
+          "description": "Adaptive icon with safe zone"
+        },
+        {
+          "src": "/icons/icon-512x512-maskable.png",
+          "sizes": "512x512",
+          "type": "image/png",
+          "purpose": "maskable",
+          "platform": "android",
+          "description": "Large adaptive icon with safe zone"
+        }
+      ]
+    },
+    "apple_touch_icons": {
+      "platform": "ios",
+      "description": "iOS home screen icons",
+      "files": [
+        {
+          "src": "/icons/apple-touch-icon-57x57.png",
+          "sizes": "57x57",
+          "type": "image/png",
+          "purpose": "any",
+          "device": "iPhone (iOS 6 and prior)"
+        },
+        {
+          "src": "/icons/apple-touch-icon-60x60.png",
+          "sizes": "60x60",
+          "type": "image/png",
+          "purpose": "any",
+          "device": "iPhone (iOS 7+)"
+        },
+        {
+          "src": "/icons/apple-touch-icon-72x72.png",
+          "sizes": "72x72",
+          "type": "image/png",
+          "purpose": "any",
+          "device": "iPad (iOS 6 and prior)"
+        },
+        {
+          "src": "/icons/apple-touch-icon-76x76.png",
+          "sizes": "76x76",
+          "type": "image/png",
+          "purpose": "any",
+          "device": "iPad (iOS 7+)"
+        },
+        {
+          "src": "/icons/apple-touch-icon-114x114.png",
+          "sizes": "114x114",
+          "type": "image/png",
+          "purpose": "any",
+          "device": "iPhone Retina (iOS 6 and prior)"
+        },
+        {
+          "src": "/icons/apple-touch-icon-120x120.png",
+          "sizes": "120x120",
+          "type": "image/png",
+          "purpose": "any",
+          "device": "iPhone Retina (iOS 7+)"
+        },
+        {
+          "src": "/icons/apple-touch-icon-144x144.png",
+          "sizes": "144x144",
+          "type": "image/png",
+          "purpose": "any",
+          "device": "iPad Retina (iOS 6 and prior)"
+        },
+        {
+          "src": "/icons/apple-touch-icon-152x152.png",
+          "sizes": "152x152",
+          "type": "image/png",
+          "purpose": "any",
+          "device": "iPad Retina (iOS 7+)"
+        },
+        {
+          "src": "/icons/apple-touch-icon-180x180.png",
+          "sizes": "180x180",
+          "type": "image/png",
+          "purpose": "any",
+          "device": "iPhone 6 Plus"
+        }
+      ]
+    },
+    "badges": {
+      "purpose": "notification_badge",
+      "description": "Monochrome icons for notifications",
+      "files": [
+        {
+          "src": "/icons/badge-72x72.png",
+          "sizes": "72x72",
+          "type": "image/png",
+          "purpose": "badge",
+          "style": "monochrome",
+          "description": "Notification badge icon"
+        }
+      ]
+    },
+    "monochrome": {
+      "purpose": "monochrome",
+      "description": "Single color icons for system integration",
+      "files": [
+        {
+          "src": "/icons/monochrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "monochrome",
+          "color": "#000000",
+          "description": "System integration icon"
+        }
+      ]
+    },
+    "shortcuts": {
+      "purpose": "shortcut_icons",
+      "description": "Icons for app shortcuts",
+      "files": [
+        {
+          "src": "/icons/shortcut-order.png",
+          "sizes": "96x96",
+          "type": "image/png",
+          "purpose": "any",
+          "shortcut": "new_order",
+          "description": "New order shortcut icon"
+        },
+        {
+          "src": "/icons/shortcut-menu.png",
+          "sizes": "96x96",
+          "type": "image/png",
+          "purpose": "any",
+          "shortcut": "menu",
+          "description": "Menu shortcut icon"
+        },
+        {
+          "src": "/icons/shortcut-history.png",
+          "sizes": "96x96",
+          "type": "image/png",
+          "purpose": "any",
+          "shortcut": "order_history",
+          "description": "Order history shortcut icon"
+        },
+        {
+          "src": "/icons/shortcut-map.png",
+          "sizes": "96x96",
+          "type": "image/png",
+          "purpose": "any",
+          "shortcut": "find_trucks",
+          "description": "Find foodtrucks shortcut icon"
+        },
+        {
+          "src": "/icons/shortcut-voice.png",
+          "sizes": "96x96",
+          "type": "image/png",
+          "purpose": "any",
+          "shortcut": "voice_order",
+          "description": "Voice ordering shortcut icon"
+        }
+      ]
+    },
+    "notification_icons": {
+      "purpose": "notifications",
+      "description": "Icons for push notifications",
+      "files": [
+        {
+          "src": "/icons/notification-order.png",
+          "sizes": "24x24",
+          "type": "image/png",
+          "purpose": "any",
+          "notification_type": "order_update",
+          "description": "Order notification icon"
+        },
+        {
+          "src": "/icons/notification-promo.png",
+          "sizes": "24x24",
+          "type": "image/png",
+          "purpose": "any",
+          "notification_type": "promotion",
+          "description": "Promotion notification icon"
+        },
+        {
+          "src": "/icons/notification-ready.png",
+          "sizes": "24x24",
+          "type": "image/png",
+          "purpose": "any",
+          "notification_type": "order_ready",
+          "description": "Order ready notification icon"
+        }
+      ]
+    },
+    "splash_screens": {
+      "purpose": "splash_screen",
+      "description": "Loading screens for different devices",
+      "files": [
+        {
+          "src": "/icons/splash-iphone5.png",
+          "sizes": "640x1136",
+          "type": "image/png",
+          "device": "iPhone 5/SE",
+          "orientation": "portrait"
+        },
+        {
+          "src": "/icons/splash-iphone6.png",
+          "sizes": "750x1334",
+          "type": "image/png",
+          "device": "iPhone 6/7/8",
+          "orientation": "portrait"
+        },
+        {
+          "src": "/icons/splash-iphone6plus.png",
+          "sizes": "1242x2208",
+          "type": "image/png",
+          "device": "iPhone 6/7/8 Plus",
+          "orientation": "portrait"
+        },
+        {
+          "src": "/icons/splash-iphonex.png",
+          "sizes": "1125x2436",
+          "type": "image/png",
+          "device": "iPhone X/XS",
+          "orientation": "portrait"
+        },
+        {
+          "src": "/icons/splash-iphonexr.png",
+          "sizes": "828x1792",
+          "type": "image/png",
+          "device": "iPhone XR/11",
+          "orientation": "portrait"
+        },
+        {
+          "src": "/icons/splash-iphonexsmax.png",
+          "sizes": "1242x2688",
+          "type": "image/png",
+          "device": "iPhone XS Max/11 Pro Max",
+          "orientation": "portrait"
+        },
+        {
+          "src": "/icons/splash-ipad.png",
+          "sizes": "1536x2048",
+          "type": "image/png",
+          "device": "iPad",
+          "orientation": "portrait"
+        },
+        {
+          "src": "/icons/splash-ipadpro10.png",
+          "sizes": "1668x2224",
+          "type": "image/png",
+          "device": "iPad Pro 10.5",
+          "orientation": "portrait"
+        },
+        {
+          "src": "/icons/splash-ipadpro12.png",
+          "sizes": "2048x2732",
+          "type": "image/png",
+          "device": "iPad Pro 12.9",
+          "orientation": "portrait"
+        }
+      ]
+    }
+  },
+  "generation_instructions": {
+    "base_logo": {
+      "format": "SVG preferred, high-res PNG acceptable",
+      "minimum_resolution": "1024x1024",
+      "background": "Transparent",
+      "style": "Flat design with Swiss aesthetics"
+    },
+    "color_requirements": {
+      "primary": "#FF6B35 (EATECH Orange)",
+      "secondary": "#004E89 (Swiss Blue)",
+      "accent": "#F7931E (Golden Orange)",
+      "white_version": "For dark backgrounds",
+      "monochrome": "Black (#000000) for system icons"
+    },
+    "design_elements": {
+      "typography": "Clean, Swiss-inspired sans-serif",
+      "iconography": "Simple, geometric shapes",
+      "foodtruck_elements": "Subtle incorporation of Swiss/food themes",
+      "accessibility": "High contrast, clear visibility"
+    },
+    "quality_standards": {
+      "formats": ["PNG", "SVG", "ICO"],
+      "compression": "Optimized for web (PNG-8 where possible)",
+      "color_depth": "24-bit color minimum",
+      "transparency": "Alpha channel support",
+      "optimization": "Web-optimized, smallest file sizes"
+    }
+  },
+  "build_commands": {
+    "generate_all": "npm run icons:generate",
+    "optimize": "npm run icons:optimize",
+    "validate": "npm run icons:validate",
+    "deploy": "npm run icons:deploy"
+  },
+  "validation_rules": {
+    "file_size": {
+      "favicon": "< 50KB",
+      "small_icons": "< 25KB each",
+      "large_icons": "< 100KB each",
+      "splash_screens": "< 200KB each"
+    },
+    "format_requirements": {
+      "png": "Lossless compression",
+      "svg": "Optimized code, no embedded raster",
+      "ico": "Multiple sizes embedded"
+    },
+    "accessibility": {
+      "contrast_ratio": ">= 4.5:1",
+      "scalability": "Vector or high-DPI ready",
+      "color_blind_friendly": "Sufficient contrast without color"
+    }
+  },
+  "deployment": {
+    "cdn_upload": {
+      "service": "Cloudflare R2",
+      "bucket": "eatech-assets",
+      "path": "/icons/",
+      "cache_headers": "max-age=31536000"
+    },
+    "manifest_integration": {
+      "auto_update": true,
+      "version_tracking": true,
+      "cache_busting": "Query parameters"
+    },
+    "testing_checklist": [
+      "iOS home screen display",
+      "Android launcher icon",
+      "PWA install prompt",
+      "Notification badges",
+      "Browser favicon",
+      "High-DPI displays",
+      "Dark mode adaptation"
+    ]
+  },
+  "maintenance": {
+    "update_frequency": "With major version releases",
+    "monitoring": "Automated icon validation",
+    "backup": "Version controlled in Git",
+    "documentation": "Update this config with changes"
+  },
+  "swiss_compliance": {
+    "trademark": "EATECH® registered trademark",
+    "copyright": "© 2025 EATECH Switzerland",
+    "licensing": "Proprietary design elements",
+    "usage_guidelines": "Internal use only, no redistribution"
+  },
+  "performance_optimization": {
+    "lazy_loading": "Progressive icon loading",
+    "preloading": "Critical icons in manifest",
+    "caching": "Long-term browser cache",
+    "compression": "Advanced optimization techniques"
+  }
+}

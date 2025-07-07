@@ -1,0 +1,797 @@
+/**
+ * EATECH - Language Selector Component Styles
+ * Version: 4.3.0
+ * Description: Comprehensive styling for voice language selection interface
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * 
+ * File Path: /apps/web/src/features/voice/components/LanguageSelector.module.css
+ */
+
+/* ============================================================================
+   DROPDOWN MODE
+   ============================================================================ */
+.dropdown {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+}
+
+.trigger {
+  width: 100%;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(248, 250, 252, 0.98) 100%);
+  border: 2px solid rgba(226, 232, 240, 0.8);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1e293b;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.trigger:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 8px 25px -8px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.trigger:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 
+    0 8px 25px -8px rgba(59, 130, 246, 0.3),
+    0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.trigger.open {
+  border-color: #3b82f6;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  box-shadow: 
+    0 8px 25px -8px rgba(59, 130, 246, 0.3),
+    0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.trigger.compact {
+  padding: 10px 12px;
+  font-size: 0.8rem;
+}
+
+[data-theme="dark"] .trigger {
+  background: linear-gradient(135deg, 
+    rgba(30, 41, 59, 0.95) 0%, 
+    rgba(51, 65, 85, 0.98) 100%);
+  border-color: rgba(71, 85, 105, 0.6);
+  color: #f1f5f9;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.currentLanguage {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.flag {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.name {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+[data-theme="dark"] .name {
+  color: #f1f5f9;
+}
+
+.details {
+  color: #64748b;
+  font-size: 0.75rem;
+  margin-left: 4px;
+}
+
+[data-theme="dark"] .details {
+  color: #94a3b8;
+}
+
+.dropdownContent {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  max-height: 400px;
+  overflow: hidden;
+  animation: slideDown 0.2s ease;
+}
+
+[data-theme="dark"] .dropdownContent {
+  background: rgba(30, 41, 59, 0.98);
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================================
+   SEARCH SECTION
+   ============================================================================ */
+.searchSection {
+  padding: 16px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+  background: rgba(248, 250, 252, 0.5);
+}
+
+[data-theme="dark"] .searchSection {
+  border-bottom-color: rgba(71, 85, 105, 0.4);
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.searchContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 12px 10px 36px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 12px;
+  font-size: 0.875rem;
+  background: rgba(255, 255, 255, 0.9);
+  transition: all 0.2s ease;
+  color: #1e293b;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: rgba(255, 255, 255, 1);
+}
+
+[data-theme="dark"] .searchInput {
+  background: rgba(51, 65, 85, 0.8);
+  border-color: rgba(71, 85, 105, 0.6);
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .searchInput:focus {
+  background: rgba(51, 65, 85, 1);
+  border-color: #3b82f6;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  color: #64748b;
+  z-index: 1;
+}
+
+[data-theme="dark"] .searchIcon {
+  color: #94a3b8;
+}
+
+.clearSearch {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.clearSearch:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+/* ============================================================================
+   LANGUAGE LIST
+   ============================================================================ */
+.languageList {
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+/* Custom Scrollbar */
+.languageList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.languageList::-webkit-scrollbar-track {
+  background: rgba(226, 232, 240, 0.3);
+  border-radius: 3px;
+}
+
+.languageList::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.4);
+  border-radius: 3px;
+}
+
+.languageList::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.6);
+}
+
+/* ============================================================================
+   LANGUAGE ITEMS
+   ============================================================================ */
+.languageItem {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.languageItem:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateX(4px);
+  box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.1);
+}
+
+.languageItem.selected {
+  background: rgba(59, 130, 246, 0.05);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.languageItem.compact {
+  padding: 8px;
+}
+
+[data-theme="dark"] .languageItem {
+  background: rgba(51, 65, 85, 0.6);
+  border-color: rgba(71, 85, 105, 0.4);
+}
+
+[data-theme="dark"] .languageItem:hover {
+  background: rgba(51, 65, 85, 0.8);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+[data-theme="dark"] .languageItem.selected {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+/* ============================================================================
+   LANGUAGE CONTENT
+   ============================================================================ */
+.languageMain {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.languageFlag {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.languageInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.languageName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+[data-theme="dark"] .languageName {
+  color: #f1f5f9;
+}
+
+.recentIcon {
+  width: 14px;
+  height: 14px;
+  color: #f59e0b;
+}
+
+.languageDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nativeName {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+[data-theme="dark"] .nativeName {
+  color: #94a3b8;
+}
+
+.region {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+[data-theme="dark"] .region {
+  color: #94a3b8;
+}
+
+.languageStats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.qualityBadge {
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.accuracy {
+  font-size: 0.7rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .accuracy {
+  color: #94a3b8;
+}
+
+/* ============================================================================
+   LANGUAGE FEATURES
+   ============================================================================ */
+.languageFeatures {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(226, 232, 240, 0.4);
+}
+
+[data-theme="dark"] .languageFeatures {
+  border-top-color: rgba(71, 85, 105, 0.3);
+}
+
+.features {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.featureIcon {
+  padding: 4px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 6px;
+  color: #3b82f6;
+}
+
+.moreFeatures {
+  font-size: 0.7rem;
+  color: #64748b;
+  font-weight: 500;
+  padding: 2px 6px;
+  background: rgba(226, 232, 240, 0.5);
+  border-radius: 6px;
+}
+
+[data-theme="dark"] .moreFeatures {
+  color: #94a3b8;
+  background: rgba(71, 85, 105, 0.4);
+}
+
+.voiceInfo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+[data-theme="dark"] .voiceInfo {
+  color: #94a3b8;
+}
+
+/* ============================================================================
+   LANGUAGE ACTIONS
+   ============================================================================ */
+.languageActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.actionButton {
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionButton:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.actionButton.favorited {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #f59e0b;
+}
+
+[data-theme="dark"] .actionButton {
+  background: rgba(51, 65, 85, 0.8);
+  border-color: rgba(71, 85, 105, 0.6);
+  color: #94a3b8;
+}
+
+.downloadProgress {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.connectionStatus {
+  display: flex;
+  align-items: center;
+  padding: 4px;
+}
+
+.offline {
+  color: #ef4444;
+}
+
+.online {
+  color: #22c55e;
+}
+
+.selectedIcon {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 50%;
+  padding: 2px;
+}
+
+/* ============================================================================
+   DIALECTS SECTION
+   ============================================================================ */
+.dialectsSection {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(226, 232, 240, 0.4);
+}
+
+[data-theme="dark"] .dialectsSection {
+  border-top-color: rgba(71, 85, 105, 0.3);
+}
+
+.dialectsLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+[data-theme="dark"] .dialectsLabel {
+  color: #94a3b8;
+}
+
+.dialects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dialectButton {
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dialectButton:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.dialectButton.selected {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+[data-theme="dark"] .dialectButton {
+  background: rgba(51, 65, 85, 0.8);
+  border-color: rgba(71, 85, 105, 0.6);
+  color: #94a3b8;
+}
+
+.dialectRegion {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+/* ============================================================================
+   GRID MODE
+   ============================================================================ */
+.grid .searchSection {
+  padding: 20px;
+  background: rgba(248, 250, 252, 0.5);
+  border-radius: 16px 16px 0 0;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+  margin-bottom: 16px;
+}
+
+.languageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  padding: 0 20px 20px;
+}
+
+/* ============================================================================
+   LIST MODE
+   ============================================================================ */
+.list .searchSection {
+  padding: 16px 20px;
+  background: rgba(248, 250, 252, 0.5);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+  margin-bottom: 16px;
+}
+
+.list .languageList {
+  padding: 0 20px 20px;
+  max-height: none;
+}
+
+.list .languageItem {
+  margin-bottom: 12px;
+  padding: 16px;
+}
+
+/* ============================================================================
+   NO RESULTS STATE
+   ============================================================================ */
+.noResults {
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748b;
+}
+
+[data-theme="dark"] .noResults {
+  color: #94a3b8;
+}
+
+.noResults svg {
+  margin-bottom: 12px;
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .noResults svg {
+  color: #475569;
+}
+
+.noResults p {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.noResults button {
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.noResults button:hover {
+  background: #2563eb;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+@media (max-width: 768px) {
+  .dropdown {
+    max-width: none;
+  }
+  
+  .dropdownContent {
+    max-height: 60vh;
+  }
+  
+  .languageGrid {
+    grid-template-columns: 1fr;
+    padding: 0 16px 16px;
+  }
+  
+  .list .searchSection,
+  .grid .searchSection {
+    padding: 16px;
+  }
+  
+  .list .languageList {
+    padding: 0 16px 16px;
+  }
+  
+  .languageActions {
+    position: static;
+    margin-top: 8px;
+    justify-content: flex-start;
+  }
+  
+  .languageMain {
+    margin-bottom: 12px;
+  }
+  
+  .dialectsSection {
+    margin-top: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .trigger {
+    padding: 12px;
+    font-size: 0.8rem;
+  }
+  
+  .languageFlag {
+    font-size: 1.25rem;
+  }
+  
+  .languageName {
+    font-size: 0.875rem;
+  }
+  
+  .languageDetails {
+    display: none;
+  }
+  
+  .languageFeatures {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .actionButton {
+    padding: 4px;
+  }
+  
+  .dialectButton {
+    font-size: 0.7rem;
+    padding: 3px 6px;
+  }
+}
+
+/* ============================================================================
+   ACCESSIBILITY
+   ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.languageItem:focus-visible,
+.trigger:focus-visible,
+.actionButton:focus-visible,
+.dialectButton:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Screen Reader Only */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .languageItem {
+    border-width: 2px;
+  }
+  
+  .trigger {
+    border-width: 3px;
+  }
+  
+  .actionButton {
+    border-width: 2px;
+  }
+}

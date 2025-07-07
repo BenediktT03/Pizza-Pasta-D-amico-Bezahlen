@@ -1,0 +1,29 @@
+﻿{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@eatech/core": ["packages/core/src"],
+      "@eatech/ui": ["packages/ui/src"],
+      "@eatech/types": ["packages/types/src"],
+      "@eatech/utils": ["packages/utils/src"],
+      "@eatech/analytics": ["packages/analytics/src"],
+      "@eatech/ai": ["packages/ai/src"],
+      "@eatech/blockchain": ["packages/blockchain/src"],
+      "@eatech/edge": ["packages/edge/src"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "build", ".next"]
+}

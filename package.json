@@ -2,62 +2,32 @@
   "name": "eatech",
   "version": "3.0.0",
   "private": true,
-  "description": "EATECH - Revolutionary Multi-Tenant Foodtruck Platform for Switzerland",
-  "author": "EATECH Development Team",
-  "license": "PROPRIETARY",
   "workspaces": [
     "apps/*",
-    "packages/*",
-    "functions"
+    "packages/*"
   ],
   "scripts": {
     "dev": "turbo run dev",
-    "dev:web": "turbo run dev --filter=@eatech/web",
-    "dev:admin": "turbo run dev --filter=@eatech/admin",
-    "dev:master": "turbo run dev --filter=@eatech/master",
-    "dev:mobile": "turbo run dev --filter=@eatech/mobile",
-    "dev:all": "turbo run dev --parallel",
     "build": "turbo run build",
-    "build:web": "turbo run build --filter=@eatech/web",
-    "build:admin": "turbo run build --filter=@eatech/admin",
-    "build:master": "turbo run build --filter=@eatech/master",
-    "build:functions": "turbo run build --filter=@eatech/functions",
     "test": "turbo run test",
-    "test:watch": "turbo run test:watch",
-    "test:coverage": "turbo run test:coverage",
     "lint": "turbo run lint",
-    "lint:fix": "turbo run lint:fix",
-    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "clean": "turbo run clean && rimraf node_modules",
-    "clean:all": "npm run clean && npm run clean:cache",
-    "clean:cache": "rimraf .turbo && rimraf apps/*/.turbo",
-    "type-check": "turbo run type-check",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "prepare": "husky install",
-    "deploy": "npm run deploy:staging",
-    "deploy:staging": "npm run build && firebase deploy --only hosting,functions --project eatech-staging",
-    "deploy:production": "npm run build && firebase deploy --only hosting,functions --project eatech-prod",
-    "emulators": "firebase emulators:start",
-    "emulators:export": "firebase emulators:export ./emulator-data",
-    "emulators:import": "firebase emulators:start --import ./emulator-data",
-    "analyze": "turbo run analyze",
-    "storybook": "turbo run storybook --filter=@eatech/ui",
-    "storybook:build": "turbo run storybook:build --filter=@eatech/ui",
-    "generate:types": "turbo run generate:types",
-    "setup": "npm install && npm run prepare",
-    "update:deps": "npm-check-updates -u && npm install",
-    "security:check": "npm audit && turbo run security:check",
-    "release": "changeset publish",
-    "version": "changeset version"
+    "postinstall": "turbo run build --filter=@eatech/core --filter=@eatech/ui"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.1",
-    "@commitlint/cli": "^18.4.4",
-    "@commitlint/config-conventional": "^18.4.4",
-    "@types/node": "^20.10.6",
-    "eslint": "^8.56.0",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "husky": "^8.0.3",
-    "lint-staged": "^15.2.0",
-    "npm-check-updates": "^16.14.12",
+    "lerna": "^8.0.0",
     "prettier": "^3.1.1",
     "rimraf": "^5.0.5",
     "turbo": "^1.11.2",
@@ -66,36 +36,5 @@
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
-  },
-  "packageManager": "npm@9.8.1",
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,css,scss,md}": [
-      "prettier --write"
-    ]
-  },
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ]
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/eatech/eatech-platform.git"
-  },
-  "keywords": [
-    "foodtruck",
-    "multi-tenant",
-    "saas",
-    "pwa",
-    "react",
-    "firebase",
-    "switzerland",
-    "ordering-system",
-    "restaurant",
-    "mobile-food"
-  ]
+  }
 }

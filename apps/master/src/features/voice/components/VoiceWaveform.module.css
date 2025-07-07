@@ -1,0 +1,640 @@
+/**
+ * EATECH - Voice Waveform Component Styles
+ * Version: 3.8.0
+ * Description: Comprehensive styling for voice waveform visualization
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * 
+ * File Path: /apps/web/src/features/voice/components/VoiceWaveform.module.css
+ */
+
+/* ============================================================================
+   CSS CUSTOM PROPERTIES
+   ============================================================================ */
+
+.voiceWaveform {
+  --primary-color: #ff6b35;
+  --secondary-color: #2c5aa0;
+  --success-color: #10b981;
+  --error-color: #ef4444;
+  --warning-color: #f59e0b;
+  --info-color: #3b82f6;
+  
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --bg-overlay: rgba(0, 0, 0, 0.5);
+  
+  --border-color: #e5e7eb;
+  --border-radius: 8px;
+  --border-radius-sm: 4px;
+  --border-radius-lg: 12px;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+  
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  
+  --z-index-canvas: 1;
+  --z-index-controls: 2;
+  --z-index-status: 3;
+}
+
+/* ============================================================================
+   MAIN COMPONENT CONTAINER
+   ============================================================================ */
+
+.voiceWaveform {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
+  overflow: hidden;
+  min-height: 120px;
+}
+
+.voiceWaveform.active {
+  border-color: var(--primary-color);
+  box-shadow: 
+    var(--shadow-lg),
+    0 0 0 2px rgba(255, 107, 53, 0.1);
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 53, 0.02), 
+    rgba(44, 90, 160, 0.02)
+  );
+}
+
+.voiceWaveform.inactive {
+  opacity: 0.7;
+  border-color: var(--border-color);
+  background: var(--bg-secondary);
+}
+
+/* ============================================================================
+   CANVAS STYLING
+   ============================================================================ */
+
+.canvas {
+  position: relative;
+  z-index: var(--z-index-canvas);
+  border-radius: var(--border-radius);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  max-width: 100%;
+  height: auto;
+}
+
+.canvas:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-md);
+}
+
+.canvas:active {
+  transform: scale(0.98);
+}
+
+/* Active canvas with glow effect */
+.active .canvas {
+  box-shadow: 
+    0 0 20px rgba(255, 107, 53, 0.3),
+    0 0 40px rgba(255, 107, 53, 0.1);
+}
+
+/* ============================================================================
+   STATUS INDICATOR
+   ============================================================================ */
+
+.statusIndicator {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: var(--z-index-status);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.statusIndicator.active {
+  background: var(--success-color);
+  border-color: var(--success-color);
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+.statusText {
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+}
+
+/* ============================================================================
+   CONTROLS SECTION
+   ============================================================================ */
+
+.controls {
+  position: relative;
+  z-index: var(--z-index-controls);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
+.controlGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.controlLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  min-width: 80px;
+}
+
+.slider {
+  flex: 1;
+  min-width: 100px;
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--primary-color);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-md);
+}
+
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: var(--primary-color);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-md);
+}
+
+.slider:focus {
+  box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
+}
+
+.slider:hover {
+  background: var(--border-color);
+}
+
+.select {
+  flex: 1;
+  min-width: 120px;
+  padding: 0.5rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.select:hover {
+  border-color: var(--primary-color);
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.1);
+}
+
+.value {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--primary-color);
+  min-width: 40px;
+  text-align: right;
+}
+
+/* ============================================================================
+   METRICS SECTION
+   ============================================================================ */
+
+.metrics {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--border-radius);
+  gap: 1rem;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.metricLabel {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metricValue {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+/* ============================================================================
+   ACCESSIBILITY
+   ============================================================================ */
+
+.accessibilityInfo {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* Screen reader only content */
+.srOnly {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Focus management for keyboard navigation */
+.voiceWaveform:focus-within {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.6);
+  }
+}
+
+@keyframes waveform-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation for canvas appearance */
+.canvas {
+  animation: waveform-fade-in 0.3s ease-out;
+}
+
+/* Active state animations */
+.active .canvas {
+  animation: glow 3s ease-in-out infinite;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .voiceWaveform {
+    padding: 0.75rem;
+    min-height: 100px;
+  }
+  
+  .controls {
+    padding: 0.75rem;
+    margin-top: 0.75rem;
+  }
+  
+  .controlGroup {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .controlLabel {
+    min-width: auto;
+    justify-content: center;
+  }
+  
+  .metrics {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .metric {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .statusIndicator {
+    position: static;
+    align-self: flex-end;
+    margin-bottom: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .voiceWaveform {
+    padding: 0.5rem;
+  }
+  
+  .canvas {
+    max-height: 60px;
+  }
+  
+  .controls {
+    padding: 0.5rem;
+  }
+  
+  .controlLabel {
+    font-size: var(--font-size-xs);
+  }
+  
+  .value {
+    font-size: var(--font-size-xs);
+  }
+  
+  .statusText {
+    display: none; /* Hide text on very small screens */
+  }
+}
+
+/* ============================================================================
+   THEME VARIATIONS
+   ============================================================================ */
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .voiceWaveform {
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+    
+    --bg-primary: #111827;
+    --bg-secondary: #1f2937;
+    --bg-tertiary: #374151;
+    --bg-overlay: rgba(0, 0, 0, 0.7);
+    
+    --border-color: #374151;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .voiceWaveform {
+    --border-color: #000000;
+    border-width: 2px;
+  }
+  
+  .canvas {
+    border: 2px solid #000000;
+  }
+  
+  .statusIndicator {
+    border-width: 2px;
+  }
+  
+  .controls {
+    border-width: 2px;
+  }
+  
+  .slider {
+    border: 2px solid #000000;
+  }
+  
+  .select {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .voiceWaveform *,
+  .voiceWaveform *::before,
+  .voiceWaveform *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .canvas:hover {
+    transform: none;
+  }
+  
+  .canvas:active {
+    transform: none;
+  }
+  
+  .slider::-webkit-slider-thumb:hover {
+    transform: none;
+  }
+  
+  .slider::-moz-range-thumb:hover {
+    transform: none;
+  }
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+
+@media print {
+  .voiceWaveform {
+    background: white !important;
+    border: 2px solid black !important;
+    box-shadow: none !important;
+  }
+  
+  .controls {
+    display: none !important;
+  }
+  
+  .metrics {
+    display: none !important;
+  }
+  
+  .statusIndicator {
+    background: white !important;
+    color: black !important;
+    border: 1px solid black !important;
+  }
+  
+  .canvas {
+    border: 1px solid black !important;
+    filter: grayscale(1) !important;
+  }
+}
+
+/* ============================================================================
+   SPECIAL STATES
+   ============================================================================ */
+
+/* Loading state */
+.voiceWaveform.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.voiceWaveform.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid var(--border-color);
+  border-top: 2px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  z-index: 999;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error state */
+.voiceWaveform.error {
+  border-color: var(--error-color);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.voiceWaveform.error .canvas {
+  filter: grayscale(0.5) brightness(0.8);
+}
+
+.voiceWaveform.error .statusIndicator {
+  background: var(--error-color);
+  color: white;
+}
+
+/* Success state */
+.voiceWaveform.success {
+  border-color: var(--success-color);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.voiceWaveform.success .statusIndicator {
+  background: var(--success-color);
+  color: white;
+}
+
+/* ============================================================================
+   CUSTOM SCROLLBARS (for controls overflow)
+   ============================================================================ */
+
+.controls::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.controls::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+}
+
+.controls::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.controls::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}

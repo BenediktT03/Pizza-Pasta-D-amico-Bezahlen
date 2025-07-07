@@ -1,0 +1,757 @@
+/**
+ * EATECH - Accessibility Panel Component Styles
+ * Version: 4.2.0
+ * Description: Comprehensive accessibility-focused styling with WCAG compliance
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * 
+ * File Path: /apps/web/src/features/voice/components/AccessibilityPanel.module.css
+ */
+
+/* ============================================================================
+   CSS CUSTOM PROPERTIES
+   ============================================================================ */
+
+.accessibilityPanel {
+  --primary-color: #3b82f6;
+  --secondary-color: #10b981;
+  --accent-color: #f59e0b;
+  --error-color: #ef4444;
+  --success-color: #22c55e;
+  --warning-color: #f97316;
+  --info-color: #06b6d4;
+  --neutral-color: #6b7280;
+  
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --text-inverse: #ffffff;
+  --text-high-contrast: #000000;
+  
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --bg-glass: rgba(255, 255, 255, 0.9);
+  --bg-accent: rgba(59, 130, 246, 0.05);
+  --bg-high-contrast: #ffffff;
+  
+  --border-color: #e5e7eb;
+  --border-color-focus: #3b82f6;
+  --border-color-high-contrast: #000000;
+  --border-radius: 8px;
+  --border-radius-sm: 4px;
+  --border-radius-lg: 12px;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+  
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 2px;
+}
+
+/* ============================================================================
+   MAIN COMPONENT CONTAINER
+   ============================================================================ */
+
+.accessibilityPanel {
+  position: relative;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-lg);
+  transition: all var(--transition-normal);
+}
+
+.accessibilityPanel.highContrast {
+  background: var(--bg-high-contrast);
+  border: 2px solid var(--border-color-high-contrast);
+  color: var(--text-high-contrast);
+}
+
+.accessibilityPanel.reducedMotion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+.accessibilityPanel.largeText {
+  font-size: var(--font-size-lg);
+}
+
+.accessibilityPanel.largeText .featuresSection h4,
+.accessibilityPanel.largeText .shortcutsSection h4,
+.accessibilityPanel.largeText .actionsSection,
+.accessibilityPanel.largeText .debugSection h4 {
+  font-size: var(--font-size-xl);
+}
+
+/* ============================================================================
+   SCREEN READER ONLY CONTENT
+   ============================================================================ */
+
+.srOnly {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* ============================================================================
+   STATUS SECTION
+   ============================================================================ */
+
+.statusSection {
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: var(--bg-accent);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+}
+
+.statusSection h3 {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.currentStatus {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.statusItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  line-height: var(--line-height-normal);
+}
+
+.statusLabel {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+.statusValue {
+  flex: 1;
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Voice state specific styles */
+.statusValue.idle {
+  color: var(--neutral-color);
+}
+
+.statusValue.listening {
+  color: var(--info-color);
+  font-weight: var(--font-weight-bold);
+}
+
+.statusValue.processing {
+  color: var(--warning-color);
+  font-weight: var(--font-weight-bold);
+}
+
+.statusValue.speaking {
+  color: var(--success-color);
+  font-weight: var(--font-weight-bold);
+}
+
+.statusValue.error {
+  color: var(--error-color);
+  font-weight: var(--font-weight-bold);
+}
+
+.statusValue.calibrating {
+  color: var(--accent-color);
+  font-weight: var(--font-weight-bold);
+  animation: pulse 1.5s infinite;
+}
+
+/* ============================================================================
+   FEATURES SECTION
+   ============================================================================ */
+
+.featuresSection {
+  margin-bottom: var(--spacing-lg);
+}
+
+.featuresSection h4 {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.featuresList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.featureToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+  width: 100%;
+}
+
+.featureToggle:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color-focus);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.featureToggle:focus {
+  outline: none;
+  border-color: var(--border-color-focus);
+  box-shadow: var(--shadow-focus);
+}
+
+.featureToggle.enabled {
+  background: var(--bg-accent);
+  border-color: var(--primary-color);
+}
+
+.featureToggle.disabled {
+  opacity: 0.7;
+}
+
+.featureToggle.enabled .toggleIndicator {
+  color: var(--success-color);
+}
+
+.featureToggle.disabled .toggleIndicator {
+  color: var(--neutral-color);
+}
+
+.featureInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex: 1;
+  margin-left: var(--spacing-sm);
+}
+
+.featureTitle {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.featureDescription {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+.toggleIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: var(--spacing-md);
+  transition: color var(--transition-fast);
+}
+
+/* ============================================================================
+   SHORTCUTS SECTION
+   ============================================================================ */
+
+.shortcutsSection {
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+}
+
+.shortcutsSection h4 {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.shortcutsList {
+  display: grid;
+  gap: var(--spacing-sm);
+}
+
+.shortcutItem {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--spacing-md);
+  align-items: center;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.shortcutItem:last-child {
+  border-bottom: none;
+}
+
+.shortcutKey {
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  white-space: nowrap;
+}
+
+.shortcutDescription {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+  margin: 0;
+}
+
+/* ============================================================================
+   ACTIONS SECTION
+   ============================================================================ */
+
+.actionsSection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.actionButton:hover {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--text-inverse);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.actionButton:focus {
+  outline: none;
+  border-color: var(--border-color-focus);
+  box-shadow: var(--shadow-focus);
+}
+
+.actionButton:active {
+  transform: translateY(0);
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.actionButton[aria-pressed="true"] {
+  background: var(--success-color);
+  border-color: var(--success-color);
+  color: var(--text-inverse);
+}
+
+.actionButton[aria-pressed="false"] {
+  background: var(--neutral-color);
+  border-color: var(--neutral-color);
+  color: var(--text-inverse);
+}
+
+/* ============================================================================
+   DEBUG SECTION
+   ============================================================================ */
+
+.debugSection {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+}
+
+.debugSection h4 {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  font-family: inherit;
+}
+
+.debugInfo {
+  display: grid;
+  gap: var(--spacing-xs);
+}
+
+.debugInfo div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+
+.debugInfo div:first-child {
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.debugInfo div:last-child {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .accessibilityPanel {
+    padding: var(--spacing-md);
+  }
+  
+  .statusSection {
+    padding: var(--spacing-sm);
+  }
+  
+  .statusItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+  
+  .statusLabel {
+    min-width: auto;
+  }
+  
+  .featureToggle {
+    padding: var(--spacing-sm);
+  }
+  
+  .featureInfo {
+    margin-left: var(--spacing-sm);
+  }
+  
+  .featureTitle {
+    font-size: var(--font-size-sm);
+  }
+  
+  .featureDescription {
+    font-size: var(--font-size-xs);
+  }
+  
+  .shortcutsSection {
+    padding: var(--spacing-sm);
+  }
+  
+  .shortcutItem {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xs);
+  }
+  
+  .shortcutKey {
+    justify-self: start;
+  }
+  
+  .actionsSection {
+    flex-direction: column;
+  }
+  
+  .actionButton {
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .debugSection {
+    padding: var(--spacing-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .accessibilityPanel {
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius);
+  }
+  
+  .statusSection h3 {
+    font-size: var(--font-size-base);
+  }
+  
+  .featuresSection h4,
+  .shortcutsSection h4,
+  .debugSection h4 {
+    font-size: var(--font-size-sm);
+  }
+  
+  .featureToggle {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .toggleIndicator {
+    align-self: flex-end;
+    margin-left: 0;
+  }
+}
+
+/* ============================================================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================================================ */
+
+/* Enhanced focus indicators for keyboard navigation */
+.featureToggle:focus,
+.actionButton:focus {
+  outline: var(--focus-ring-width) solid var(--border-color-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Enhanced focus indicators for high contrast mode */
+@media (prefers-contrast: high) {
+  .accessibilityPanel {
+    --border-color: var(--border-color-high-contrast);
+    --border-color-focus: var(--border-color-high-contrast);
+    border-width: 2px;
+  }
+  
+  .statusSection,
+  .featuresSection,
+  .shortcutsSection,
+  .debugSection,
+  .featureToggle,
+  .actionButton,
+  .shortcutKey {
+    border-width: 2px;
+    border-color: var(--border-color-high-contrast);
+  }
+  
+  .featureToggle:focus,
+  .actionButton:focus {
+    outline-width: 4px;
+    outline-color: var(--border-color-high-contrast);
+  }
+}
+
+/* Enhanced styles for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .accessibilityPanel *,
+  .accessibilityPanel *::before,
+  .accessibilityPanel *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .featureToggle:hover,
+  .actionButton:hover {
+    transform: none;
+  }
+  
+  .statusValue.calibrating {
+    animation: none;
+  }
+}
+
+/* Print styles for documentation */
+@media print {
+  .accessibilityPanel {
+    background: white !important;
+    border: 2px solid black !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+  
+  .actionsSection {
+    display: none !important;
+  }
+  
+  .debugSection {
+    background: white !important;
+    border: 1px solid black !important;
+  }
+  
+  .featureToggle {
+    background: white !important;
+    border: 1px solid black !important;
+  }
+  
+  .statusSection {
+    background: white !important;
+    border: 1px solid black !important;
+  }
+  
+  .shortcutsSection {
+    background: white !important;
+    border: 1px solid black !important;
+  }
+}
+
+/* ============================================================================
+   DARK MODE SUPPORT
+   ============================================================================ */
+
+@media (prefers-color-scheme: dark) {
+  .accessibilityPanel {
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+    --text-inverse: #111827;
+    --text-high-contrast: #ffffff;
+    
+    --bg-primary: #111827;
+    --bg-secondary: #1f2937;
+    --bg-tertiary: #374151;
+    --bg-glass: rgba(31, 41, 55, 0.9);
+    --bg-accent: rgba(59, 130, 246, 0.1);
+    --bg-high-contrast: #000000;
+    
+    --border-color: #374151;
+    --border-color-high-contrast: #ffffff;
+  }
+}
+
+/* ============================================================================
+   ANIMATION KEYFRAMES
+   ============================================================================ */
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+
+.fadeIn {
+  animation: fadeIn var(--transition-normal) ease-out;
+}
+
+.slideIn {
+  animation: slideIn var(--transition-normal) ease-out;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Focus management utilities */
+.focusRing {
+  outline: var(--focus-ring-width) solid var(--border-color-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.skipToContent {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  z-index: 1000;
+  transition: top var(--transition-fast);
+}
+
+.skipToContent:focus {
+  top: 6px;
+}

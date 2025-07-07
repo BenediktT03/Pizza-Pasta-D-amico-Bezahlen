@@ -1,0 +1,6 @@
+ WARN  Unsupported engine: wanted: {"node":"20"} (current: {"node":"v22.17.0","pnpm":"10.12.4"})
+
+> @eatech/functions@26.0.0 build C:\Users\Benedikt Thomma\Documents\Eatech\functions
+> echo 'No build needed'
+
+'No build needed'

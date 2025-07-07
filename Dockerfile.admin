@@ -3,7 +3,7 @@
 # Optimized for real-time admin operations
 
 # Base image with Node.js 18 Alpine
-FROM node:18-alpine AS base
+FROM node:24-alpine AS base
 LABEL maintainer="benedikt@thomma.ch"
 LABEL description="EATECH Admin Dashboard - React 18"
 LABEL version="3.0.0"
@@ -148,7 +148,7 @@ ENTRYPOINT ["dumb-init", "--"]
 CMD ["nginx", "-g", "daemon off;"]
 
 # Development stage for debugging
-FROM node:18-alpine AS debug
+FROM node:24-alpine AS debug
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY apps/admin ./apps/admin

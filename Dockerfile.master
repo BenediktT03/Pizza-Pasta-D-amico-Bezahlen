@@ -3,7 +3,7 @@
 # High-security configuration for platform administration
 
 # Base image with Node.js 18 Alpine
-FROM node:18-alpine AS base
+FROM node:24-alpine AS base
 LABEL maintainer="benedikt@thomma.ch"
 LABEL description="EATECH Master Control System - React 18"
 LABEL version="3.0.0"

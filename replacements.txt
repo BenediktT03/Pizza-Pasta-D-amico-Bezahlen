@@ -1,0 +1,1 @@
+echo sk-proj-.*==REMOVED > replacements.txt

@@ -1,0 +1,1118 @@
+/**
+ * EATECH - Size Selector CSS Module
+ * Version: 4.1.0
+ * Description: Advanced styling for dynamic product size selection interface
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * 
+ * File Path: /apps/web/src/components/customer/SizeSelector.module.css
+ * 
+ * Features:
+ * - Swiss design system compliance
+ * - SGE/SSN portion standards compliance
+ * - Multi-size visualization and comparison
+ * - Value analysis and recommendations
+ * - Nutrition impact calculations
+ * - Accessibility optimizations
+ * - Responsive design for all devices
+ * - Dark/light theme support
+ * - Swiss portion standards
+ * - Performance optimized animations
+ */
+
+/* ===== CSS CUSTOM PROPERTIES ===== */
+.sizeSelector {
+  /* Swiss Color Palette */
+  --swiss-red: #dc143c;
+  --swiss-white: #ffffff;
+  --swiss-dark: #1a1a1a;
+  --swiss-gray-50: #f8fafc;
+  --swiss-gray-100: #f1f5f9;
+  --swiss-gray-200: #e2e8f0;
+  --swiss-gray-300: #cbd5e1;
+  --swiss-gray-400: #94a3b8;
+  --swiss-gray-500: #64748b;
+  --swiss-gray-600: #475569;
+  --swiss-gray-700: #334155;
+  --swiss-gray-800: #1e293b;
+  --swiss-gray-900: #0f172a;
+
+  /* Size Colors */
+  --size-small: #8b5cf6;
+  --size-medium: #3b82f6;
+  --size-large: #10b981;
+  --size-xl: #f59e0b;
+  --size-xxl: #ef4444;
+
+  /* Value Colors */
+  --value-excellent: #10b981;
+  --value-good: #22c55e;
+  --value-fair: #f59e0b;
+  --value-poor: #ef4444;
+  --value-savings: #06b6d4;
+
+  /* Portion Colors */
+  --portion-recommended: #10b981;
+  --portion-moderate: #f59e0b;
+  --portion-large: #ef4444;
+  --portion-custom: #8b5cf6;
+
+  /* Selection States */
+  --selection-idle: var(--swiss-gray-200);
+  --selection-hover: var(--swiss-gray-300);
+  --selection-selected: var(--size-medium);
+  --selection-disabled: var(--swiss-gray-100);
+  --selection-recommended: var(--portion-recommended);
+
+  /* Gradients */
+  --size-gradient: linear-gradient(135deg, var(--size-small) 0%, var(--size-large) 100%);
+  --value-gradient: linear-gradient(135deg, var(--value-excellent) 0%, var(--value-good) 100%);
+  --savings-gradient: linear-gradient(135deg, var(--value-savings) 0%, #22d3ee 100%);
+
+  /* Swiss Typography */
+  --font-family-primary: 'Inter', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif;
+  --font-family-mono: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+
+  /* Spacing (Swiss 8px grid system) */
+  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-sm: 0.5rem;    /* 8px */
+  --spacing-md: 1rem;      /* 16px */
+  --spacing-lg: 1.5rem;    /* 24px */
+  --spacing-xl: 2rem;      /* 32px */
+  --spacing-2xl: 3rem;     /* 48px */
+  --spacing-3xl: 4rem;     /* 64px */
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-size: 0 0 20px rgba(59, 130, 246, 0.3);
+
+  /* Borders */
+  --border-radius-sm: 0.375rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 0.75rem;
+  --border-radius-xl: 1rem;
+  --border-radius-2xl: 1.5rem;
+  --border-radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --transition-spring: 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Z-index layers */
+  --z-base: 1;
+  --z-tooltip: 1020;
+  --z-modal: 1010;
+}
+
+/* ===== MAIN CONTAINER ===== */
+.sizeSelector {
+  width: 100%;
+  background: var(--swiss-white);
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-family-primary);
+  overflow: hidden;
+  transition: all var(--transition-normal);
+}
+
+.sizeSelector.dark {
+  background: var(--swiss-gray-900);
+  color: var(--swiss-white);
+}
+
+/* ===== HEADER SECTION ===== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  background: var(--swiss-gray-50);
+  border-bottom: 1px solid var(--swiss-gray-200);
+}
+
+.dark .header {
+  background: var(--swiss-gray-800);
+  border-bottom-color: var(--swiss-gray-700);
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--swiss-gray-900);
+  margin: 0;
+}
+
+.dark .title {
+  color: var(--swiss-white);
+}
+
+.titleIcon {
+  width: 24px;
+  height: 24px;
+  color: var(--size-medium);
+}
+
+.portionStandard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--portion-recommended);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--border-radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.standardIcon {
+  width: 12px;
+  height: 12px;
+}
+
+/* ===== CONTENT SECTION ===== */
+.content {
+  padding: var(--spacing-lg);
+}
+
+/* ===== SIZE OPTIONS GRID ===== */
+.sizeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.sizeOption {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-xl);
+  background: var(--swiss-white);
+  border: 2px solid var(--swiss-gray-200);
+  border-radius: var(--border-radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  text-align: center;
+  overflow: hidden;
+}
+
+.dark .sizeOption {
+  background: var(--swiss-gray-800);
+  border-color: var(--swiss-gray-700);
+}
+
+.sizeOption:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--size-medium);
+}
+
+.sizeOption.selected {
+  border-color: var(--size-medium);
+  background: rgba(59, 130, 246, 0.05);
+  box-shadow: var(--shadow-size);
+}
+
+.dark .sizeOption.selected {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.sizeOption.recommended {
+  border-color: var(--portion-recommended);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.dark .sizeOption.recommended {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.sizeOption.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.sizeOption.disabled:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--swiss-gray-200);
+}
+
+/* ===== SIZE VISUALIZATION ===== */
+.sizeVisualization {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sizeCircle {
+  border-radius: var(--border-radius-full);
+  background: var(--size-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--swiss-white);
+  font-weight: 600;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.sizeCircle.small {
+  width: 40px;
+  height: 40px;
+  font-size: 0.75rem;
+  background: var(--size-small);
+}
+
+.sizeCircle.medium {
+  width: 60px;
+  height: 60px;
+  font-size: 0.875rem;
+  background: var(--size-medium);
+}
+
+.sizeCircle.large {
+  width: 80px;
+  height: 80px;
+  font-size: 1rem;
+  background: var(--size-large);
+}
+
+.sizeCircle.xl {
+  width: 70px;
+  height: 70px;
+  font-size: 0.875rem;
+  background: var(--size-xl);
+}
+
+.sizeCircle.xxl {
+  width: 75px;
+  height: 75px;
+  font-size: 0.875rem;
+  background: var(--size-xxl);
+}
+
+.sizeCircle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+  animation: shimmer 2s infinite;
+}
+
+.sizeOption:hover .sizeCircle {
+  transform: scale(1.1);
+}
+
+.sizeOption.selected .sizeCircle {
+  transform: scale(1.15);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+}
+
+/* ===== SIZE INFORMATION ===== */
+.sizeName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--swiss-gray-900);
+  margin-bottom: var(--spacing-xs);
+}
+
+.dark .sizeName {
+  color: var(--swiss-white);
+}
+
+.sizeDescription {
+  font-size: 0.875rem;
+  color: var(--swiss-gray-600);
+  margin-bottom: var(--spacing-md);
+  line-height: 1.4;
+}
+
+.dark .sizeDescription {
+  color: var(--swiss-gray-400);
+}
+
+.sizeDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.detailLabel {
+  color: var(--swiss-gray-600);
+  font-weight: 500;
+}
+
+.dark .detailLabel {
+  color: var(--swiss-gray-400);
+}
+
+.detailValue {
+  color: var(--swiss-gray-900);
+  font-weight: 600;
+}
+
+.dark .detailValue {
+  color: var(--swiss-white);
+}
+
+.detailValue.highlight {
+  color: var(--size-medium);
+}
+
+.detailValue.savings {
+  color: var(--value-savings);
+}
+
+.detailValue.warning {
+  color: var(--value-poor);
+}
+
+/* ===== BADGES AND INDICATORS ===== */
+.sizeBadge {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-full);
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sizeBadge.recommended {
+  background: var(--portion-recommended);
+  color: var(--swiss-white);
+}
+
+.sizeBadge.popular {
+  background: var(--value-fair);
+  color: var(--swiss-white);
+}
+
+.sizeBadge.value {
+  background: var(--value-savings);
+  color: var(--swiss-white);
+}
+
+.sizeBadge.new {
+  background: var(--size-xl);
+  color: var(--swiss-white);
+}
+
+.valueIndicator {
+  position: absolute;
+  bottom: var(--spacing-sm);
+  left: var(--spacing-sm);
+  right: var(--spacing-sm);
+  height: 4px;
+  border-radius: var(--border-radius-full);
+  background: var(--swiss-gray-200);
+  overflow: hidden;
+}
+
+.dark .valueIndicator {
+  background: var(--swiss-gray-700);
+}
+
+.valueBar {
+  height: 100%;
+  border-radius: var(--border-radius-full);
+  transition: width var(--transition-normal);
+}
+
+.valueBar.excellent {
+  width: 90%;
+  background: var(--value-excellent);
+}
+
+.valueBar.good {
+  width: 75%;
+  background: var(--value-good);
+}
+
+.valueBar.fair {
+  width: 50%;
+  background: var(--value-fair);
+}
+
+.valueBar.poor {
+  width: 25%;
+  background: var(--value-poor);
+}
+
+/* ===== SIZE COMPARISON ===== */
+.sizeComparison {
+  background: var(--swiss-gray-50);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.dark .sizeComparison {
+  background: var(--swiss-gray-800);
+}
+
+.comparisonTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--swiss-gray-900);
+  margin-bottom: var(--spacing-lg);
+}
+
+.dark .comparisonTitle {
+  color: var(--swiss-white);
+}
+
+.comparisonIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--size-medium);
+}
+
+.comparisonGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.comparisonItem {
+  text-align: center;
+  padding: var(--spacing-md);
+  background: var(--swiss-white);
+  border: 1px solid var(--swiss-gray-200);
+  border-radius: var(--border-radius-md);
+}
+
+.dark .comparisonItem {
+  background: var(--swiss-gray-900);
+  border-color: var(--swiss-gray-700);
+}
+
+.comparisonItem.selected {
+  border-color: var(--size-medium);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.comparisonMetric {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--swiss-gray-900);
+  margin-bottom: var(--spacing-xs);
+}
+
+.dark .comparisonMetric {
+  color: var(--swiss-white);
+}
+
+.comparisonLabel {
+  font-size: 0.75rem;
+  color: var(--swiss-gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dark .comparisonLabel {
+  color: var(--swiss-gray-400);
+}
+
+.comparisonChart {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  height: 60px;
+  margin-bottom: var(--spacing-md);
+}
+
+.chartBar {
+  width: 20px;
+  background: var(--size-medium);
+  border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+  transition: all var(--transition-normal);
+  position: relative;
+  opacity: 0.6;
+}
+
+.chartBar.selected {
+  opacity: 1;
+  background: var(--size-large);
+}
+
+.chartBar.small {
+  height: 20px;
+}
+
+.chartBar.medium {
+  height: 40px;
+}
+
+.chartBar.large {
+  height: 60px;
+}
+
+.chartBar.xl {
+  height: 50px;
+}
+
+/* ===== NUTRITION IMPACT ===== */
+.nutritionImpact {
+  background: var(--swiss-gray-50);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.dark .nutritionImpact {
+  background: var(--swiss-gray-800);
+}
+
+.impactTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--swiss-gray-900);
+  margin-bottom: var(--spacing-lg);
+}
+
+.dark .impactTitle {
+  color: var(--swiss-white);
+}
+
+.impactIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--portion-recommended);
+}
+
+.nutritionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.nutritionItem {
+  text-align: center;
+  padding: var(--spacing-md);
+  background: var(--swiss-white);
+  border: 1px solid var(--swiss-gray-200);
+  border-radius: var(--border-radius-md);
+}
+
+.dark .nutritionItem {
+  background: var(--swiss-gray-900);
+  border-color: var(--swiss-gray-700);
+}
+
+.nutritionValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--swiss-gray-900);
+  margin-bottom: var(--spacing-xs);
+}
+
+.dark .nutritionValue {
+  color: var(--swiss-white);
+}
+
+.nutritionLabel {
+  font-size: 0.75rem;
+  color: var(--swiss-gray-600);
+  margin-bottom: var(--spacing-sm);
+}
+
+.dark .nutritionLabel {
+  color: var(--swiss-gray-400);
+}
+
+.nutritionChange {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.nutritionChange.positive {
+  color: var(--value-poor);
+}
+
+.nutritionChange.negative {
+  color: var(--value-excellent);
+}
+
+.nutritionChange.neutral {
+  color: var(--swiss-gray-500);
+}
+
+.changeIcon {
+  width: 12px;
+  height: 12px;
+}
+
+/* ===== RECOMMENDATIONS ===== */
+.recommendations {
+  background: var(--swiss-gray-50);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.dark .recommendations {
+  background: var(--swiss-gray-800);
+}
+
+.recommendationsTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--swiss-gray-900);
+  margin-bottom: var(--spacing-lg);
+}
+
+.dark .recommendationsTitle {
+  color: var(--swiss-white);
+}
+
+.recommendationsIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--size-medium);
+}
+
+.recommendationsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.recommendationItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.recommendationBullet {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--border-radius-full);
+  background: var(--size-medium);
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.recommendationBullet.warning {
+  background: var(--value-fair);
+}
+
+.recommendationBullet.success {
+  background: var(--value-excellent);
+}
+
+.recommendationText {
+  color: var(--swiss-gray-700);
+}
+
+.dark .recommendationText {
+  color: var(--swiss-gray-300);
+}
+
+/* ===== CUSTOM SIZE INPUT ===== */
+.customSize {
+  background: var(--swiss-gray-50);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.dark .customSize {
+  background: var(--swiss-gray-800);
+}
+
+.customTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--swiss-gray-900);
+  margin-bottom: var(--spacing-md);
+}
+
+.dark .customTitle {
+  color: var(--swiss-white);
+}
+
+.customInputGroup {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.customInput {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--swiss-white);
+  border: 1px solid var(--swiss-gray-300);
+  border-radius: var(--border-radius-md);
+  font-size: 0.875rem;
+  color: var(--swiss-gray-900);
+  transition: all var(--transition-fast);
+}
+
+.dark .customInput {
+  background: var(--swiss-gray-900);
+  border-color: var(--swiss-gray-600);
+  color: var(--swiss-white);
+}
+
+.customInput:focus {
+  outline: none;
+  border-color: var(--size-medium);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.customUnit {
+  font-size: 0.875rem;
+  color: var(--swiss-gray-600);
+  font-weight: 500;
+  min-width: 40px;
+}
+
+.dark .customUnit {
+  color: var(--swiss-gray-400);
+}
+
+.customApply {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--size-medium);
+  color: var(--swiss-white);
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.customApply:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.customApply:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablet styles */
+@media (max-width: 768px) {
+  .sizeSelector {
+    border-radius: var(--border-radius-lg);
+  }
+
+  .content {
+    padding: var(--spacing-md);
+  }
+
+  .sizeGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+
+  .sizeOption {
+    padding: var(--spacing-lg);
+  }
+
+  .sizeVisualization {
+    width: 60px;
+    height: 60px;
+  }
+
+  .comparisonGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .nutritionGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 480px) {
+  .header {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    text-align: center;
+  }
+
+  .content {
+    padding: var(--spacing-sm);
+  }
+
+  .sizeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sizeOption {
+    padding: var(--spacing-md);
+  }
+
+  .sizeVisualization {
+    width: 50px;
+    height: 50px;
+  }
+
+  .comparisonGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .nutritionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .customInputGroup {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .customApply {
+    width: 100%;
+  }
+
+  .comparisonChart {
+    height: 40px;
+  }
+
+  .chartBar {
+    width: 15px;
+  }
+
+  .chartBar.small {
+    height: 15px;
+  }
+
+  .chartBar.medium {
+    height: 25px;
+  }
+
+  .chartBar.large {
+    height: 40px;
+  }
+
+  .chartBar.xl {
+    height: 35px;
+  }
+}
+
+/* ===== ANIMATIONS ===== */
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -10px, 0);
+  }
+  70% {
+    transform: translate3d(0, -5px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .sizeSelector {
+    border: 2px solid var(--swiss-gray-900);
+  }
+
+  .sizeOption {
+    border-width: 3px;
+  }
+
+  .sizeOption.selected {
+    border-width: 4px;
+  }
+
+  .sizeBadge {
+    border: 1px solid var(--swiss-white);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus indicators */
+.sizeOption:focus-visible,
+.customInput:focus-visible,
+.customApply:focus-visible {
+  outline: 2px solid var(--size-medium);
+  outline-offset: 2px;
+}
+
+/* Screen reader only */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .sizeSelector {
+    box-shadow: none;
+    border: 1px solid var(--swiss-gray-300);
+  }
+
+  .sizeOption {
+    break-inside: avoid;
+  }
+
+  .customSize,
+  .recommendations {
+    break-inside: avoid;
+  }
+
+  .sizeCircle::before {
+    display: none;
+  }
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+
+/* GPU acceleration for animations */
+.sizeOption,
+.sizeCircle,
+.chartBar,
+.valueBar {
+  will-change: transform;
+}
+
+/* Contain layout changes */
+.sizeGrid {
+  contain: layout;
+}
+
+.content {
+  contain: layout style;
+}
+
+/* ===== SWISS PORTION STANDARDS ===== */
+
+/* SGE/SSN compliance indicators */
+.sizeSelector.sgeCompliant .portionStandard::after {
+  content: 'SGE';
+  margin-left: var(--spacing-xs);
+  padding: 2px 4px;
+  background: var(--swiss-white);
+  color: var(--portion-recommended);
+  font-size: 0.625rem;
+  border-radius: var(--border-radius-sm);
+}
+
+/* Swiss nutritional guidelines highlighting */
+.sizeSelector.swissNutrition .sizeOption.recommended::before {
+  content: '🇨🇭';
+  position: absolute;
+  top: var(--spacing-xs);
+  left: var(--spacing-xs);
+  font-size: 1rem;
+}
+
+/* Cultural portion adaptations */
+.sizeSelector.swissCulture .sizeOption {
+  border-radius: var(--border-radius-md);
+}
+
+.sizeSelector.swissCulture .sizeCircle {
+  background: linear-gradient(135deg, var(--swiss-red) 0%, var(--swiss-white) 50%, var(--swiss-red) 100%);
+  color: var(--swiss-dark);
+}

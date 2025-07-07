@@ -1,0 +1,951 @@
+/**
+ * EATECH - NLP Debugger Component Styles
+ * Version: 4.3.0
+ * Description: Comprehensive styling for natural language processing debugger
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * 
+ * File Path: /apps/web/src/features/voice/components/NLPDebugger.module.css
+ */
+
+/* ============================================================================
+   CSS CUSTOM PROPERTIES
+   ============================================================================ */
+
+.nlpDebugger {
+  --primary-color: #3b82f6;
+  --secondary-color: #10b981;
+  --accent-color: #f59e0b;
+  --error-color: #ef4444;
+  --success-color: #22c55e;
+  --warning-color: #f97316;
+  --info-color: #06b6d4;
+  --neutral-color: #6b7280;
+  
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --text-inverse: #ffffff;
+  --text-code: #1f2937;
+  
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --bg-code: #1f2937;
+  --bg-overlay: rgba(0, 0, 0, 0.8);
+  --bg-glass: rgba(255, 255, 255, 0.95);
+  --bg-success: rgba(34, 197, 94, 0.1);
+  --bg-error: rgba(239, 68, 68, 0.1);
+  --bg-warning: rgba(245, 158, 11, 0.1);
+  --bg-info: rgba(6, 182, 212, 0.1);
+  
+  --border-color: #e5e7eb;
+  --border-color-light: #f3f4f6;
+  --border-radius: 8px;
+  --border-radius-sm: 4px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+  
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  
+  --font-family-mono: 'Monaco', 'Menlo', 'Courier New', monospace;
+  
+  --z-index-modal: 1050;
+  --z-index-dropdown: 1000;
+  --z-index-tooltip: 1100;
+}
+
+/* ============================================================================
+   MAIN DEBUGGER CONTAINER
+   ============================================================================ */
+
+.nlpDebugger {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-index-modal);
+  padding: var(--spacing-lg);
+  backdrop-filter: blur(8px);
+  animation: fadeIn var(--transition-normal) ease-out;
+}
+
+.nlpDebugger > div {
+  background: var(--bg-glass);
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-2xl);
+  max-width: 1200px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  animation: slideUp var(--transition-normal) ease-out;
+}
+
+/* ============================================================================
+   HEADER SECTION
+   ============================================================================ */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-xl);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.titleSection h2 {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.titleSection svg {
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.statusIndicators {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-left: var(--spacing-lg);
+}
+
+.recordingIndicator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--error-color);
+  color: var(--text-inverse);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  animation: pulse 1s infinite;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  border-radius: var(--border-radius);
+  color: var(--text-inverse);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.actionButton:hover {
+  background: var(--info-color);
+  border-color: var(--info-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.closeButton:hover {
+  background: var(--error-color);
+  border-color: var(--error-color);
+  color: var(--text-inverse);
+  transform: scale(1.05);
+}
+
+/* ============================================================================
+   CONTROLS SECTION
+   ============================================================================ */
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.debugLevelSelector {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.debugLevelSelector label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.debugLevelSelector select {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.filterSection {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.filterToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.filterToggle:hover,
+.filterToggle.active {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  background: var(--bg-info);
+}
+
+.filterInputs {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-left: var(--spacing-sm);
+}
+
+.filterInputs input {
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  min-width: 200px;
+}
+
+.clearButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--warning-color);
+  border: 1px solid var(--warning-color);
+  border-radius: var(--border-radius);
+  color: var(--text-inverse);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.clearButton:hover {
+  background: var(--error-color);
+  border-color: var(--error-color);
+}
+
+/* ============================================================================
+   CONTENT SECTION
+   ============================================================================ */
+
+.content {
+  flex: 1;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: var(--neutral-color);
+}
+
+/* ============================================================================
+   PIPELINE SECTION
+   ============================================================================ */
+
+.pipelineSection {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.pipelineSection h3 {
+  margin: 0 0 var(--spacing-lg) 0;
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.pipelineProgress {
+  position: relative;
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  margin-bottom: var(--spacing-lg);
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  border-radius: 3px;
+  transition: width var(--transition-normal);
+  position: relative;
+}
+
+.progressBar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
+}
+
+.pipelineStages {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.pipelineStage {
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.pipelineStage:hover {
+  border-color: var(--primary-color);
+  background: var(--bg-tertiary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.pipelineStage.active {
+  border-color: var(--primary-color);
+  background: var(--bg-info);
+  box-shadow: var(--shadow-md);
+}
+
+.pipelineStage.completed {
+  border-color: var(--success-color);
+  background: var(--bg-success);
+}
+
+.pipelineStage.processing {
+  border-color: var(--warning-color);
+  background: var(--bg-warning);
+  animation: pulse 1s infinite;
+}
+
+.pipelineStage.error {
+  border-color: var(--error-color);
+  background: var(--bg-error);
+}
+
+.stageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.stageTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stageDuration {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-family: var(--font-family-mono);
+  background: var(--bg-tertiary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+}
+
+.stageDescription {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.stageData {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--bg-code);
+  border-radius: var(--border-radius);
+  overflow: auto;
+  max-height: 200px;
+}
+
+.stageData pre {
+  margin: 0;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: #e5e7eb;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ============================================================================
+   METRICS PANEL
+   ============================================================================ */
+
+.metricsPanel {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.metricsPanel h4 {
+  margin: 0 0 var(--spacing-lg) 0;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  text-align: center;
+}
+
+.metricLabel {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.metricValue {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-family-mono);
+}
+
+.metricValue.error {
+  color: var(--error-color);
+}
+
+.metricValue.warning {
+  color: var(--warning-color);
+}
+
+.metricValue.success {
+  color: var(--success-color);
+}
+
+.issuesSection {
+  border-top: 1px solid var(--border-color);
+  padding-top: var(--spacing-lg);
+}
+
+.errorItem,
+.warningItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.errorItem {
+  background: var(--bg-error);
+  color: var(--error-color);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.warningItem {
+  background: var(--bg-warning);
+  color: var(--warning-color);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+/* ============================================================================
+   LOGS SECTION
+   ============================================================================ */
+
+.logsSection {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.logsSection h3 {
+  margin: 0 0 var(--spacing-lg) 0;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.logsList {
+  flex: 1;
+  background: var(--bg-code);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  overflow-y: auto;
+  max-height: 400px;
+  font-family: var(--font-family-mono);
+}
+
+.logsList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.logsList::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.logsList::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.logEntry {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  gap: var(--spacing-sm);
+  align-items: center;
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+}
+
+.logEntry:last-child {
+  border-bottom: none;
+}
+
+.logTimestamp {
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+.logLevel {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm);
+  white-space: nowrap;
+}
+
+.logEntry.error .logLevel {
+  background: var(--error-color);
+  color: var(--text-inverse);
+}
+
+.logEntry.warn .logLevel {
+  background: var(--warning-color);
+  color: var(--text-inverse);
+}
+
+.logEntry.info .logLevel {
+  background: var(--info-color);
+  color: var(--text-inverse);
+}
+
+.logEntry.debug .logLevel {
+  background: var(--neutral-color);
+  color: var(--text-inverse);
+}
+
+.logEntry.trace .logLevel {
+  background: var(--text-muted);
+  color: var(--text-inverse);
+}
+
+.logMessage {
+  color: #e5e7eb;
+  word-break: break-word;
+}
+
+.logDataToggle {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--border-radius-sm);
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 2px 4px;
+  transition: all var(--transition-fast);
+}
+
+.logDataToggle:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 1024px) {
+  .nlpDebugger {
+    padding: var(--spacing-md);
+  }
+  
+  .nlpDebugger > div {
+    max-width: 100%;
+    border-radius: var(--border-radius-lg);
+  }
+  
+  .header {
+    padding: var(--spacing-lg);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+  
+  .headerActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+  
+  .content {
+    padding: var(--spacing-md);
+  }
+  
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .nlpDebugger {
+    padding: var(--spacing-sm);
+  }
+  
+  .header {
+    padding: var(--spacing-md);
+  }
+  
+  .titleSection h2 {
+    font-size: var(--font-size-xl);
+  }
+  
+  .statusIndicators {
+    margin-left: 0;
+    margin-top: var(--spacing-sm);
+  }
+  
+  .controls {
+    padding: var(--spacing-md);
+  }
+  
+  .filterInputs {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .filterInputs input {
+    min-width: auto;
+  }
+  
+  .content {
+    gap: var(--spacing-lg);
+  }
+  
+  .pipelineSection,
+  .metricsPanel,
+  .logsSection {
+    padding: var(--spacing-md);
+  }
+  
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+  
+  .logEntry {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) 0;
+  }
+  
+  .logTimestamp,
+  .logLevel {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 480px) {
+  .actionButton {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .titleSection {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .stageData {
+    max-height: 150px;
+  }
+  
+  .logsList {
+    max-height: 250px;
+  }
+}
+
+/* ============================================================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================================================ */
+
+.actionButton:focus,
+.closeButton:focus,
+.filterToggle:focus,
+.clearButton:focus,
+.debugLevelSelector select:focus,
+.filterInputs input:focus,
+.pipelineStage:focus,
+.logDataToggle:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+@media (prefers-contrast: high) {
+  .nlpDebugger {
+    --border-color: #000000;
+    border-width: 2px;
+  }
+  
+  .pipelineStage,
+  .actionButton,
+  .closeButton,
+  .filterToggle,
+  .clearButton {
+    border-width: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nlpDebugger *,
+  .nlpDebugger *::before,
+  .nlpDebugger *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .actionButton:hover,
+  .pipelineStage:hover {
+    transform: none;
+  }
+}
+
+@media print {
+  .nlpDebugger {
+    position: static;
+    background: white !important;
+    padding: 0 !important;
+  }
+  
+  .headerActions,
+  .controls {
+    display: none !important;
+  }
+  
+  .logsList {
+    background: white !important;
+    color: black !important;
+    border: 1px solid black !important;
+  }
+}
+
+/* ============================================================================
+   DARK MODE SUPPORT
+   ============================================================================ */
+
+@media (prefers-color-scheme: dark) {
+  .nlpDebugger {
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+    --text-inverse: #111827;
+    
+    --bg-primary: #111827;
+    --bg-secondary: #1f2937;
+    --bg-tertiary: #374151;
+    --bg-code: #0f172a;
+    --bg-glass: rgba(17, 24, 39, 0.95);
+    
+    --border-color: #374151;
+    --border-color-light: #4b5563;
+  }
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

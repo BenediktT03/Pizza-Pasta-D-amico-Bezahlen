@@ -1,0 +1,1106 @@
+/**
+ * EATECH - Modifier Selector CSS Module
+ * Version: 4.1.0
+ * Description: Advanced styling for product modification and customization interface
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * 
+ * File Path: /apps/web/src/components/customer/ModifierSelector.module.css
+ * 
+ * Features:
+ * - Swiss design system compliance
+ * - Multi-group modifier organization
+ * - Real-time price calculations with CHF formatting
+ * - Voice command visual feedback
+ * - Conflict resolution indicators
+ * - Accessibility optimizations
+ * - Responsive design for all devices
+ * - Dark/light theme support
+ * - Swiss food customization patterns
+ * - Performance optimized animations
+ */
+
+/* ===== CSS CUSTOM PROPERTIES ===== */
+.modifierSelector {
+  /* Swiss Color Palette */
+  --swiss-red: #dc143c;
+  --swiss-white: #ffffff;
+  --swiss-dark: #1a1a1a;
+  --swiss-gray-50: #f8fafc;
+  --swiss-gray-100: #f1f5f9;
+  --swiss-gray-200: #e2e8f0;
+  --swiss-gray-300: #cbd5e1;
+  --swiss-gray-400: #94a3b8;
+  --swiss-gray-500: #64748b;
+  --swiss-gray-600: #475569;
+  --swiss-gray-700: #334155;
+  --swiss-gray-800: #1e293b;
+  --swiss-gray-900: #0f172a;
+
+  /* Modifier Colors */
+  --modifier-primary: #3b82f6;
+  --modifier-secondary: #06b6d4;
+  --modifier-accent: #8b5cf6;
+  --modifier-success: #10b981;
+  --modifier-warning: #f59e0b;
+  --modifier-error: #ef4444;
+  --modifier-info: #0ea5e9;
+
+  /* Selection States */
+  --selection-idle: var(--swiss-gray-200);
+  --selection-hover: var(--swiss-gray-300);
+  --selection-active: var(--modifier-primary);
+  --selection-selected: var(--modifier-success);
+  --selection-disabled: var(--swiss-gray-100);
+  --selection-conflict: var(--modifier-error);
+
+  /* Price Colors */
+  --price-free: var(--modifier-success);
+  --price-extra: var(--modifier-warning);
+  --price-premium: var(--modifier-error);
+  --price-discount: var(--modifier-info);
+
+  /* Gradients */
+  --modifier-gradient: linear-gradient(135deg, var(--modifier-primary) 0%, var(--modifier-secondary) 100%);
+  --selection-gradient: linear-gradient(135deg, var(--modifier-success) 0%, #34d399 100%);
+  --conflict-gradient: linear-gradient(135deg, var(--modifier-error) 0%, #f87171 100%);
+
+  /* Swiss Typography */
+  --font-family-primary: 'Inter', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif;
+  --font-family-mono: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+
+  /* Spacing (Swiss 8px grid system) */
+  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-sm: 0.5rem;    /* 8px */
+  --spacing-md: 1rem;      /* 16px */
+  --spacing-lg: 1.5rem;    /* 24px */
+  --spacing-xl: 2rem;      /* 32px */
+  --spacing-2xl: 3rem;     /* 48px */
+  --spacing-3xl: 4rem;     /* 64px */
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-selection: 0 0 0 3px rgba(59, 130, 246, 0.1);
+
+  /* Borders */
+  --border-radius-sm: 0.375rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 0.75rem;
+  --border-radius-xl: 1rem;
+  --border-radius-2xl: 1.5rem;
+  --border-radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --transition-spring: 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Z-index layers */
+  --z-base: 1;
+  --z-dropdown: 1000;
+  --z-modal: 1010;
+  --z-tooltip: 1020;
+}
+
+/* ===== MAIN CONTAINER ===== */
+.modifierSelector {
+  width: 100%;
+  background: var(--swiss-white);
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-family-primary);
+  overflow: hidden;
+  transition: all var(--transition-normal);
+}
+
+.modifierSelector.dark {
+  background: var(--swiss-gray-900);
+  color: var(--swiss-white);
+}
+
+/* ===== HEADER SECTION ===== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  background: var(--swiss-gray-50);
+  border-bottom: 1px solid var(--swiss-gray-200);
+}
+
+.dark .header {
+  background: var(--swiss-gray-800);
+  border-bottom-color: var(--swiss-gray-700);
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--swiss-gray-900);
+  margin: 0;
+}
+
+.dark .title {
+  color: var(--swiss-white);
+}
+
+.titleIcon {
+  width: 24px;
+  height: 24px;
+  color: var(--modifier-primary);
+}
+
+.pricePreview {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--swiss-white);
+  border: 1px solid var(--swiss-gray-300);
+  border-radius: var(--border-radius-full);
+  font-weight: 600;
+  color: var(--swiss-gray-900);
+  transition: all var(--transition-fast);
+}
+
+.dark .pricePreview {
+  background: var(--swiss-gray-900);
+  border-color: var(--swiss-gray-600);
+  color: var(--swiss-white);
+}
+
+.priceIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--modifier-success);
+}
+
+.priceAmount {
+  font-family: var(--font-family-mono);
+  font-size: 0.875rem;
+}
+
+.priceChange {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+}
+
+.priceChange.positive {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--price-extra);
+}
+
+.priceChange.negative {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--price-discount);
+}
+
+.priceChange.neutral {
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--swiss-gray-600);
+}
+
+/* ===== MODIFIER GROUPS ===== */
+.modifierGroups {
+  padding: var(--spacing-lg);
+}
+
+.modifierGroup {
+  margin-bottom: var(--spacing-xl);
+}
+
+.modifierGroup:last-child {
+  margin-bottom: 0;
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.groupTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--swiss-gray-900);
+  margin: 0;
+}
+
+.dark .groupTitle {
+  color: var(--swiss-white);
+}
+
+.groupIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--modifier-primary);
+}
+
+.groupBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--swiss-gray-100);
+  color: var(--swiss-gray-600);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: var(--border-radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dark .groupBadge {
+  background: var(--swiss-gray-700);
+  color: var(--swiss-gray-400);
+}
+
+.groupBadge.required {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--modifier-error);
+}
+
+.groupBadge.optional {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--modifier-primary);
+}
+
+.groupBadge.multiSelect {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--modifier-accent);
+}
+
+.badgeIcon {
+  width: 12px;
+  height: 12px;
+}
+
+.groupDescription {
+  font-size: 0.875rem;
+  color: var(--swiss-gray-600);
+  margin-bottom: var(--spacing-md);
+  line-height: 1.5;
+}
+
+.dark .groupDescription {
+  color: var(--swiss-gray-400);
+}
+
+/* ===== MODIFIER OPTIONS ===== */
+.optionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.optionsGrid.singleColumn {
+  grid-template-columns: 1fr;
+}
+
+.optionsGrid.compact {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.modifierOption {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-md);
+  background: var(--swiss-gray-50);
+  border: 2px solid var(--swiss-gray-200);
+  border-radius: var(--border-radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.dark .modifierOption {
+  background: var(--swiss-gray-800);
+  border-color: var(--swiss-gray-700);
+}
+
+.modifierOption:hover {
+  background: var(--swiss-gray-100);
+  border-color: var(--modifier-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.dark .modifierOption:hover {
+  background: var(--swiss-gray-700);
+}
+
+.modifierOption.selected {
+  background: rgba(59, 130, 246, 0.05);
+  border-color: var(--modifier-primary);
+  box-shadow: var(--shadow-selection);
+}
+
+.dark .modifierOption.selected {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.modifierOption.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--swiss-gray-100);
+  border-color: var(--swiss-gray-200);
+}
+
+.dark .modifierOption.disabled {
+  background: var(--swiss-gray-800);
+  border-color: var(--swiss-gray-700);
+}
+
+.modifierOption.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.modifierOption.conflict {
+  border-color: var(--modifier-error);
+  background: rgba(239, 68, 68, 0.05);
+  animation: conflictPulse 2s infinite;
+}
+
+.modifierOption.voiceHighlight {
+  border-color: var(--modifier-accent);
+  background: rgba(139, 92, 246, 0.05);
+  animation: voiceGlow 1.5s ease-in-out infinite;
+}
+
+/* ===== OPTION CONTENT ===== */
+.optionContent {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.optionImage {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--border-radius-md);
+  object-fit: cover;
+  background: var(--swiss-gray-200);
+  flex-shrink: 0;
+}
+
+.dark .optionImage {
+  background: var(--swiss-gray-700);
+}
+
+.optionDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.optionName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--swiss-gray-900);
+  margin-bottom: var(--spacing-xs);
+  line-height: 1.2;
+}
+
+.dark .optionName {
+  color: var(--swiss-white);
+}
+
+.optionDescription {
+  font-size: 0.75rem;
+  color: var(--swiss-gray-600);
+  line-height: 1.3;
+  margin-bottom: var(--spacing-xs);
+}
+
+.dark .optionDescription {
+  color: var(--swiss-gray-400);
+}
+
+.optionTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.optionTag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 2px 6px;
+  background: var(--swiss-gray-200);
+  color: var(--swiss-gray-700);
+  font-size: 0.625rem;
+  font-weight: 500;
+  border-radius: var(--border-radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dark .optionTag {
+  background: var(--swiss-gray-700);
+  color: var(--swiss-gray-300);
+}
+
+.optionTag.popular {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--modifier-warning);
+}
+
+.optionTag.new {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--modifier-success);
+}
+
+.optionTag.recommended {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--modifier-primary);
+}
+
+.optionTag.spicy {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--modifier-error);
+}
+
+.optionTag.healthy {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--modifier-success);
+}
+
+.optionTag.swiss {
+  background: rgba(220, 20, 60, 0.2);
+  color: var(--swiss-red);
+}
+
+.tagIcon {
+  width: 10px;
+  height: 10px;
+}
+
+/* ===== OPTION PRICING ===== */
+.optionPricing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.optionPrice {
+  font-family: var(--font-family-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--swiss-gray-900);
+}
+
+.dark .optionPrice {
+  color: var(--swiss-white);
+}
+
+.optionPrice.free {
+  color: var(--price-free);
+}
+
+.optionPrice.extra {
+  color: var(--price-extra);
+}
+
+.optionPrice.premium {
+  color: var(--price-premium);
+}
+
+.optionPrice.discount {
+  color: var(--price-discount);
+}
+
+.priceLabel {
+  font-size: 0.625rem;
+  color: var(--swiss-gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dark .priceLabel {
+  color: var(--swiss-gray-400);
+}
+
+/* ===== SELECTION INDICATORS ===== */
+.selectionIndicator {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  width: 24px;
+  height: 24px;
+  border-radius: var(--border-radius-full);
+  background: var(--modifier-success);
+  color: var(--swiss-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all var(--transition-bounce);
+}
+
+.modifierOption.selected .selectionIndicator {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.selectionIcon {
+  width: 14px;
+  height: 14px;
+}
+
+/* ===== QUANTITY CONTROLS ===== */
+.quantityControls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all var(--transition-normal);
+}
+
+.modifierOption.selected .quantityControls {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.quantityButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--swiss-gray-300);
+  border-radius: var(--border-radius-full);
+  background: var(--swiss-white);
+  color: var(--swiss-gray-700);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.dark .quantityButton {
+  border-color: var(--swiss-gray-600);
+  background: var(--swiss-gray-800);
+  color: var(--swiss-gray-300);
+}
+
+.quantityButton:hover {
+  background: var(--modifier-primary);
+  border-color: var(--modifier-primary);
+  color: var(--swiss-white);
+}
+
+.quantityButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quantityButton:disabled:hover {
+  background: var(--swiss-white);
+  border-color: var(--swiss-gray-300);
+  color: var(--swiss-gray-700);
+}
+
+.quantityIcon {
+  width: 14px;
+  height: 14px;
+}
+
+.quantityValue {
+  min-width: 32px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--swiss-gray-900);
+}
+
+.dark .quantityValue {
+  color: var(--swiss-white);
+}
+
+/* ===== CONFLICT INDICATORS ===== */
+.conflictIndicator {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  background: var(--modifier-error);
+  color: var(--swiss-white);
+  border-radius: var(--border-radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  animation: conflictBounce 0.5s ease-in-out;
+}
+
+.conflictIcon {
+  width: 12px;
+  height: 12px;
+}
+
+.conflictTooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--swiss-gray-900);
+  color: var(--swiss-white);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-md);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+  z-index: var(--z-tooltip);
+  margin-bottom: var(--spacing-xs);
+}
+
+.conflictTooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: var(--swiss-gray-900);
+}
+
+.modifierOption.conflict:hover .conflictTooltip {
+  opacity: 1;
+}
+
+/* ===== RECOMMENDATION INDICATOR ===== */
+.recommendationBadge {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  background: var(--modifier-accent);
+  color: var(--swiss-white);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-full);
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  animation: recommendationGlow 2s ease-in-out infinite;
+}
+
+.recommendationIcon {
+  width: 10px;
+  height: 10px;
+  margin-right: var(--spacing-xs);
+}
+
+/* ===== FOOTER SUMMARY ===== */
+.footerSummary {
+  padding: var(--spacing-lg);
+  background: var(--swiss-gray-50);
+  border-top: 1px solid var(--swiss-gray-200);
+}
+
+.dark .footerSummary {
+  background: var(--swiss-gray-800);
+  border-top-color: var(--swiss-gray-700);
+}
+
+.summaryContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.summaryText {
+  flex: 1;
+}
+
+.summaryTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--swiss-gray-900);
+  margin-bottom: var(--spacing-xs);
+}
+
+.dark .summaryTitle {
+  color: var(--swiss-white);
+}
+
+.summaryDetails {
+  font-size: 0.75rem;
+  color: var(--swiss-gray-600);
+  line-height: 1.4;
+}
+
+.dark .summaryDetails {
+  color: var(--swiss-gray-400);
+}
+
+.summaryPrice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-xs);
+}
+
+.totalPrice {
+  font-family: var(--font-family-mono);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--swiss-gray-900);
+}
+
+.dark .totalPrice {
+  color: var(--swiss-white);
+}
+
+.priceBreakdown {
+  font-size: 0.75rem;
+  color: var(--swiss-gray-600);
+  text-align: right;
+}
+
+.dark .priceBreakdown {
+  color: var(--swiss-gray-400);
+}
+
+/* ===== LOADING STATES ===== */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  text-align: center;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--swiss-gray-200);
+  border-top-color: var(--modifier-primary);
+  border-radius: var(--border-radius-full);
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--spacing-md);
+}
+
+.dark .loadingSpinner {
+  border-color: var(--swiss-gray-700);
+  border-top-color: var(--modifier-primary);
+}
+
+.loadingText {
+  font-size: 0.875rem;
+  color: var(--swiss-gray-500);
+}
+
+.dark .loadingText {
+  color: var(--swiss-gray-400);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablet styles */
+@media (max-width: 768px) {
+  .modifierSelector {
+    border-radius: var(--border-radius-lg);
+  }
+
+  .modifierGroups {
+    padding: var(--spacing-md);
+  }
+
+  .optionsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .optionsGrid.compact {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .optionContent {
+    gap: var(--spacing-sm);
+  }
+
+  .optionImage {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 480px) {
+  .header {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    text-align: center;
+  }
+
+  .modifierGroups {
+    padding: var(--spacing-sm);
+  }
+
+  .modifierGroup {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .groupHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .optionsGrid {
+    gap: var(--spacing-xs);
+  }
+
+  .modifierOption {
+    padding: var(--spacing-sm);
+  }
+
+  .optionContent {
+    gap: var(--spacing-sm);
+  }
+
+  .optionImage {
+    width: 36px;
+    height: 36px;
+  }
+
+  .footerSummary {
+    padding: var(--spacing-sm);
+  }
+
+  .summaryContent {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+}
+
+/* ===== ANIMATIONS ===== */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes conflictPulse {
+  0%, 100% {
+    border-color: var(--modifier-error);
+  }
+  50% {
+    border-color: #f87171;
+  }
+}
+
+@keyframes voiceGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(139, 92, 246, 0);
+  }
+}
+
+@keyframes conflictBounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+@keyframes recommendationGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(139, 92, 246, 0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .modifierOption {
+    border-width: 3px;
+  }
+
+  .modifierOption.selected {
+    border-width: 3px;
+  }
+
+  .selectionIndicator {
+    border: 2px solid var(--swiss-white);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus indicators */
+.modifierOption:focus-visible,
+.quantityButton:focus-visible {
+  outline: 2px solid var(--modifier-primary);
+  outline-offset: 2px;
+}
+
+/* Screen reader only */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ===== TOUCH GESTURES ===== */
+
+/* Touch targets */
+.modifierOption,
+.quantityButton {
+  min-height: 44px;
+}
+
+/* Disable hover effects on touch devices */
+@media (hover: none) {
+  .modifierOption:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .quantityButton:hover {
+    background: var(--swiss-white);
+    border-color: var(--swiss-gray-300);
+    color: var(--swiss-gray-700);
+  }
+
+  .dark .quantityButton:hover {
+    background: var(--swiss-gray-800);
+    border-color: var(--swiss-gray-600);
+    color: var(--swiss-gray-300);
+  }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .modifierSelector {
+    box-shadow: none;
+    border: 1px solid var(--swiss-gray-300);
+  }
+
+  .quantityControls,
+  .conflictIndicator,
+  .recommendationBadge {
+    display: none;
+  }
+
+  .modifierOption {
+    break-inside: avoid;
+  }
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+
+/* GPU acceleration for animations */
+.modifierOption,
+.selectionIndicator,
+.quantityControls {
+  will-change: transform;
+}
+
+/* Contain layout changes */
+.optionsGrid {
+  contain: layout;
+}
+
+.modifierGroup {
+  contain: layout style;
+}
+
+/* ===== SWISS CUSTOMIZATION PATTERNS ===== */
+
+/* Swiss food modifier styling */
+.modifierSelector.swissFood .optionTag.swiss {
+  background: var(--swiss-red);
+  color: var(--swiss-white);
+}
+
+.modifierSelector.swissFood .modifierOption.swiss {
+  border-left: 4px solid var(--swiss-red);
+}
+
+/* Alpine theme for mountain food products */
+.modifierSelector.alpineTheme {
+  background: linear-gradient(180deg, #e0f2fe 0%, #ffffff 100%);
+}
+
+.modifierSelector.alpineTheme.dark {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+}
+
+/* Premium Swiss products */
+.modifierSelector.premiumSwiss .modifierOption.premium {
+  background: linear-gradient(135deg, rgba(220, 20, 60, 0.05) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border-color: var(--swiss-red);
+}
+
+.modifierSelector.premiumSwiss .modifierOption.premium::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--swiss-red);
+  border-radius: var(--border-radius-sm) 0 0 var(--border-radius-sm);
+}

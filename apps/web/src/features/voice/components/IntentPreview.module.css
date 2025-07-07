@@ -1,0 +1,951 @@
+/**
+ * EATECH - Intent Preview Component Styles
+ * Version: 4.0.0
+ * Description: Comprehensive styling for voice intent analysis and preview
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * 
+ * File Path: /apps/web/src/features/voice/components/IntentPreview.module.css
+ */
+
+/* ============================================================================
+   CSS CUSTOM PROPERTIES
+   ============================================================================ */
+
+.intentPreview {
+  --primary-color: #3b82f6;
+  --secondary-color: #10b981;
+  --accent-color: #f59e0b;
+  --error-color: #ef4444;
+  --success-color: #22c55e;
+  --warning-color: #f97316;
+  --info-color: #06b6d4;
+  --neutral-color: #6b7280;
+  
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --text-inverse: #ffffff;
+  --text-entity: #1d4ed8;
+  
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --bg-glass: rgba(255, 255, 255, 0.9);
+  --bg-gradient: linear-gradient(135deg, #f9fafb, #ffffff);
+  --bg-entity: rgba(59, 130, 246, 0.1);
+  --bg-confidence: linear-gradient(90deg, #10b981, #22c55e);
+  
+  --border-color: #e5e7eb;
+  --border-color-light: #f3f4f6;
+  --border-color-entity: #3b82f6;
+  --border-radius: 8px;
+  --border-radius-sm: 4px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --shadow-inset: inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+  
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  
+  --font-family-mono: 'Monaco', 'Menlo', 'Courier New', monospace;
+  
+  --z-index-modal: 1050;
+  --z-index-tooltip: 1100;
+}
+
+/* ============================================================================
+   MAIN COMPONENT CONTAINER
+   ============================================================================ */
+
+.intentPreview {
+  position: relative;
+  background: var(--bg-gradient);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-lg) 0;
+  transition: all var(--transition-normal);
+  animation: slideInUp var(--transition-normal) ease-out;
+}
+
+.intentPreview:hover {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px);
+}
+
+/* ============================================================================
+   TEXT SECTION
+   ============================================================================ */
+
+.textSection {
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-color-light);
+  border-radius: var(--border-radius);
+  backdrop-filter: blur(8px);
+}
+
+.textHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.textHeader > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.textHeader svg {
+  color: var(--primary-color);
+}
+
+.analyzingIndicator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--info-color);
+  font-weight: var(--font-weight-medium);
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+.textDisplay {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  line-height: var(--line-height-relaxed);
+  padding: var(--spacing-md);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  min-height: 3em;
+  display: flex;
+  align-items: center;
+}
+
+/* ============================================================================
+   ENTITY HIGHLIGHTING
+   ============================================================================ */
+
+.entityHighlight {
+  display: inline;
+  padding: 2px 4px;
+  border-radius: var(--border-radius-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.entityHighlight:hover {
+  transform: scale(1.05);
+  z-index: 1;
+}
+
+.entityHighlight.product {
+  background: rgba(59, 130, 246, 0.15);
+  color: #1d4ed8;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.entityHighlight.quantity {
+  background: rgba(16, 185, 129, 0.15);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.entityHighlight.location {
+  background: rgba(245, 158, 11, 0.15);
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.entityHighlight.time {
+  background: rgba(139, 92, 246, 0.15);
+  color: #6b21a8;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.entityHighlight.modifier {
+  background: rgba(239, 68, 68, 0.15);
+  color: #b91c1c;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ============================================================================
+   ANALYSIS RESULTS
+   ============================================================================ */
+
+.analysisResults {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* ============================================================================
+   PRIMARY INTENT
+   ============================================================================ */
+
+.primaryIntent {
+  padding: var(--spacing-lg);
+  background: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  transition: all var(--transition-fast);
+}
+
+.primaryIntent:hover {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-md);
+}
+
+.intentHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.intentLabel {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.intentConfidence {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--bg-confidence);
+  color: var(--text-inverse);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family-mono);
+}
+
+.intentDescription {
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+  font-size: var(--font-size-base);
+}
+
+/* ============================================================================
+   CONFIDENCE SECTION
+   ============================================================================ */
+
+.confidenceSection {
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+}
+
+.confidenceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+}
+
+.confidenceBar {
+  position: relative;
+  height: 12px;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: var(--spacing-sm);
+}
+
+.confidenceFill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width var(--transition-normal);
+  position: relative;
+  background: var(--bg-confidence);
+}
+
+.confidenceFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
+}
+
+.confidenceLabel {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+}
+
+/* ============================================================================
+   ALTERNATIVES SECTION
+   ============================================================================ */
+
+.alternativesSection {
+  padding: var(--spacing-md);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+}
+
+.alternativesSection h4 {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+}
+
+.alternativesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.alternativeItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+  width: 100%;
+}
+
+.alternativeItem:hover {
+  border-color: var(--primary-color);
+  background: var(--bg-glass);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-sm);
+}
+
+.alternativeItem.selected {
+  border-color: var(--secondary-color);
+  background: rgba(16, 185, 129, 0.1);
+  box-shadow: var(--shadow-md);
+}
+
+.altLabel {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  margin-left: var(--spacing-sm);
+}
+
+.altConfidence {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-family: var(--font-family-mono);
+}
+
+/* ============================================================================
+   ENTITIES SECTION
+   ============================================================================ */
+
+.entitiesSection {
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+}
+
+.entitiesSection h4 {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+}
+
+.entitiesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.entityItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.entityItem:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  z-index: 1;
+}
+
+.entityItem.product {
+  border-color: rgba(59, 130, 246, 0.3);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.entityItem.quantity {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.entityItem.location {
+  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.entityItem.time {
+  border-color: rgba(139, 92, 246, 0.3);
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.entityItem.modifier {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.entityType {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  font-weight: var(--font-weight-semibold);
+}
+
+.entityValue {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  font-family: var(--font-family-mono);
+}
+
+.entityConfidence {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-family: var(--font-family-mono);
+}
+
+/* ============================================================================
+   ACTION SECTION
+   ============================================================================ */
+
+.actionSection {
+  padding: var(--spacing-lg);
+  background: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.actionSection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+}
+
+.actionHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.actionHeader svg {
+  color: var(--warning-color);
+}
+
+.actionPreview {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  line-height: var(--line-height-normal);
+  padding: var(--spacing-md);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-lg);
+  font-family: var(--font-family-mono);
+  word-break: break-word;
+}
+
+.actionButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.actionButton:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.actionButton:active {
+  transform: translateY(0);
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.actionButton.confirm {
+  background: var(--success-color);
+  border-color: var(--success-color);
+  color: var(--text-inverse);
+  font-weight: var(--font-weight-semibold);
+}
+
+.actionButton.confirm:hover {
+  background: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.actionButton.confirm:disabled {
+  background: var(--neutral-color);
+  border-color: var(--neutral-color);
+}
+
+/* ============================================================================
+   DEBUG INFO
+   ============================================================================ */
+
+.debugInfo {
+  position: absolute;
+  bottom: var(--spacing-sm);
+  right: var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(0, 0, 0, 0.8);
+  color: var(--text-inverse);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-mono);
+}
+
+.debugInfo svg {
+  color: var(--info-color);
+}
+
+/* ============================================================================
+   CORRECTION MODAL
+   ============================================================================ */
+
+.correctionModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-index-modal);
+  backdrop-filter: blur(4px);
+}
+
+.modalContent {
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: var(--spacing-xl);
+  min-width: 400px;
+  max-width: 500px;
+  animation: modalSlideIn var(--transition-normal) ease-out;
+}
+
+.modalContent h3 {
+  margin: 0 0 var(--spacing-lg) 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+}
+
+.modalContent select {
+  width: 100%;
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  margin-bottom: var(--spacing-lg);
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+}
+
+.modalButtons button {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.modalButtons button:first-child {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--text-inverse);
+}
+
+.modalButtons button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.modalButtons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .intentPreview {
+    padding: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+  }
+  
+  .textDisplay {
+    font-size: var(--font-size-base);
+    padding: var(--spacing-sm);
+  }
+  
+  .intentHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .intentLabel {
+    font-size: var(--font-size-lg);
+  }
+  
+  .alternativeItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+  
+  .entitiesList {
+    flex-direction: column;
+  }
+  
+  .actionButtons {
+    flex-direction: column;
+  }
+  
+  .actionButton {
+    justify-content: center;
+  }
+  
+  .modalContent {
+    margin: var(--spacing-md);
+    min-width: auto;
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .textHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .primaryIntent,
+  .confidenceSection,
+  .alternativesSection,
+  .entitiesSection,
+  .actionSection {
+    padding: var(--spacing-sm);
+  }
+  
+  .actionPreview {
+    font-size: var(--font-size-base);
+    padding: var(--spacing-sm);
+  }
+  
+  .entityItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+    text-align: left;
+  }
+  
+  .debugInfo {
+    position: static;
+    margin-top: var(--spacing-md);
+    justify-content: center;
+  }
+}
+
+/* ============================================================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================================================ */
+
+.alternativeItem:focus,
+.entityItem:focus,
+.actionButton:focus,
+.modalContent select:focus,
+.modalButtons button:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+@media (prefers-contrast: high) {
+  .intentPreview {
+    --border-color: #000000;
+    border-width: 2px;
+  }
+  
+  .primaryIntent,
+  .alternativeItem,
+  .entityItem,
+  .actionButton,
+  .modalContent {
+    border-width: 2px;
+  }
+  
+  .entityHighlight {
+    border-width: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intentPreview *,
+  .intentPreview *::before,
+  .intentPreview *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .intentPreview:hover,
+  .alternativeItem:hover,
+  .entityItem:hover,
+  .actionButton:hover {
+    transform: none;
+  }
+  
+  .confidenceFill::after {
+    display: none;
+  }
+}
+
+@media print {
+  .intentPreview {
+    background: white !important;
+    border: 2px solid black !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+  
+  .actionButtons,
+  .debugInfo,
+  .correctionModal {
+    display: none !important;
+  }
+  
+  .primaryIntent,
+  .alternativesSection,
+  .entitiesSection {
+    background: white !important;
+    border: 1px solid black !important;
+  }
+}
+
+/* ============================================================================
+   DARK MODE SUPPORT
+   ============================================================================ */
+
+@media (prefers-color-scheme: dark) {
+  .intentPreview {
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+    --text-inverse: #111827;
+    --text-entity: #60a5fa;
+    
+    --bg-primary: #111827;
+    --bg-secondary: #1f2937;
+    --bg-tertiary: #374151;
+    --bg-glass: rgba(31, 41, 55, 0.9);
+    --bg-gradient: linear-gradient(135deg, #1f2937, #111827);
+    --bg-entity: rgba(96, 165, 250, 0.1);
+    
+    --border-color: #374151;
+    --border-color-light: #4b5563;
+    --border-color-entity: #60a5fa;
+  }
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+
+.slideInUp {
+  animation: slideInUp var(--transition-normal) ease-out;
+}
+
+.modalSlideIn {
+  animation: modalSlideIn var(--transition-normal) ease-out;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}

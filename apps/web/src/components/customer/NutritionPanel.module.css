@@ -1,0 +1,1104 @@
+/**
+ * EATECH - Nutrition Panel CSS Module
+ * Version: 4.1.0
+ * Description: Comprehensive styling for nutrition information displays
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * 
+ * File Path: /apps/web/src/components/customer/NutritionPanel.module.css
+ * 
+ * Features:
+ * - Swiss nutrition standards compliance (OSAV/BLV)
+ * - Interactive nutrition charts and visualizations
+ * - Allergen warning system styling
+ * - Health score indicators
+ * - Multi-language nutrition labels
+ * - Accessibility optimizations
+ * - Responsive design for all devices
+ * - Dark/light theme support
+ * - Print-friendly nutrition facts
+ * - Swiss dietary guidelines integration
+ */
+
+/* ===== CSS CUSTOM PROPERTIES ===== */
+.nutritionPanel {
+  /* Swiss Color Palette */
+  --swiss-red: #dc143c;
+  --swiss-white: #ffffff;
+  --swiss-dark: #1a1a1a;
+  --swiss-gray-50: #f8fafc;
+  --swiss-gray-100: #f1f5f9;
+  --swiss-gray-200: #e2e8f0;
+  --swiss-gray-300: #cbd5e1;
+  --swiss-gray-400: #94a3b8;
+  --swiss-gray-500: #64748b;
+  --swiss-gray-600: #475569;
+  --swiss-gray-700: #334155;
+  --swiss-gray-800: #1e293b;
+  --swiss-gray-900: #0f172a;
+
+  /* Nutrition Colors */
+  --nutrition-excellent: #10b981;
+  --nutrition-good: #22c55e;
+  --nutrition-fair: #f59e0b;
+  --nutrition-poor: #ef4444;
+  --nutrition-critical: #dc2626;
+
+  /* Macronutrient Colors */
+  --macro-protein: #8b5cf6;
+  --macro-carbs: #06b6d4;
+  --macro-fat: #f59e0b;
+  --macro-fiber: #10b981;
+  --macro-sugar: #ef4444;
+  --macro-sodium: #f97316;
+
+  /* Allergen Colors */
+  --allergen-high: #dc2626;
+  --allergen-medium: #f59e0b;
+  --allergen-low: #10b981;
+  --allergen-none: var(--swiss-gray-400);
+
+  /* Health Score Colors */
+  --health-a: #10b981;  /* 90-100 */
+  --health-b: #22c55e;  /* 80-89 */
+  --health-c: #84cc16;  /* 70-79 */
+  --health-d: #f59e0b;  /* 60-69 */
+  --health-e: #ef4444;  /* Below 60 */
+
+  /* Gradients */
+  --health-gradient: linear-gradient(90deg, var(--nutrition-poor) 0%, var(--nutrition-fair) 50%, var(--nutrition-excellent) 100%);
+  --macro-gradient: linear-gradient(135deg, var(--macro-protein) 0%, var(--macro-carbs) 50%, var(--macro-fat) 100%);
+
+  /* Swiss Typography */
+  --font-family-primary: 'Inter', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif;
+  --font-family-mono: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+
+  /* Spacing (Swiss 8px grid system) */
+  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-sm: 0.5rem;    /* 8px */
+  --spacing-md: 1rem;      /* 16px */
+  --spacing-lg: 1.5rem;    /* 24px */
+  --spacing-xl: 2rem;      /* 32px */
+  --spacing-2xl: 3rem;     /* 48px */
+  --spacing-3xl: 4rem;     /* 64px */
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Borders */
+  --border-radius-sm: 0.375rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 0.75rem;
+  --border-radius-xl: 1rem;
+  --border-radius-2xl: 1.5rem;
+  --border-radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Z-index layers */
+  --z-base: 1;
+  --z-dropdown: 1000;
+  --z-modal: 1010;
+  --z-tooltip: 1020;
+}
+
+/* ===== MAIN CONTAINER ===== */
+.nutritionPanel {
+  width: 100%;
+  background: var(--swiss-white);
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-family-primary);
+  overflow: hidden;
+  transition: all var(--transition-normal);
+}
+
+.nutritionPanel.dark {
+  background: var(--swiss-gray-900);
+  color: var(--swiss-white);
+}
+
+/* ===== HEADER SECTION ===== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  background: var(--swiss-gray-50);
+  border-bottom: 1px solid var(--swiss-gray-200);
+}
+
+.dark .header {
+  background: var(--swiss-gray-800);
+  border-bottom-color: var(--swiss-gray-700);
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--swiss-gray-900);
+  margin: 0;
+}
+
+.dark .title {
+  color: var(--swiss-white);
+}
+
+.titleIcon {
+  width: 24px;
+  height: 24px;
+  color: var(--nutrition-excellent);
+}
+
+.healthScore {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-full);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.healthScore.a {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--health-a);
+}
+
+.healthScore.b {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--health-b);
+}
+
+.healthScore.c {
+  background: rgba(132, 204, 22, 0.1);
+  color: var(--health-c);
+}
+
+.healthScore.d {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--health-d);
+}
+
+.healthScore.e {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--health-e);
+}
+
+.scoreIcon {
+  width: 16px;
+  height: 16px;
+}
+
+/* ===== TAB NAVIGATION ===== */
+.tabNavigation {
+  display: flex;
+  background: var(--swiss-gray-50);
+  border-bottom: 1px solid var(--swiss-gray-200);
+}
+
+.dark .tabNavigation {
+  background: var(--swiss-gray-800);
+  border-bottom-color: var(--swiss-gray-700);
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+  background: transparent;
+  border: none;
+  color: var(--swiss-gray-600);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.dark .tab {
+  color: var(--swiss-gray-400);
+}
+
+.tab:hover {
+  background: var(--swiss-gray-100);
+  color: var(--swiss-gray-900);
+}
+
+.dark .tab:hover {
+  background: var(--swiss-gray-700);
+  color: var(--swiss-white);
+}
+
+.tab.active {
+  background: var(--swiss-white);
+  color: var(--swiss-gray-900);
+  box-shadow: inset 0 -2px 0 var(--nutrition-excellent);
+}
+
+.dark .tab.active {
+  background: var(--swiss-gray-900);
+  color: var(--swiss-white);
+}
+
+.tabIcon {
+  width: 16px;
+  height: 16px;
+}
+
+/* ===== CONTENT SECTIONS ===== */
+.content {
+  padding: var(--spacing-lg);
+}
+
+/* ===== NUTRITION FACTS TABLE ===== */
+.nutritionFacts {
+  background: var(--swiss-white);
+  border: 2px solid var(--swiss-gray-900);
+  border-radius: var(--border-radius-md);
+  font-family: var(--font-family-mono);
+  margin-bottom: var(--spacing-lg);
+}
+
+.dark .nutritionFacts {
+  background: var(--swiss-gray-800);
+  border-color: var(--swiss-gray-600);
+}
+
+.factsHeader {
+  background: var(--swiss-gray-900);
+  color: var(--swiss-white);
+  padding: var(--spacing-md);
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dark .factsHeader {
+  background: var(--swiss-gray-700);
+}
+
+.servingSize {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--swiss-gray-900);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.dark .servingSize {
+  border-bottom-color: var(--swiss-gray-600);
+}
+
+.nutrientList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nutrientItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--swiss-gray-200);
+  font-size: 0.875rem;
+}
+
+.dark .nutrientItem {
+  border-bottom-color: var(--swiss-gray-700);
+}
+
+.nutrientItem.major {
+  font-weight: 700;
+  border-bottom: 2px solid var(--swiss-gray-900);
+  background: var(--swiss-gray-50);
+}
+
+.dark .nutrientItem.major {
+  border-bottom-color: var(--swiss-gray-600);
+  background: var(--swiss-gray-800);
+}
+
+.nutrientItem.indented {
+  padding-left: var(--spacing-xl);
+  font-size: 0.8125rem;
+}
+
+.nutrientName {
+  flex: 1;
+}
+
+.nutrientAmount {
+  font-weight: 600;
+}
+
+.nutrientDv {
+  font-weight: 600;
+  margin-left: var(--spacing-md);
+  min-width: 60px;
+  text-align: right;
+}
+
+/* ===== MACRONUTRIENT BREAKDOWN ===== */
+.macroBreakdown {
+  margin-bottom: var(--spacing-lg);
+}
+
+.macroChart {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto var(--spacing-lg);
+}
+
+.macroDonut {
+  transform: rotate(-90deg);
+}
+
+.macroSegment {
+  fill: none;
+  stroke-width: 20;
+  transition: stroke-width var(--transition-normal);
+  cursor: pointer;
+}
+
+.macroSegment:hover {
+  stroke-width: 24;
+}
+
+.macroSegment.protein {
+  stroke: var(--macro-protein);
+}
+
+.macroSegment.carbs {
+  stroke: var(--macro-carbs);
+}
+
+.macroSegment.fat {
+  stroke: var(--macro-fat);
+}
+
+.macroLegend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.macroItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-md);
+  background: var(--swiss-gray-50);
+  transition: all var(--transition-fast);
+}
+
+.dark .macroItem {
+  background: var(--swiss-gray-800);
+}
+
+.macroItem:hover {
+  background: var(--swiss-gray-100);
+  transform: translateY(-1px);
+}
+
+.dark .macroItem:hover {
+  background: var(--swiss-gray-700);
+}
+
+.macroColor {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--border-radius-sm);
+  flex-shrink: 0;
+}
+
+.macroColor.protein {
+  background: var(--macro-protein);
+}
+
+.macroColor.carbs {
+  background: var(--macro-carbs);
+}
+
+.macroColor.fat {
+  background: var(--macro-fat);
+}
+
+.macroDetails {
+  flex: 1;
+}
+
+.macroName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--swiss-gray-900);
+}
+
+.dark .macroName {
+  color: var(--swiss-white);
+}
+
+.macroValue {
+  font-size: 0.75rem;
+  color: var(--swiss-gray-600);
+}
+
+.dark .macroValue {
+  color: var(--swiss-gray-400);
+}
+
+/* ===== DAILY VALUE PROGRESS BARS ===== */
+.dailyValues {
+  margin-bottom: var(--spacing-lg);
+}
+
+.dvSection {
+  margin-bottom: var(--spacing-lg);
+}
+
+.dvTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--swiss-gray-900);
+  margin-bottom: var(--spacing-md);
+}
+
+.dark .dvTitle {
+  color: var(--swiss-white);
+}
+
+.dvItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.dvLabel {
+  flex: 0 0 120px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--swiss-gray-700);
+}
+
+.dark .dvLabel {
+  color: var(--swiss-gray-300);
+}
+
+.dvProgress {
+  flex: 1;
+  height: 8px;
+  background: var(--swiss-gray-200);
+  border-radius: var(--border-radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.dark .dvProgress {
+  background: var(--swiss-gray-700);
+}
+
+.dvBar {
+  height: 100%;
+  border-radius: var(--border-radius-full);
+  transition: width var(--transition-normal);
+  position: relative;
+}
+
+.dvBar.excellent {
+  background: var(--nutrition-excellent);
+}
+
+.dvBar.good {
+  background: var(--nutrition-good);
+}
+
+.dvBar.fair {
+  background: var(--nutrition-fair);
+}
+
+.dvBar.poor {
+  background: var(--nutrition-poor);
+}
+
+.dvBar.critical {
+  background: var(--nutrition-critical);
+  animation: criticalPulse 2s infinite;
+}
+
+.dvValue {
+  flex: 0 0 60px;
+  text-align: right;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--swiss-gray-900);
+}
+
+.dark .dvValue {
+  color: var(--swiss-white);
+}
+
+/* ===== ALLERGEN WARNINGS ===== */
+.allergenSection {
+  margin-bottom: var(--spacing-lg);
+}
+
+.allergenGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.allergenItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border: 1px solid var(--swiss-gray-200);
+  border-radius: var(--border-radius-md);
+  background: var(--swiss-white);
+  transition: all var(--transition-fast);
+}
+
+.dark .allergenItem {
+  border-color: var(--swiss-gray-700);
+  background: var(--swiss-gray-800);
+}
+
+.allergenItem.present {
+  border-color: var(--allergen-high);
+  background: rgba(220, 38, 38, 0.05);
+}
+
+.allergenItem.trace {
+  border-color: var(--allergen-medium);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.allergenItem.absent {
+  opacity: 0.6;
+}
+
+.allergenIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.allergenIcon.present {
+  color: var(--allergen-high);
+}
+
+.allergenIcon.trace {
+  color: var(--allergen-medium);
+}
+
+.allergenIcon.absent {
+  color: var(--allergen-none);
+}
+
+.allergenName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--swiss-gray-900);
+}
+
+.dark .allergenName {
+  color: var(--swiss-white);
+}
+
+.allergenStatus {
+  font-size: 0.75rem;
+  color: var(--swiss-gray-600);
+}
+
+.dark .allergenStatus {
+  color: var(--swiss-gray-400);
+}
+
+/* ===== HEALTH INSIGHTS ===== */
+.healthInsights {
+  background: var(--swiss-gray-50);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.dark .healthInsights {
+  background: var(--swiss-gray-800);
+}
+
+.insightTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--swiss-gray-900);
+  margin-bottom: var(--spacing-md);
+}
+
+.dark .insightTitle {
+  color: var(--swiss-white);
+}
+
+.insightIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--nutrition-excellent);
+}
+
+.insightList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.insightItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.insightBullet {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--border-radius-full);
+  background: var(--nutrition-excellent);
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.insightBullet.warning {
+  background: var(--nutrition-fair);
+}
+
+.insightBullet.critical {
+  background: var(--nutrition-poor);
+}
+
+.insightText {
+  color: var(--swiss-gray-700);
+}
+
+.dark .insightText {
+  color: var(--swiss-gray-300);
+}
+
+/* ===== COMPARISON SECTION ===== */
+.comparisonSection {
+  margin-bottom: var(--spacing-lg);
+}
+
+.comparisonChart {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.comparisonItem {
+  text-align: center;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-lg);
+  background: var(--swiss-gray-50);
+}
+
+.dark .comparisonItem {
+  background: var(--swiss-gray-800);
+}
+
+.comparisonItem.current {
+  border: 2px solid var(--nutrition-excellent);
+}
+
+.comparisonLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--swiss-gray-600);
+  margin-bottom: var(--spacing-sm);
+}
+
+.dark .comparisonLabel {
+  color: var(--swiss-gray-400);
+}
+
+.comparisonValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--swiss-gray-900);
+}
+
+.dark .comparisonValue {
+  color: var(--swiss-white);
+}
+
+.comparisonDiff {
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: var(--spacing-xs);
+}
+
+.comparisonDiff.positive {
+  color: var(--nutrition-excellent);
+}
+
+.comparisonDiff.negative {
+  color: var(--nutrition-poor);
+}
+
+/* ===== INGREDIENTS LIST ===== */
+.ingredientsSection {
+  margin-bottom: var(--spacing-lg);
+}
+
+.ingredientsList {
+  background: var(--swiss-gray-50);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--swiss-gray-700);
+}
+
+.dark .ingredientsList {
+  background: var(--swiss-gray-800);
+  color: var(--swiss-gray-300);
+}
+
+.ingredient {
+  display: inline;
+}
+
+.ingredient.allergen {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--allergen-high);
+  padding: 2px 4px;
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+}
+
+.ingredient.additive {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--allergen-medium);
+  padding: 2px 4px;
+  border-radius: var(--border-radius-sm);
+}
+
+/* ===== FOOTER ACTIONS ===== */
+.footerActions {
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  background: var(--swiss-gray-50);
+  border-top: 1px solid var(--swiss-gray-200);
+}
+
+.dark .footerActions {
+  background: var(--swiss-gray-800);
+  border-top-color: var(--swiss-gray-700);
+}
+
+.actionButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+  border: 1px solid var(--swiss-gray-300);
+  border-radius: var(--border-radius-lg);
+  background: var(--swiss-white);
+  color: var(--swiss-gray-700);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.dark .actionButton {
+  background: var(--swiss-gray-900);
+  border-color: var(--swiss-gray-600);
+  color: var(--swiss-gray-300);
+}
+
+.actionButton:hover {
+  background: var(--swiss-gray-50);
+  border-color: var(--nutrition-excellent);
+  transform: translateY(-1px);
+}
+
+.dark .actionButton:hover {
+  background: var(--swiss-gray-800);
+}
+
+.actionIcon {
+  width: 16px;
+  height: 16px;
+}
+
+/* ===== LOADING STATES ===== */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  text-align: center;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--swiss-gray-200);
+  border-top-color: var(--nutrition-excellent);
+  border-radius: var(--border-radius-full);
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--spacing-md);
+}
+
+.dark .loadingSpinner {
+  border-color: var(--swiss-gray-700);
+  border-top-color: var(--nutrition-excellent);
+}
+
+.loadingText {
+  font-size: 0.875rem;
+  color: var(--swiss-gray-500);
+}
+
+.dark .loadingText {
+  color: var(--swiss-gray-400);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablet styles */
+@media (max-width: 768px) {
+  .nutritionPanel {
+    border-radius: var(--border-radius-lg);
+  }
+
+  .content {
+    padding: var(--spacing-md);
+  }
+
+  .macroChart {
+    width: 160px;
+    height: 160px;
+  }
+
+  .macroLegend {
+    grid-template-columns: 1fr;
+  }
+
+  .comparisonChart {
+    grid-template-columns: 1fr;
+  }
+
+  .allergenGrid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 480px) {
+  .header {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    text-align: center;
+  }
+
+  .tabNavigation {
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    flex: 1 1 50%;
+    min-width: 120px;
+  }
+
+  .content {
+    padding: var(--spacing-sm);
+  }
+
+  .macroChart {
+    width: 140px;
+    height: 140px;
+  }
+
+  .dvItem {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+
+  .dvLabel {
+    flex: none;
+  }
+
+  .allergenGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .footerActions {
+    flex-direction: column;
+    padding: var(--spacing-sm);
+  }
+}
+
+/* ===== ANIMATIONS ===== */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes criticalPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .nutritionPanel {
+    border: 2px solid var(--swiss-gray-900);
+  }
+
+  .tab.active {
+    box-shadow: inset 0 -3px 0 var(--nutrition-excellent);
+  }
+
+  .allergenItem.present {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus indicators */
+.tab:focus-visible,
+.actionButton:focus-visible {
+  outline: 2px solid var(--nutrition-excellent);
+  outline-offset: 2px;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .nutritionPanel {
+    box-shadow: none;
+    border: 1px solid var(--swiss-gray-300);
+  }
+
+  .tabNavigation,
+  .footerActions {
+    display: none;
+  }
+
+  .nutritionFacts {
+    break-inside: avoid;
+  }
+
+  .macroChart {
+    display: none;
+  }
+
+  .allergenItem {
+    break-inside: avoid;
+  }
+}
+
+/* ===== SWISS NUTRITION COMPLIANCE ===== */
+
+/* OSAV/BLV compliant nutrition label styling */
+.nutritionPanel.osavCompliant .nutritionFacts {
+  border-color: var(--swiss-red);
+}
+
+.nutritionPanel.osavCompliant .factsHeader {
+  background: var(--swiss-red);
+}
+
+/* Swiss dietary guidelines highlighting */
+.nutritionPanel.swissGuidelines .dvBar.recommended {
+  background: var(--nutrition-excellent);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+}
+
+.nutritionPanel.swissGuidelines .dvBar.excessive {
+  background: var(--nutrition-poor);
+  animation: excessiveWarning 3s infinite;
+}
+
+@keyframes excessiveWarning {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Performance optimizations */
+.macroChart,
+.dvProgress,
+.allergenItem {
+  will-change: auto;
+}
+
+.nutritionFacts {
+  contain: layout style;
+}
+
+.macroLegend {
+  contain: layout;
+}

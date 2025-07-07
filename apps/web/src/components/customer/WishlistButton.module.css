@@ -1,0 +1,1012 @@
+/**
+ * EATECH - Wishlist Button CSS Module
+ * Version: 4.1.0
+ * Description: Advanced styling for interactive wishlist management interface
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * 
+ * File Path: /apps/web/src/components/customer/WishlistButton.module.css
+ * 
+ * Features:
+ * - Swiss design system compliance
+ * - Multi-state wishlist interactions
+ * - Gesture support for mobile devices
+ * - Voice command integration
+ * - Cross-device synchronization indicators
+ * - Accessibility optimizations
+ * - Responsive design for all devices
+ * - Dark/light theme support
+ * - Swiss UX patterns
+ * - Performance optimized animations
+ */
+
+/* ===== CSS CUSTOM PROPERTIES ===== */
+.wishlistButton {
+  /* Swiss Color Palette */
+  --swiss-red: #dc143c;
+  --swiss-white: #ffffff;
+  --swiss-dark: #1a1a1a;
+  --swiss-gray-50: #f8fafc;
+  --swiss-gray-100: #f1f5f9;
+  --swiss-gray-200: #e2e8f0;
+  --swiss-gray-300: #cbd5e1;
+  --swiss-gray-400: #94a3b8;
+  --swiss-gray-500: #64748b;
+  --swiss-gray-600: #475569;
+  --swiss-gray-700: #334155;
+  --swiss-gray-800: #1e293b;
+  --swiss-gray-900: #0f172a;
+
+  /* Wishlist Colors */
+  --wishlist-default: var(--swiss-gray-400);
+  --wishlist-hover: var(--swiss-gray-600);
+  --wishlist-active: var(--swiss-red);
+  --wishlist-added: #ec4899;
+  --wishlist-pending: #f59e0b;
+  --wishlist-syncing: #06b6d4;
+  --wishlist-error: #ef4444;
+
+  /* Heart Colors */
+  --heart-empty: var(--swiss-gray-300);
+  --heart-filling: var(--swiss-red);
+  --heart-full: var(--swiss-red);
+  --heart-pulse: #fecaca;
+
+  /* Interaction States */
+  --state-idle: var(--swiss-gray-100);
+  --state-hover: var(--swiss-gray-200);
+  --state-pressed: var(--swiss-gray-300);
+  --state-disabled: var(--swiss-gray-100);
+
+  /* Gradients */
+  --heart-gradient: linear-gradient(135deg, var(--swiss-red) 0%, #f43f5e 100%);
+  --pulse-gradient: radial-gradient(circle, rgba(220, 20, 60, 0.3) 0%, transparent 70%);
+  --sync-gradient: linear-gradient(135deg, var(--wishlist-syncing) 0%, #22d3ee 100%);
+
+  /* Swiss Typography */
+  --font-family-primary: 'Inter', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif;
+  --font-family-mono: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+
+  /* Spacing (Swiss 8px grid system) */
+  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-sm: 0.5rem;    /* 8px */
+  --spacing-md: 1rem;      /* 16px */
+  --spacing-lg: 1.5rem;    /* 24px */
+  --spacing-xl: 2rem;      /* 32px */
+  --spacing-2xl: 3rem;     /* 48px */
+  --spacing-3xl: 4rem;     /* 64px */
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-heart: 0 0 20px rgba(220, 20, 60, 0.4);
+
+  /* Borders */
+  --border-radius-sm: 0.375rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 0.75rem;
+  --border-radius-xl: 1rem;
+  --border-radius-2xl: 1.5rem;
+  --border-radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --transition-spring: 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --transition-heart: 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  /* Z-index layers */
+  --z-base: 1;
+  --z-tooltip: 1020;
+  --z-modal: 1010;
+}
+
+/* ===== MAIN BUTTON CONTAINER ===== */
+.wishlistButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--swiss-white);
+  border: 1px solid var(--swiss-gray-300);
+  border-radius: var(--border-radius-full);
+  cursor: pointer;
+  font-family: var(--font-family-primary);
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  touch-action: manipulation;
+  transition: all var(--transition-normal);
+  overflow: hidden;
+}
+
+.wishlistButton.dark {
+  background: var(--swiss-gray-800);
+  border-color: var(--swiss-gray-600);
+  color: var(--swiss-white);
+}
+
+/* ===== SIZE VARIANTS ===== */
+.wishlistButton.small {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+}
+
+.wishlistButton.medium {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+}
+
+.wishlistButton.large {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+}
+
+.wishlistButton.withLabel {
+  width: auto;
+  padding: var(--spacing-sm) var(--spacing-md);
+  gap: var(--spacing-xs);
+}
+
+/* ===== BUTTON STATES ===== */
+.wishlistButton:hover {
+  background: var(--state-hover);
+  border-color: var(--wishlist-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.dark .wishlistButton:hover {
+  background: var(--swiss-gray-700);
+}
+
+.wishlistButton:active {
+  transform: translateY(0);
+  background: var(--state-pressed);
+}
+
+.wishlistButton.added {
+  background: rgba(220, 20, 60, 0.1);
+  border-color: var(--wishlist-active);
+  color: var(--wishlist-active);
+}
+
+.dark .wishlistButton.added {
+  background: rgba(220, 20, 60, 0.2);
+}
+
+.wishlistButton.added:hover {
+  background: rgba(220, 20, 60, 0.15);
+  box-shadow: var(--shadow-heart);
+}
+
+.dark .wishlistButton.added:hover {
+  background: rgba(220, 20, 60, 0.25);
+}
+
+.wishlistButton.pending {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: var(--wishlist-pending);
+  color: var(--wishlist-pending);
+  cursor: wait;
+}
+
+.wishlistButton.syncing {
+  background: rgba(6, 182, 212, 0.1);
+  border-color: var(--wishlist-syncing);
+  color: var(--wishlist-syncing);
+}
+
+.wishlistButton.error {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--wishlist-error);
+  color: var(--wishlist-error);
+  animation: errorShake 0.5s ease-in-out;
+}
+
+.wishlistButton.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.wishlistButton.voiceActive {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: #8b5cf6;
+  animation: voicePulse 2s ease-in-out infinite;
+}
+
+/* ===== HEART ICON ===== */
+.heartIcon {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  color: var(--wishlist-default);
+  transition: all var(--transition-heart);
+  transform-origin: center;
+}
+
+.wishlistButton.small .heartIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.wishlistButton.large .heartIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.wishlistButton:hover .heartIcon {
+  color: var(--wishlist-hover);
+  transform: scale(1.1);
+}
+
+.wishlistButton.added .heartIcon {
+  color: var(--heart-full);
+  transform: scale(1.2);
+  animation: heartBeat 0.6s ease-in-out;
+}
+
+.wishlistButton.pending .heartIcon {
+  animation: heartPulse 1.5s ease-in-out infinite;
+}
+
+.wishlistButton.syncing .heartIcon {
+  animation: heartSync 2s linear infinite;
+}
+
+.wishlistButton.error .heartIcon {
+  animation: heartError 0.5s ease-in-out;
+}
+
+/* ===== HEART FILL ANIMATION ===== */
+.heartIcon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--heart-gradient);
+  clip-path: polygon(0 0, 0 0, 0 0, 0 0);
+  transition: clip-path var(--transition-heart);
+  z-index: var(--z-base);
+}
+
+.wishlistButton.added .heartIcon::before {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+/* ===== HEART PARTICLES ===== */
+.heartIcon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  background: var(--pulse-gradient);
+  border-radius: var(--border-radius-full);
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.wishlistButton.added .heartIcon::after {
+  animation: heartParticles 0.8s ease-out;
+}
+
+/* ===== BUTTON LABEL ===== */
+.buttonLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--swiss-gray-700);
+  transition: color var(--transition-fast);
+}
+
+.dark .buttonLabel {
+  color: var(--swiss-gray-300);
+}
+
+.wishlistButton.added .buttonLabel {
+  color: var(--wishlist-active);
+  font-weight: 600;
+}
+
+.wishlistButton.pending .buttonLabel {
+  color: var(--wishlist-pending);
+}
+
+.wishlistButton.syncing .buttonLabel {
+  color: var(--wishlist-syncing);
+}
+
+.wishlistButton.error .buttonLabel {
+  color: var(--wishlist-error);
+}
+
+/* ===== COUNT INDICATOR ===== */
+.countIndicator {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 20px;
+  height: 20px;
+  background: var(--swiss-red);
+  color: var(--swiss-white);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--border-radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  box-shadow: var(--shadow-sm);
+  animation: countBounce var(--transition-bounce);
+  z-index: var(--z-base);
+}
+
+.countIndicator.hidden {
+  opacity: 0;
+  transform: scale(0);
+}
+
+/* ===== SYNC INDICATOR ===== */
+.syncIndicator {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  background: var(--wishlist-syncing);
+  color: var(--swiss-white);
+  border-radius: var(--border-radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0);
+  transition: all var(--transition-fast);
+  z-index: var(--z-base);
+}
+
+.wishlistButton.syncing .syncIndicator {
+  opacity: 1;
+  transform: scale(1);
+  animation: syncSpin 1.5s linear infinite;
+}
+
+.syncIcon {
+  width: 10px;
+  height: 10px;
+}
+
+/* ===== TOOLTIP ===== */
+.tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--swiss-gray-900);
+  color: var(--swiss-white);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-md);
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all var(--transition-fast);
+  z-index: var(--z-tooltip);
+}
+
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: var(--swiss-gray-900);
+}
+
+.wishlistButton:hover .tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+.dark .tooltip {
+  background: var(--swiss-gray-700);
+}
+
+.dark .tooltip::after {
+  border-top-color: var(--swiss-gray-700);
+}
+
+/* ===== LONG PRESS INDICATOR ===== */
+.longPressIndicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 2px solid var(--wishlist-active);
+  border-radius: var(--border-radius-full);
+  clip-path: circle(0% at 50% 50%);
+  transition: clip-path var(--transition-slow);
+  pointer-events: none;
+  z-index: var(--z-base);
+}
+
+.wishlistButton.longPressing .longPressIndicator {
+  clip-path: circle(100% at 50% 50%);
+}
+
+/* ===== VOICE COMMAND INDICATOR ===== */
+.voiceIndicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  border: 2px solid #8b5cf6;
+  border-radius: var(--border-radius-full);
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.wishlistButton.voiceActive .voiceIndicator {
+  opacity: 1;
+  animation: voiceRipple 2s ease-out infinite;
+}
+
+/* ===== GESTURE FEEDBACK ===== */
+.gestureRipple {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(220, 20, 60, 0.3);
+  border-radius: var(--border-radius-full);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: var(--z-base);
+}
+
+.wishlistButton.rippleActive .gestureRipple {
+  animation: gestureRipple 0.6s ease-out;
+}
+
+/* ===== LOADING SPINNER ===== */
+.loadingSpinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--swiss-gray-200);
+  border-top-color: var(--wishlist-pending);
+  border-radius: var(--border-radius-full);
+  animation: spin 1s linear infinite;
+  opacity: 0;
+  z-index: var(--z-base);
+}
+
+.wishlistButton.pending .loadingSpinner {
+  opacity: 1;
+}
+
+.dark .loadingSpinner {
+  border-color: var(--swiss-gray-600);
+  border-top-color: var(--wishlist-pending);
+}
+
+/* ===== SUCCESS CHECKMARK ===== */
+.successCheck {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 16px;
+  height: 16px;
+  color: var(--wishlist-active);
+  opacity: 0;
+  transition: all var(--transition-bounce);
+  z-index: var(--z-base);
+}
+
+.wishlistButton.success .successCheck {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* ===== FLOATING HEARTS ===== */
+.floatingHearts {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.floatingHeart {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  color: var(--swiss-red);
+  opacity: 0;
+  animation: heartFloat 2s ease-out;
+}
+
+.floatingHeart:nth-child(1) { left: 20%; animation-delay: 0s; }
+.floatingHeart:nth-child(2) { left: 50%; animation-delay: 0.2s; }
+.floatingHeart:nth-child(3) { left: 80%; animation-delay: 0.4s; }
+
+/* ===== COMPACT VARIANT ===== */
+.wishlistButton.compact {
+  width: 28px;
+  height: 28px;
+  border-width: 1px;
+}
+
+.wishlistButton.compact .heartIcon {
+  width: 14px;
+  height: 14px;
+}
+
+.wishlistButton.compact .countIndicator {
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  font-size: 0.625rem;
+}
+
+/* ===== OUTLINED VARIANT ===== */
+.wishlistButton.outlined {
+  background: transparent;
+  border: 2px solid var(--swiss-gray-300);
+}
+
+.wishlistButton.outlined:hover {
+  background: var(--swiss-gray-50);
+  border-color: var(--wishlist-hover);
+}
+
+.dark .wishlistButton.outlined {
+  border-color: var(--swiss-gray-600);
+}
+
+.dark .wishlistButton.outlined:hover {
+  background: var(--swiss-gray-800);
+}
+
+.wishlistButton.outlined.added {
+  background: transparent;
+  border-color: var(--wishlist-active);
+}
+
+.wishlistButton.outlined.added:hover {
+  background: rgba(220, 20, 60, 0.05);
+}
+
+/* ===== FILLED VARIANT ===== */
+.wishlistButton.filled {
+  background: var(--swiss-gray-100);
+  border: none;
+}
+
+.dark .wishlistButton.filled {
+  background: var(--swiss-gray-700);
+}
+
+.wishlistButton.filled.added {
+  background: var(--heart-gradient);
+  color: var(--swiss-white);
+}
+
+.wishlistButton.filled.added .heartIcon {
+  color: var(--swiss-white);
+}
+
+.wishlistButton.filled.added .buttonLabel {
+  color: var(--swiss-white);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablet styles */
+@media (max-width: 768px) {
+  .wishlistButton.medium {
+    width: 44px;
+    height: 44px;
+  }
+
+  .wishlistButton.large {
+    width: 52px;
+    height: 52px;
+  }
+
+  .heartIcon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .tooltip {
+    font-size: 0.8125rem;
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 480px) {
+  .wishlistButton {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .wishlistButton.small {
+    width: 36px;
+    height: 36px;
+  }
+
+  .wishlistButton.medium {
+    width: 44px;
+    height: 44px;
+  }
+
+  .wishlistButton.large {
+    width: 48px;
+    height: 48px;
+  }
+
+  .wishlistButton.withLabel {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .buttonLabel {
+    font-size: 0.8125rem;
+  }
+
+  .tooltip {
+    bottom: calc(100% + 12px);
+    font-size: 0.875rem;
+  }
+}
+
+/* ===== ANIMATIONS ===== */
+
+@keyframes heartBeat {
+  0% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1.3);
+  }
+  40% {
+    transform: scale(1.1);
+  }
+  60% {
+    transform: scale(1.25);
+  }
+  80% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1.2);
+  }
+}
+
+@keyframes heartPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes heartSync {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes heartError {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes heartParticles {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes heartFloat {
+  0% {
+    bottom: 0;
+    opacity: 1;
+    transform: translateX(0) rotate(0deg);
+  }
+  100% {
+    bottom: 100px;
+    opacity: 0;
+    transform: translateX(20px) rotate(360deg);
+  }
+}
+
+@keyframes countBounce {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes syncSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes errorShake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes voicePulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(139, 92, 246, 0);
+  }
+}
+
+@keyframes voiceRipple {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes gestureRipple {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0.8;
+  }
+  100% {
+    width: 80px;
+    height: 80px;
+    opacity: 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .wishlistButton {
+    border-width: 2px;
+  }
+
+  .wishlistButton.added {
+    border-width: 3px;
+  }
+
+  .countIndicator {
+    border: 1px solid var(--swiss-white);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .wishlistButton,
+  .heartIcon,
+  .countIndicator,
+  .syncIndicator,
+  .tooltip {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .heartIcon::before,
+  .heartIcon::after {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus indicators */
+.wishlistButton:focus-visible {
+  outline: 2px solid var(--wishlist-active);
+  outline-offset: 2px;
+  border-radius: var(--border-radius-full);
+}
+
+/* Screen reader only */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ===== TOUCH GESTURES ===== */
+
+/* Touch targets */
+.wishlistButton {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Disable hover effects on touch devices */
+@media (hover: none) {
+  .wishlistButton:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .wishlistButton:hover .heartIcon {
+    transform: none;
+  }
+
+  .wishlistButton:hover .tooltip {
+    opacity: 0;
+    transform: translateX(-50%);
+  }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .wishlistButton {
+    box-shadow: none;
+    border: 1px solid var(--swiss-gray-300);
+  }
+
+  .tooltip,
+  .floatingHearts,
+  .voiceIndicator,
+  .longPressIndicator {
+    display: none;
+  }
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+
+/* GPU acceleration for animations */
+.heartIcon,
+.countIndicator,
+.syncIndicator,
+.gestureRipple,
+.floatingHeart {
+  will-change: transform;
+}
+
+/* Contain layout changes */
+.wishlistButton {
+  contain: layout style;
+}
+
+/* ===== SWISS UX PATTERNS ===== */
+
+/* Swiss precision feedback */
+.wishlistButton.swissPrecision {
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.wishlistButton.swissPrecision .heartIcon {
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* Alpine theme for mountain regions */
+.wishlistButton.alpine {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 249, 255, 0.95) 100%);
+  border-color: rgba(6, 182, 212, 0.3);
+}
+
+.wishlistButton.alpine.dark {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+}
+
+/* Swiss flag inspired variant */
+.wishlistButton.swissFlag.added {
+  background: var(--swiss-red);
+  border: 2px solid var(--swiss-white);
+  box-shadow: 0 0 0 2px var(--swiss-red);
+}
+
+.wishlistButton.swissFlag.added .heartIcon {
+  color: var(--swiss-white);
+}
+
+/* Cantonal colors adaptation */
+.wishlistButton.zurich.added {
+  background: linear-gradient(135deg, #0066cc 0%, #ffffff 50%, #0066cc 100%);
+}
+
+.wishlistButton.geneva.added {
+  background: linear-gradient(135deg, #ffcc00 0%, #dc143c 100%);
+}
+
+.wishlistButton.bern.added {
+  background: linear-gradient(135deg, #dc143c 0%, #ffcc00 50%, #000000 100%);
+}

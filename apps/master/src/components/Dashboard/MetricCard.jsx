@@ -1,75 +1,109 @@
-/**
- * EATECH Master Metric Card Component
- * Version: 1.0.0
- * 
- * Wiederverwendbare Metrik-Karte für Dashboard
- * 
- * Author: EATECH Development Team
- * Created: 2025-01-07
- * File Path: /apps/master/src/components/Dashboard/MetricCard.jsx
- */
-
 import React from 'react';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import styles from './MetricCard.module.css';
 
-const MetricCard = ({ 
-  icon: Icon, 
-  label, 
-  value, 
-  prefix = '', 
-  suffix = '', 
-  change, 
-  trend, 
-  color = 'primary' 
+const MetricCard = ({
+  title,
+  value,
+  change,
+  changeType = 'neutral', // positive, negative, neutral
+  icon: Icon,
+  subtitle,
+  trend = [],
+  loading = false,
+  onClick,
+  variant = 'default' // default, primary, success, warning, danger
 }) => {
-  // Format value
+  const getTrendIcon = () => {
+    switch (changeType) {
+      case 'positive':
+        return <TrendingUp size={16} />;
+      case 'negative':
+        return <TrendingDown size={16} />;
+      default:
+        return <Minus size={16} />;
+    }
+  };
+
   const formatValue = (val) => {
     if (typeof val === 'number') {
-      // For currency values
-      if (prefix === 'CHF') {
-        return val.toLocaleString('de-CH', { 
-          minimumFractionDigits: 2, 
-          maximumFractionDigits: 2 
-        });
+      if (val >= 1000000) {
+        return `${(val / 1000000).toFixed(1)}M`;
+      } else if (val >= 1000) {
+        return `${(val / 1000).toFixed(1)}K`;
       }
-      // For percentages
-      if (suffix === '%') {
-        return val.toFixed(1);
-      }
-      // For other numbers
-      return val.toLocaleString('de-CH');
+      return val.toLocaleString();
     }
     return val;
   };
 
-  return (
-    <div className={`${styles.card} ${styles[color]}`}>
-      <div className={styles.header}>
-        <div className={`${styles.iconContainer} ${styles[`${color}Icon`]}`}>
-          <Icon />
-        </div>
-        <div className={styles.trend}>
-          {trend === 'up' ? (
-            <TrendingUp className={styles.trendUp} />
-          ) : trend === 'down' ? (
-            <TrendingDown className={styles.trendDown} />
-          ) : null}
-          {change && (
-            <span className={`${styles.change} ${styles[trend]}`}>
-              {trend === 'up' ? '+' : ''}{change}%
-            </span>
-          )}
+  const cardClasses = [
+    styles.card,
+    styles[variant],
+    onClick ? styles.clickable : '',
+    loading ? styles.loading : ''
+  ].filter(Boolean).join(' ');
+
+  if (loading) {
+    return (
+      <div className={cardClasses}>
+        <div className={styles.loadingContent}>
+          <div className={`${styles.skeleton} ${styles.skeletonTitle}`}></div>
+          <div className={`${styles.skeleton} ${styles.skeletonValue}`}></div>
+          <div className={`${styles.skeleton} ${styles.skeletonChange}`}></div>
         </div>
       </div>
-      
+    );
+  }
+
+  return (
+    <div className={cardClasses} onClick={onClick}>
+      <div className={styles.header}>
+        <div className={styles.titleSection}>
+          <h3 className={styles.title}>{title}</h3>
+          {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+        </div>
+        {Icon && (
+          <div className={styles.iconWrapper}>
+            <Icon size={24} />
+          </div>
+        )}
+      </div>
+
       <div className={styles.content}>
-        <p className={styles.label}>{label}</p>
-        <h3 className={styles.value}>
-          {prefix && <span className={styles.prefix}>{prefix}</span>}
-          {formatValue(value)}
-          {suffix && <span className={styles.suffix}>{suffix}</span>}
-        </h3>
+        <div className={styles.valueSection}>
+          <span className={styles.value}>{formatValue(value)}</span>
+          {change !== undefined && (
+            <div className={`${styles.change} ${styles[changeType]}`}>
+              {getTrendIcon()}
+              <span>{Math.abs(change)}%</span>
+            </div>
+          )}
+        </div>
+
+        {trend.length > 0 && (
+          <div className={styles.trendChart}>
+            <svg viewBox="0 0 100 40" className={styles.trendSvg}>
+              <polyline
+                points={trend.map((val, idx) => 
+                  `${(idx / (trend.length - 1)) * 100},${40 - (val / Math.max(...trend)) * 35}`
+                ).join(' ')}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className={styles.trendLine}
+              />
+              <polyline
+                points={`0,40 ${trend.map((val, idx) => 
+                  `${(idx / (trend.length - 1)) * 100},${40 - (val / Math.max(...trend)) * 35}`
+                ).join(' ')} 100,40`}
+                fill="currentColor"
+                fillOpacity="0.1"
+                className={styles.trendFill}
+              />
+            </svg>
+          </div>
+        )}
       </div>
     </div>
   );

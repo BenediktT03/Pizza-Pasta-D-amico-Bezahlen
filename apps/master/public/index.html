@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  
+  <!-- SEO Meta Tags -->
+  <title>EATECH Master Control - Admin Dashboard</title>
+  <meta name="description" content="EATECH Master Control System - Powerful administrative interface for multi-tenant foodtruck management">
+  <meta name="keywords" content="EATECH, Master Control, Admin, Dashboard, Foodtruck Management">
+  <meta name="author" content="EATECH Development Team">
+  <meta name="robots" content="noindex, nofollow">
+  
+  <!-- Open Graph / Social Media -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="EATECH Master Control">
+  <meta property="og:description" content="Administrative interface for EATECH platform">
+  <meta property="og:image" content="/og-image.png">
+  <meta property="og:locale" content="de_CH">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#0f172a">
+  <meta name="msapplication-TileColor" content="#0f172a">
+  
+  <!-- iOS Specific -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="EATECH Master">
+  
+  <!-- Security Headers -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://www.googletagmanager.com;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' https://fonts.gstatic.com;
+    img-src 'self' data: https: blob:;
+    connect-src 'self' https://api.eatech.ch https://firestore.googleapis.com https://identitytoolkit.googleapis.com wss://*.firebaseio.com;
+    frame-src 'self' https://eatech.firebaseapp.com;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+  ">
+  
+  <!-- Preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.eatech.ch">
+  <link rel="preconnect" href="https://firestore.googleapis.com">
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Critical CSS (inline for performance) -->
+  <style>
+    /* Reset and base styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+    
+    #root {
+      min-height: 100vh;
+      position: relative;
+    }
+    
+    /* Loading screen */
+    .app-loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f172a;
+      z-index: 9999;
+    }
+    
+    .app-loading-content {
+      text-align: center;
+    }
+    
+    .app-loading-logo {
+      font-size: 3rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 2rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .app-loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(102, 126, 234, 0.2);
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* No JavaScript warning */
+    .no-js-warning {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #ef4444;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      z-index: 10000;
+    }
+  </style>
+</head>
+<body>
+  <!-- No JavaScript Warning -->
+  <noscript>
+    <div class="no-js-warning">
+      <strong>JavaScript ist deaktiviert!</strong> 
+      Bitte aktivieren Sie JavaScript in Ihrem Browser, um die EATECH Master Control zu verwenden.
+    </div>
+  </noscript>
+  
+  <!-- Root Element -->
+  <div id="root">
+    <!-- Initial Loading Screen -->
+    <div class="app-loading" id="app-loading">
+      <div class="app-loading-content">
+        <div class="app-loading-logo">EATECH</div>
+        <div class="app-loading-spinner"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Remove loading screen when app loads -->
+  <script>
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        const loader = document.getElementById('app-loading');
+        if (loader) {
+          loader.style.opacity = '0';
+          loader.style.transition = 'opacity 0.3s ease-out';
+          setTimeout(function() {
+            loader.remove();
+          }, 300);
+        }
+      }, 100);
+    });
+  </script>
+  
+  <!-- Error fallback -->
+  <script>
+    window.addEventListener('error', function(e) {
+      if (e.target === document.querySelector('script[src*="index"]')) {
+        document.getElementById('root').innerHTML = `
+          <div style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            text-align: center;
+          ">
+            <h1 style="
+              font-size: 2rem;
+              font-weight: 800;
+              color: #f1f5f9;
+              margin-bottom: 1rem;
+            ">Fehler beim Laden der Anwendung</h1>
+            <p style="
+              color: #cbd5e1;
+              margin-bottom: 2rem;
+            ">Die Anwendung konnte nicht geladen werden. Bitte versuchen Sie es später erneut.</p>
+            <button onclick="location.reload()" style="
+              padding: 0.75rem 1.5rem;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              border: none;
+              border-radius: 0.5rem;
+              font-size: 1rem;
+              font-weight: 600;
+              cursor: pointer;
+            ">Seite neu laden</button>
+          </div>
+        `;
+      }
+    });
+  </script>
+  
+  <!-- Module entry point -->
+  <script type="module" src="/src/index.jsx"></script>
+</body>
+</html>

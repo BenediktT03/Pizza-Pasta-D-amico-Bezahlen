@@ -1,23 +1,96 @@
 ﻿{
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local"],
-  "tasks": {
+  "globalDependencies": [
+    "**/.env.*local"
+  ],
+  "pipeline": {
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "!.next/cache/**",
+        "build/**"
+      ],
+      "env": [
+        "NODE_ENV",
+        "VITE_*",
+        "NEXT_PUBLIC_*",
+        "REACT_APP_*"
+      ]
     },
-    "dev": {
+    "test": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "coverage/**"
+      ],
+      "cache": false
+    },
+    "test:watch": {
       "cache": false,
       "persistent": true
     },
-    "lint": {
-      "dependsOn": ["^lint"]
+    "test:coverage": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "coverage/**"
+      ]
     },
-    "test": {
-      "dependsOn": ["build"],
-      "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts"]
+    "lint": {
+      "outputs": []
+    },
+    "lint:fix": {
+      "outputs": [],
+      "cache": false
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "NODE_ENV",
+        "VITE_*",
+        "NEXT_PUBLIC_*",
+        "REACT_APP_*"
+      ]
     },
     "clean": {
+      "cache": false
+    },
+    "type-check": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": []
+    },
+    "storybook": {
+      "cache": false,
+      "persistent": true
+    },
+    "storybook:build": {
+      "outputs": [
+        "storybook-static/**"
+      ]
+    },
+    "analyze": {
+      "dependsOn": [
+        "build"
+      ],
+      "outputs": [
+        "stats/**"
+      ]
+    },
+    "generate:types": {
+      "outputs": [
+        "src/types/generated/**"
+      ]
+    },
+    "security:check": {
       "cache": false
     }
   }

@@ -1,0 +1,340 @@
+/**
+ * EATECH Firestore Security Rules
+ * Version: 3.0.0
+ * 
+ * Multi-tenant security rules for foodtruck platform
+ * 
+ * Author: EATECH Development Team
+ * Updated: 2025-01-07
+ */
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    
+    // Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if user is master admin
+    function isMasterAdmin() {
+      return isAuthenticated() && 
+        request.auth.token.role == 'master_admin';
+    }
+    
+    // Check if user is tenant admin
+    function isTenantAdmin(tenantId) {
+      return isAuthenticated() && 
+        request.auth.token.tenantId == tenantId &&
+        request.auth.token.role == 'admin';
+    }
+    
+    // Check if user belongs to tenant
+    function belongsToTenant(tenantId) {
+      return isAuthenticated() && 
+        request.auth.token.tenantId == tenantId;
+    }
+    
+    // Check if user is customer
+    function isCustomer() {
+      return isAuthenticated() && 
+        request.auth.token.role == 'customer';
+    }
+    
+    // Check if document is owned by user
+    function isOwner(userId) {
+      return isAuthenticated() && 
+        request.auth.uid == userId;
+    }
+    
+    // Validate tenant is active
+    function isTenantActive(tenantId) {
+      return get(/databases/$(database)/documents/tenants/$(tenantId)).data.status == 'active';
+    }
+    
+    // Check feature flag
+    function isFeatureEnabled(tenantId, feature) {
+      return get(/databases/$(database)/documents/tenants/$(tenantId)).data.features[feature] == true;
+    }
+    
+    // ============================================
+    // MASTER ADMIN COLLECTIONS
+    // ============================================
+    
+    // Master configuration (read-only for all, write for master admins)
+    match /config/{document=**} {
+      allow read: if isAuthenticated();
+      allow write: if isMasterAdmin();
+    }
+    
+    // System logs (master admins only)
+    match /logs/{document=**} {
+      allow read, write: if isMasterAdmin();
+    }
+    
+    // Analytics data (read for admins, write for system)
+    match /analytics/{document=**} {
+      allow read: if isAuthenticated() && 
+        (isMasterAdmin() || request.auth.token.role == 'admin');
+      allow write: if false; // Only system can write
+    }
+    
+    // ============================================
+    // TENANT MANAGEMENT
+    // ============================================
+    
+    // Tenants collection
+    match /tenants/{tenantId} {
+      allow read: if isAuthenticated() && 
+        (isMasterAdmin() || belongsToTenant(tenantId));
+      allow create: if isMasterAdmin();
+      allow update: if isMasterAdmin() || 
+        (isTenantAdmin(tenantId) && !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['status', 'plan', 'features', 'billing']));
+      allow delete: if isMasterAdmin();
+      
+      // Tenant subcollections
+      match /settings/{setting} {
+        allow read: if belongsToTenant(tenantId);
+        allow write: if isTenantAdmin(tenantId);
+      }
+      
+      match /statistics/{stat} {
+        allow read: if belongsToTenant(tenantId) && 
+          request.auth.token.role in ['admin', 'manager'];
+        allow write: if false; // System only
+      }
+    }
+    
+    // ============================================
+    // PRODUCTS & MENUS
+    // ============================================
+    
+    // Products collection (tenant-scoped)
+    match /tenants/{tenantId}/products/{productId} {
+      allow read: if isTenantActive(tenantId);
+      allow create, update: if isTenantAdmin(tenantId) && 
+        request.resource.data.tenantId == tenantId;
+      allow delete: if isTenantAdmin(tenantId);
+    }
+    
+    // Categories collection
+    match /tenants/{tenantId}/categories/{categoryId} {
+      allow read: if isTenantActive(tenantId);
+      allow write: if isTenantAdmin(tenantId);
+    }
+    
+    // ============================================
+    // ORDERS
+    // ============================================
+    
+    // Orders collection
+    match /orders/{orderId} {
+      allow read: if isAuthenticated() && (
+        isMasterAdmin() ||
+        belongsToTenant(resource.data.tenantId) ||
+        isOwner(resource.data.customerId)
+      );
+      allow create: if isAuthenticated() && 
+        request.resource.data.customerId == request.auth.uid &&
+        isTenantActive(request.resource.data.tenantId);
+      allow update: if isAuthenticated() && (
+        (belongsToTenant(resource.data.tenantId) && 
+         request.auth.token.role in ['admin', 'staff']) ||
+        (isOwner(resource.data.customerId) && 
+         resource.data.status == 'pending' &&
+         request.resource.data.status == 'cancelled')
+      );
+      allow delete: if false; // Never delete orders
+      
+      // Order items subcollection
+      match /items/{itemId} {
+        allow read: if isAuthenticated() && (
+          belongsToTenant(get(/databases/$(database)/documents/orders/$(orderId)).data.tenantId) ||
+          isOwner(get(/databases/$(database)/documents/orders/$(orderId)).data.customerId)
+        );
+        allow write: if false; // Only through order creation
+      }
+    }
+    
+    // ============================================
+    // CUSTOMERS
+    // ============================================
+    
+    // Customers collection
+    match /customers/{customerId} {
+      allow read: if isAuthenticated() && (
+        isMasterAdmin() ||
+        isOwner(customerId) ||
+        (request.auth.token.role in ['admin', 'staff'] && 
+         resource.data.tenants.hasAny([request.auth.token.tenantId]))
+      );
+      allow create: if isAuthenticated() && 
+        request.auth.uid == customerId;
+      allow update: if isOwner(customerId) && 
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['createdAt', 'tenants', 'totalOrders']);
+      allow delete: if isOwner(customerId);
+      
+      // Customer favorites
+      match /favorites/{favoriteId} {
+        allow read, write: if isOwner(customerId);
+      }
+    }
+    
+    // ============================================
+    // STAFF & ROLES
+    // ============================================
+    
+    // Staff members
+    match /tenants/{tenantId}/staff/{staffId} {
+      allow read: if belongsToTenant(tenantId);
+      allow write: if isTenantAdmin(tenantId);
+    }
+    
+    // ============================================
+    // EVENTS & LOCATIONS
+    // ============================================
+    
+    // Events collection
+    match /events/{eventId} {
+      allow read: if true; // Public events
+      allow write: if isAuthenticated() && 
+        request.auth.token.role == 'event_organizer';
+    }
+    
+    // Locations (foodtruck positions)
+    match /locations/{locationId} {
+      allow read: if true; // Public information
+      allow write: if isAuthenticated() && 
+        belongsToTenant(resource.data.tenantId) &&
+        request.auth.token.role in ['admin', 'manager'];
+    }
+    
+    // ============================================
+    // REVIEWS & RATINGS
+    // ============================================
+    
+    // Reviews collection
+    match /reviews/{reviewId} {
+      allow read: if true; // Public reviews
+      allow create: if isAuthenticated() && 
+        request.resource.data.customerId == request.auth.uid &&
+        exists(/databases/$(database)/documents/orders/$(request.resource.data.orderId)) &&
+        get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.customerId == request.auth.uid;
+      allow update: if isOwner(resource.data.customerId) && 
+        resource.data.createdAt == request.resource.data.createdAt;
+      allow delete: if isOwner(resource.data.customerId) || 
+        isTenantAdmin(resource.data.tenantId);
+    }
+    
+    // ============================================
+    // NOTIFICATIONS
+    // ============================================
+    
+    // User notifications
+    match /notifications/{notificationId} {
+      allow read: if isOwner(resource.data.userId);
+      allow update: if isOwner(resource.data.userId) && 
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['read', 'readAt']);
+      allow delete: if isOwner(resource.data.userId);
+      allow create: if false; // System only
+    }
+    
+    // ============================================
+    // LOYALTY & REWARDS
+    // ============================================
+    
+    // Loyalty programs
+    match /tenants/{tenantId}/loyalty/{programId} {
+      allow read: if isTenantActive(tenantId);
+      allow write: if isTenantAdmin(tenantId);
+    }
+    
+    // Customer loyalty points
+    match /customers/{customerId}/loyalty/{tenantId} {
+      allow read: if isOwner(customerId) || belongsToTenant(tenantId);
+      allow write: if false; // System only through transactions
+    }
+    
+    // ============================================
+    // PAYMENTS & BILLING
+    // ============================================
+    
+    // Payment methods (customer private data)
+    match /customers/{customerId}/payment_methods/{methodId} {
+      allow read, write: if isOwner(customerId);
+    }
+    
+    // Invoices (tenant billing)
+    match /tenants/{tenantId}/invoices/{invoiceId} {
+      allow read: if belongsToTenant(tenantId) && 
+        request.auth.token.role == 'admin';
+      allow write: if isMasterAdmin();
+    }
+    
+    // ============================================
+    // CHAT & SUPPORT
+    // ============================================
+    
+    // Support tickets
+    match /support_tickets/{ticketId} {
+      allow read: if isAuthenticated() && (
+        isMasterAdmin() ||
+        isOwner(resource.data.userId) ||
+        (belongsToTenant(resource.data.tenantId) && 
+         request.auth.token.role in ['admin', 'support'])
+      );
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (
+        isOwner(resource.data.userId) ||
+        (belongsToTenant(resource.data.tenantId) && 
+         request.auth.token.role in ['admin', 'support']) ||
+        isMasterAdmin()
+      );
+      allow delete: if isMasterAdmin();
+      
+      // Ticket messages
+      match /messages/{messageId} {
+        allow read: if isAuthenticated() && (
+          get(/databases/$(database)/documents/support_tickets/$(ticketId)).data.userId == request.auth.uid ||
+          belongsToTenant(get(/databases/$(database)/documents/support_tickets/$(ticketId)).data.tenantId) ||
+          isMasterAdmin()
+        );
+        allow create: if isAuthenticated();
+        allow update, delete: if false;
+      }
+    }
+    
+    // ============================================
+    // FEATURE FLAGS & EXPERIMENTS
+    // ============================================
+    
+    // Feature flags
+    match /features/{feature} {
+      allow read: if isAuthenticated();
+      allow write: if isMasterAdmin();
+    }
+    
+    // A/B test assignments
+    match /experiments/{experimentId}/assignments/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if false; // System only
+    }
+    
+    // ============================================
+    // DEFAULT DENY
+    // ============================================
+    
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

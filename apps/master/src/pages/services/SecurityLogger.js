@@ -1,182 +1,425 @@
 /**
- * EATECH Master Security Logger
+ * EATECH Security Logger Service
  * Version: 1.0.0
  * 
- * Protokolliert alle sicherheitsrelevanten Events
+ * Comprehensive security event logging for Master Control System
+ * Features:
+ * - Security event tracking
+ * - Audit trail generation
+ * - Real-time alerting
+ * - Log aggregation
+ * - Compliance reporting
  * 
  * Author: EATECH Development Team
  * Created: 2025-01-07
  * File Path: /apps/master/src/services/SecurityLogger.js
  */
 
-import { getDatabase, ref, push, serverTimestamp } from 'firebase/database';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+// Event severity levels
+export const SecurityEventLevel = {
+  INFO: 'info',
+  WARNING: 'warning',
+  ERROR: 'error',
+  CRITICAL: 'critical'
+};
+
+// Event types
+export const SecurityEventType = {
+  LOGIN_ATTEMPT: 'login_attempt',
+  LOGIN_SUCCESS: 'login_success',
+  LOGIN_FAILED: 'login_failed',
+  LOGOUT: 'logout',
+  SESSION_EXPIRED: 'session_expired',
+  PERMISSION_DENIED: 'permission_denied',
+  DATA_ACCESS: 'data_access',
+  DATA_MODIFICATION: 'data_modification',
+  CONFIGURATION_CHANGE: 'configuration_change',
+  SUSPICIOUS_ACTIVITY: 'suspicious_activity',
+  BRUTE_FORCE_DETECTED: 'brute_force_detected',
+  API_RATE_LIMIT: 'api_rate_limit',
+  SYSTEM_ERROR: 'system_error'
+};
 
 class SecurityLogger {
   constructor() {
-    this.db = getDatabase();
-    this.firestore = getFirestore();
-    this.queue = [];
-    this.isProcessing = false;
+    this.logs = [];
+    this.maxLogs = 10000;
+    this.alertHandlers = new Map();
+    this.batchSize = 50;
+    this.batchTimeout = 5000; // 5 seconds
+    this.pendingLogs = [];
+    this.batchTimer = null;
   }
 
   /**
-   * Log Security Event
+   * Log a security event
    */
-  async logEvent(eventType, data = {}) {
+  async logEvent({
+    type,
+    level = SecurityEventLevel.INFO,
+    userId = null,
+    message,
+    details = {},
+    ip = null,
+    userAgent = null
+  }) {
     const event = {
-      type: eventType,
-      timestamp: Date.now(),
-      serverTimestamp: serverTimestamp(),
-      data,
-      metadata: {
-        userAgent: navigator.userAgent,
-        language: navigator.language,
-        platform: navigator.platform,
-        screenResolution: `${window.screen.width}x${window.screen.height}`,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-      }
+      id: this.generateEventId(),
+      timestamp: new Date().toISOString(),
+      type,
+      level,
+      userId,
+      message,
+      details,
+      ip: ip || this.getClientIP(),
+      userAgent: userAgent || navigator.userAgent,
+      sessionId: this.getSessionId(),
+      environment: this.getEnvironment()
     };
 
-    // Add to queue
-    this.queue.push(event);
+    // Add to local cache
+    this.addToCache(event);
 
-    // Process queue
-    if (!this.isProcessing) {
-      this.processQueue();
+    // Add to pending batch
+    this.pendingLogs.push(event);
+
+    // Process batch if needed
+    if (this.pendingLogs.length >= this.batchSize) {
+      this.processBatch();
+    } else {
+      this.scheduleBatchProcess();
     }
+
+    // Trigger alerts for critical events
+    if (level === SecurityEventLevel.CRITICAL || level === SecurityEventLevel.ERROR) {
+      this.triggerAlerts(event);
+    }
+
+    return event;
   }
 
   /**
-   * Process Event Queue
+   * Log login attempt
    */
-  async processQueue() {
-    if (this.queue.length === 0) {
-      this.isProcessing = false;
-      return;
-    }
-
-    this.isProcessing = true;
-    const event = this.queue.shift();
-
-    try {
-      // Log to Realtime Database
-      await push(ref(this.db, 'security_logs'), event);
-
-      // Log critical events to Firestore for better querying
-      if (this.isCriticalEvent(event.type)) {
-        await addDoc(collection(this.firestore, 'security_logs'), {
-          ...event,
-          critical: true,
-          indexed: true
-        });
+  async logLoginAttempt(email, success, details = {}) {
+    return this.logEvent({
+      type: success ? SecurityEventType.LOGIN_SUCCESS : SecurityEventType.LOGIN_FAILED,
+      level: success ? SecurityEventLevel.INFO : SecurityEventLevel.WARNING,
+      message: success ? `Successful login for ${email}` : `Failed login attempt for ${email}`,
+      details: {
+        email,
+        success,
+        ...details
       }
+    });
+  }
 
-      // Send to monitoring service (if configured)
-      if (this.shouldAlert(event.type)) {
-        this.sendAlert(event);
+  /**
+   * Log data access
+   */
+  async logDataAccess(resource, action, userId, details = {}) {
+    return this.logEvent({
+      type: SecurityEventType.DATA_ACCESS,
+      level: SecurityEventLevel.INFO,
+      userId,
+      message: `${action} on ${resource}`,
+      details: {
+        resource,
+        action,
+        ...details
       }
+    });
+  }
 
-    } catch (error) {
-      console.error('Failed to log security event:', error);
-      // Re-add to queue for retry
-      this.queue.unshift(event);
+  /**
+   * Log suspicious activity
+   */
+  async logSuspiciousActivity(description, userId = null, details = {}) {
+    return this.logEvent({
+      type: SecurityEventType.SUSPICIOUS_ACTIVITY,
+      level: SecurityEventLevel.WARNING,
+      userId,
+      message: description,
+      details
+    });
+  }
+
+  /**
+   * Log configuration change
+   */
+  async logConfigurationChange(setting, oldValue, newValue, userId, details = {}) {
+    return this.logEvent({
+      type: SecurityEventType.CONFIGURATION_CHANGE,
+      level: SecurityEventLevel.WARNING,
+      userId,
+      message: `Configuration change: ${setting}`,
+      details: {
+        setting,
+        oldValue,
+        newValue,
+        ...details
+      }
+    });
+  }
+
+  /**
+   * Register alert handler
+   */
+  registerAlertHandler(name, handler) {
+    this.alertHandlers.set(name, handler);
+  }
+
+  /**
+   * Get security logs with filtering
+   */
+  getLogs({
+    type = null,
+    level = null,
+    userId = null,
+    startDate = null,
+    endDate = null,
+    limit = 100
+  } = {}) {
+    let filtered = [...this.logs];
+
+    if (type) {
+      filtered = filtered.filter(log => log.type === type);
     }
 
-    // Process next event
-    setTimeout(() => this.processQueue(), 100);
+    if (level) {
+      filtered = filtered.filter(log => log.level === level);
+    }
+
+    if (userId) {
+      filtered = filtered.filter(log => log.userId === userId);
+    }
+
+    if (startDate) {
+      filtered = filtered.filter(log => new Date(log.timestamp) >= new Date(startDate));
+    }
+
+    if (endDate) {
+      filtered = filtered.filter(log => new Date(log.timestamp) <= new Date(endDate));
+    }
+
+    // Sort by timestamp descending
+    filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    return filtered.slice(0, limit);
   }
 
   /**
-   * Check if event is critical
+   * Get security statistics
    */
-  isCriticalEvent(eventType) {
-    const criticalEvents = [
-      'master_login_failed',
-      'master_login_failed_attempt',
-      'security_check_failed',
-      'unauthorized_access',
-      'session_hijack_attempt',
-      'brute_force_detected',
-      'suspicious_activity'
-    ];
+  getStatistics(timeRange = '24h') {
+    const now = new Date();
+    const startTime = this.getStartTime(now, timeRange);
     
-    return criticalEvents.includes(eventType);
-  }
+    const recentLogs = this.logs.filter(log => 
+      new Date(log.timestamp) >= startTime
+    );
 
-  /**
-   * Check if event should trigger alert
-   */
-  shouldAlert(eventType) {
-    const alertEvents = [
-      'master_login_success',
-      'master_login_failed',
-      'brute_force_detected',
-      'unauthorized_access',
-      'suspicious_activity',
-      'system_breach_attempt'
-    ];
+    const stats = {
+      total: recentLogs.length,
+      byLevel: {},
+      byType: {},
+      topUsers: [],
+      suspiciousIPs: []
+    };
 
-    return alertEvents.includes(eventType);
-  }
+    // Count by level
+    Object.values(SecurityEventLevel).forEach(level => {
+      stats.byLevel[level] = recentLogs.filter(log => log.level === level).length;
+    });
 
-  /**
-   * Send Alert (placeholder for push notifications)
-   */
-  async sendAlert(event) {
-    // TODO: Implement push notification service
-    console.log('🚨 Security Alert:', event);
+    // Count by type
+    Object.values(SecurityEventType).forEach(type => {
+      stats.byType[type] = recentLogs.filter(log => log.type === type).length;
+    });
+
+    // Top users by activity
+    const userActivity = {};
+    recentLogs.forEach(log => {
+      if (log.userId) {
+        userActivity[log.userId] = (userActivity[log.userId] || 0) + 1;
+      }
+    });
     
-    // For now, store alerts in a special collection
-    try {
-      await push(ref(this.db, 'security_alerts'), {
-        ...event,
-        alert: true,
-        acknowledged: false
+    stats.topUsers = Object.entries(userActivity)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 10)
+      .map(([userId, count]) => ({ userId, count }));
+
+    // Suspicious IPs (multiple failed logins)
+    const ipFailures = {};
+    recentLogs
+      .filter(log => log.type === SecurityEventType.LOGIN_FAILED)
+      .forEach(log => {
+        ipFailures[log.ip] = (ipFailures[log.ip] || 0) + 1;
       });
-    } catch (error) {
-      console.error('Failed to send alert:', error);
+    
+    stats.suspiciousIPs = Object.entries(ipFailures)
+      .filter(([, count]) => count >= 3)
+      .sort(([, a], [, b]) => b - a)
+      .map(([ip, count]) => ({ ip, count }));
+
+    return stats;
+  }
+
+  /**
+   * Export logs for compliance
+   */
+  exportLogs(format = 'json', filters = {}) {
+    const logs = this.getLogs(filters);
+    
+    switch (format) {
+      case 'json':
+        return JSON.stringify(logs, null, 2);
+      
+      case 'csv':
+        return this.convertToCSV(logs);
+      
+      case 'pdf':
+        // Would integrate with PDF generation library
+        console.log('PDF export not implemented');
+        return null;
+      
+      default:
+        return logs;
     }
   }
 
   /**
-   * Get Recent Events
+   * Clear old logs
    */
-  async getRecentEvents(limit = 100) {
-    try {
-      const snapshot = await get(
-        query(
-          ref(this.db, 'security_logs'),
-          orderByChild('timestamp'),
-          limitToLast(limit)
-        )
-      );
+  clearOldLogs(daysToKeep = 90) {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
+    
+    const initialCount = this.logs.length;
+    this.logs = this.logs.filter(log => 
+      new Date(log.timestamp) > cutoffDate
+    );
+    
+    const removedCount = initialCount - this.logs.length;
+    
+    this.logEvent({
+      type: SecurityEventType.SYSTEM_ERROR,
+      level: SecurityEventLevel.INFO,
+      message: `Cleared ${removedCount} old security logs`,
+      details: { daysToKeep, removedCount }
+    });
+  }
 
-      if (snapshot.exists()) {
-        const events = [];
-        snapshot.forEach((child) => {
-          events.unshift({
-            id: child.key,
-            ...child.val()
-          });
-        });
-        return events;
-      }
+  // Private methods
+  generateEventId() {
+    return `sec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
 
-      return [];
-    } catch (error) {
-      console.error('Failed to get recent events:', error);
-      return [];
+  getClientIP() {
+    // In a real implementation, this would get the actual client IP
+    return '127.0.0.1';
+  }
+
+  getSessionId() {
+    return sessionStorage.getItem('sessionId') || 'no-session';
+  }
+
+  getEnvironment() {
+    return process.env.NODE_ENV || 'development';
+  }
+
+  addToCache(event) {
+    this.logs.push(event);
+    
+    // Maintain max logs limit
+    if (this.logs.length > this.maxLogs) {
+      this.logs.shift();
     }
+  }
+
+  scheduleBatchProcess() {
+    if (this.batchTimer) {
+      clearTimeout(this.batchTimer);
+    }
+    
+    this.batchTimer = setTimeout(() => {
+      this.processBatch();
+    }, this.batchTimeout);
+  }
+
+  async processBatch() {
+    if (this.pendingLogs.length === 0) return;
+    
+    const batch = [...this.pendingLogs];
+    this.pendingLogs = [];
+    
+    try {
+      // In production, this would send logs to a backend service
+      await this.sendLogsToBackend(batch);
+    } catch (error) {
+      console.error('Failed to send security logs:', error);
+      // Re-add failed logs to pending
+      this.pendingLogs.unshift(...batch);
+    }
+  }
+
+  async sendLogsToBackend(logs) {
+    // Mock implementation
+    console.log('Sending security logs to backend:', logs.length);
+    return Promise.resolve();
+  }
+
+  triggerAlerts(event) {
+    this.alertHandlers.forEach((handler, name) => {
+      try {
+        handler(event);
+      } catch (error) {
+        console.error(`Alert handler ${name} failed:`, error);
+      }
+    });
+  }
+
+  getStartTime(now, timeRange) {
+    const ranges = {
+      '1h': 60 * 60 * 1000,
+      '24h': 24 * 60 * 60 * 1000,
+      '7d': 7 * 24 * 60 * 60 * 1000,
+      '30d': 30 * 24 * 60 * 60 * 1000
+    };
+    
+    const offset = ranges[timeRange] || ranges['24h'];
+    return new Date(now.getTime() - offset);
+  }
+
+  convertToCSV(logs) {
+    if (logs.length === 0) return '';
+    
+    const headers = Object.keys(logs[0]);
+    const csvHeaders = headers.join(',');
+    
+    const csvRows = logs.map(log => 
+      headers.map(header => {
+        const value = log[header];
+        if (typeof value === 'object') {
+          return JSON.stringify(value);
+        }
+        return value;
+      }).join(',')
+    );
+    
+    return [csvHeaders, ...csvRows].join('\n');
   }
 }
 
-// Export singleton instance
+// Create singleton instance
 const securityLogger = new SecurityLogger();
 
-// Export convenience function
-export const logSecurityEvent = (type, data) => {
-  return securityLogger.logEvent(type, data);
-};
-
+// Export instance and helper functions
 export default securityLogger;
+
+export const logSecurityEvent = (...args) => securityLogger.logEvent(...args);
+export const logLoginAttempt = (...args) => securityLogger.logLoginAttempt(...args);
+export const logDataAccess = (...args) => securityLogger.logDataAccess(...args);
+export const logSuspiciousActivity = (...args) => securityLogger.logSuspiciousActivity(...args);
+export const logConfigurationChange = (...args) => securityLogger.logConfigurationChange(...args);

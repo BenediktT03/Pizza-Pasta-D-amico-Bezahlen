@@ -1,8 +1,8 @@
 /**
- * EATECH Master Validation Utilities
+ * EATECH Validation Utilities
  * Version: 1.0.0
  * 
- * Validation helpers für Master Control
+ * Comprehensive validation functions for Master Control System
  * 
  * Author: EATECH Development Team
  * Created: 2025-01-07
@@ -10,144 +10,378 @@
  */
 
 /**
- * Email Validation
+ * Email validation
  */
 export const validateEmail = (email) => {
+  if (!email) return { isValid: false, error: 'E-Mail ist erforderlich' };
+  
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+  const isValid = emailRegex.test(email);
+  
+  if (!isValid) {
+    return { isValid: false, error: 'Ungültige E-Mail-Adresse' };
+  }
+  
+  // Additional checks
+  if (email.length > 255) {
+    return { isValid: false, error: 'E-Mail-Adresse ist zu lang' };
+  }
+  
+  return { isValid: true, error: null };
 };
 
 /**
- * Password Validation for Master
+ * Password validation
  */
-export const validatePassword = (password) => {
-  // Master passwords must be extra secure
-  const minLength = 12;
-  const hasUpperCase = /[A-Z]/.test(password);
-  const hasLowerCase = /[a-z]/.test(password);
-  const hasNumbers = /\d/.test(password);
-  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-  return {
-    isValid: password.length >= minLength && hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar,
-    errors: {
-      length: password.length < minLength ? `Mindestens ${minLength} Zeichen erforderlich` : null,
-      uppercase: !hasUpperCase ? 'Mindestens ein Großbuchstabe erforderlich' : null,
-      lowercase: !hasLowerCase ? 'Mindestens ein Kleinbuchstabe erforderlich' : null,
-      number: !hasNumbers ? 'Mindestens eine Zahl erforderlich' : null,
-      special: !hasSpecialChar ? 'Mindestens ein Sonderzeichen erforderlich' : null
+export const validatePassword = (password, options = {}) => {
+  const {
+    minLength = 12,
+    requireUppercase = true,
+    requireLowercase = true,
+    requireNumbers = true,
+    requireSpecialChars = true,
+    disallowCommon = true
+  } = options;
+  
+  if (!password) return { isValid: false, error: 'Passwort ist erforderlich' };
+  
+  const errors = [];
+  
+  if (password.length < minLength) {
+    errors.push(`Mindestens ${minLength} Zeichen erforderlich`);
+  }
+  
+  if (requireUppercase && !/[A-Z]/.test(password)) {
+    errors.push('Mindestens ein Großbuchstabe erforderlich');
+  }
+  
+  if (requireLowercase && !/[a-z]/.test(password)) {
+    errors.push('Mindestens ein Kleinbuchstabe erforderlich');
+  }
+  
+  if (requireNumbers && !/[0-9]/.test(password)) {
+    errors.push('Mindestens eine Zahl erforderlich');
+  }
+  
+  if (requireSpecialChars && !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    errors.push('Mindestens ein Sonderzeichen erforderlich');
+  }
+  
+  if (disallowCommon) {
+    const commonPasswords = [
+      'password', 'passwort', '12345678', 'qwertyui', 'admin123',
+      'letmein', 'welcome', 'master123', 'eatech123'
+    ];
+    
+    const lowerPassword = password.toLowerCase();
+    if (commonPasswords.some(common => lowerPassword.includes(common))) {
+      errors.push('Passwort ist zu häufig oder unsicher');
     }
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    error: errors.length > 0 ? errors.join('. ') : null,
+    errors
   };
 };
 
 /**
- * IP Address Validation
+ * Phone number validation (Swiss format)
  */
-export const validateIP = (ip) => {
-  const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
-  const ipv6Regex = /^([\da-f]{1,4}:){7}[\da-f]{1,4}$/i;
+export const validatePhone = (phone) => {
+  if (!phone) return { isValid: false, error: 'Telefonnummer ist erforderlich' };
   
-  if (ipv4Regex.test(ip)) {
-    const parts = ip.split('.');
-    return parts.every(part => parseInt(part) >= 0 && parseInt(part) <= 255);
+  // Remove all non-digit characters
+  const cleaned = phone.replace(/\D/g, '');
+  
+  // Swiss phone number patterns
+  const swissPhoneRegex = /^(41|0041|0)?[1-9]\d{8}$/;
+  const isValid = swissPhoneRegex.test(cleaned);
+  
+  if (!isValid) {
+    return { isValid: false, error: 'Ungültige Schweizer Telefonnummer' };
   }
   
-  return ipv6Regex.test(ip);
+  return { isValid: true, error: null };
 };
 
 /**
- * Session Token Validation
- */
-export const validateSessionToken = (token) => {
-  // Token should be 64 characters hex string
-  const tokenRegex = /^[a-f0-9]{64}$/i;
-  return tokenRegex.test(token);
-};
-
-/**
- * Sanitize Input
- */
-export const sanitizeInput = (input) => {
-  if (typeof input !== 'string') return input;
-  
-  return input
-    .replace(/[<>]/g, '') // Remove potential HTML tags
-    .replace(/javascript:/gi, '') // Remove javascript protocol
-    .replace(/on\w+\s*=/gi, '') // Remove event handlers
-    .trim();
-};
-
-/**
- * Validate Phone Number (Swiss format)
- */
-export const validatePhoneNumber = (phone) => {
-  // Swiss phone number formats
-  const swissPhoneRegex = /^(\+41|0041|0)[1-9]\d{8}$/;
-  const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
-  return swissPhoneRegex.test(cleanPhone);
-};
-
-/**
- * Validate Swiss Postal Code
- */
-export const validateSwissPostalCode = (code) => {
-  const postalCodeRegex = /^[1-9]\d{3}$/;
-  return postalCodeRegex.test(code);
-};
-
-/**
- * Validate URL
+ * URL validation
  */
 export const validateURL = (url) => {
+  if (!url) return { isValid: false, error: 'URL ist erforderlich' };
+  
   try {
     const urlObj = new URL(url);
-    return ['http:', 'https:'].includes(urlObj.protocol);
-  } catch {
-    return false;
+    
+    // Check protocol
+    if (!['http:', 'https:'].includes(urlObj.protocol)) {
+      return { isValid: false, error: 'Nur HTTP/HTTPS URLs sind erlaubt' };
+    }
+    
+    // Check for localhost in production
+    if (process.env.NODE_ENV === 'production' && 
+        (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1')) {
+      return { isValid: false, error: 'Localhost URLs sind in Produktion nicht erlaubt' };
+    }
+    
+    return { isValid: true, error: null };
+  } catch (error) {
+    return { isValid: false, error: 'Ungültige URL' };
   }
 };
 
 /**
- * Validate Date Range
+ * IP Address validation
+ */
+export const validateIP = (ip) => {
+  if (!ip) return { isValid: false, error: 'IP-Adresse ist erforderlich' };
+  
+  // IPv4 pattern
+  const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+  
+  // IPv6 pattern (simplified)
+  const ipv6Regex = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/;
+  
+  const isValid = ipv4Regex.test(ip) || ipv6Regex.test(ip);
+  
+  if (!isValid) {
+    return { isValid: false, error: 'Ungültige IP-Adresse' };
+  }
+  
+  return { isValid: true, error: null };
+};
+
+/**
+ * Date range validation
  */
 export const validateDateRange = (startDate, endDate) => {
+  if (!startDate || !endDate) {
+    return { isValid: false, error: 'Start- und Enddatum sind erforderlich' };
+  }
+  
   const start = new Date(startDate);
   const end = new Date(endDate);
   
   if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-    return { isValid: false, error: 'Ungültiges Datum' };
+    return { isValid: false, error: 'Ungültiges Datumsformat' };
   }
   
   if (start > end) {
-    return { isValid: false, error: 'Startdatum muss vor Enddatum liegen' };
+    return { isValid: false, error: 'Startdatum muss vor dem Enddatum liegen' };
   }
   
-  return { isValid: true };
+  // Check if range is not too large (e.g., max 1 year)
+  const oneYear = 365 * 24 * 60 * 60 * 1000;
+  if (end - start > oneYear) {
+    return { isValid: false, error: 'Datumsbereich darf maximal 1 Jahr umfassen' };
+  }
+  
+  return { isValid: true, error: null };
 };
 
 /**
- * Validate Percentage
+ * Number validation with range
  */
-export const validatePercentage = (value) => {
-  const num = parseFloat(value);
-  return !isNaN(num) && num >= 0 && num <= 100;
+export const validateNumber = (value, options = {}) => {
+  const {
+    min = null,
+    max = null,
+    integer = false,
+    positive = false,
+    allowZero = true
+  } = options;
+  
+  const num = Number(value);
+  
+  if (isNaN(num)) {
+    return { isValid: false, error: 'Ungültige Zahl' };
+  }
+  
+  if (integer && !Number.isInteger(num)) {
+    return { isValid: false, error: 'Nur ganze Zahlen erlaubt' };
+  }
+  
+  if (positive && num < 0) {
+    return { isValid: false, error: 'Nur positive Zahlen erlaubt' };
+  }
+  
+  if (!allowZero && num === 0) {
+    return { isValid: false, error: 'Null ist nicht erlaubt' };
+  }
+  
+  if (min !== null && num < min) {
+    return { isValid: false, error: `Mindestwert ist ${min}` };
+  }
+  
+  if (max !== null && num > max) {
+    return { isValid: false, error: `Maximalwert ist ${max}` };
+  }
+  
+  return { isValid: true, error: null };
 };
 
 /**
- * Validate Swiss Currency Amount
+ * Text length validation
  */
-export const validateCurrencyAmount = (amount) => {
-  // Swiss currency format: 1'234.56 or 1234.56
-  const currencyRegex = /^\d{1,3}('?\d{3})*(\.\d{2})?$/;
-  const cleanAmount = amount.toString().replace(/[CHF\s]/g, '');
-  return currencyRegex.test(cleanAmount);
+export const validateTextLength = (text, options = {}) => {
+  const {
+    minLength = 0,
+    maxLength = Infinity,
+    required = true
+  } = options;
+  
+  if (!text && required) {
+    return { isValid: false, error: 'Text ist erforderlich' };
+  }
+  
+  if (!text) {
+    return { isValid: true, error: null };
+  }
+  
+  const length = text.trim().length;
+  
+  if (length < minLength) {
+    return { isValid: false, error: `Mindestens ${minLength} Zeichen erforderlich` };
+  }
+  
+  if (length > maxLength) {
+    return { isValid: false, error: `Maximal ${maxLength} Zeichen erlaubt` };
+  }
+  
+  return { isValid: true, error: null };
 };
 
 /**
- * Strong ID Validation
+ * File validation
  */
-export const validateStrongId = (id) => {
-  // IDs should be alphanumeric with dashes/underscores, min 8 chars
-  const idRegex = /^[a-zA-Z0-9_-]{8,}$/;
-  return idRegex.test(id);
+export const validateFile = (file, options = {}) => {
+  const {
+    maxSize = 10 * 1024 * 1024, // 10MB default
+    allowedTypes = [],
+    allowedExtensions = []
+  } = options;
+  
+  if (!file) {
+    return { isValid: false, error: 'Datei ist erforderlich' };
+  }
+  
+  // Check file size
+  if (file.size > maxSize) {
+    const sizeMB = (maxSize / 1024 / 1024).toFixed(1);
+    return { isValid: false, error: `Datei darf maximal ${sizeMB}MB groß sein` };
+  }
+  
+  // Check file type
+  if (allowedTypes.length > 0 && !allowedTypes.includes(file.type)) {
+    return { isValid: false, error: `Nur folgende Dateitypen erlaubt: ${allowedTypes.join(', ')}` };
+  }
+  
+  // Check file extension
+  if (allowedExtensions.length > 0) {
+    const extension = file.name.split('.').pop().toLowerCase();
+    if (!allowedExtensions.includes(extension)) {
+      return { isValid: false, error: `Nur folgende Dateiendungen erlaubt: ${allowedExtensions.join(', ')}` };
+    }
+  }
+  
+  return { isValid: true, error: null };
+};
+
+/**
+ * Credit card validation (basic)
+ */
+export const validateCreditCard = (cardNumber) => {
+  if (!cardNumber) {
+    return { isValid: false, error: 'Kartennummer ist erforderlich' };
+  }
+  
+  // Remove spaces and dashes
+  const cleaned = cardNumber.replace(/[\s-]/g, '');
+  
+  // Check if only digits
+  if (!/^\d+$/.test(cleaned)) {
+    return { isValid: false, error: 'Kartennummer darf nur Zahlen enthalten' };
+  }
+  
+  // Check length (most cards are 13-19 digits)
+  if (cleaned.length < 13 || cleaned.length > 19) {
+    return { isValid: false, error: 'Ungültige Kartennummer-Länge' };
+  }
+  
+  // Luhn algorithm
+  let sum = 0;
+  let isEven = false;
+  
+  for (let i = cleaned.length - 1; i >= 0; i--) {
+    let digit = parseInt(cleaned.charAt(i), 10);
+    
+    if (isEven) {
+      digit *= 2;
+      if (digit > 9) {
+        digit -= 9;
+      }
+    }
+    
+    sum += digit;
+    isEven = !isEven;
+  }
+  
+  const isValid = sum % 10 === 0;
+  
+  return {
+    isValid,
+    error: isValid ? null : 'Ungültige Kartennummer'
+  };
+};
+
+/**
+ * Swiss postal code validation
+ */
+export const validateSwissPostalCode = (postalCode) => {
+  if (!postalCode) {
+    return { isValid: false, error: 'Postleitzahl ist erforderlich' };
+  }
+  
+  // Swiss postal codes are 4 digits, 1000-9999
+  const cleaned = postalCode.replace(/\s/g, '');
+  const isValid = /^[1-9]\d{3}$/.test(cleaned);
+  
+  if (!isValid) {
+    return { isValid: false, error: 'Ungültige Schweizer Postleitzahl' };
+  }
+  
+  return { isValid: true, error: null };
+};
+
+/**
+ * Validate form data
+ */
+export const validateForm = (formData, validationRules) => {
+  const errors = {};
+  let isValid = true;
+  
+  Object.keys(validationRules).forEach(field => {
+    const rules = validationRules[field];
+    const value = formData[field];
+    
+    // Required check
+    if (rules.required && !value) {
+      errors[field] = `${rules.label || field} ist erforderlich`;
+      isValid = false;
+      return;
+    }
+    
+    // Custom validation function
+    if (rules.validate && value) {
+      const result = rules.validate(value);
+      if (!result.isValid) {
+        errors[field] = result.error;
+        isValid = false;
+      }
+    }
+  });
+  
+  return { isValid, errors };
 };

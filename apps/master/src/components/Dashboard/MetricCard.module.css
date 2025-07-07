@@ -1,16 +1,10 @@
-/**
- * EATECH Master Metric Card Styles
- * Version: 1.0.0
- * 
- * Author: EATECH Development Team
- * Created: 2025-01-07
- * File Path: /apps/master/src/components/Dashboard/MetricCard.module.css
- */
+/* MetricCard.module.css */
 
 .card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 1rem;
+  background: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 16px;
   padding: 1.5rem;
   transition: all 0.3s;
   position: relative;
@@ -24,7 +18,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: var(--primary-color);
+  background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.5), transparent);
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -33,9 +27,39 @@
   opacity: 1;
 }
 
-.card:hover {
+/* Variants */
+.card.default {
+  background: rgba(30, 41, 59, 0.5);
+}
+
+.card.primary {
+  background: rgba(102, 126, 234, 0.1);
+  border-color: rgba(102, 126, 234, 0.2);
+}
+
+.card.success {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.card.warning {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.card.danger {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* Clickable state */
+.card.clickable {
+  cursor: pointer;
+}
+
+.card.clickable:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* Header */
@@ -46,134 +70,204 @@
   margin-bottom: 1rem;
 }
 
-.iconContainer {
-  width: 48px;
-  height: 48px;
-  border-radius: 0.75rem;
+.titleSection {
+  flex: 1;
+}
+
+.title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.iconWrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
 }
 
-.iconContainer svg {
-  width: 24px;
-  height: 24px;
+.card.primary .iconWrapper {
+  background: rgba(102, 126, 234, 0.2);
+  color: #818cf8;
 }
 
-/* Color Variants */
-.primary .iconContainer {
-  background: var(--primary-light);
-  color: var(--primary-color);
+.card.success .iconWrapper {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
 }
 
-.success .iconContainer {
-  background: var(--success-light);
-  color: var(--success-color);
+.card.warning .iconWrapper {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
 }
 
-.warning .iconContainer {
-  background: var(--warning-light);
-  color: var(--warning-color);
-}
-
-.error .iconContainer {
-  background: var(--error-light);
-  color: var(--error-color);
-}
-
-.info .iconContainer {
-  background: var(--info-light);
-  color: var(--info-color);
-}
-
-/* Trend */
-.trend {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.trend svg {
-  width: 16px;
-  height: 16px;
-}
-
-.trendUp {
-  color: var(--success-color);
-}
-
-.trendDown {
-  color: var(--error-color);
-}
-
-.change {
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.change.up {
-  color: var(--success-color);
-}
-
-.change.down {
-  color: var(--error-color);
+.card.danger .iconWrapper {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
 }
 
 /* Content */
 .content {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
-.label {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  margin: 0;
+.valueSection {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
 }
 
 .value {
   font-size: 2rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  margin: 0;
+  font-weight: 700;
+  color: #f1f5f9;
+  line-height: 1;
+}
+
+.change {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.25rem;
-}
-
-.prefix,
-.suffix {
-  font-size: 1.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: var(--text-secondary);
 }
 
-/* Hover Effects */
-.card:hover .iconContainer {
-  transform: scale(1.1);
+.change.positive {
+  background: rgba(16, 185, 129, 0.1);
+  color: #34d399;
 }
 
-/* Card color variants borders */
-.primary::before { background: var(--primary-color); }
-.success::before { background: var(--success-color); }
-.warning::before { background: var(--warning-color); }
-.error::before { background: var(--error-color); }
-.info::before { background: var(--info-color); }
+.change.negative {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+}
+
+.change.neutral {
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+}
+
+/* Trend Chart */
+.trendChart {
+  height: 40px;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.trendSvg {
+  width: 100%;
+  height: 100%;
+}
+
+.trendLine {
+  stroke: #667eea;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.trendFill {
+  fill: #667eea;
+  stroke: none;
+}
+
+.card.success .trendLine {
+  stroke: #10b981;
+}
+
+.card.success .trendFill {
+  fill: #10b981;
+}
+
+.card.danger .trendLine {
+  stroke: #ef4444;
+}
+
+.card.danger .trendFill {
+  fill: #ef4444;
+}
+
+/* Loading State */
+.card.loading {
+  pointer-events: none;
+}
+
+.loadingContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(148, 163, 184, 0.1) 0%,
+    rgba(148, 163, 184, 0.2) 50%,
+    rgba(148, 163, 184, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+.skeletonTitle {
+  height: 16px;
+  width: 60%;
+}
+
+.skeletonValue {
+  height: 32px;
+  width: 80%;
+}
+
+.skeletonChange {
+  height: 20px;
+  width: 40%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
 
 /* Responsive */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .card {
     padding: 1rem;
   }
-
+  
   .value {
     font-size: 1.5rem;
   }
-
-  .prefix,
-  .suffix {
-    font-size: 1rem;
+  
+  .iconWrapper {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .iconWrapper svg {
+    width: 20px;
+    height: 20px;
   }
 }

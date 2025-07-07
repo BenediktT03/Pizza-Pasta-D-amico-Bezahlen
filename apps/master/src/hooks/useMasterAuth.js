@@ -2,96 +2,186 @@
  * EATECH Master Authentication Hook
  * Version: 1.0.0
  * 
- * React Hook für Master Authentication
- * Provides authentication state and methods
+ * Custom React Hook für Master-Admin Authentifizierung
+ * Features:
+ * - Authentication State Management
+ * - Session Handling
+ * - Role-based Access Control
+ * - Activity Tracking
  * 
  * Author: EATECH Development Team
  * Created: 2025-01-07
  * File Path: /apps/master/src/hooks/useMasterAuth.js
  */
 
-import { useState, useEffect, useContext, createContext } from 'react';
-import AuthService from '../services/AuthService';
-import { useNavigate } from 'react-router-dom';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 // Create Auth Context
-const MasterAuthContext = createContext(null);
+const MasterAuthContext = createContext({});
 
-/**
- * Master Auth Provider Component
- */
+// Auth Provider Component
 export const MasterAuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [session, setSession] = useState(null);
-  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [sessionExpiry, setSessionExpiry] = useState(null);
 
-  useEffect(() => {
-    // Subscribe to auth state changes
-    const unsubscribe = AuthService.onAuthStateChanged(async (authUser) => {
-      if (authUser) {
-        setUser(authUser);
-        // Load session data
-        const sessionData = AuthService.currentSession;
-        setSession(sessionData);
-      } else {
-        setUser(null);
-        setSession(null);
+  // Mock auth service (replace with real Firebase auth)
+  const authService = {
+    getCurrentUser: () => {
+      // Check if user is stored in sessionStorage
+      const storedUser = sessionStorage.getItem('masterUser');
+      return storedUser ? JSON.parse(storedUser) : null;
+    },
+    
+    login: async (email, password) => {
+      // Mock login logic
+      if (email === 'admin@eatech.ch' && password === 'master123') {
+        const userData = {
+          id: '1',
+          email: email,
+          name: 'Master Admin',
+          role: 'super_admin',
+          permissions: ['all'],
+          lastLogin: new Date().toISOString()
+        };
+        
+        sessionStorage.setItem('masterUser', JSON.stringify(userData));
+        sessionStorage.setItem('masterToken', 'mock-jwt-token');
+        
+        return { success: true, user: userData };
       }
-      setLoading(false);
-    });
-
-    // Cleanup subscription
-    return () => unsubscribe();
-  }, []);
-
-  // Auth methods
-  const login = async (credentials) => {
-    try {
-      const result = await AuthService.login(credentials);
-      if (result.success) {
-        setUser(result.user);
-        setSession({
-          sessionId: result.sessionId,
-          ip: result.ip,
-          requires2FA: result.requires2FA
-        });
-      }
-      return result;
-    } catch (error) {
-      throw error;
+      
+      throw new Error('Invalid credentials');
+    },
+    
+    logout: async () => {
+      sessionStorage.removeItem('masterUser');
+      sessionStorage.removeItem('masterToken');
+    },
+    
+    checkSession: () => {
+      const token = sessionStorage.getItem('masterToken');
+      return !!token;
     }
   };
 
-  const logout = async () => {
+  // Initialize auth state
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const currentUser = authService.getCurrentUser();
+        const hasValidSession = authService.checkSession();
+        
+        if (currentUser && hasValidSession) {
+          setUser(currentUser);
+          setIsAuthenticated(true);
+          
+          // Set session expiry (30 minutes from now)
+          const expiry = new Date();
+          expiry.setMinutes(expiry.getMinutes() + 30);
+          setSessionExpiry(expiry);
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initAuth();
+  }, []);
+
+  // Session timeout handler
+  useEffect(() => {
+    if (!sessionExpiry) return;
+
+    const checkExpiry = setInterval(() => {
+      if (new Date() > sessionExpiry) {
+        logout();
+      }
+    }, 60000); // Check every minute
+
+    return () => clearInterval(checkExpiry);
+  }, [sessionExpiry]);
+
+  // Login function
+  const login = useCallback(async (email, password) => {
+    setIsLoading(true);
+    
     try {
-      await AuthService.logout();
+      const result = await authService.login(email, password);
+      
+      if (result.success) {
+        setUser(result.user);
+        setIsAuthenticated(true);
+        
+        // Set session expiry
+        const expiry = new Date();
+        expiry.setMinutes(expiry.getMinutes() + 30);
+        setSessionExpiry(expiry);
+        
+        return { success: true };
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      return { success: false, error: error.message };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Logout function
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
       setUser(null);
-      setSession(null);
-      navigate('/master/login');
+      setIsAuthenticated(false);
+      setSessionExpiry(null);
     } catch (error) {
       console.error('Logout error:', error);
     }
-  };
+  }, []);
 
-  const checkMasterStatus = async () => {
-    const currentUser = AuthService.getCurrentUser();
-    if (currentUser) {
-      const isMaster = await AuthService.verifyMasterRole(currentUser.uid);
-      return isMaster;
+  // Check if user has specific permission
+  const hasPermission = useCallback((permission) => {
+    if (!user) return false;
+    if (user.permissions.includes('all')) return true;
+    return user.permissions.includes(permission);
+  }, [user]);
+
+  // Check if user has specific role
+  const hasRole = useCallback((role) => {
+    if (!user) return false;
+    return user.role === role;
+  }, [user]);
+
+  // Update user activity
+  const updateActivity = useCallback(() => {
+    if (sessionExpiry) {
+      const expiry = new Date();
+      expiry.setMinutes(expiry.getMinutes() + 30);
+      setSessionExpiry(expiry);
     }
-    return false;
-  };
+  }, [sessionExpiry]);
 
+  // Check master status
+  const checkMasterStatus = useCallback(() => {
+    return user && (user.role === 'super_admin' || user.role === 'master_admin');
+  }, [user]);
+
+  // Context value
   const value = {
     user,
-    loading,
-    session,
+    isLoading,
+    isAuthenticated,
+    sessionExpiry,
     login,
     logout,
-    checkMasterStatus,
-    isAuthenticated: !!user,
-    isMaster: user?.role === 'master_admin'
+    hasPermission,
+    hasRole,
+    updateActivity,
+    checkMasterStatus
   };
 
   return (
@@ -101,13 +191,35 @@ export const MasterAuthProvider = ({ children }) => {
   );
 };
 
-/**
- * Hook to use Master Auth Context
- */
+// Custom hook to use auth context
 export const useMasterAuth = () => {
   const context = useContext(MasterAuthContext);
+  
   if (!context) {
     throw new Error('useMasterAuth must be used within MasterAuthProvider');
   }
+  
   return context;
+};
+
+// Higher-order component for protected routes
+export const withMasterAuth = (Component, requiredRole = null) => {
+  return function ProtectedComponent(props) {
+    const { isAuthenticated, isLoading, hasRole } = useMasterAuth();
+    
+    if (isLoading) {
+      return <div>Loading...</div>;
+    }
+    
+    if (!isAuthenticated) {
+      window.location.href = '/master/login';
+      return null;
+    }
+    
+    if (requiredRole && !hasRole(requiredRole)) {
+      return <div>Access Denied</div>;
+    }
+    
+    return <Component {...props} />;
+  };
 };

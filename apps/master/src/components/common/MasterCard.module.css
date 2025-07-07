@@ -1,0 +1,360 @@
+/* MasterCard.module.css */
+
+.card {
+  background: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 16px;
+  transition: all 0.3s;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Variants */
+.card.default {
+  background: rgba(30, 41, 59, 0.5);
+}
+
+.card.primary {
+  background: rgba(102, 126, 234, 0.1);
+  border-color: rgba(102, 126, 234, 0.2);
+}
+
+.card.success {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.card.warning {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.card.danger {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.card.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Sizes */
+.card.small {
+  border-radius: 12px;
+}
+
+.card.medium {
+  border-radius: 16px;
+}
+
+.card.large {
+  border-radius: 20px;
+}
+
+/* Padding */
+.card.padded {
+  padding: 1.5rem;
+}
+
+.card.small.padded {
+  padding: 1rem;
+}
+
+.card.large.padded {
+  padding: 2rem;
+}
+
+/* Hoverable */
+.card.hoverable {
+  cursor: pointer;
+}
+
+.card.hoverable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+}
+
+.card.hoverable:hover .arrow {
+  transform: translateX(4px);
+}
+
+.card.primary.hoverable:hover {
+  border-color: rgba(102, 126, 234, 0.4);
+  box-shadow: 0 10px 30px -5px rgba(102, 126, 234, 0.2);
+}
+
+.card.success.hoverable:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.2);
+}
+
+.card.warning.hoverable:hover {
+  border-color: rgba(245, 158, 11, 0.4);
+  box-shadow: 0 10px 30px -5px rgba(245, 158, 11, 0.2);
+}
+
+.card.danger.hoverable:hover {
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 10px 30px -5px rgba(239, 68, 68, 0.2);
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.headerContent {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex: 1;
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  flex-shrink: 0;
+}
+
+.card.primary .iconWrapper {
+  background: rgba(102, 126, 234, 0.2);
+  color: #818cf8;
+}
+
+.card.success .iconWrapper {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.card.warning .iconWrapper {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+.card.danger .iconWrapper {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.titleSection {
+  flex: 1;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Badge */
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-default {
+  background: rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+}
+
+.badge-primary {
+  background: rgba(102, 126, 234, 0.2);
+  color: #818cf8;
+}
+
+.badge-success {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.badge-warning {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+.badge-danger {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Arrow */
+.arrow {
+  color: #64748b;
+  transition: transform 0.3s;
+}
+
+/* Content */
+.content {
+  color: #e2e8f0;
+}
+
+/* Section */
+.section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.section:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.sectionTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+/* Stat */
+.stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+}
+
+.stat:last-child {
+  margin-bottom: 0;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: #94a3b8;
+}
+
+.statValue {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.statTrend {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+}
+
+.trend-positive {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.trend-negative {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.trend-neutral {
+  background: rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card.hoverable:hover::before {
+  opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .card.padded {
+    padding: 1rem;
+  }
+  
+  .card.large.padded {
+    padding: 1.5rem;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .headerRight {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .title {
+    font-size: 1rem;
+  }
+  
+  .iconWrapper {
+    width: 40px;
+    height: 40px;
+  }
+}

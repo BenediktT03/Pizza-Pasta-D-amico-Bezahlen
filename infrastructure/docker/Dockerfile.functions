@@ -1,0 +1,80 @@
+# EATECH V3.0 - Firebase Functions Dockerfile
+# Optimized for Cloud Functions deployment
+
+# Stage 1: Dependencies
+FROM node:20-alpine AS deps
+RUN apk add --no-cache libc6-compat python3 make g++
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json* ./
+COPY services/functions/package.json ./services/functions/
+COPY packages/*/package.json ./packages/*/
+
+# Install dependencies including devDependencies for building
+RUN npm ci
+
+# Stage 2: Builder
+FROM node:20-alpine AS builder
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Build TypeScript
+RUN npm run build:functions
+
+# Stage 3: Production dependencies
+FROM node:20-alpine AS prod-deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+COPY services/functions/package.json ./services/functions/
+COPY packages/*/package.json ./packages/*/
+
+# Install only production dependencies
+RUN npm ci --only=production
+
+# Stage 4: Runner
+FROM node:20-alpine AS runner
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+ENV NODE_ENV production
+ENV FUNCTIONS_EMULATOR false
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
+
+# Copy production dependencies
+COPY --from=prod-deps /app/node_modules ./node_modules
+COPY --from=prod-deps /app/services/functions/node_modules ./services/functions/node_modules
+
+# Copy built functions
+COPY --from=builder /app/services/functions/lib ./services/functions/lib
+COPY --from=builder /app/services/functions/package.json ./services/functions/
+COPY --from=builder /app/packages/*/lib ./packages/*/lib
+
+# Copy Firebase configuration
+COPY firebase.json .
+COPY .firebaserc .
+
+# Install Firebase tools globally
+RUN npm install -g firebase-tools
+
+USER nodejs
+
+# Expose functions emulator ports
+EXPOSE 5001 5002 4000 9099
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:5001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })"
+
+# Start Firebase emulator for local development
+# In production, this will be deployed directly to Firebase
+CMD ["firebase", "emulators:start", "--only", "functions", "--project", "eatech-v3"]

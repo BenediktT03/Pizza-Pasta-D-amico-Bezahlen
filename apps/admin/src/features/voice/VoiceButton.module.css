@@ -1,0 +1,318 @@
+.container {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Size variants */
+.small {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+}
+
+.small .icon,
+.small .iconActive,
+.small .iconProcessing {
+  width: 20px;
+  height: 20px;
+}
+
+.medium {
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+}
+
+.medium .icon,
+.medium .iconActive,
+.medium .iconProcessing {
+  width: 24px;
+  height: 24px;
+}
+
+.large {
+  width: 72px;
+  height: 72px;
+  border-radius: 36px;
+}
+
+.large .icon,
+.large .iconActive,
+.large .iconProcessing {
+  width: 32px;
+  height: 32px;
+}
+
+/* States */
+.button:hover:not(.disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.button:active:not(.disabled) {
+  transform: translateY(0);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #6c757d;
+}
+
+.button.listening {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(231, 76, 60, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(231, 76, 60, 0.8);
+  }
+}
+
+.button.processing {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+}
+
+/* Icons */
+.icon,
+.iconActive,
+.iconProcessing {
+  position: relative;
+  z-index: 2;
+  transition: transform 0.3s ease;
+}
+
+.iconActive {
+  animation: micPulse 1s ease-in-out infinite;
+}
+
+@keyframes micPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.iconProcessing {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Ripple effect */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(0);
+  animation: rippleAnimation 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes rippleAnimation {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Pulse rings */
+.pulseRing {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border: 2px solid rgba(231, 76, 60, 0.5);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  animation: pulseRing 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  pointer-events: none;
+}
+
+.pulseRing2 {
+  animation-delay: 0.5s;
+}
+
+.pulseRing3 {
+  animation-delay: 1s;
+}
+
+@keyframes pulseRing {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+/* Sound waves */
+.soundWaves {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  pointer-events: none;
+}
+
+.wave {
+  width: 3px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 3px;
+  animation: wave 1s ease-in-out infinite;
+}
+
+.wave:nth-child(1) {
+  height: 10px;
+  animation-delay: 0s;
+}
+
+.wave:nth-child(2) {
+  height: 20px;
+  animation-delay: 0.1s;
+}
+
+.wave:nth-child(3) {
+  height: 30px;
+  animation-delay: 0.2s;
+}
+
+.wave:nth-child(4) {
+  height: 20px;
+  animation-delay: 0.3s;
+}
+
+.wave:nth-child(5) {
+  height: 10px;
+  animation-delay: 0.4s;
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: scaleY(0.5);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* Tooltip */
+.tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  animation: fadeIn 0.3s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.tooltipArrow {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid rgba(0, 0, 0, 0.9);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Status text */
+.statusText {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #495057;
+  text-align: center;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tooltip {
+    display: none;
+  }
+
+  .statusText {
+    display: block !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .statusText {
+    color: #adb5bd;
+  }
+
+  .button.disabled {
+    background: #343a40;
+  }
+}

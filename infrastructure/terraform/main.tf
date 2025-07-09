@@ -1,10 +1,7 @@
-# EATECH V3.0 - Main Terraform Configuration
-# Multi-cloud infrastructure with Swiss data residency
-# Production-ready with high availability and security
-
+# EATECH V3.0 - Terraform Main Configuration
 terraform {
-  required_version = ">= 1.6.0"
-
+  required_version = ">= 1.5.0"
+  
   required_providers {
     google = {
       source  = "hashicorp/google"
@@ -14,78 +11,41 @@ terraform {
       source  = "hashicorp/google-beta"
       version = "~> 5.0"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
     cloudflare = {
       source  = "cloudflare/cloudflare"
       version = "~> 4.0"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 2.0"
+      version = "~> 2.23"
     }
     helm = {
       source  = "hashicorp/helm"
-      version = "~> 2.0"
+      version = "~> 2.11"
     }
     random = {
       source  = "hashicorp/random"
-      version = "~> 3.0"
-    }
-    tls = {
-      source  = "hashicorp/tls"
-      version = "~> 4.0"
+      version = "~> 3.5"
     }
   }
-
-  # Backend configuration for state management
+  
   backend "gcs" {
     bucket = "eatech-terraform-state"
-    prefix = "production/infrastructure"
+    prefix = "prod/state"
   }
 }
 
-# Provider Configurations
-
-# Google Cloud Provider - Primary (Swiss Data Residency)
+# Provider Configuration
 provider "google" {
   project = var.gcp_project_id
   region  = var.gcp_region
-  zone    = var.gcp_zone
-
-  default_labels = {
-    project     = "eatech"
-    environment = "production"
-    managed_by  = "terraform"
-    team        = "platform"
-    cost_center = "eatech-ops"
-  }
 }
 
 provider "google-beta" {
   project = var.gcp_project_id
   region  = var.gcp_region
-  zone    = var.gcp_zone
 }
 
-# AWS Provider - Backup and Additional Services
-provider "aws" {
-  region = var.aws_region
-
-  default_tags {
-    tags = {
-      Project     = "eatech"
-      Environment = "production"
-      ManagedBy   = "terraform"
-      Team        = "platform"
-      CostCenter  = "eatech-ops"
-    }
-  }
-}
-
-# Cloudflare Provider - CDN and DNS
 provider "cloudflare" {
   api_token = var.cloudflare_api_token
 }
@@ -93,586 +53,409 @@ provider "cloudflare" {
 # Data Sources
 data "google_client_config" "default" {}
 
-data "google_container_engine_versions" "gke_version" {
-  location       = var.gcp_region
-  version_prefix = "1.28."
-}
-
-data "cloudflare_zones" "eatech" {
-  filter {
-    name = var.domain_name
-  }
-}
-
-# Random Resources for Security
-resource "random_password" "master_key" {
-  length  = 32
-  special = true
-}
-
-resource "random_password" "encryption_key" {
-  length  = 64
-  special = false
-}
-
-resource "random_password" "jwt_secret" {
-  length  = 64
-  special = false
-}
-
 # Local Variables
 locals {
   common_labels = {
-    project     = "eatech"
-    environment = "production"
-    managed_by  = "terraform"
-    version     = "3.0.0"
+    environment  = var.environment
+    project      = "eatech"
+    managed_by   = "terraform"
+    cost_center  = "engineering"
+    created_date = formatdate("YYYY-MM-DD", timestamp())
   }
-
-  swiss_regions = [
-    "europe-west6",  # Zurich (Primary)
-    "europe-west3",  # Frankfurt (Secondary)
+  
+  firebase_regions = {
+    firestore = "europe-west6"
+    functions = "europe-west6"
+    storage   = "europe-west6"
+  }
+  
+  gke_zones = [
+    "${var.gcp_region}-a",
+    "${var.gcp_region}-b",
+    "${var.gcp_region}-c"
   ]
-
-  domain_zones = {
-    main   = var.domain_name
-    app    = "app.${var.domain_name}"
-    admin  = "admin.${var.domain_name}"
-    master = "master.${var.domain_name}"
-    api    = "api.${var.domain_name}"
-    cdn    = "cdn.${var.domain_name}"
-    ws     = "ws.${var.domain_name}"
-  }
 }
 
-# Google Cloud Project Configuration
-resource "google_project_service" "enabled_apis" {
+# Enable Required APIs
+resource "google_project_service" "required_apis" {
   for_each = toset([
     "compute.googleapis.com",
     "container.googleapis.com",
-    "cloudsql.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "sqladmin.googleapis.com",
     "redis.googleapis.com",
+    "cloudrun.googleapis.com",
+    "firebase.googleapis.com",
+    "firestore.googleapis.com",
+    "firebasestorage.googleapis.com",
+    "identitytoolkit.googleapis.com",
+    "securetoken.googleapis.com",
     "monitoring.googleapis.com",
     "logging.googleapis.com",
     "cloudtrace.googleapis.com",
     "clouderrorreporting.googleapis.com",
-    "cloudprofiler.googleapis.com",
     "secretmanager.googleapis.com",
-    "certificatemanager.googleapis.com",
+    "iamcredentials.googleapis.com",
     "dns.googleapis.com",
-    "storage.googleapis.com",
-    "firestore.googleapis.com",
-    "firebase.googleapis.com",
-    "cloudfunctions.googleapis.com",
-    "run.googleapis.com",
-    "artifactregistry.googleapis.com",
-    "cloudkms.googleapis.com",
-    "iap.googleapis.com",
-    "cloudscheduler.googleapis.com",
-    "pubsub.googleapis.com",
-    "bigquery.googleapis.com",
-    "dataflow.googleapis.com",
-    "aiplatform.googleapis.com",
+    "certificatemanager.googleapis.com"
   ])
-
-  project = var.gcp_project_id
-  service = each.value
-
-  disable_dependent_services = true
+  
+  service            = each.key
+  disable_on_destroy = false
 }
 
-# Google Kubernetes Engine (GKE) Cluster
-resource "google_container_cluster" "eatech_cluster" {
-  name     = "eatech-production"
-  location = var.gcp_region
+# VPC Network
+resource "google_compute_network" "eatech_vpc" {
+  name                            = "eatech-${var.environment}-vpc"
+  auto_create_subnetworks         = false
+  routing_mode                    = "REGIONAL"
+  delete_default_routes_on_create = true
+  
+  depends_on = [google_project_service.required_apis]
+}
 
-  # Swiss data residency
-  resource_labels = merge(local.common_labels, {
-    data_residency = "switzerland"
-    compliance     = "gdpr-dsg"
+# Subnets
+resource "google_compute_subnetwork" "eatech_subnet" {
+  name                     = "eatech-${var.environment}-subnet"
+  ip_cidr_range            = var.subnet_cidr
+  region                   = var.gcp_region
+  network                  = google_compute_network.eatech_vpc.id
+  private_ip_google_access = true
+  
+  secondary_ip_range {
+    range_name    = "gke-pods"
+    ip_cidr_range = var.pods_cidr
+  }
+  
+  secondary_ip_range {
+    range_name    = "gke-services"
+    ip_cidr_range = var.services_cidr
+  }
+  
+  log_config {
+    aggregation_interval = "INTERVAL_10_MIN"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+}
+
+# Cloud NAT
+resource "google_compute_router" "eatech_router" {
+  name    = "eatech-${var.environment}-router"
+  region  = var.gcp_region
+  network = google_compute_network.eatech_vpc.id
+}
+
+resource "google_compute_router_nat" "eatech_nat" {
+  name                               = "eatech-${var.environment}-nat"
+  router                             = google_compute_router.eatech_router.name
+  region                             = var.gcp_region
+  nat_ip_allocate_option             = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+  
+  log_config {
+    enable = true
+    filter = "ERRORS_ONLY"
+  }
+}
+
+# Firewall Rules
+resource "google_compute_firewall" "allow_internal" {
+  name    = "eatech-${var.environment}-allow-internal"
+  network = google_compute_network.eatech_vpc.name
+  
+  allow {
+    protocol = "tcp"
+    ports    = ["0-65535"]
+  }
+  
+  allow {
+    protocol = "udp"
+    ports    = ["0-65535"]
+  }
+  
+  allow {
+    protocol = "icmp"
+  }
+  
+  source_ranges = [
+    var.subnet_cidr,
+    var.pods_cidr,
+    var.services_cidr
+  ]
+}
+
+# GKE Cluster
+module "gke" {
+  source = "./modules/gke"
+  
+  project_id     = var.gcp_project_id
+  cluster_name   = "eatech-${var.environment}"
+  region         = var.gcp_region
+  zones          = local.gke_zones
+  network        = google_compute_network.eatech_vpc.name
+  subnetwork     = google_compute_subnetwork.eatech_subnet.name
+  
+  node_pools = var.gke_node_pools
+  
+  cluster_labels = merge(local.common_labels, {
+    component = "kubernetes"
   })
+}
 
-  # Remove default node pool
-  remove_default_node_pool = true
-  initial_node_count       = 1
+# Artifact Registry
+resource "google_artifact_registry_repository" "eatech_docker" {
+  location      = var.gcp_region
+  repository_id = "eatech-${var.environment}"
+  description   = "Docker repository for EATECH ${var.environment} environment"
+  format        = "DOCKER"
+  
+  labels = local.common_labels
+}
 
-  # Network configuration
-  network    = google_compute_network.vpc.name
-  subnetwork = google_compute_subnetwork.private.name
-
-  # Enable private cluster
-  private_cluster_config {
-    enable_private_nodes    = true
-    enable_private_endpoint = false
-    master_ipv4_cidr_block  = "172.16.0.0/28"
-
-    master_global_access_config {
-      enabled = true
+# Cloud SQL (PostgreSQL)
+module "postgresql" {
+  source = "./modules/cloudsql"
+  
+  project_id       = var.gcp_project_id
+  name             = "eatech-${var.environment}-postgres"
+  database_version = "POSTGRES_15"
+  region           = var.gcp_region
+  tier             = var.cloudsql_tier
+  
+  deletion_protection = var.environment == "prod" ? true : false
+  
+  database_flags = [
+    {
+      name  = "max_connections"
+      value = "200"
+    },
+    {
+      name  = "log_checkpoints"
+      value = "on"
     }
-  }
-
-  # IP allocation policy
-  ip_allocation_policy {
-    cluster_secondary_range_name  = "k8s-pod-range"
-    services_secondary_range_name = "k8s-service-range"
-  }
-
-  # Network policy
-  network_policy {
-    enabled = true
-  }
-
-  # Workload Identity
-  workload_identity_config {
-    workload_pool = "${var.gcp_project_id}.svc.id.goog"
-  }
-
-  # Master auth
-  master_auth {
-    client_certificate_config {
-      issue_client_certificate = false
-    }
-  }
-
-  # Addons
-  addons_config {
-    http_load_balancing {
-      disabled = false
-    }
-
-    horizontal_pod_autoscaling {
-      disabled = false
-    }
-
-    network_policy_config {
-      disabled = false
-    }
-
-    cloudrun_config {
-      disabled = false
-    }
-
-    gcp_filestore_csi_driver_config {
-      enabled = true
-    }
-
-    gce_persistent_disk_csi_driver_config {
-      enabled = true
-    }
-  }
-
-  # Cluster autoscaling
-  cluster_autoscaling {
-    enabled = true
-
-    resource_limits {
-      resource_type = "cpu"
-      minimum       = 4
-      maximum       = 100
-    }
-
-    resource_limits {
-      resource_type = "memory"
-      minimum       = 16
-      maximum       = 400
-    }
-
-    auto_provisioning_defaults {
-      min_cpu_platform = "Intel Skylake"
-
-      management {
-        auto_upgrade = true
-        auto_repair  = true
-      }
-
-      oauth_scopes = [
-        "https://www.googleapis.com/auth/cloud-platform"
-      ]
-    }
-  }
-
-  # Maintenance policy
-  maintenance_policy {
-    recurring_window {
-      start_time = "2024-01-01T02:00:00Z"
-      end_time   = "2024-01-01T06:00:00Z"
-      recurrence = "FREQ=WEEKLY;BYDAY=SU"
-    }
-  }
-
-  # Release channel
-  release_channel {
-    channel = "REGULAR"
-  }
-
-  # Monitoring and logging
-  monitoring_config {
-    enable_components = [
-      "SYSTEM_COMPONENTS",
-      "WORKLOADS",
-      "APISERVER",
-      "CONTROLLER_MANAGER",
-      "SCHEDULER"
-    ]
-
-    managed_prometheus {
-      enabled = true
-    }
-  }
-
-  logging_config {
-    enable_components = [
-      "SYSTEM_COMPONENTS",
-      "WORKLOADS",
-      "APISERVER",
-      "CONTROLLER_MANAGER",
-      "SCHEDULER"
-    ]
-  }
-
-  # Binary authorization
-  binary_authorization {
-    evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
-  }
-
-  # Security posture
-  security_posture_config {
-    mode               = "BASIC"
-    vulnerability_mode = "VULNERABILITY_ENTERPRISE"
-  }
-
-  depends_on = [
-    google_project_service.enabled_apis,
-    google_compute_network.vpc,
-    google_compute_subnetwork.private,
   ]
+  
+  insights_config = {
+    query_insights_enabled  = true
+    query_string_length     = 1024
+    record_application_tags = true
+    record_client_address   = true
+  }
+  
+  backup_configuration = {
+    enabled                        = true
+    start_time                     = "03:00"
+    location                       = var.gcp_region
+    point_in_time_recovery_enabled = true
+    transaction_log_retention_days = 7
+    retained_backups               = 30
+    retention_unit                 = "COUNT"
+  }
+  
+  labels = local.common_labels
 }
 
-# GKE Node Pools
-resource "google_container_node_pool" "general" {
-  name       = "general"
-  cluster    = google_container_cluster.eatech_cluster.name
-  location   = var.gcp_region
-  node_count = 2
-
-  # Autoscaling
-  autoscaling {
-    min_node_count = 2
-    max_node_count = 10
+# Memorystore (Redis)
+resource "google_redis_instance" "eatech_cache" {
+  name               = "eatech-${var.environment}-redis"
+  tier               = var.redis_tier
+  memory_size_gb     = var.redis_memory_gb
+  region             = var.gcp_region
+  redis_version      = "REDIS_7_0"
+  display_name       = "EATECH ${var.environment} Redis Cache"
+  
+  authorized_network = google_compute_network.eatech_vpc.id
+  connect_mode       = "PRIVATE_SERVICE_ACCESS"
+  
+  redis_configs = {
+    maxmemory-policy = "allkeys-lru"
+    notify-keyspace-events = "Ex"
   }
-
-  # Management
-  management {
-    auto_repair  = true
-    auto_upgrade = true
-  }
-
-  # Node configuration
-  node_config {
-    preemptible  = false
-    machine_type = "e2-standard-4"
-
-    # Labels
-    labels = merge(local.common_labels, {
-      node_pool = "general"
-    })
-
-    # Service account
-    service_account = google_service_account.gke_nodes.email
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/cloud-platform"
-    ]
-
-    # Disk
-    disk_size_gb = 100
-    disk_type    = "pd-ssd"
-
-    # Metadata
-    metadata = {
-      disable-legacy-endpoints = "true"
-    }
-
-    # Workload Identity
-    workload_metadata_config {
-      mode = "GKE_METADATA"
-    }
-
-    # Shielded instance
-    shielded_instance_config {
-      enable_secure_boot          = true
-      enable_integrity_monitoring = true
-    }
-
-    # Network tags
-    tags = ["gke-node", "eatech-production"]
-  }
-
-  # Upgrade settings
-  upgrade_settings {
-    strategy        = "SURGE"
-    max_surge       = 1
-    max_unavailable = 0
-  }
-
-  depends_on = [
-    google_service_account.gke_nodes,
-    google_project_iam_member.gke_nodes,
-  ]
-}
-
-# Admin Node Pool (for admin workloads)
-resource "google_container_node_pool" "admin" {
-  name       = "admin"
-  cluster    = google_container_cluster.eatech_cluster.name
-  location   = var.gcp_region
-  node_count = 1
-
-  autoscaling {
-    min_node_count = 1
-    max_node_count = 3
-  }
-
-  management {
-    auto_repair  = true
-    auto_upgrade = true
-  }
-
-  node_config {
-    preemptible  = false
-    machine_type = "e2-highmem-2"
-
-    labels = merge(local.common_labels, {
-      node_pool   = "admin"
-      node_type   = "admin"
-      criticality = "high"
-    })
-
-    # Taints for dedicated admin workloads
-    taint {
-      key    = "node-type"
-      value  = "admin"
-      effect = "NO_SCHEDULE"
-    }
-
-    service_account = google_service_account.gke_nodes.email
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/cloud-platform"
-    ]
-
-    disk_size_gb = 50
-    disk_type    = "pd-ssd"
-
-    metadata = {
-      disable-legacy-endpoints = "true"
-    }
-
-    workload_metadata_config {
-      mode = "GKE_METADATA"
-    }
-
-    shielded_instance_config {
-      enable_secure_boot          = true
-      enable_integrity_monitoring = true
-    }
-
-    tags = ["gke-node", "gke-admin", "eatech-production"]
-  }
-
-  upgrade_settings {
-    strategy        = "SURGE"
-    max_surge       = 1
-    max_unavailable = 0
-  }
-
-  depends_on = [
-    google_service_account.gke_nodes,
-    google_project_iam_member.gke_nodes,
-  ]
-}
-
-# Master Control Node Pool (maximum security)
-resource "google_container_node_pool" "master" {
-  name       = "master"
-  cluster    = google_container_cluster.eatech_cluster.name
-  location   = var.gcp_region
-  node_count = 1
-
-  autoscaling {
-    min_node_count = 1
-    max_node_count = 1  # Single node for master control
-  }
-
-  management {
-    auto_repair  = true
-    auto_upgrade = true
-  }
-
-  node_config {
-    preemptible  = false
-    machine_type = "e2-highmem-4"
-
-    labels = merge(local.common_labels, {
-      node_pool      = "master"
-      node_type      = "master-control"
-      security_level = "maximum"
-      criticality    = "critical"
-    })
-
-    # Dedicated for master control
-    taint {
-      key    = "master-control"
-      value  = "true"
-      effect = "NO_SCHEDULE"
-    }
-
-    taint {
-      key    = "security-zone"
-      value  = "high"
-      effect = "NO_SCHEDULE"
-    }
-
-    service_account = google_service_account.gke_master.email
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/cloud-platform"
-    ]
-
-    disk_size_gb = 100
-    disk_type    = "pd-ssd"
-
-    metadata = {
-      disable-legacy-endpoints = "true"
-      security-cleared        = "true"
-    }
-
-    workload_metadata_config {
-      mode = "GKE_METADATA"
-    }
-
-    shielded_instance_config {
-      enable_secure_boot          = true
-      enable_integrity_monitoring = true
-    }
-
-    tags = ["gke-node", "gke-master", "eatech-production", "security-high"]
-  }
-
-  upgrade_settings {
-    strategy        = "SURGE"
-    max_surge       = 1
-    max_unavailable = 0
-  }
-
-  depends_on = [
-    google_service_account.gke_master,
-    google_project_iam_member.gke_master,
-  ]
-}
-
-# Service Accounts
-resource "google_service_account" "gke_nodes" {
-  account_id   = "gke-nodes"
-  display_name = "GKE Nodes Service Account"
-  description  = "Service account for GKE nodes"
-}
-
-resource "google_service_account" "gke_master" {
-  account_id   = "gke-master"
-  display_name = "GKE Master Control Service Account"
-  description  = "Service account for GKE master control nodes with enhanced permissions"
-}
-
-# IAM Bindings for Service Accounts
-resource "google_project_iam_member" "gke_nodes" {
-  for_each = toset([
-    "roles/logging.logWriter",
-    "roles/monitoring.metricWriter",
-    "roles/monitoring.viewer",
-    "roles/stackdriver.resourceMetadata.writer",
-    "roles/storage.objectViewer",
-    "roles/artifactregistry.reader",
-  ])
-
-  project = var.gcp_project_id
-  role    = each.value
-  member  = "serviceAccount:${google_service_account.gke_nodes.email}"
-}
-
-resource "google_project_iam_member" "gke_master" {
-  for_each = toset([
-    "roles/logging.logWriter",
-    "roles/monitoring.metricWriter",
-    "roles/monitoring.viewer",
-    "roles/stackdriver.resourceMetadata.writer",
-    "roles/storage.objectViewer",
-    "roles/artifactregistry.reader",
-    "roles/secretmanager.secretAccessor",
-    "roles/cloudkms.cryptoKeyEncrypterDecrypter",
-  ])
-
-  project = var.gcp_project_id
-  role    = each.value
-  member  = "serviceAccount:${google_service_account.gke_master.email}"
+  
+  labels = local.common_labels
 }
 
 # Firebase Project
-resource "google_firebase_project" "eatech" {
-  provider = google-beta
-  project  = var.gcp_project_id
-
-  depends_on = [
-    google_project_service.enabled_apis
+module "firebase" {
+  source = "./modules/firebase"
+  
+  project_id   = var.gcp_project_id
+  environment  = var.environment
+  regions      = local.firebase_regions
+  
+  firestore_settings = {
+    delete_protection_state = var.environment == "prod" ? "DELETE_PROTECTION_ENABLED" : "DELETE_PROTECTION_DISABLED"
+    location_id             = local.firebase_regions.firestore
+  }
+  
+  auth_settings = {
+    enable_email_password   = true
+    enable_phone_auth       = true
+    enable_google_auth      = true
+    enable_anonymous_auth   = true
+    allowed_domains         = ["eatech.ch", "*.eatech.ch"]
+  }
+  
+  storage_buckets = [
+    {
+      name          = "${var.gcp_project_id}.appspot.com"
+      location      = local.firebase_regions.storage
+      storage_class = "STANDARD"
+      lifecycle_rules = [
+        {
+          action = {
+            type = "Delete"
+          }
+          condition = {
+            age = 90
+            matches_prefix = ["temp/"]
+          }
+        }
+      ]
+    }
   ]
 }
 
-# Firestore Database
-resource "google_firestore_database" "eatech" {
-  provider = google-beta
-  project  = var.gcp_project_id
-  name     = "(default)"
-
-  location_id = "eur3"  # Multi-region Europe (includes Zurich)
-  type        = "FIRESTORE_NATIVE"
-
-  # Point-in-time recovery
-  point_in_time_recovery_enablement = "POINT_IN_TIME_RECOVERY_ENABLED"
-
-  # Delete protection
-  delete_protection_state = "DELETE_PROTECTION_ENABLED"
-
-  depends_on = [
-    google_firebase_project.eatech
+# Cloudflare Configuration
+module "cloudflare" {
+  source = "./modules/cloudflare"
+  
+  zone_id     = var.cloudflare_zone_id
+  environment = var.environment
+  
+  dns_records = [
+    {
+      name    = var.environment == "prod" ? "@" : var.environment
+      type    = "A"
+      value   = module.gke.ingress_ip
+      proxied = true
+    },
+    {
+      name    = var.environment == "prod" ? "www" : "www.${var.environment}"
+      type    = "CNAME"
+      value   = var.environment == "prod" ? "eatech.ch" : "${var.environment}.eatech.ch"
+      proxied = true
+    },
+    {
+      name    = var.environment == "prod" ? "api" : "api.${var.environment}"
+      type    = "A"
+      value   = module.gke.ingress_ip
+      proxied = true
+    },
+    {
+      name    = var.environment == "prod" ? "admin" : "admin.${var.environment}"
+      type    = "A"
+      value   = module.gke.ingress_ip
+      proxied = true
+    }
   ]
+  
+  page_rules = [
+    {
+      target = "${var.environment == "prod" ? "" : "${var.environment}."}eatech.ch/api/*"
+      actions = {
+        cache_level = "bypass"
+        ssl         = "flexible"
+      }
+    }
+  ]
+  
+  firewall_rules = var.cloudflare_firewall_rules
+}
+
+# Monitoring & Logging
+resource "google_monitoring_notification_channel" "email" {
+  display_name = "EATECH ${var.environment} Email Alerts"
+  type         = "email"
+  
+  labels = {
+    email_address = var.alert_email
+  }
+}
+
+resource "google_monitoring_alert_policy" "high_error_rate" {
+  display_name = "EATECH ${var.environment} - High Error Rate"
+  combiner     = "OR"
+  
+  conditions {
+    display_name = "Error rate above 5%"
+    
+    condition_threshold {
+      filter          = "resource.type=\"k8s_container\" AND metric.type=\"logging.googleapis.com/user/error_rate\""
+      duration        = "300s"
+      comparison      = "COMPARISON_GT"
+      threshold_value = 0.05
+      
+      aggregations {
+        alignment_period   = "60s"
+        per_series_aligner = "ALIGN_RATE"
+      }
+    }
+  }
+  
+  notification_channels = [google_monitoring_notification_channel.email.id]
+  
+  alert_strategy {
+    auto_close = "1800s"
+  }
+}
+
+# Secrets Management
+resource "google_secret_manager_secret" "app_secrets" {
+  for_each = var.app_secrets
+  
+  secret_id = each.key
+  
+  replication {
+    automatic = true
+  }
+  
+  labels = local.common_labels
+}
+
+resource "google_secret_manager_secret_version" "app_secrets" {
+  for_each = var.app_secrets
+  
+  secret      = google_secret_manager_secret.app_secrets[each.key].id
+  secret_data = each.value
+}
+
+# IAM Bindings
+resource "google_project_iam_member" "gke_service_account_roles" {
+  for_each = toset([
+    "roles/logging.logWriter",
+    "roles/monitoring.metricWriter",
+    "roles/monitoring.viewer",
+    "roles/stackdriver.resourceMetadata.writer",
+    "roles/artifactregistry.reader"
+  ])
+  
+  project = var.gcp_project_id
+  role    = each.key
+  member  = "serviceAccount:${module.gke.service_account_email}"
 }
 
 # Outputs
-output "cluster_endpoint" {
+output "gke_cluster_endpoint" {
+  value       = module.gke.endpoint
   description = "GKE cluster endpoint"
-  value       = google_container_cluster.eatech_cluster.endpoint
   sensitive   = true
 }
 
-output "cluster_ca_certificate" {
-  description = "GKE cluster CA certificate"
-  value       = google_container_cluster.eatech_cluster.master_auth[0].cluster_ca_certificate
-  sensitive   = true
+output "database_connection_name" {
+  value       = module.postgresql.connection_name
+  description = "Cloud SQL connection name"
 }
 
-output "cluster_name" {
-  description = "GKE cluster name"
-  value       = google_container_cluster.eatech_cluster.name
+output "redis_host" {
+  value       = google_redis_instance.eatech_cache.host
+  description = "Redis instance host"
 }
 
-output "firestore_database" {
-  description = "Firestore database name"
-  value       = google_firestore_database.eatech.name
-}
-
-output "project_id" {
-  description = "GCP project ID"
-  value       = var.gcp_project_id
-}
-
-output "region" {
-  description = "GCP region"
-  value       = var.gcp_region
+output "artifact_registry_url" {
+  value       = "${var.gcp_region}-docker.pkg.dev/${var.gcp_project_id}/eatech-${var.environment}"
+  description = "Artifact Registry URL"
 }

@@ -1,0 +1,362 @@
+{
+  "app": {
+    "name": "EATECH",
+    "tagline": "Smart Foodtruck Ordering",
+    "description": "Bestellen Sie bei Ihrem Lieblings-Foodtruck mit Stimme und QR-Code"
+  },
+  "common": {
+    "loading": "Wird geladen...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "warning": "Warnung",
+    "info": "Information",
+    "confirm": "Bestätigen",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schliessen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "finish": "Fertig",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "sort": "Sortieren",
+    "refresh": "Aktualisieren",
+    "retry": "Erneut versuchen",
+    "submit": "Absenden",
+    "reset": "Zurücksetzen",
+    "select": "Auswählen",
+    "all": "Alle",
+    "none": "Keine",
+    "yes": "Ja",
+    "no": "Nein",
+    "or": "oder",
+    "and": "und",
+    "from": "von",
+    "to": "bis",
+    "currency": "CHF",
+    "optional": "Optional",
+    "required": "Erforderlich"
+  },
+  "navigation": {
+    "home": "Startseite",
+    "menu": "Speisekarte",
+    "cart": "Warenkorb",
+    "orders": "Bestellungen",
+    "profile": "Profil",
+    "settings": "Einstellungen",
+    "help": "Hilfe",
+    "about": "Über uns",
+    "contact": "Kontakt",
+    "terms": "AGB",
+    "privacy": "Datenschutz",
+    "logout": "Abmelden",
+    "login": "Anmelden",
+    "signup": "Registrieren"
+  },
+  "auth": {
+    "login": {
+      "title": "Anmelden",
+      "subtitle": "Willkommen zurück",
+      "email": "E-Mail-Adresse",
+      "password": "Passwort",
+      "rememberMe": "Angemeldet bleiben",
+      "forgotPassword": "Passwort vergessen?",
+      "submit": "Anmelden",
+      "noAccount": "Noch kein Konto?",
+      "signupLink": "Jetzt registrieren",
+      "orContinueWith": "Oder fortfahren mit",
+      "anonymousLogin": "Als Gast fortfahren"
+    },
+    "signup": {
+      "title": "Registrieren",
+      "subtitle": "Erstellen Sie Ihr Konto",
+      "name": "Name",
+      "email": "E-Mail-Adresse",
+      "password": "Passwort",
+      "confirmPassword": "Passwort bestätigen",
+      "phone": "Telefonnummer",
+      "terms": "Ich akzeptiere die {{terms}} und {{privacy}}",
+      "termsLink": "Nutzungsbedingungen",
+      "privacyLink": "Datenschutzerklärung",
+      "submit": "Registrieren",
+      "hasAccount": "Bereits ein Konto?",
+      "loginLink": "Jetzt anmelden"
+    },
+    "forgotPassword": {
+      "title": "Passwort zurücksetzen",
+      "subtitle": "Geben Sie Ihre E-Mail-Adresse ein",
+      "email": "E-Mail-Adresse",
+      "submit": "Link senden",
+      "success": "E-Mail wurde gesendet! Bitte überprüfen Sie Ihren Posteingang.",
+      "backToLogin": "Zurück zur Anmeldung"
+    },
+    "verification": {
+      "title": "E-Mail verifizieren",
+      "subtitle": "Bitte überprüfen Sie Ihre E-Mail",
+      "resend": "E-Mail erneut senden",
+      "success": "Verifizierungs-E-Mail wurde gesendet"
+    },
+    "errors": {
+      "invalidCredentials": "Ungültige E-Mail oder Passwort",
+      "userNotFound": "Benutzer nicht gefunden",
+      "emailInUse": "E-Mail wird bereits verwendet",
+      "weakPassword": "Passwort ist zu schwach",
+      "networkError": "Netzwerkfehler. Bitte versuchen Sie es später erneut.",
+      "tooManyRequests": "Zu viele Versuche. Bitte warten Sie einen Moment."
+    }
+  },
+  "menu": {
+    "title": "Speisekarte",
+    "searchPlaceholder": "Gerichte suchen...",
+    "categories": {
+      "all": "Alle",
+      "starters": "Vorspeisen",
+      "mains": "Hauptgerichte",
+      "burgers": "Burger",
+      "wraps": "Wraps",
+      "salads": "Salate",
+      "sides": "Beilagen",
+      "desserts": "Desserts",
+      "drinks": "Getränke",
+      "specials": "Tagesangebote"
+    },
+    "filters": {
+      "title": "Filter",
+      "dietary": "Ernährung",
+      "allergens": "Allergene",
+      "price": "Preis",
+      "vegetarian": "Vegetarisch",
+      "vegan": "Vegan",
+      "glutenFree": "Glutenfrei",
+      "lactoseFree": "Laktosefrei",
+      "halal": "Halal",
+      "kosher": "Koscher"
+    },
+    "item": {
+      "addToCart": "In den Warenkorb",
+      "customize": "Anpassen",
+      "outOfStock": "Nicht verfügbar",
+      "popular": "Beliebt",
+      "new": "Neu",
+      "spicy": "Scharf",
+      "description": "Beschreibung",
+      "ingredients": "Zutaten",
+      "nutrition": "Nährwerte",
+      "allergens": "Allergene"
+    },
+    "modifiers": {
+      "title": "Anpassungen",
+      "required": "Erforderlich",
+      "optional": "Optional",
+      "extras": "Extras",
+      "remove": "Ohne",
+      "add": "Extra",
+      "replace": "Ersetzen"
+    }
+  },
+  "cart": {
+    "title": "Warenkorb",
+    "empty": "Ihr Warenkorb ist leer",
+    "emptySubtitle": "Fügen Sie Artikel aus der Speisekarte hinzu",
+    "items": "{{count}} Artikel",
+    "subtotal": "Zwischensumme",
+    "tax": "MwSt. ({{rate}}%)",
+    "delivery": "Liefergebühr",
+    "discount": "Rabatt",
+    "total": "Gesamt",
+    "checkout": "Zur Kasse",
+    "continueShopping": "Weiter einkaufen",
+    "removeItem": "Artikel entfernen",
+    "updateQuantity": "Menge aktualisieren",
+    "specialInstructions": "Spezielle Anweisungen",
+    "promoCode": {
+      "title": "Gutscheincode",
+      "placeholder": "Code eingeben",
+      "apply": "Anwenden",
+      "remove": "Entfernen",
+      "invalid": "Ungültiger Code",
+      "success": "Code angewendet"
+    },
+    "minimum": "Mindestbestellwert: {{amount}}",
+    "maximum": "Maximaler Bestellwert: {{amount}}"
+  },
+  "checkout": {
+    "title": "Kasse",
+    "steps": {
+      "delivery": "Lieferung",
+      "payment": "Zahlung",
+      "confirm": "Bestätigen"
+    },
+    "delivery": {
+      "title": "Lieferdetails",
+      "type": "Lieferart",
+      "pickup": "Abholung",
+      "delivery": "Lieferung",
+      "tableService": "Tischservice",
+      "address": "Lieferadresse",
+      "time": "Gewünschte Zeit",
+      "asap": "So schnell wie möglich",
+      "scheduled": "Geplant",
+      "tableNumber": "Tischnummer",
+      "notes": "Anmerkungen",
+      "notesPlaceholder": "z.B. Klingel funktioniert nicht, 3. Stock"
+    },
+    "payment": {
+      "title": "Zahlungsmethode",
+      "methods": {
+        "card": "Kredit-/Debitkarte",
+        "twint": "TWINT",
+        "postfinance": "PostFinance",
+        "cash": "Barzahlung"
+      },
+      "cardNumber": "Kartennummer",
+      "cardHolder": "Karteninhaber",
+      "expiryDate": "Ablaufdatum",
+      "cvv": "CVV",
+      "saveCard": "Karte für zukünftige Zahlungen speichern",
+      "processing": "Zahlung wird verarbeitet...",
+      "secure": "Sichere Zahlung"
+    },
+    "confirm": {
+      "title": "Bestellung bestätigen",
+      "review": "Bitte überprüfen Sie Ihre Bestellung",
+      "agree": "Ich akzeptiere die {{terms}}",
+      "termsLink": "Allgemeinen Geschäftsbedingungen",
+      "placeOrder": "Bestellung aufgeben",
+      "total": "Gesamtbetrag"
+    }
+  },
+  "order": {
+    "title": "Bestellung",
+    "number": "Bestellnummer",
+    "status": {
+      "pending": "Ausstehend",
+      "confirmed": "Bestätigt",
+      "preparing": "In Zubereitung",
+      "ready": "Bereit zur Abholung",
+      "delivered": "Unterwegs",
+      "completed": "Abgeschlossen",
+      "cancelled": "Storniert"
+    },
+    "details": {
+      "title": "Bestelldetails",
+      "items": "Artikel",
+      "delivery": "Lieferung",
+      "payment": "Zahlung",
+      "notes": "Anmerkungen",
+      "orderedAt": "Bestellt am",
+      "estimatedTime": "Geschätzte Zeit",
+      "deliveryAddress": "Lieferadresse",
+      "phoneNumber": "Telefonnummer"
+    },
+    "actions": {
+      "track": "Verfolgen",
+      "cancel": "Stornieren",
+      "reorder": "Erneut bestellen",
+      "receipt": "Quittung",
+      "help": "Hilfe"
+    },
+    "tracking": {
+      "title": "Bestellung verfolgen",
+      "live": "Live-Verfolgung",
+      "estimatedArrival": "Geschätzte Ankunft",
+      "driver": "Fahrer",
+      "callDriver": "Fahrer anrufen"
+    },
+    "success": {
+      "title": "Bestellung erfolgreich!",
+      "subtitle": "Vielen Dank für Ihre Bestellung",
+      "orderNumber": "Ihre Bestellnummer ist",
+      "estimatedTime": "Geschätzte Zeit: {{time}} Minuten",
+      "trackOrder": "Bestellung verfolgen",
+      "backToMenu": "Zurück zur Speisekarte"
+    }
+  },
+  "profile": {
+    "title": "Mein Profil",
+    "personalInfo": "Persönliche Informationen",
+    "name": "Name",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "language": "Sprache",
+    "addresses": "Adressen",
+    "addAddress": "Adresse hinzufügen",
+    "defaultAddress": "Standardadresse",
+    "savedCards": "Gespeicherte Karten",
+    "preferences": "Einstellungen",
+    "notifications": "Benachrichtigungen",
+    "newsletter": "Newsletter",
+    "orderHistory": "Bestellverlauf",
+    "favorites": "Favoriten",
+    "loyalty": "Treuepunkte",
+    "deleteAccount": "Konto löschen"
+  },
+  "voice": {
+    "title": "Sprachbestellung",
+    "button": "Zum Sprechen tippen",
+    "listening": "Ich höre zu...",
+    "processing": "Verarbeite...",
+    "speak": "Sprechen Sie jetzt",
+    "examples": {
+      "title": "Beispielbefehle:",
+      "order": "\"Ich möchte einen Cheeseburger bestellen\"",
+      "add": "\"Füge Pommes hinzu\"",
+      "remove": "\"Entferne die Cola\"",
+      "checkout": "\"Zur Kasse gehen\"",
+      "help": "\"Hilfe\""
+    },
+    "errors": {
+      "notSupported": "Spracherkennung wird nicht unterstützt",
+      "noMicrophone": "Kein Mikrofon gefunden",
+      "permissionDenied": "Mikrofonzugriff verweigert",
+      "notUnderstood": "Entschuldigung, ich habe das nicht verstanden"
+    }
+  },
+  "notifications": {
+    "orderConfirmed": "Ihre Bestellung wurde bestätigt",
+    "orderReady": "Ihre Bestellung ist bereit",
+    "orderDelivered": "Ihre Bestellung wurde geliefert",
+    "newPromotion": "Neue Aktion verfügbar",
+    "pointsEarned": "Sie haben {{points}} Punkte verdient"
+  },
+  "errors": {
+    "general": "Ein Fehler ist aufgetreten",
+    "network": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.",
+    "server": "Serverfehler. Bitte versuchen Sie es später erneut.",
+    "notFound": "Seite nicht gefunden",
+    "unauthorized": "Nicht autorisiert",
+    "forbidden": "Zugriff verweigert",
+    "validation": "Bitte überprüfen Sie Ihre Eingaben",
+    "timeout": "Zeitüberschreitung der Anfrage"
+  },
+  "offline": {
+    "title": "Sie sind offline",
+    "subtitle": "Bitte überprüfen Sie Ihre Internetverbindung",
+    "retry": "Erneut versuchen"
+  },
+  "pwa": {
+    "install": {
+      "title": "App installieren",
+      "subtitle": "Installieren Sie EATECH für ein besseres Erlebnis",
+      "button": "Installieren",
+      "later": "Später"
+    },
+    "update": {
+      "title": "Update verfügbar",
+      "subtitle": "Eine neue Version ist verfügbar",
+      "button": "Aktualisieren",
+      "later": "Später"
+    }
+  },
+  "accessibility": {
+    "skipToContent": "Zum Inhalt springen",
+    "menu": "Menü",
+    "close": "Schliessen",
+    "loading": "Wird geladen",
+    "image": "Bild",
+    "button": "Schaltfläche",
+    "link": "Link"
+  }
+}

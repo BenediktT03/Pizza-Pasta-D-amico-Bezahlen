@@ -1,0 +1,239 @@
+import React{{#if hasState}}, { useState, useEffect }{{/if}}{{#if hasHooks}}, { {{hooks}} }{{/if}} from 'react';
+{{#if hasStyles}}import styles from './{{componentName}}.module.css';{{/if}}
+{{#if hasTypes}}import type { {{componentName}}Props } from './{{componentName}}.types';{{/if}}
+{{#each imports}}
+import {{this.name}} from '{{this.path}}';
+{{/each}}
+
+{{#if hasTypes}}
+interface {{componentName}}Props {
+  {{#each props}}
+  {{this.name}}{{#if this.optional}}?{{/if}}: {{this.type}};
+  {{/each}}
+}
+{{/if}}
+
+/**
+ * {{description}}
+ * @component
+ * @example
+ * ```tsx
+ * <{{componentName}}
+ *   {{#each props}}
+ *   {{this.name}}={{this.example}}
+ *   {{/each}}
+ * />
+ * ```
+ */
+{{#if isExport}}export {{/if}}const {{componentName}}{{#if hasTypes}}: React.FC<{{componentName}}Props>{{/if}} = ({{#if hasProps}}{
+  {{#each props}}
+  {{this.name}}{{#if this.defaultValue}} = {{this.defaultValue}}{{/if}},
+  {{/each}}
+}{{/if}}) => {
+  {{#if hasState}}
+  // State management
+  {{#each states}}
+  const [{{this.name}}, set{{this.setter}}] = useState{{#if this.type}}<{{this.type}}>{{/if}}({{this.initial}});
+  {{/each}}
+  {{/if}}
+
+  {{#if hasEffects}}
+  // Side effects
+  {{#each effects}}
+  useEffect(() => {
+    {{this.body}}
+  }, [{{this.deps}}]);
+  {{/each}}
+  {{/if}}
+
+  {{#if hasHandlers}}
+  // Event handlers
+  {{#each handlers}}
+  const {{this.name}} = {{#if this.async}}async {{/if}}({{this.params}}) => {
+    {{this.body}}
+  };
+  {{/each}}
+  {{/if}}
+
+  {{#if hasHelpers}}
+  // Helper functions
+  {{#each helpers}}
+  const {{this.name}} = ({{this.params}}) => {
+    {{this.body}}
+  };
+  {{/each}}
+  {{/if}}
+
+  return (
+    <{{wrapper}}{{#if hasStyles}} className={styles.{{rootClass}}}{{/if}}{{#if hasTestId}} data-testid="{{testId}}"{{/if}}>
+      {{#if hasHeader}}
+      <header className={styles.header}>
+        <h2>{title}</h2>
+      </header>
+      {{/if}}
+      
+      {{#if hasContent}}
+      <div className={styles.content}>
+        {/* Component content */}
+        {{content}}
+      </div>
+      {{/if}}
+
+      {{#if hasChildren}}
+      {children}
+      {{/if}}
+
+      {{#if hasFooter}}
+      <footer className={styles.footer}>
+        {/* Footer content */}
+      </footer>
+      {{/if}}
+    </{{wrapper}}>
+  );
+};
+
+{{#if hasMemo}}
+export default React.memo({{componentName}});
+{{else}}
+export default {{componentName}};
+{{/if}}
+
+{{#if hasDisplayName}}
+{{componentName}}.displayName = '{{componentName}}';
+{{/if}}
+
+// CSS Module Template ({{componentName}}.module.css)
+/*
+.{{rootClass}} {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: var(--color-background);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.content {
+  flex: 1;
+  overflow: auto;
+}
+
+.footer {
+  display: flex;
+  gap: var(--spacing-sm);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+}
+
+@media (max-width: 768px) {
+  .{{rootClass}} {
+    padding: var(--spacing-md);
+  }
+}
+*/
+
+// TypeScript Types Template ({{componentName}}.types.ts)
+/*
+export interface {{componentName}}Props {
+  {{#each props}}
+  {{this.name}}{{#if this.optional}}?{{/if}}: {{this.type}};
+  {{/each}}
+}
+
+{{#if hasComplexTypes}}
+export interface {{componentName}}State {
+  {{#each states}}
+  {{this.name}}: {{this.type}};
+  {{/each}}
+}
+
+export type {{componentName}}Action = 
+  {{#each actions}}
+  | { type: '{{this.type}}'; payload: {{this.payload}} }
+  {{/each}};
+{{/if}}
+*/
+
+// Test Template ({{componentName}}.test.tsx)
+/*
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { {{componentName}} } from './{{componentName}}';
+
+describe('{{componentName}}', () => {
+  const defaultProps = {
+    {{#each props}}
+    {{this.name}}: {{this.testValue}},
+    {{/each}}
+  };
+
+  it('renders without crashing', () => {
+    render(<{{componentName}} {...defaultProps} />);
+    expect(screen.getByTestId('{{testId}}')).toBeInTheDocument();
+  });
+
+  {{#each testCases}}
+  it('{{this.description}}', {{#if this.async}}async {{/if}}() => {
+    {{this.body}}
+  });
+  {{/each}}
+});
+*/
+
+// Storybook Story Template ({{componentName}}.stories.tsx)
+/*
+import type { Meta, StoryObj } from '@storybook/react';
+import { {{componentName}} } from './{{componentName}}';
+
+const meta: Meta<typeof {{componentName}}> = {
+  title: '{{storyCategory}}/{{componentName}}',
+  component: {{componentName}},
+  parameters: {
+    layout: '{{layout}}',
+    docs: {
+      description: {
+        component: '{{description}}'
+      }
+    }
+  },
+  tags: ['autodocs'],
+  argTypes: {
+    {{#each props}}
+    {{this.name}}: {
+      control: '{{this.control}}',
+      description: '{{this.description}}'
+    },
+    {{/each}}
+  }
+};
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  args: {
+    {{#each props}}
+    {{this.name}}: {{this.defaultValue}},
+    {{/each}}
+  }
+};
+
+{{#each stories}}
+export const {{this.name}}: Story = {
+  args: {
+    {{#each this.args}}
+    {{@key}}: {{this}},
+    {{/each}}
+  }
+};
+{{/each}}
+*/

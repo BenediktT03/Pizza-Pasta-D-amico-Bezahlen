@@ -18,3 +18,72 @@
     "vitest": "^1.1.0"
   }
 }
+{
+  "name": "@eatech/ai",
+  "version": "1.0.0",
+  "description": "AI services for EATECH platform - price optimization, demand forecasting, emergency detection",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src --ext .ts,.tsx",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "openai": "^4.26.0",
+    "@tensorflow/tfjs": "^4.15.0",
+    "natural": "^6.10.0",
+    "compromise": "^14.10.0",
+    "ml-regression": "^5.0.0",
+    "simple-statistics": "^7.8.3",
+    "brain.js": "^2.0.0-beta.23",
+    "axios": "^1.6.5",
+    "date-fns": "^3.2.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11",
+    "@types/lodash": "^4.14.202",
+    "@types/node": "^20.11.5",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "firebase": "^10.7.2",
+    "react": "^18.2.0"
+  },
+  "keywords": [
+    "ai",
+    "machine-learning",
+    "price-optimization",
+    "demand-forecasting",
+    "foodtech",
+    "eatech"
+  ],
+  "author": "EATECH Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eatech/monorepo.git",
+    "directory": "packages/ai"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

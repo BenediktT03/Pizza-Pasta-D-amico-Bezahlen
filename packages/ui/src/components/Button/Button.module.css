@@ -1,0 +1,116 @@
+/* Button Component Styles */
+
+.button {
+  @apply relative overflow-hidden;
+}
+
+/* Ripple effect */
+.button::before {
+  content: '';
+  @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
+}
+
+.button:active::before {
+  @apply opacity-100;
+}
+
+/* Loading state */
+.button[data-loading='true'] {
+  @apply cursor-not-allowed;
+}
+
+/* Swiss theme specific styles */
+.swiss {
+  @apply relative;
+}
+
+.swiss::after {
+  content: '';
+  @apply absolute inset-0 bg-white opacity-0 transition-opacity duration-200;
+}
+
+.swiss:hover::after {
+  @apply opacity-10;
+}
+
+/* Gradient variant animations */
+.gradient {
+  @apply bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_100%] animate-gradient;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+/* Focus styles for accessibility */
+.button:focus-visible {
+  @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+}
+
+/* Disabled state */
+.button:disabled {
+  @apply cursor-not-allowed opacity-50;
+}
+
+/* Icon button adjustments */
+.icon {
+  @apply p-0;
+}
+
+.icon > * {
+  @apply h-5 w-5;
+}
+
+/* Button group styles */
+.buttonGroup {
+  @apply inline-flex -space-x-px;
+}
+
+.buttonGroup .button:not(:first-child) {
+  @apply rounded-l-none;
+}
+
+.buttonGroup .button:not(:last-child) {
+  @apply rounded-r-none;
+}
+
+/* Elevated button shadow */
+.elevated {
+  @apply shadow-lg hover:shadow-xl transition-shadow duration-200;
+}
+
+/* Floating action button */
+.fab {
+  @apply fixed bottom-4 right-4 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200;
+}
+
+.fab:hover {
+  @apply -translate-y-1;
+}
+
+/* Pulse animation for attention */
+.pulse {
+  @apply animate-pulse;
+}
+
+/* Custom animations */
+@keyframes slideIn {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.slideIn {
+  animation: slideIn 0.3s ease-out;
+}

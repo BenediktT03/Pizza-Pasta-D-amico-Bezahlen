@@ -1,0 +1,224 @@
+# EATECH V3.0 - Docker Compose for Development
+version: '3.9'
+
+services:
+  # Web Application (Customer Frontend)
+  web:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.web
+      args:
+        - NODE_ENV=development
+    container_name: eatech-web
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../../apps/web:/app/apps/web
+      - ../../packages:/app/packages
+      - /app/node_modules
+      - /app/apps/web/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}
+      - VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN}
+      - VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID}
+      - VITE_FIREBASE_STORAGE_BUCKET=${VITE_FIREBASE_STORAGE_BUCKET}
+      - VITE_FIREBASE_MESSAGING_SENDER_ID=${VITE_FIREBASE_MESSAGING_SENDER_ID}
+      - VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}
+      - VITE_STRIPE_PUBLIC_KEY=${VITE_STRIPE_PUBLIC_KEY}
+      - VITE_TWINT_MERCHANT_ID=${VITE_TWINT_MERCHANT_ID}
+    networks:
+      - eatech-network
+    restart: unless-stopped
+
+  # Admin Dashboard
+  admin:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.admin
+      args:
+        - NODE_ENV=development
+    container_name: eatech-admin
+    ports:
+      - "3001:8080"
+    volumes:
+      - ../../apps/admin:/app/apps/admin
+      - ../../packages:/app/packages
+      - /app/node_modules
+      - /app/apps/admin/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}
+      - VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN}
+      - VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID}
+      - VITE_FIREBASE_STORAGE_BUCKET=${VITE_FIREBASE_STORAGE_BUCKET}
+      - VITE_FIREBASE_MESSAGING_SENDER_ID=${VITE_FIREBASE_MESSAGING_SENDER_ID}
+      - VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}
+    networks:
+      - eatech-network
+    restart: unless-stopped
+
+  # Master Control Panel
+  master:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.web
+      args:
+        - NODE_ENV=development
+        - APP_NAME=master
+    container_name: eatech-master
+    ports:
+      - "3002:3000"
+    volumes:
+      - ../../apps/master:/app/apps/master
+      - ../../packages:/app/packages
+      - /app/node_modules
+      - /app/apps/master/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}
+      - VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN}
+      - VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID}
+      - VITE_FIREBASE_STORAGE_BUCKET=${VITE_FIREBASE_STORAGE_BUCKET}
+      - VITE_FIREBASE_MESSAGING_SENDER_ID=${VITE_FIREBASE_MESSAGING_SENDER_ID}
+      - VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}
+      - VITE_MASTER_API_KEY=${VITE_MASTER_API_KEY}
+    networks:
+      - eatech-network
+    restart: unless-stopped
+
+  # Kitchen Display
+  kitchen:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.web
+      args:
+        - NODE_ENV=development
+        - APP_NAME=kitchen
+    container_name: eatech-kitchen
+    ports:
+      - "3003:3000"
+    volumes:
+      - ../../apps/kitchen:/app/apps/kitchen
+      - ../../packages:/app/packages
+      - /app/node_modules
+      - /app/apps/kitchen/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}
+      - VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN}
+      - VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID}
+      - VITE_FIREBASE_STORAGE_BUCKET=${VITE_FIREBASE_STORAGE_BUCKET}
+      - VITE_FIREBASE_MESSAGING_SENDER_ID=${VITE_FIREBASE_MESSAGING_SENDER_ID}
+      - VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}
+    networks:
+      - eatech-network
+    restart: unless-stopped
+
+  # Firebase Functions Emulator
+  functions:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.functions
+    container_name: eatech-functions
+    ports:
+      - "5001:5001" # Functions
+      - "5002:5002" # Firestore
+      - "4000:4000" # Emulator UI
+      - "9099:9099" # Auth
+    volumes:
+      - ../../services/functions:/app/services/functions
+      - ../../packages:/app/packages
+      - /app/node_modules
+      - /app/services/functions/node_modules
+    environment:
+      - NODE_ENV=development
+      - FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
+      - FIRESTORE_EMULATOR_HOST=localhost:5002
+      - FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - TWINT_API_KEY=${TWINT_API_KEY}
+      - TWINT_WEBHOOK_SECRET=${TWINT_WEBHOOK_SECRET}
+    networks:
+      - eatech-network
+    restart: unless-stopped
+
+  # PostgreSQL Database (for analytics and reports)
+  postgres:
+    image: postgres:16-alpine
+    container_name: eatech-postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../../infrastructure/docker/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_DB=eatech
+      - POSTGRES_USER=eatech_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-eatech_dev_password}
+    networks:
+      - eatech-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eatech_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: eatech-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-eatech_dev_password}
+    networks:
+      - eatech-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: eatech-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../../infrastructure/docker/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+      - ../../infrastructure/docker/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - web
+      - admin
+      - master
+      - kitchen
+      - functions
+    networks:
+      - eatech-network
+    restart: unless-stopped
+
+  # Mailhog for Email Testing
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: eatech-mailhog
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    networks:
+      - eatech-network
+    restart: unless-stopped
+
+networks:
+  eatech-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

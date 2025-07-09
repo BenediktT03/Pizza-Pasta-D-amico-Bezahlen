@@ -1,6 +1,64 @@
-﻿{
+{
   "name": "@eatech/config",
   "version": "1.0.0",
-  "private": true,
-  "main": "index.js"
+  "description": "Configuration management for Eatech platform",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./app": {
+      "import": "./dist/app.config.mjs",
+      "require": "./dist/app.config.js",
+      "types": "./dist/app.config.d.ts"
+    },
+    "./firebase": {
+      "import": "./dist/firebase.config.mjs",
+      "require": "./dist/firebase.config.js",
+      "types": "./dist/firebase.config.d.ts"
+    },
+    "./payment": {
+      "import": "./dist/payment.config.mjs",
+      "require": "./dist/payment.config.js",
+      "types": "./dist/payment.config.d.ts"
+    },
+    "./features": {
+      "import": "./dist/features.config.mjs",
+      "require": "./dist/features.config.js",
+      "types": "./dist/features.config.d.ts"
+    },
+    "./locales": {
+      "import": "./dist/locales.config.mjs",
+      "require": "./dist/locales.config.js",
+      "types": "./dist/locales.config.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint src/",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@eatech/types": "workspace:*",
+    "dotenv": "^16.3.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+  
+  <!-- Landing Page -->
+  <url>
+    <loc>https://eatech.ch/</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.00</priority>
+  </url>
+  
+  <!-- Features Page -->
+  <url>
+    <loc>https://eatech.ch/features</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  
+  <!-- Pricing Page -->
+  <url>
+    <loc>https://eatech.ch/pricing</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  
+  <!-- Contact Page -->
+  <url>
+    <loc>https://eatech.ch/contact</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  
+  <!-- About Page -->
+  <url>
+    <loc>https://eatech.ch/about</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  
+  <!-- Legal Pages -->
+  <url>
+    <loc>https://eatech.ch/terms</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.50</priority>
+  </url>
+  
+  <url>
+    <loc>https://eatech.ch/privacy</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.50</priority>
+  </url>
+  
+  <url>
+    <loc>https://eatech.ch/impressum</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.50</priority>
+  </url>
+  
+  <!-- App Entry Points -->
+  <url>
+    <loc>https://app.eatech.ch/</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.90</priority>
+  </url>
+  
+  <url>
+    <loc>https://admin.eatech.ch/</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.80</priority>
+  </url>
+  
+  <url>
+    <loc>https://master.eatech.ch/</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.70</priority>
+  </url>
+  
+  <!-- Support Pages -->
+  <url>
+    <loc>https://eatech.ch/support</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  
+  <url>
+    <loc>https://eatech.ch/faq</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  
+  <!-- Documentation -->
+  <url>
+    <loc>https://docs.eatech.ch/</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  
+  <!-- Blog/News (für später) -->
+  <url>
+    <loc>https://eatech.ch/blog</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  
+  <!-- Partner Pages -->
+  <url>
+    <loc>https://eatech.ch/partner</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  
+  <!-- Language Variants -->
+  <url>
+    <loc>https://eatech.ch/de</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  
+  <url>
+    <loc>https://eatech.ch/fr</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  
+  <url>
+    <loc>https://eatech.ch/it</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  
+  <url>
+    <loc>https://eatech.ch/en</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  
+  <!-- Status Page -->
+  <url>
+    <loc>https://status.eatech.ch/</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>always</changefreq>
+    <priority>0.60</priority>
+  </url>
+  
+  <!-- Manager Portal -->
+  <url>
+    <loc>https://manager.eatech.ch/</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.80</priority>
+  </url>
+  
+  <!-- Kitchen Display -->
+  <url>
+    <loc>https://kitchen.eatech.ch/</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.70</priority>
+  </url>
+  
+  <!-- Demo/Sandbox -->
+  <url>
+    <loc>https://demo.eatech.ch/</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  
+  <!-- Developer Resources -->
+  <url>
+    <loc>https://eatech.ch/developers</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  
+  <url>
+    <loc>https://eatech.ch/api</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  
+  <!-- Careers/Jobs -->
+  <url>
+    <loc>https://eatech.ch/careers</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  
+  <!-- Press/Media -->
+  <url>
+    <loc>https://eatech.ch/press</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  
+  <!-- Success Stories -->
+  <url>
+    <loc>https://eatech.ch/success-stories</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  
+  <!-- Events -->
+  <url>
+    <loc>https://eatech.ch/events</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  
+  <!-- Newsletter Signup -->
+  <url>
+    <loc>https://eatech.ch/newsletter</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  
+  <!-- Downloads/Resources -->
+  <url>
+    <loc>https://eatech.ch/downloads</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  
+  <!-- Webinar Registration -->
+  <url>
+    <loc>https://eatech.ch/webinar</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  
+  <!-- Referral Program -->
+  <url>
+    <loc>https://eatech.ch/referral</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  
+  <!-- Security -->
+  <url>
+    <loc>https://eatech.ch/security</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>quarterly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  
+  <!-- Compliance -->
+  <url>
+    <loc>https://eatech.ch/compliance</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>quarterly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  
+  <!-- Integration Partners -->
+  <url>
+    <loc>https://eatech.ch/integrations</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  
+  <!-- Roadmap -->
+  <url>
+    <loc>https://eatech.ch/roadmap</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  
+  <!-- Changelog -->
+  <url>
+    <loc>https://eatech.ch/changelog</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  
+  <!-- Community -->
+  <url>
+    <loc>https://eatech.ch/community</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  
+  <!-- Trust Center -->
+  <url>
+    <loc>https://eatech.ch/trust</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>quarterly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  
+  <!-- Accessibility -->
+  <url>
+    <loc>https://eatech.ch/accessibility</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.50</priority>
+  </url>
+  
+  <!-- Cookie Policy -->
+  <url>
+    <loc>https://eatech.ch/cookies</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.50</priority>
+  </url>
+  
+  <!-- Sitemap -->
+  <url>
+    <loc>https://eatech.ch/sitemap</loc>
+    <lastmod>2024-03-15T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.50</priority>
+  </url>
+  
+</urlset>

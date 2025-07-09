@@ -1,0 +1,362 @@
+{
+  "app": {
+    "name": "EATECH",
+    "tagline": "Ordini Foodtruck Intelligenti",
+    "description": "Ordina dal tuo foodtruck preferito con voce e codice QR"
+  },
+  "common": {
+    "loading": "Caricamento...",
+    "error": "Errore",
+    "success": "Successo",
+    "warning": "Avviso",
+    "info": "Informazione",
+    "confirm": "Conferma",
+    "cancel": "Annulla",
+    "save": "Salva",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "close": "Chiudi",
+    "back": "Indietro",
+    "next": "Avanti",
+    "finish": "Fine",
+    "search": "Cerca",
+    "filter": "Filtra",
+    "sort": "Ordina",
+    "refresh": "Aggiorna",
+    "retry": "Riprova",
+    "submit": "Invia",
+    "reset": "Reimposta",
+    "select": "Seleziona",
+    "all": "Tutti",
+    "none": "Nessuno",
+    "yes": "Sì",
+    "no": "No",
+    "or": "o",
+    "and": "e",
+    "from": "da",
+    "to": "a",
+    "currency": "CHF",
+    "optional": "Opzionale",
+    "required": "Obbligatorio"
+  },
+  "navigation": {
+    "home": "Home",
+    "menu": "Menu",
+    "cart": "Carrello",
+    "orders": "Ordini",
+    "profile": "Profilo",
+    "settings": "Impostazioni",
+    "help": "Aiuto",
+    "about": "Chi siamo",
+    "contact": "Contatti",
+    "terms": "Termini",
+    "privacy": "Privacy",
+    "logout": "Esci",
+    "login": "Accedi",
+    "signup": "Registrati"
+  },
+  "auth": {
+    "login": {
+      "title": "Accedi",
+      "subtitle": "Bentornato",
+      "email": "Indirizzo email",
+      "password": "Password",
+      "rememberMe": "Ricordami",
+      "forgotPassword": "Password dimenticata?",
+      "submit": "Accedi",
+      "noAccount": "Non hai un account?",
+      "signupLink": "Registrati ora",
+      "orContinueWith": "O continua con",
+      "anonymousLogin": "Continua come ospite"
+    },
+    "signup": {
+      "title": "Registrati",
+      "subtitle": "Crea il tuo account",
+      "name": "Nome",
+      "email": "Indirizzo email",
+      "password": "Password",
+      "confirmPassword": "Conferma password",
+      "phone": "Numero di telefono",
+      "terms": "Accetto i {{terms}} e la {{privacy}}",
+      "termsLink": "termini di servizio",
+      "privacyLink": "politica sulla privacy",
+      "submit": "Registrati",
+      "hasAccount": "Hai già un account?",
+      "loginLink": "Accedi ora"
+    },
+    "forgotPassword": {
+      "title": "Reimposta password",
+      "subtitle": "Inserisci il tuo indirizzo email",
+      "email": "Indirizzo email",
+      "submit": "Invia link",
+      "success": "Email inviata! Controlla la tua casella di posta.",
+      "backToLogin": "Torna al login"
+    },
+    "verification": {
+      "title": "Verifica email",
+      "subtitle": "Controlla la tua email",
+      "resend": "Invia di nuovo email",
+      "success": "Email di verifica inviata"
+    },
+    "errors": {
+      "invalidCredentials": "Email o password non validi",
+      "userNotFound": "Utente non trovato",
+      "emailInUse": "Email già in uso",
+      "weakPassword": "Password troppo debole",
+      "networkError": "Errore di rete. Riprova più tardi.",
+      "tooManyRequests": "Troppi tentativi. Attendi un momento."
+    }
+  },
+  "menu": {
+    "title": "Menu",
+    "searchPlaceholder": "Cerca piatti...",
+    "categories": {
+      "all": "Tutti",
+      "starters": "Antipasti",
+      "mains": "Piatti principali",
+      "burgers": "Burger",
+      "wraps": "Wraps",
+      "salads": "Insalate",
+      "sides": "Contorni",
+      "desserts": "Dolci",
+      "drinks": "Bevande",
+      "specials": "Offerte del giorno"
+    },
+    "filters": {
+      "title": "Filtri",
+      "dietary": "Dieta",
+      "allergens": "Allergeni",
+      "price": "Prezzo",
+      "vegetarian": "Vegetariano",
+      "vegan": "Vegano",
+      "glutenFree": "Senza glutine",
+      "lactoseFree": "Senza lattosio",
+      "halal": "Halal",
+      "kosher": "Kosher"
+    },
+    "item": {
+      "addToCart": "Aggiungi al carrello",
+      "customize": "Personalizza",
+      "outOfStock": "Non disponibile",
+      "popular": "Popolare",
+      "new": "Nuovo",
+      "spicy": "Piccante",
+      "description": "Descrizione",
+      "ingredients": "Ingredienti",
+      "nutrition": "Valori nutrizionali",
+      "allergens": "Allergeni"
+    },
+    "modifiers": {
+      "title": "Personalizzazioni",
+      "required": "Obbligatorio",
+      "optional": "Opzionale",
+      "extras": "Extra",
+      "remove": "Senza",
+      "add": "Extra",
+      "replace": "Sostituisci"
+    }
+  },
+  "cart": {
+    "title": "Carrello",
+    "empty": "Il tuo carrello è vuoto",
+    "emptySubtitle": "Aggiungi articoli dal menu",
+    "items": "{{count}} articoli",
+    "subtotal": "Subtotale",
+    "tax": "IVA ({{rate}}%)",
+    "delivery": "Spese di consegna",
+    "discount": "Sconto",
+    "total": "Totale",
+    "checkout": "Procedi all'ordine",
+    "continueShopping": "Continua lo shopping",
+    "removeItem": "Rimuovi articolo",
+    "updateQuantity": "Aggiorna quantità",
+    "specialInstructions": "Istruzioni speciali",
+    "promoCode": {
+      "title": "Codice promozionale",
+      "placeholder": "Inserisci codice",
+      "apply": "Applica",
+      "remove": "Rimuovi",
+      "invalid": "Codice non valido",
+      "success": "Codice applicato"
+    },
+    "minimum": "Ordine minimo: {{amount}}",
+    "maximum": "Ordine massimo: {{amount}}"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "steps": {
+      "delivery": "Consegna",
+      "payment": "Pagamento",
+      "confirm": "Conferma"
+    },
+    "delivery": {
+      "title": "Dettagli consegna",
+      "type": "Tipo di consegna",
+      "pickup": "Ritiro",
+      "delivery": "Consegna",
+      "tableService": "Servizio al tavolo",
+      "address": "Indirizzo di consegna",
+      "time": "Orario desiderato",
+      "asap": "Il prima possibile",
+      "scheduled": "Programmato",
+      "tableNumber": "Numero tavolo",
+      "notes": "Note",
+      "notesPlaceholder": "es. campanello non funziona, 3° piano"
+    },
+    "payment": {
+      "title": "Metodo di pagamento",
+      "methods": {
+        "card": "Carta di credito/debito",
+        "twint": "TWINT",
+        "postfinance": "PostFinance",
+        "cash": "Contanti"
+      },
+      "cardNumber": "Numero carta",
+      "cardHolder": "Titolare carta",
+      "expiryDate": "Data di scadenza",
+      "cvv": "CVV",
+      "saveCard": "Salva carta per pagamenti futuri",
+      "processing": "Elaborazione pagamento...",
+      "secure": "Pagamento sicuro"
+    },
+    "confirm": {
+      "title": "Conferma ordine",
+      "review": "Rivedi il tuo ordine",
+      "agree": "Accetto i {{terms}}",
+      "termsLink": "termini e condizioni",
+      "placeOrder": "Conferma ordine",
+      "total": "Importo totale"
+    }
+  },
+  "order": {
+    "title": "Ordine",
+    "number": "Numero ordine",
+    "status": {
+      "pending": "In attesa",
+      "confirmed": "Confermato",
+      "preparing": "In preparazione",
+      "ready": "Pronto per il ritiro",
+      "delivered": "In consegna",
+      "completed": "Completato",
+      "cancelled": "Annullato"
+    },
+    "details": {
+      "title": "Dettagli ordine",
+      "items": "Articoli",
+      "delivery": "Consegna",
+      "payment": "Pagamento",
+      "notes": "Note",
+      "orderedAt": "Ordinato il",
+      "estimatedTime": "Tempo stimato",
+      "deliveryAddress": "Indirizzo di consegna",
+      "phoneNumber": "Numero di telefono"
+    },
+    "actions": {
+      "track": "Traccia",
+      "cancel": "Annulla",
+      "reorder": "Ordina di nuovo",
+      "receipt": "Ricevuta",
+      "help": "Aiuto"
+    },
+    "tracking": {
+      "title": "Traccia ordine",
+      "live": "Tracciamento live",
+      "estimatedArrival": "Arrivo stimato",
+      "driver": "Autista",
+      "callDriver": "Chiama autista"
+    },
+    "success": {
+      "title": "Ordine completato!",
+      "subtitle": "Grazie per il tuo ordine",
+      "orderNumber": "Il tuo numero d'ordine è",
+      "estimatedTime": "Tempo stimato: {{time}} minuti",
+      "trackOrder": "Traccia ordine",
+      "backToMenu": "Torna al menu"
+    }
+  },
+  "profile": {
+    "title": "Il mio profilo",
+    "personalInfo": "Informazioni personali",
+    "name": "Nome",
+    "email": "Email",
+    "phone": "Telefono",
+    "language": "Lingua",
+    "addresses": "Indirizzi",
+    "addAddress": "Aggiungi indirizzo",
+    "defaultAddress": "Indirizzo predefinito",
+    "savedCards": "Carte salvate",
+    "preferences": "Preferenze",
+    "notifications": "Notifiche",
+    "newsletter": "Newsletter",
+    "orderHistory": "Storico ordini",
+    "favorites": "Preferiti",
+    "loyalty": "Punti fedeltà",
+    "deleteAccount": "Elimina account"
+  },
+  "voice": {
+    "title": "Ordine vocale",
+    "button": "Tocca per parlare",
+    "listening": "Sto ascoltando...",
+    "processing": "Elaborazione...",
+    "speak": "Parla ora",
+    "examples": {
+      "title": "Esempi di comandi:",
+      "order": "\"Vorrei ordinare un cheeseburger\"",
+      "add": "\"Aggiungi patatine\"",
+      "remove": "\"Rimuovi la coca cola\"",
+      "checkout": "\"Vai alla cassa\"",
+      "help": "\"Aiuto\""
+    },
+    "errors": {
+      "notSupported": "Il riconoscimento vocale non è supportato",
+      "noMicrophone": "Nessun microfono trovato",
+      "permissionDenied": "Accesso al microfono negato",
+      "notUnderstood": "Scusa, non ho capito"
+    }
+  },
+  "notifications": {
+    "orderConfirmed": "Il tuo ordine è stato confermato",
+    "orderReady": "Il tuo ordine è pronto",
+    "orderDelivered": "Il tuo ordine è stato consegnato",
+    "newPromotion": "Nuova promozione disponibile",
+    "pointsEarned": "Hai guadagnato {{points}} punti"
+  },
+  "errors": {
+    "general": "Si è verificato un errore",
+    "network": "Errore di rete. Controlla la tua connessione.",
+    "server": "Errore del server. Riprova più tardi.",
+    "notFound": "Pagina non trovata",
+    "unauthorized": "Non autorizzato",
+    "forbidden": "Accesso negato",
+    "validation": "Controlla i tuoi dati",
+    "timeout": "Timeout della richiesta"
+  },
+  "offline": {
+    "title": "Sei offline",
+    "subtitle": "Controlla la tua connessione Internet",
+    "retry": "Riprova"
+  },
+  "pwa": {
+    "install": {
+      "title": "Installa l'app",
+      "subtitle": "Installa EATECH per un'esperienza migliore",
+      "button": "Installa",
+      "later": "Più tardi"
+    },
+    "update": {
+      "title": "Aggiornamento disponibile",
+      "subtitle": "È disponibile una nuova versione",
+      "button": "Aggiorna",
+      "later": "Più tardi"
+    }
+  },
+  "accessibility": {
+    "skipToContent": "Vai al contenuto",
+    "menu": "Menu",
+    "close": "Chiudi",
+    "loading": "Caricamento",
+    "image": "Immagine",
+    "button": "Pulsante",
+    "link": "Link"
+  }
+}

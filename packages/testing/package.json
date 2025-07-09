@@ -1,0 +1,86 @@
+{
+  "name": "@eatech/testing",
+  "version": "1.0.0",
+  "description": "Testing utilities, mocks, and fixtures for EATECH platform",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./mocks": {
+      "import": "./dist/mocks/index.mjs",
+      "require": "./dist/mocks/index.js",
+      "types": "./dist/mocks/index.d.ts"
+    },
+    "./fixtures": {
+      "import": "./dist/fixtures/index.mjs",
+      "require": "./dist/fixtures/index.js",
+      "types": "./dist/fixtures/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.mjs",
+      "require": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
+    }
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src/**/*.{ts,tsx}",
+    "test": "vitest",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/jest-dom": "^6.2.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@testing-library/react-hooks": "^8.0.1",
+    "msw": "^2.1.2",
+    "faker": "^5.5.3",
+    "jest-mock-extended": "^3.0.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "@vitejs/plugin-react": "^4.2.1",
+    "firebase": "^10.7.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "stripe": "^14.12.0",
+    "vite": "^5.0.11",
+    "vite-plugin-dts": "^3.7.2",
+    "vitest": "^1.2.2"
+  },
+  "peerDependencies": {
+    "@eatech/core": "workspace:*",
+    "@eatech/types": "workspace:*",
+    "@eatech/ui": "workspace:*",
+    "firebase": "^10.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "vitest": "^1.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eatech-gmbh/eatech.git",
+    "directory": "packages/testing"
+  },
+  "keywords": [
+    "eatech",
+    "testing",
+    "mocks",
+    "fixtures",
+    "test-utils"
+  ],
+  "author": "EATECH GmbH",
+  "license": "MIT"
+}

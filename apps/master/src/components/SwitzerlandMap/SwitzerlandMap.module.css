@@ -1,213 +1,390 @@
-/**
- * EATECH Switzerland Map Styles
- * Version: 1.0.0
- * 
- * Author: EATECH Development Team
- * Created: 2025-01-07
- * File Path: /apps/master/src/components/SwitzerlandMap/SwitzerlandMap.module.css
- */
+/* SwitzerlandMap.module.css - Interactive Switzerland Map Styles */
 
 .mapContainer {
-  width: 100%;
-  height: 100%;
   position: relative;
-  background: var(--bg-primary);
-  border-radius: 0.75rem;
+  width: 100%;
+  height: 600px;
+  background: #f8fafc;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   overflow: hidden;
 }
 
-.map {
+/* SVG Styles */
+.mapContainer svg {
   width: 100%;
   height: 100%;
-  cursor: crosshair;
+  cursor: grab;
 }
 
-/* Grid */
-.grid {
-  pointer-events: none;
+.mapContainer svg:active {
+  cursor: grabbing;
 }
 
-/* Switzerland outline */
-.switzerlandOutline {
+/* Canton Paths */
+.mapContainer path {
+  transition: all 0.3s ease;
+}
+
+.mapContainer path:hover {
+  filter: brightness(0.9);
+}
+
+/* Canton Labels */
+.canton-label {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 500;
   pointer-events: none;
+  user-select: none;
+}
+
+/* Tenant Markers */
+.tenant-marker {
+  transition: all 0.3s ease;
+}
+
+.tenant-marker:hover {
+  transform: scale(1.2);
+}
+
+.tenant-marker circle {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
-/* Cantons */
-.canton {
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.canton:hover {
-  fill: var(--primary-light);
-  stroke: var(--primary-color);
-  stroke-width: 1;
-}
-
-.cantonLabel {
-  font-size: 2px;
-  fill: var(--text-primary);
-  font-weight: 600;
-  pointer-events: none;
-  text-shadow: 0 0 2px var(--bg-primary);
-}
-
-/* Cities */
-.city {
-  pointer-events: none;
-}
-
-.cityLabel {
-  font-size: 1.5px;
-  fill: var(--text-secondary);
-  font-weight: 500;
-}
-
-/* Foodtrucks */
-.foodtruck {
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.truckDot {
-  transition: all 0.2s;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
-}
-
-.foodtruck:hover .truckDot {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-}
-
-.truckIcon {
-  pointer-events: none;
-}
-
-/* Pulse animation */
-.pulse {
-  animation: pulse 2s ease-out infinite;
-}
-
-@keyframes pulse {
-  0% {
-    r: 3;
-    opacity: 0.5;
-  }
-  100% {
-    r: 6;
-    opacity: 0;
-  }
+/* Route Paths */
+.route-path {
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* Tooltip */
 .tooltip {
+  position: absolute;
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   pointer-events: none;
-  overflow: visible;
+  z-index: 100;
+  min-width: 200px;
+  transform: translate(-50%, -100%);
+  margin-top: -10px;
+  opacity: 0;
+  animation: fadeIn 0.2s ease-out forwards;
 }
 
-.tooltipContent {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  box-shadow: var(--shadow-lg);
-  min-width: 180px;
-  font-size: 12px;
-  animation: fadeIn 0.2s ease-out;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -100%) translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%) translateY(0);
+  }
 }
 
-.tooltipContent h4 {
-  font-size: 14px;
+.tooltip h4 {
+  font-size: 1rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #1e293b;
   margin: 0 0 0.5rem 0;
 }
 
-.tooltipContent p {
+.tooltipStats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tooltipStat {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin: 0.25rem 0;
+  font-size: 0.875rem;
+  color: #64748b;
 }
 
-.tooltipContent p svg {
-  width: 12px;
-  height: 12px;
+.tooltipStat svg {
+  width: 1rem;
+  height: 1rem;
+  color: #8b5cf6;
+}
+
+/* Map Controls */
+.mapControls {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 50;
+}
+
+.mapControls button {
+  width: 2.5rem;
+  height: 2.5rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1.25rem;
+  color: #475569;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.mapControls button:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.mapControls button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.mapControls button svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Selected Info Panel */
+.selectedInfo {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  min-width: 250px;
+  max-width: 350px;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.selectedInfo h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.25rem 0;
+}
+
+.selectedInfo p {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0 0 0.75rem 0;
+}
+
+.selectedStats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .status {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: 11px;
-  font-weight: 600;
-  margin-top: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
-.status.active {
-  background: var(--success-light);
-  color: var(--success-color);
-}
-
-.status.paused {
-  background: var(--warning-light);
-  color: var(--warning-color);
+.status svg {
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 /* Legend */
 .legend {
-  pointer-events: none;
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
-.legendTitle {
-  font-size: 1.5px;
-  fill: var(--text-primary);
-  font-weight: 600;
+/* Heatmap Mode */
+.heatmapToggle {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: white;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #475569;
 }
 
-.legendText {
-  font-size: 1.2px;
-  fill: var(--text-secondary);
+.heatmapToggle input[type="checkbox"] {
+  cursor: pointer;
 }
 
-/* Stats overlay */
-.statsOverlay {
-  pointer-events: none;
-  animation: slideIn 0.2s ease-out;
-}
-
-.statsTitle {
-  font-size: 1.5px;
-  fill: var(--text-primary);
-  font-weight: 600;
-}
-
-.statsText {
-  font-size: 1.2px;
-  fill: var(--text-secondary);
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from {
+/* Mobile Tenant Pulse Animation */
+@keyframes mobilePulse {
+  0% {
+    r: 6;
+    opacity: 0.8;
+  }
+  50% {
+    r: 20;
     opacity: 0;
-    transform: translateY(-5px);
+  }
+  100% {
+    r: 6;
+    opacity: 0.8;
+  }
+}
+
+/* Route Animation */
+@keyframes routeDash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+.route-path {
+  animation: routeDash 0.5s linear infinite;
+}
+
+/* Canton Statistics Overlay */
+.cantonStatsOverlay {
+  position: absolute;
+  top: 4rem;
+  left: 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  min-width: 300px;
+}
+
+.cantonStatsOverlay h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statValue {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Loading State */
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(248, 250, 252, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.loadingSpinner {
+  width: 3rem;
+  height: 3rem;
+  color: #8b5cf6;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
   }
   to {
-    opacity: 1;
-    transform: translateY(0);
+    transform: rotate(360deg);
   }
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(5px);
+/* Responsive Design */
+@media (max-width: 768px) {
+  .mapContainer {
+    height: 400px;
   }
-  to {
-    opacity: 1;
-    transform: translateX(0);
+
+  .selectedInfo {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 1rem 1rem 0 0;
+    max-width: none;
+  }
+
+  .tooltip {
+    font-size: 0.875rem;
+    min-width: 150px;
+  }
+
+  .mapControls {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .mapControls button {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .mapControls,
+  .heatmapToggle {
+    display: none;
+  }
+
+  .mapContainer {
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
   }
 }

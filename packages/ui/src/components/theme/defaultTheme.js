@@ -13,65 +13,65 @@ const defaultTheme = {
     primaryMedium: '#fecaca',
     primaryDark: '#ff5252',
     primaryContrast: '#ffffff',
-    
+
     // Secondary Colors
     secondary: '#f3f4f6',
     secondaryLight: '#f9fafb',
     secondaryDark: '#e5e7eb',
     secondaryContrast: '#1f2937',
-    
+
     // Neutral Colors
     text: '#1f2937',
     textSecondary: '#6b7280',
     textTertiary: '#9ca3af',
     textInverse: '#ffffff',
-    
+
     // Background Colors
     background: '#ffffff',
     backgroundSecondary: '#f9fafb',
     backgroundTertiary: '#f3f4f6',
     backgroundHover: 'rgba(0, 0, 0, 0.05)',
     backgroundActive: 'rgba(0, 0, 0, 0.1)',
-    
+
     // Semantic Colors
     success: '#10b981',
     successLight: '#d1fae5',
     successDark: '#059669',
-    
+
     warning: '#f59e0b',
     warningLight: '#fef3c7',
     warningDark: '#d97706',
-    
+
     danger: '#ef4444',
     dangerLight: '#fee2e2',
     dangerDark: '#dc2626',
-    
+
     info: '#3b82f6',
     infoLight: '#dbeafe',
     infoDark: '#2563eb',
-    
+
     // UI Colors
     border: '#e5e7eb',
     borderLight: '#f3f4f6',
     borderDark: '#d1d5db',
-    
+
     focus: 'rgba(255, 107, 107, 0.2)',
     shadow: 'rgba(0, 0, 0, 0.1)',
     overlay: 'rgba(0, 0, 0, 0.5)',
-    
+
     // Special Colors
     gold: '#fbbf24',
     silver: '#9ca3af',
     bronze: '#d97706'
   },
-  
+
   // Typography
   fonts: {
     body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     mono: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace'
   },
-  
+
   fontSizes: {
     xs: '12px',
     sm: '14px',
@@ -84,7 +84,7 @@ const defaultTheme = {
     '5xl': '48px',
     '6xl': '60px'
   },
-  
+
   fontWeights: {
     thin: 100,
     light: 300,
@@ -95,7 +95,7 @@ const defaultTheme = {
     extrabold: 800,
     black: 900
   },
-  
+
   lineHeights: {
     none: 1,
     tight: 1.25,
@@ -104,7 +104,7 @@ const defaultTheme = {
     relaxed: 1.625,
     loose: 2
   },
-  
+
   // Spacing
   space: {
     0: '0',
@@ -122,7 +122,7 @@ const defaultTheme = {
     24: '96px',
     32: '128px'
   },
-  
+
   // Sizing
   sizes: {
     xs: '320px',
@@ -141,7 +141,7 @@ const defaultTheme = {
     max: 'max-content',
     fit: 'fit-content'
   },
-  
+
   // Border Radius
   radii: {
     none: '0',
@@ -152,7 +152,7 @@ const defaultTheme = {
     '2xl': '24px',
     full: '9999px'
   },
-  
+
   // Shadows
   shadows: {
     none: 'none',
@@ -164,7 +164,7 @@ const defaultTheme = {
     inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
     outline: '0 0 0 3px rgba(255, 107, 107, 0.2)'
   },
-  
+
   // Breakpoints
   breakpoints: {
     xs: '480px',
@@ -174,7 +174,7 @@ const defaultTheme = {
     xl: '1280px',
     '2xl': '1536px'
   },
-  
+
   // Z-Index
   zIndices: {
     hide: -1,
@@ -190,13 +190,13 @@ const defaultTheme = {
     toast: 1700,
     tooltip: 1800
   },
-  
+
   // Transitions
   transitions: {
     fast: '150ms ease',
     normal: '250ms ease',
     slow: '350ms ease',
-    
+
     property: {
       common: 'background-color, border-color, color, fill, stroke, opacity, box-shadow, transform',
       colors: 'background-color, border-color, color, fill, stroke',
@@ -204,7 +204,7 @@ const defaultTheme = {
       position: 'left, right, top, bottom',
       background: 'background-color, background-image, background-position'
     },
-    
+
     timing: {
       ease: 'cubic-bezier(0.4, 0, 0.2, 1)',
       easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
@@ -213,14 +213,14 @@ const defaultTheme = {
       linear: 'linear'
     }
   },
-  
+
   // Borders
   borders: {
     none: 'none',
     thin: '1px solid',
     thick: '2px solid'
   },
-  
+
   // Special EATECH tokens
   eatech: {
     // Restaurant specific colors
@@ -228,14 +228,14 @@ const defaultTheme = {
     waiter: '#3b82f6',
     delivery: '#f59e0b',
     takeaway: '#8b5cf6',
-    
+
     // Status colors
     statusNew: '#3b82f6',
     statusPreparing: '#f59e0b',
     statusReady: '#22c55e',
     statusDelivered: '#6b7280',
     statusCancelled: '#ef4444',
-    
+
     // Table status
     tableFree: '#22c55e',
     tableOccupied: '#f59e0b',

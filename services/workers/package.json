@@ -1,0 +1,41 @@
+{
+  "name": "@eatech/workers",
+  "version": "3.0.0",
+  "description": "Cloudflare Workers for EATECH Platform",
+  "main": "dist/index.js",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "wrangler build",
+    "deploy": "wrangler publish",
+    "deploy:production": "wrangler publish --env production",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "format": "prettier --write 'src/**/*.{ts,tsx,json}'",
+    "typecheck": "tsc --noEmit",
+    "tail": "wrangler tail",
+    "tail:prod": "wrangler tail --env production"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20250115.0",
+    "@eatech/types": "workspace:*",
+    "@eatech/utils": "workspace:*",
+    "itty-router": "^5.0.19",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@typescript-eslint/eslint-plugin": "^8.19.0",
+    "@typescript-eslint/parser": "^8.19.0",
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "wrangler": "^3.99.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

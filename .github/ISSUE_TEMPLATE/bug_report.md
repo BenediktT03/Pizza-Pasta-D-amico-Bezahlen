@@ -4,7 +4,7 @@ about: Create a report to help us improve EATECH
 title: '[BUG] '
 labels: ['bug', 'needs-triage']
 assignees: ['BenediktT03']
----
+---s
 
 ## 🐛 Bug Description
 A clear and concise description of what the bug is.

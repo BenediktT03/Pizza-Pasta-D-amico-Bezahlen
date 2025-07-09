@@ -1,0 +1,362 @@
+{
+  "app": {
+    "name": "EATECH",
+    "tagline": "Smart Foodtruck Ordering",
+    "description": "Order from your favorite foodtruck with voice and QR code"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "refresh": "Refresh",
+    "retry": "Retry",
+    "submit": "Submit",
+    "reset": "Reset",
+    "select": "Select",
+    "all": "All",
+    "none": "None",
+    "yes": "Yes",
+    "no": "No",
+    "or": "or",
+    "and": "and",
+    "from": "from",
+    "to": "to",
+    "currency": "CHF",
+    "optional": "Optional",
+    "required": "Required"
+  },
+  "navigation": {
+    "home": "Home",
+    "menu": "Menu",
+    "cart": "Cart",
+    "orders": "Orders",
+    "profile": "Profile",
+    "settings": "Settings",
+    "help": "Help",
+    "about": "About",
+    "contact": "Contact",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "logout": "Logout",
+    "login": "Login",
+    "signup": "Sign Up"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "subtitle": "Welcome back",
+      "email": "Email address",
+      "password": "Password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account?",
+      "signupLink": "Sign up now",
+      "orContinueWith": "Or continue with",
+      "anonymousLogin": "Continue as guest"
+    },
+    "signup": {
+      "title": "Sign Up",
+      "subtitle": "Create your account",
+      "name": "Name",
+      "email": "Email address",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "phone": "Phone number",
+      "terms": "I accept the {{terms}} and {{privacy}}",
+      "termsLink": "terms of service",
+      "privacyLink": "privacy policy",
+      "submit": "Sign up",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in now"
+    },
+    "forgotPassword": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email address",
+      "email": "Email address",
+      "submit": "Send link",
+      "success": "Email sent! Please check your inbox.",
+      "backToLogin": "Back to login"
+    },
+    "verification": {
+      "title": "Verify Email",
+      "subtitle": "Please check your email",
+      "resend": "Resend email",
+      "success": "Verification email sent"
+    },
+    "errors": {
+      "invalidCredentials": "Invalid email or password",
+      "userNotFound": "User not found",
+      "emailInUse": "Email already in use",
+      "weakPassword": "Password is too weak",
+      "networkError": "Network error. Please try again later.",
+      "tooManyRequests": "Too many attempts. Please wait a moment."
+    }
+  },
+  "menu": {
+    "title": "Menu",
+    "searchPlaceholder": "Search dishes...",
+    "categories": {
+      "all": "All",
+      "starters": "Starters",
+      "mains": "Main Courses",
+      "burgers": "Burgers",
+      "wraps": "Wraps",
+      "salads": "Salads",
+      "sides": "Sides",
+      "desserts": "Desserts",
+      "drinks": "Drinks",
+      "specials": "Daily Specials"
+    },
+    "filters": {
+      "title": "Filters",
+      "dietary": "Dietary",
+      "allergens": "Allergens",
+      "price": "Price",
+      "vegetarian": "Vegetarian",
+      "vegan": "Vegan",
+      "glutenFree": "Gluten Free",
+      "lactoseFree": "Lactose Free",
+      "halal": "Halal",
+      "kosher": "Kosher"
+    },
+    "item": {
+      "addToCart": "Add to Cart",
+      "customize": "Customize",
+      "outOfStock": "Out of Stock",
+      "popular": "Popular",
+      "new": "New",
+      "spicy": "Spicy",
+      "description": "Description",
+      "ingredients": "Ingredients",
+      "nutrition": "Nutrition Facts",
+      "allergens": "Allergens"
+    },
+    "modifiers": {
+      "title": "Customizations",
+      "required": "Required",
+      "optional": "Optional",
+      "extras": "Extras",
+      "remove": "Without",
+      "add": "Extra",
+      "replace": "Replace"
+    }
+  },
+  "cart": {
+    "title": "Cart",
+    "empty": "Your cart is empty",
+    "emptySubtitle": "Add items from the menu",
+    "items": "{{count}} items",
+    "subtotal": "Subtotal",
+    "tax": "VAT ({{rate}}%)",
+    "delivery": "Delivery fee",
+    "discount": "Discount",
+    "total": "Total",
+    "checkout": "Checkout",
+    "continueShopping": "Continue Shopping",
+    "removeItem": "Remove item",
+    "updateQuantity": "Update quantity",
+    "specialInstructions": "Special instructions",
+    "promoCode": {
+      "title": "Promo Code",
+      "placeholder": "Enter code",
+      "apply": "Apply",
+      "remove": "Remove",
+      "invalid": "Invalid code",
+      "success": "Code applied"
+    },
+    "minimum": "Minimum order: {{amount}}",
+    "maximum": "Maximum order: {{amount}}"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "steps": {
+      "delivery": "Delivery",
+      "payment": "Payment",
+      "confirm": "Confirm"
+    },
+    "delivery": {
+      "title": "Delivery Details",
+      "type": "Delivery type",
+      "pickup": "Pickup",
+      "delivery": "Delivery",
+      "tableService": "Table Service",
+      "address": "Delivery address",
+      "time": "Preferred time",
+      "asap": "As soon as possible",
+      "scheduled": "Scheduled",
+      "tableNumber": "Table number",
+      "notes": "Notes",
+      "notesPlaceholder": "e.g. Doorbell doesn't work, 3rd floor"
+    },
+    "payment": {
+      "title": "Payment Method",
+      "methods": {
+        "card": "Credit/Debit Card",
+        "twint": "TWINT",
+        "postfinance": "PostFinance",
+        "cash": "Cash"
+      },
+      "cardNumber": "Card number",
+      "cardHolder": "Card holder",
+      "expiryDate": "Expiry date",
+      "cvv": "CVV",
+      "saveCard": "Save card for future payments",
+      "processing": "Processing payment...",
+      "secure": "Secure payment"
+    },
+    "confirm": {
+      "title": "Confirm Order",
+      "review": "Please review your order",
+      "agree": "I accept the {{terms}}",
+      "termsLink": "terms and conditions",
+      "placeOrder": "Place Order",
+      "total": "Total amount"
+    }
+  },
+  "order": {
+    "title": "Order",
+    "number": "Order number",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "preparing": "Preparing",
+      "ready": "Ready for Pickup",
+      "delivered": "Out for Delivery",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "details": {
+      "title": "Order Details",
+      "items": "Items",
+      "delivery": "Delivery",
+      "payment": "Payment",
+      "notes": "Notes",
+      "orderedAt": "Ordered at",
+      "estimatedTime": "Estimated time",
+      "deliveryAddress": "Delivery address",
+      "phoneNumber": "Phone number"
+    },
+    "actions": {
+      "track": "Track",
+      "cancel": "Cancel",
+      "reorder": "Reorder",
+      "receipt": "Receipt",
+      "help": "Help"
+    },
+    "tracking": {
+      "title": "Track Order",
+      "live": "Live tracking",
+      "estimatedArrival": "Estimated arrival",
+      "driver": "Driver",
+      "callDriver": "Call driver"
+    },
+    "success": {
+      "title": "Order Successful!",
+      "subtitle": "Thank you for your order",
+      "orderNumber": "Your order number is",
+      "estimatedTime": "Estimated time: {{time}} minutes",
+      "trackOrder": "Track Order",
+      "backToMenu": "Back to Menu"
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "personalInfo": "Personal Information",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "language": "Language",
+    "addresses": "Addresses",
+    "addAddress": "Add Address",
+    "defaultAddress": "Default Address",
+    "savedCards": "Saved Cards",
+    "preferences": "Preferences",
+    "notifications": "Notifications",
+    "newsletter": "Newsletter",
+    "orderHistory": "Order History",
+    "favorites": "Favorites",
+    "loyalty": "Loyalty Points",
+    "deleteAccount": "Delete Account"
+  },
+  "voice": {
+    "title": "Voice Order",
+    "button": "Tap to speak",
+    "listening": "Listening...",
+    "processing": "Processing...",
+    "speak": "Speak now",
+    "examples": {
+      "title": "Example commands:",
+      "order": "\"I want to order a cheeseburger\"",
+      "add": "\"Add fries\"",
+      "remove": "\"Remove the coke\"",
+      "checkout": "\"Go to checkout\"",
+      "help": "\"Help\""
+    },
+    "errors": {
+      "notSupported": "Voice recognition is not supported",
+      "noMicrophone": "No microphone found",
+      "permissionDenied": "Microphone access denied",
+      "notUnderstood": "Sorry, I didn't understand that"
+    }
+  },
+  "notifications": {
+    "orderConfirmed": "Your order has been confirmed",
+    "orderReady": "Your order is ready",
+    "orderDelivered": "Your order has been delivered",
+    "newPromotion": "New promotion available",
+    "pointsEarned": "You earned {{points}} points"
+  },
+  "errors": {
+    "general": "An error occurred",
+    "network": "Network error. Please check your connection.",
+    "server": "Server error. Please try again later.",
+    "notFound": "Page not found",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Access denied",
+    "validation": "Please check your input",
+    "timeout": "Request timeout"
+  },
+  "offline": {
+    "title": "You're offline",
+    "subtitle": "Please check your internet connection",
+    "retry": "Retry"
+  },
+  "pwa": {
+    "install": {
+      "title": "Install App",
+      "subtitle": "Install EATECH for a better experience",
+      "button": "Install",
+      "later": "Later"
+    },
+    "update": {
+      "title": "Update Available",
+      "subtitle": "A new version is available",
+      "button": "Update",
+      "later": "Later"
+    }
+  },
+  "accessibility": {
+    "skipToContent": "Skip to content",
+    "menu": "Menu",
+    "close": "Close",
+    "loading": "Loading",
+    "image": "Image",
+    "button": "Button",
+    "link": "Link"
+  }
+}

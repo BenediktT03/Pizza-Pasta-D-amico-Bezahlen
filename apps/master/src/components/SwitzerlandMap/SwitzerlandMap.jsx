@@ -5,20 +5,25 @@
  * Author: EATECH Development Team
  * Modified: 2025-01-08
  * File Path: /apps/master/src/components/SwitzerlandMap/SwitzerlandMap.jsx
- * 
+ *
  * Features: SVG map, canton statistics, heatmap, real-time updates
  */
 
-import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
-import { 
-  MapPin, Users, TrendingUp, Activity,
-  ZoomIn, ZoomOut, RotateCcw, Layers,
-  Filter, Search, Download, Settings,
-  BarChart3, PieChart, Map as MapIcon,
-  Eye, EyeOff, RefreshCw
-} from 'lucide-react';
 import { scaleLinear } from 'd3-scale';
-import { interpolateReds, interpolateBlues } from 'd3-scale-chromatic';
+import {
+  Activity,
+  BarChart3,
+  Download,
+  Filter,
+  Layers,
+  MapPin,
+  RefreshCw,
+  RotateCcw,
+  TrendingUp,
+  Users,
+  ZoomIn, ZoomOut
+} from 'lucide-react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styles from './SwitzerlandMap.module.css';
 
 // Lazy loaded components
@@ -133,17 +138,17 @@ const SwitzerlandMap = ({
   const initializeMap = async () => {
     try {
       setLoading(true);
-      
+
       // Load map data
       const { default: MapDataServiceModule } = await MapDataService();
       const swissMapData = await MapDataServiceModule.getSwitzerlandGeoData();
       setMapData(swissMapData);
-      
+
       // Load initial foodtruck data
       await loadFoodtruckData();
-      
+
       console.log('Switzerland map initialized successfully');
-      
+
     } catch (error) {
       console.error('Map initialization failed:', error);
       setError('Fehler beim Laden der Karte');
@@ -159,9 +164,9 @@ const SwitzerlandMap = ({
         filters: activeFilters,
         mode: mapMode
       });
-      
+
       setFoodtrucks(foodtruckData);
-      
+
     } catch (error) {
       console.error('Error loading foodtruck data:', error);
     }
@@ -175,9 +180,9 @@ const SwitzerlandMap = ({
         SWISS_CANTONS,
         mapMode
       );
-      
+
       setMapStatistics(stats);
-      
+
     } catch (error) {
       console.error('Error calculating statistics:', error);
     }
@@ -188,27 +193,27 @@ const SwitzerlandMap = ({
   // ============================================================================
   const colorScale = useMemo(() => {
     if (!mapStatistics.cantonData) return () => '#E5E7EB';
-    
+
     const values = Object.values(mapStatistics.cantonData);
     const maxValue = Math.max(...values);
     const minValue = Math.min(...values);
-    
+
     switch (mapMode) {
       case MAP_MODES.REVENUE:
         return scaleLinear()
           .domain([minValue, maxValue])
           .range(['#FEF3C7', '#DC2626']);
-      
+
       case MAP_MODES.ORDERS:
         return scaleLinear()
           .domain([minValue, maxValue])
           .range(['#DBEAFE', '#1D4ED8']);
-      
+
       case MAP_MODES.GROWTH:
         return scaleLinear()
           .domain([minValue, maxValue])
           .range(['#FECACA', '#059669']);
-      
+
       default:
         return scaleLinear()
           .domain([minValue, maxValue])
@@ -262,15 +267,15 @@ const SwitzerlandMap = ({
 
   const handleMouseMove = useCallback((event) => {
     if (!isDragging) return;
-    
+
     const deltaX = event.clientX - lastPanPoint.x;
     const deltaY = event.clientY - lastPanPoint.y;
-    
+
     setPanOffset(prev => ({
       x: prev.x + deltaX,
       y: prev.y + deltaY
     }));
-    
+
     setLastPanPoint({ x: event.clientX, y: event.clientY });
   }, [isDragging, lastPanPoint]);
 
@@ -286,27 +291,27 @@ const SwitzerlandMap = ({
     try {
       const svg = svgRef.current;
       if (!svg) return;
-      
+
       // Create canvas and export as PNG
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       const data = new XMLSerializer().serializeToString(svg);
       const img = new Image();
-      
+
       img.onload = () => {
         canvas.width = img.width;
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0);
-        
+
         // Download
         const link = document.createElement('a');
         link.download = `switzerland-map-${mapMode}-${new Date().toISOString().split('T')[0]}.png`;
         link.href = canvas.toDataURL();
         link.click();
       };
-      
+
       img.src = 'data:image/svg+xml;base64,' + btoa(data);
-      
+
     } catch (error) {
       console.error('Export failed:', error);
     }
@@ -317,16 +322,16 @@ const SwitzerlandMap = ({
   // ============================================================================
   const renderCanton = useCallback((canton) => {
     if (!mapData?.features) return null;
-    
+
     const cantonData = mapData.features.find(f => f.properties.code === canton);
     if (!cantonData) return null;
-    
+
     const cantonInfo = SWISS_CANTONS[canton];
     const value = mapStatistics.cantonData?.[canton] || 0;
     const fillColor = colorScale(value);
     const isSelected = selectedCanton === canton;
     const isHovered = hoveredCanton === canton;
-    
+
     return (
       <path
         key={canton}
@@ -344,7 +349,7 @@ const SwitzerlandMap = ({
 
   const renderFoodtrucks = () => {
     if (!showClusters || !foodtrucks.length) return null;
-    
+
     return foodtrucks.map(foodtruck => (
       <Suspense key={foodtruck.id} fallback={null}>
         <FoodtruckMarker
@@ -383,7 +388,7 @@ const SwitzerlandMap = ({
           <RotateCcw size={16} />
         </button>
       </div>
-      
+
       <div className={styles.controlGroup}>
         <button
           className={`${styles.controlButton} ${showHeatmap ? styles.active : ''}`}
@@ -407,7 +412,7 @@ const SwitzerlandMap = ({
           <Filter size={16} />
         </button>
       </div>
-      
+
       <div className={styles.controlGroup}>
         <button
           className={`${styles.controlButton} ${showStats ? styles.active : ''}`}
@@ -478,7 +483,7 @@ const SwitzerlandMap = ({
     <div className={`${styles.switzerlandMap} ${className}`} ref={mapContainerRef}>
       {/* Mode Selector */}
       {renderModeSelector()}
-      
+
       {/* Map Container */}
       <div className={styles.mapContainer}>
         <svg
@@ -498,7 +503,7 @@ const SwitzerlandMap = ({
           <g className={styles.cantonsGroup}>
             {Object.keys(SWISS_CANTONS).map(renderCanton)}
           </g>
-          
+
           {/* Heatmap Overlay */}
           {showHeatmap && (
             <Suspense fallback={null}>
@@ -509,12 +514,12 @@ const SwitzerlandMap = ({
               />
             </Suspense>
           )}
-          
+
           {/* Foodtruck Markers */}
           <g className={styles.foodtrucksGroup}>
             {renderFoodtrucks()}
           </g>
-          
+
           {/* Cluster Overlay */}
           {showClusters && (
             <Suspense fallback={null}>
@@ -526,11 +531,11 @@ const SwitzerlandMap = ({
             </Suspense>
           )}
         </svg>
-        
+
         {/* Controls */}
         {renderControls()}
       </div>
-      
+
       {/* Tooltip */}
       {showTooltip && hoveredCanton && (
         <Suspense fallback={null}>
@@ -542,7 +547,7 @@ const SwitzerlandMap = ({
           />
         </Suspense>
       )}
-      
+
       {/* Statistics Panel */}
       {showStats && (
         <Suspense fallback={<LoadingSpinner />}>
@@ -553,7 +558,7 @@ const SwitzerlandMap = ({
           />
         </Suspense>
       )}
-      
+
       {/* Legend */}
       {showLegend && (
         <Suspense fallback={<LoadingSpinner />}>
@@ -564,7 +569,7 @@ const SwitzerlandMap = ({
           />
         </Suspense>
       )}
-      
+
       {/* Filter Panel */}
       {showFilters && (
         <Suspense fallback={<LoadingSpinner />}>

@@ -1,20 +1,42 @@
-﻿{
+{
   "name": "@eatech/core",
   "version": "3.0.0",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "description": "Core services and utilities for EATECH platform",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
-    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
-    "test": "vitest",
-    "lint": "eslint src --ext .ts,.tsx",
-    "clean": "rimraf dist .turbo node_modules"
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext ts,tsx",
+    "clean": "rm -rf dist node_modules .turbo"
+  },
+  "dependencies": {
+    "firebase": "^10.7.0",
+    "@stripe/stripe-js": "^2.2.0",
+    "nanoid": "^5.0.4"
   },
   "devDependencies": {
-    "tsup": "^8.0.1",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.45",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "eslint": "^8.55.0",
+    "react": "^18.2.0",
     "typescript": "^5.3.3",
-    "vitest": "^1.1.0"
-  }
+    "vite": "^5.0.8",
+    "vite-plugin-dts": "^3.7.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT"
 }

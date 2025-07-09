@@ -1,0 +1,71 @@
+name = "eatech-workers"
+main = "src/index.ts"
+compatibility_date = "2025-01-15"
+node_compat = true
+
+# KV Namespaces
+kv_namespaces = [
+  { binding = "CACHE", id = "YOUR_KV_NAMESPACE_ID" },
+  { binding = "IMAGES", id = "YOUR_IMAGES_NAMESPACE_ID" },
+  { binding = "SESSIONS", id = "YOUR_SESSIONS_NAMESPACE_ID" }
+]
+
+# R2 Buckets
+r2_buckets = [
+  { binding = "ASSETS", bucket_name = "eatech-assets" },
+  { binding = "UPLOADS", bucket_name = "eatech-uploads" }
+]
+
+# Durable Objects
+durable_objects.bindings = [
+  { name = "RATE_LIMITER", class_name = "RateLimiter" }
+]
+
+# Environment variables
+[vars]
+ENVIRONMENT = "development"
+API_VERSION = "v1"
+MAX_IMAGE_SIZE = "10485760" # 10MB
+ALLOWED_IMAGE_TYPES = "image/jpeg,image/png,image/webp,image/avif"
+CACHE_TTL = "86400" # 24 hours
+
+# Routes
+routes = [
+  { pattern = "cdn.eatech.ch/*", zone_name = "eatech.ch" },
+  { pattern = "api.eatech.ch/v1/images/*", zone_name = "eatech.ch" },
+  { pattern = "api.eatech.ch/v1/cache/*", zone_name = "eatech.ch" }
+]
+
+# Development environment
+[env.development]
+name = "eatech-workers-dev"
+vars = { ENVIRONMENT = "development" }
+
+# Staging environment
+[env.staging]
+name = "eatech-workers-staging"
+vars = { ENVIRONMENT = "staging" }
+routes = [
+  { pattern = "cdn-staging.eatech.ch/*", zone_name = "eatech.ch" },
+  { pattern = "api-staging.eatech.ch/v1/images/*", zone_name = "eatech.ch" }
+]
+
+# Production environment
+[env.production]
+name = "eatech-workers-prod"
+vars = { ENVIRONMENT = "production" }
+routes = [
+  { pattern = "cdn.eatech.ch/*", zone_name = "eatech.ch" },
+  { pattern = "api.eatech.ch/v1/images/*", zone_name = "eatech.ch" },
+  { pattern = "api.eatech.ch/v1/cache/*", zone_name = "eatech.ch" }
+]
+
+# Build configuration
+[build]
+command = "npm run build"
+upload.format = "modules"
+upload.main = "./src/index.ts"
+
+[[build.upload.rules]]
+type = "ESModule"
+globs = ["**/*.js", "**/*.ts"]

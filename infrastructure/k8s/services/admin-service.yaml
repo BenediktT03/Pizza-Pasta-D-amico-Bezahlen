@@ -1,0 +1,147 @@
+# EATECH V3.0 - Admin Dashboard Kubernetes Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-admin
+  namespace: eatech-prod
+  labels:
+    app: eatech-admin
+    app.kubernetes.io/name: eatech-admin
+    app.kubernetes.io/instance: production
+    app.kubernetes.io/component: admin-dashboard
+    app.kubernetes.io/part-of: eatech-platform
+    app.kubernetes.io/managed-by: kubectl
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:region:account-id:certificate/cert-id"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+    protocol: TCP
+  selector:
+    app: eatech-admin
+    version: v1
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+---
+# Internal Service for Admin-to-Admin Communication
+apiVersion: v1
+kind: Service
+metadata:
+  name: eatech-admin-internal
+  namespace: eatech-prod
+  labels:
+    app: eatech-admin
+    type: internal
+    app.kubernetes.io/name: eatech-admin-internal
+    app.kubernetes.io/instance: production
+    app.kubernetes.io/component: admin-dashboard
+spec:
+  type: ClusterIP
+  ports:
+  - name: grpc
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  - name: metrics
+    port: 9091
+    targetPort: 9091
+    protocol: TCP
+  selector:
+    app: eatech-admin
+    version: v1
+---
+# ServiceMonitor for Prometheus
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: eatech-admin
+  namespace: eatech-prod
+  labels:
+    app: eatech-admin
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: eatech-admin
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+  - port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+---
+# NetworkPolicy for Admin Service
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: eatech-admin-network-policy
+  namespace: eatech-prod
+spec:
+  podSelector:
+    matchLabels:
+      app: eatech-admin
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow traffic from Ingress Controller
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 8080
+  # Allow traffic from monitoring namespace
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 9091
+  # Allow internal admin communication
+  - from:
+    - podSelector:
+        matchLabels:
+          app: eatech-admin
+    ports:
+    - protocol: TCP
+      port: 9090
+  egress:
+  # Allow DNS
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: UDP
+      port: 53
+  # Allow HTTPS to external services
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443
+  # Allow connection to Firebase
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 5001
+  # Allow connection to other services in namespace
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/part-of: eatech-platform

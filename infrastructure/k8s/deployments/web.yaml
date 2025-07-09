@@ -1,0 +1,248 @@
+# EATECH V3.0 - Web Application Kubernetes Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eatech-web
+  namespace: eatech-prod
+  labels:
+    app: eatech-web
+    version: v1
+    app.kubernetes.io/name: eatech-web
+    app.kubernetes.io/instance: production
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: eatech-platform
+    app.kubernetes.io/managed-by: kubectl
+spec:
+  replicas: 3
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: eatech-web
+      version: v1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: eatech-web
+        version: v1
+        app.kubernetes.io/name: eatech-web
+        app.kubernetes.io/instance: production
+        app.kubernetes.io/component: frontend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: eatech-web
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      containers:
+      - name: web
+        image: ${DOCKER_REGISTRY}/eatech-web:${VERSION}
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
+        - name: VITE_FIREBASE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: eatech-firebase-secrets
+              key: api-key
+        - name: VITE_FIREBASE_AUTH_DOMAIN
+          valueFrom:
+            configMapKeyRef:
+              name: eatech-firebase-config
+              key: auth-domain
+        - name: VITE_FIREBASE_PROJECT_ID
+          valueFrom:
+            configMapKeyRef:
+              name: eatech-firebase-config
+              key: project-id
+        - name: VITE_FIREBASE_STORAGE_BUCKET
+          valueFrom:
+            configMapKeyRef:
+              name: eatech-firebase-config
+              key: storage-bucket
+        - name: VITE_FIREBASE_MESSAGING_SENDER_ID
+          valueFrom:
+            configMapKeyRef:
+              name: eatech-firebase-config
+              key: messaging-sender-id
+        - name: VITE_FIREBASE_APP_ID
+          valueFrom:
+            secretKeyRef:
+              name: eatech-firebase-secrets
+              key: app-id
+        - name: VITE_STRIPE_PUBLIC_KEY
+          valueFrom:
+            secretKeyRef:
+              name: eatech-stripe-secrets
+              key: public-key
+        - name: VITE_TWINT_MERCHANT_ID
+          valueFrom:
+            configMapKeyRef:
+              name: eatech-payment-config
+              key: twint-merchant-id
+        - name: VITE_SENTRY_DSN
+          valueFrom:
+            secretKeyRef:
+              name: eatech-monitoring-secrets
+              key: sentry-dsn-web
+        - name: VITE_PLAUSIBLE_DOMAIN
+          valueFrom:
+            configMapKeyRef:
+              name: eatech-monitoring-config
+              key: plausible-domain
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 0
+          periodSeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 30
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: cache
+          mountPath: /app/.cache
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: cache
+        emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - eatech-web
+              topologyKey: kubernetes.io/hostname
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app: eatech-web
+      imagePullSecrets:
+      - name: docker-registry-secret
+---
+# ServiceAccount for Web Application
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eatech-web
+  namespace: eatech-prod
+  labels:
+    app: eatech-web
+    app.kubernetes.io/name: eatech-web
+    app.kubernetes.io/instance: production
+    app.kubernetes.io/component: frontend
+---
+# PodDisruptionBudget for Web Application
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: eatech-web-pdb
+  namespace: eatech-prod
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: eatech-web
+---
+# HorizontalPodAutoscaler for Web Application
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: eatech-web-hpa
+  namespace: eatech-prod
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: eatech-web
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 4
+        periodSeconds: 15
+      selectPolicy: Max

@@ -1,0 +1,257 @@
+# EATECH V3.0 - Kubernetes Ingress Configuration
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eatech-ingress
+  namespace: eatech-prod
+  labels:
+    app.kubernetes.io/name: eatech-ingress
+    app.kubernetes.io/instance: production
+    app.kubernetes.io/component: ingress
+    app.kubernetes.io/part-of: eatech-platform
+    app.kubernetes.io/managed-by: kubectl
+  annotations:
+    # Ingress Controller
+    kubernetes.io/ingress.class: "nginx"
+    
+    # SSL/TLS Configuration
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    
+    # Security Headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload";
+      more_set_headers "X-Frame-Options: SAMEORIGIN";
+      more_set_headers "X-Content-Type-Options: nosniff";
+      more_set_headers "X-XSS-Protection: 1; mode=block";
+      more_set_headers "Referrer-Policy: strict-origin-when-cross-origin";
+      more_set_headers "Permissions-Policy: camera=(), microphone=(), geolocation=()";
+    
+    # Rate Limiting
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-connections: "50"
+    nginx.ingress.kubernetes.io/limit-whitelist: "10.0.0.0/8,172.16.0.0/12"
+    
+    # Proxy Configuration
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    
+    # CORS Configuration
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://eatech.ch,https://www.eatech.ch"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+    nginx.ingress.kubernetes.io/cors-max-age: "1728000"
+    
+    # WebSocket Support
+    nginx.ingress.kubernetes.io/websocket-services: "eatech-web,eatech-kitchen"
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    
+    # Monitoring
+    nginx.ingress.kubernetes.io/enable-opentracing: "true"
+    nginx.ingress.kubernetes.io/opentracing-trust-incoming-span: "true"
+spec:
+  tls:
+  - hosts:
+    - eatech.ch
+    - www.eatech.ch
+    - api.eatech.ch
+    secretName: eatech-tls-certificate
+  - hosts:
+    - admin.eatech.ch
+    secretName: eatech-admin-tls-certificate
+  - hosts:
+    - master.eatech.ch
+    secretName: eatech-master-tls-certificate
+  - hosts:
+    - kitchen.eatech.ch
+    secretName: eatech-kitchen-tls-certificate
+  rules:
+  # Main Website
+  - host: eatech.ch
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-web
+            port:
+              number: 80
+  # WWW Redirect
+  - host: www.eatech.ch
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-web
+            port:
+              number: 80
+  # API Endpoints
+  - host: api.eatech.ch
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-api
+            port:
+              number: 8080
+  # Admin Dashboard
+  - host: admin.eatech.ch
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-admin
+            port:
+              number: 80
+  # Master Control Panel
+  - host: master.eatech.ch
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-master
+            port:
+              number: 80
+  # Kitchen Display
+  - host: kitchen.eatech.ch
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-kitchen
+            port:
+              number: 80
+---
+# Ingress for Staging Environment
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eatech-ingress-staging
+  namespace: eatech-staging
+  labels:
+    app.kubernetes.io/name: eatech-ingress
+    app.kubernetes.io/instance: staging
+    app.kubernetes.io/component: ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: staging-auth
+    nginx.ingress.kubernetes.io/auth-realm: "Staging Environment - Authentication Required"
+spec:
+  tls:
+  - hosts:
+    - staging.eatech.ch
+    - "*.staging.eatech.ch"
+    secretName: eatech-staging-wildcard-tls
+  rules:
+  - host: staging.eatech.ch
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-web
+            port:
+              number: 80
+  - host: admin.staging.eatech.ch
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-admin
+            port:
+              number: 80
+  - host: api.staging.eatech.ch
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-api
+            port:
+              number: 8080
+---
+# Middleware for Redirects
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eatech-redirects
+  namespace: eatech-prod
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/permanent-redirect: "https://eatech.ch$request_uri"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+  # Old domain redirects
+  - host: eatech.swiss
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-web
+            port:
+              number: 80
+  - host: www.eatech.swiss
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-web
+            port:
+              number: 80
+---
+# Canary Ingress for A/B Testing
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eatech-canary
+  namespace: eatech-prod
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "10"
+    nginx.ingress.kubernetes.io/canary-by-header: "X-Canary"
+    nginx.ingress.kubernetes.io/canary-by-header-value: "always"
+    nginx.ingress.kubernetes.io/canary-by-cookie: "canary"
+spec:
+  tls:
+  - hosts:
+    - eatech.ch
+    secretName: eatech-tls-certificate
+  rules:
+  - host: eatech.ch
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eatech-web-canary
+            port:
+              number: 80

@@ -1,0 +1,299 @@
+# EATECH V3.0 - Application ConfigMaps
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eatech-firebase-config
+  namespace: eatech-prod
+  labels:
+    app.kubernetes.io/name: eatech-config
+    app.kubernetes.io/instance: production
+    app.kubernetes.io/component: configuration
+    app.kubernetes.io/part-of: eatech-platform
+    config.type: firebase
+data:
+  # Firebase Configuration (Non-sensitive)
+  auth-domain: "eatech-prod.firebaseapp.com"
+  project-id: "eatech-prod"
+  storage-bucket: "eatech-prod.appspot.com"
+  messaging-sender-id: "123456789012"
+  database-url: "https://eatech-prod.firebaseio.com"
+  functions-region: "europe-west6"
+  
+  # Firebase Emulator Configuration (for development)
+  emulator-auth-url: "http://localhost:9099"
+  emulator-firestore-host: "localhost:8080"
+  emulator-functions-url: "http://localhost:5001"
+  emulator-storage-url: "http://localhost:9199"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eatech-app-config
+  namespace: eatech-prod
+  labels:
+    app.kubernetes.io/name: eatech-config
+    app.kubernetes.io/instance: production
+    app.kubernetes.io/component: configuration
+    config.type: application
+data:
+  # Application Settings
+  app-name: "EATECH"
+  app-version: "${VERSION}"
+  environment: "production"
+  default-language: "de-CH"
+  supported-languages: "de-CH,fr-CH,it-CH,en"
+  timezone: "Europe/Zurich"
+  currency: "CHF"
+  
+  # Feature Flags
+  feature-voice-ordering: "true"
+  feature-ai-recommendations: "true"
+  feature-multi-tenant: "true"
+  feature-pwa: "true"
+  feature-offline-mode: "true"
+  feature-table-ordering: "true"
+  feature-kitchen-display: "true"
+  feature-inventory-tracking: "true"
+  
+  # Business Rules
+  min-order-amount: "10.00"
+  max-order-amount: "500.00"
+  delivery-radius-km: "5"
+  order-ahead-days: "7"
+  kitchen-prep-time-minutes: "20"
+  
+  # Integration URLs
+  terms-url: "https://eatech.ch/terms"
+  privacy-url: "https://eatech.ch/privacy"
+  support-email: "support@eatech.ch"
+  contact-phone: "+41 44 123 45 67"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eatech-payment-config
+  namespace: eatech-prod
+  labels:
+    app.kubernetes.io/name: eatech-config
+    app.kubernetes.io/instance: production
+    app.kubernetes.io/component: configuration
+    config.type: payment
+data:
+  # Payment Configuration
+  stripe-public-key: "pk_live_51ABC..."
+  stripe-webhook-endpoint: "https://api.eatech.ch/webhooks/stripe"
+  twint-merchant-id: "M123456"
+  twint-api-url: "https://api.twint.ch/v2"
+  supported-payment-methods: "card,twint,cash"
+  payment-currency: "CHF"
+  
+  # Swiss Payment Settings
+  qr-bill-enabled: "true"
+  qr-bill-iban: "CH93 0076 2011 6238 5295 7"
+  qr-bill-reference-type: "QRR"
+  payment-timeout-minutes: "15"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eatech-monitoring-config
+  namespace: eatech-prod
+  labels:
+    app.kubernetes.io/name: eatech-config
+    app.kubernetes.io/instance: production
+    app.kubernetes.io/component: configuration
+    config.type: monitoring
+data:
+  # Analytics Configuration
+  plausible-domain: "eatech.ch"
+  plausible-api-url: "https://plausible.io/api/v1"
+  google-analytics-id: "G-XXXXXXXXXX"
+  
+  # Monitoring Settings
+  sentry-environment: "production"
+  sentry-traces-sample-rate: "0.1"
+  datadog-site: "datadoghq.eu"
+  datadog-service: "eatech"
+  datadog-env: "production"
+  
+  # Logging Configuration
+  log-level: "info"
+  log-format: "json"
+  log-retention-days: "30"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eatech-cache-config
+  namespace: eatech-prod
+  labels:
+    app.kubernetes.io/name: eatech-config
+    app.kubernetes.io/instance: production
+    app.kubernetes.io/component: configuration
+    config.type: cache
+data:
+  # Redis Configuration
+  redis-host: "eatech-redis"
+  redis-port: "6379"
+  redis-db: "0"
+  redis-max-retries: "3"
+  redis-timeout-ms: "5000"
+  
+  # Cache Settings
+  cache-ttl-seconds: "3600"
+  cache-max-size-mb: "100"
+  cache-eviction-policy: "lru"
+  session-ttl-hours: "24"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eatech-nginx-config
+  namespace: eatech-prod
+  labels:
+    app.kubernetes.io/name: eatech-config
+    app.kubernetes.io/instance: production
+    app.kubernetes.io/component: configuration
+    config.type: nginx
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes auto;
+    error_log /var/log/nginx/error.log warn;
+    pid /var/run/nginx.pid;
+
+    events {
+        worker_connections 1024;
+        use epoll;
+        multi_accept on;
+    }
+
+    http {
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+
+        log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                        '$status $body_bytes_sent "$http_referer" '
+                        '"$http_user_agent" "$http_x_forwarded_for"';
+
+        access_log /var/log/nginx/access.log main;
+
+        sendfile on;
+        tcp_nopush on;
+        tcp_nodelay on;
+        keepalive_timeout 65;
+        types_hash_max_size 2048;
+        server_tokens off;
+
+        # Gzip Settings
+        gzip on;
+        gzip_vary on;
+        gzip_proxied any;
+        gzip_comp_level 6;
+        gzip_types text/plain text/css text/xml text/javascript application/javascript application/json application/xml+rss;
+
+        # Security Headers
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+        include /etc/nginx/conf.d/*.conf;
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eatech-db-init-scripts
+  namespace: eatech-prod
+  labels:
+    app.kubernetes.io/name: eatech-config
+    app.kubernetes.io/instance: production
+    app.kubernetes.io/component: configuration
+    config.type: database
+data:
+  01-init-schema.sql: |
+    -- Initialize database schema
+    CREATE SCHEMA IF NOT EXISTS analytics;
+    CREATE SCHEMA IF NOT EXISTS reports;
+    CREATE SCHEMA IF NOT EXISTS audit;
+    
+    -- Create extensions
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+  
+  02-create-tables.sql: |
+    -- Create analytics tables
+    CREATE TABLE IF NOT EXISTS analytics.events (
+        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+        tenant_id VARCHAR(255) NOT NULL,
+        event_name VARCHAR(255) NOT NULL,
+        event_data JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    CREATE INDEX idx_events_tenant_created ON analytics.events(tenant_id, created_at DESC);
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eatech-locale-de
+  namespace: eatech-prod
+  labels:
+    app.kubernetes.io/name: eatech-config
+    app.kubernetes.io/instance: production
+    app.kubernetes.io/component: configuration
+    config.type: locale
+data:
+  messages.json: |
+    {
+      "common": {
+        "welcome": "Willkommen bei EATECH",
+        "loading": "Laden...",
+        "error": "Ein Fehler ist aufgetreten",
+        "retry": "Erneut versuchen",
+        "cancel": "Abbrechen",
+        "confirm": "Bestätigen",
+        "save": "Speichern",
+        "delete": "Löschen",
+        "edit": "Bearbeiten",
+        "close": "Schliessen"
+      },
+      "menu": {
+        "title": "Speisekarte",
+        "categories": "Kategorien",
+        "search": "Suchen...",
+        "addToCart": "In den Warenkorb",
+        "outOfStock": "Nicht verfügbar",
+        "allergens": "Allergene",
+        "nutritionalInfo": "Nährwertangaben"
+      },
+      "cart": {
+        "title": "Warenkorb",
+        "empty": "Ihr Warenkorb ist leer",
+        "subtotal": "Zwischensumme",
+        "tax": "MwSt.",
+        "total": "Gesamt",
+        "checkout": "Zur Kasse",
+        "remove": "Entfernen",
+        "quantity": "Menge"
+      },
+      "order": {
+        "title": "Bestellung",
+        "delivery": "Lieferung",
+        "pickup": "Abholung",
+        "dineIn": "Vor Ort",
+        "paymentMethod": "Zahlungsmethode",
+        "specialRequests": "Besondere Wünsche",
+        "estimatedTime": "Geschätzte Zeit",
+        "orderNumber": "Bestellnummer",
+        "status": {
+          "pending": "Ausstehend",
+          "confirmed": "Bestätigt",
+          "preparing": "In Zubereitung",
+          "ready": "Bereit",
+          "delivered": "Geliefert",
+          "cancelled": "Storniert"
+        }
+      }
+    }

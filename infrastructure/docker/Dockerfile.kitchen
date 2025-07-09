@@ -1,0 +1,85 @@
+# Stage 1: Dependencies
+FROM node:20-alpine AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Copy root package files
+COPY package.json package-lock.json* ./
+COPY lerna.json ./
+
+# Copy workspace package files
+COPY apps/kitchen/package.json ./apps/kitchen/
+COPY packages/*/package.json ./packages/*/
+
+# Install dependencies
+RUN npm ci
+
+# Stage 2: Builder
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+# Build arguments
+ARG VITE_FIREBASE_API_KEY
+ARG VITE_FIREBASE_AUTH_DOMAIN
+ARG VITE_FIREBASE_PROJECT_ID
+ARG VITE_FIREBASE_STORAGE_BUCKET
+ARG VITE_FIREBASE_MESSAGING_SENDER_ID
+ARG VITE_FIREBASE_APP_ID
+ARG VITE_API_BASE_URL
+ARG VITE_REALTIME_DB_URL
+
+# Copy dependencies
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/kitchen/node_modules ./apps/kitchen/node_modules
+COPY --from=deps /app/packages/*/node_modules ./packages/*/node_modules
+
+# Copy source code
+COPY . .
+
+# Build packages first
+RUN npm run build:packages
+
+# Build kitchen app
+WORKDIR /app/apps/kitchen
+RUN npm run build
+
+# Stage 3: Nginx optimized for real-time
+FROM nginx:alpine AS runner
+
+# Install curl for healthcheck
+RUN apk add --no-cache curl
+
+# Copy nginx configuration optimized for SSE/WebSocket
+COPY infrastructure/docker/nginx/kitchen.conf /etc/nginx/conf.d/default.conf
+
+# Copy built application
+COPY --from=builder /app/apps/kitchen/dist /usr/share/nginx/html
+
+# Add non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S kitchen -u 1001
+
+# Set proper permissions
+RUN chown -R kitchen:nodejs /usr/share/nginx/html && \
+    chown -R kitchen:nodejs /var/cache/nginx && \
+    chown -R kitchen:nodejs /var/log/nginx
+
+# Expose port
+EXPOSE 80
+
+# Health check
+HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost/health || exit 1
+
+# Environment variables
+ENV NGINX_WORKER_PROCESSES=auto
+ENV NGINX_WORKER_CONNECTIONS=1024
+
+# Labels
+LABEL org.opencontainers.image.source="https://github.com/eatech/eatech-platform"
+LABEL org.opencontainers.image.description="EATECH Kitchen Display System"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL maintainer="EATECH Team <dev@eatech.ch>"
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

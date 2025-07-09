@@ -1,0 +1,320 @@
+{{#if isTypeScript}}import type { {{#each types}}{{this}}, {{/each}} } from '@eatech/types';{{/if}}
+{{#each imports}}
+import {{#if this.isDefault}}{{this.name}}{{else}}{ {{this.name}} }{{/if}} from '{{this.path}}';
+{{/each}}
+{{#if hasConfig}}import { config } from '@/config';{{/if}}
+{{#if hasLogger}}import { logger } from '@/utils/logger';{{/if}}
+{{#if hasAuth}}import { auth } from '@eatech/core';{{/if}}
+{{#if hasDatabase}}import { db } from '@eatech/core';{{/if}}
+
+{{#if hasInterfaces}}
+// Service Interfaces
+{{#each interfaces}}
+export interface {{this.name}} {
+  {{#each this.properties}}
+  {{this.name}}{{#if this.optional}}?{{/if}}: {{this.type}};
+  {{/each}}
+}
+{{/each}}
+{{/if}}
+
+{{#if hasTypes}}
+// Service Types  
+{{#each types}}
+export type {{this.name}} = {{this.definition}};
+{{/each}}
+{{/if}}
+
+{{#if hasEnums}}
+// Service Enums
+{{#each enums}}
+export enum {{this.name}} {
+  {{#each this.values}}
+  {{this.key}} = '{{this.value}}',
+  {{/each}}
+}
+{{/each}}
+{{/if}}
+
+{{#if hasConstants}}
+// Service Constants
+{{#each constants}}
+export const {{this.name}} = {{this.value}};
+{{/each}}
+{{/if}}
+
+/**
+ * {{description}}
+ * @service
+ * @module {{moduleName}}
+ */
+{{#if isClass}}
+export class {{serviceName}}Service {
+  {{#if hasPrivateProperties}}
+  // Private properties
+  {{#each privateProperties}}
+  private {{this.name}}: {{this.type}}{{#if this.initial}} = {{this.initial}}{{/if}};
+  {{/each}}
+  {{/if}}
+
+  {{#if hasConstructor}}
+  constructor({{#each constructorParams}}{{this.name}}: {{this.type}}{{#unless @last}}, {{/unless}}{{/each}}) {
+    {{#each constructorBody}}
+    {{this}}
+    {{/each}}
+  }
+  {{/if}}
+
+  {{#if hasInitializer}}
+  /**
+   * Initialize the service
+   */
+  async initialize(): Promise<void> {
+    {{#if hasLogger}}logger.info('Initializing {{serviceName}} service');{{/if}}
+    {{initializerBody}}
+  }
+  {{/if}}
+
+  {{#each methods}}
+  /**
+   * {{this.description}}
+   {{#each this.params}}
+   * @param {{this.name}} - {{this.description}}
+   {{/each}}
+   {{#if this.returns}}
+   * @returns {{this.returns.description}}
+   {{/if}}
+   {{#if this.throws}}
+   * @throws {{this.throws}}
+   {{/if}}
+   */
+  {{#if this.isPrivate}}private {{/if}}{{#if this.isStatic}}static {{/if}}{{#if this.isAsync}}async {{/if}}{{this.name}}({{#each this.params}}{{this.name}}{{#if this.optional}}?{{/if}}: {{this.type}}{{#unless @last}}, {{/unless}}{{/each}}){{#if this.returns}}: {{this.returns.type}}{{/if}} {
+    {{#if this.hasValidation}}
+    // Input validation
+    {{#each this.validations}}
+    {{this}}
+    {{/each}}
+    {{/if}}
+
+    {{#if this.hasLogging}}
+    {{#if ../hasLogger}}logger.debug('{{this.name}} called', { {{#each this.params}}{{this.name}}{{#unless @last}}, {{/unless}}{{/each}} });{{/if}}
+    {{/if}}
+
+    {{#if this.hasTryCatch}}
+    try {
+      {{this.body}}
+    } catch (error) {
+      {{#if ../hasLogger}}logger.error('Error in {{this.name}}', error);{{/if}}
+      throw error;
+    }
+    {{else}}
+    {{this.body}}
+    {{/if}}
+  }
+  {{/each}}
+
+  {{#if hasCleanup}}
+  /**
+   * Cleanup service resources
+   */
+  async cleanup(): Promise<void> {
+    {{#if hasLogger}}logger.info('Cleaning up {{serviceName}} service');{{/if}}
+    {{cleanupBody}}
+  }
+  {{/if}}
+}
+
+{{#if hasSingleton}}
+// Singleton instance
+export const {{camelCase serviceName}}Service = new {{serviceName}}Service();
+{{/if}}
+
+{{else}}
+// Service Functions
+
+{{#each functions}}
+/**
+ * {{this.description}}
+ {{#each this.params}}
+ * @param {{this.name}} - {{this.description}}
+ {{/each}}
+ {{#if this.returns}}
+ * @returns {{this.returns}}
+ {{/if}}
+ */
+export {{#if this.isAsync}}async {{/if}}function {{this.name}}({{#each this.params}}{{this.name}}{{#if this.optional}}?{{/if}}: {{this.type}}{{#unless @last}}, {{/unless}}{{/each}}){{#if this.returnType}}: {{this.returnType}}{{/if}} {
+  {{#if this.hasValidation}}
+  // Input validation
+  {{#each this.validations}}
+  {{this}}
+  {{/each}}
+  {{/if}}
+
+  {{#if this.hasLogging}}
+  {{#if ../hasLogger}}logger.debug('{{this.name}} called', { {{#each this.params}}{{this.name}}{{#unless @last}}, {{/unless}}{{/each}} });{{/if}}
+  {{/if}}
+
+  {{#if this.hasTryCatch}}
+  try {
+    {{this.body}}
+  } catch (error) {
+    {{#if ../hasLogger}}logger.error('Error in {{this.name}}', error);{{/if}}
+    throw error;
+  }
+  {{else}}
+  {{this.body}}
+  {{/if}}
+}
+{{/each}}
+{{/if}}
+
+{{#if hasHooks}}
+// React Hooks (if applicable)
+{{#each hooks}}
+/**
+ * {{this.description}}
+ */
+export function {{this.name}}({{#each this.params}}{{this.name}}: {{this.type}}{{#unless @last}}, {{/unless}}{{/each}}) {
+  {{this.body}}
+}
+{{/each}}
+{{/if}}
+
+{{#if hasMiddleware}}
+// Express Middleware (if applicable)
+{{#each middleware}}
+/**
+ * {{this.description}}
+ */
+export const {{this.name}} = {{#if this.isAsync}}async {{/if}}(req: Request, res: Response, next: NextFunction) => {
+  {{this.body}}
+};
+{{/each}}
+{{/if}}
+
+{{#if hasHelpers}}
+// Helper Functions
+{{#each helpers}}
+/**
+ * {{this.description}}
+ * @private
+ */
+{{#if this.isExported}}export {{/if}}function {{this.name}}({{#each this.params}}{{this.name}}: {{this.type}}{{#unless @last}}, {{/unless}}{{/each}}){{#if this.returnType}}: {{this.returnType}}{{/if}} {
+  {{this.body}}
+}
+{{/each}}
+{{/if}}
+
+{{#if hasDefault}}
+export default {{#if isClass}}{{serviceName}}Service{{else}}{ {{#each exports}}{{this}}{{#unless @last}}, {{/unless}}{{/each}} }{{/if}};
+{{/if}}
+
+// Test Template ({{serviceName}}.test.ts)
+/*
+import { {{#if isClass}}{{serviceName}}Service{{else}}{{#each testImports}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}} } from './{{fileName}}';
+{{#each testMocks}}
+import { {{this}} } from '{{this.path}}';
+{{/each}}
+
+{{#each testMocks}}
+jest.mock('{{this.path}}');
+{{/each}}
+
+describe('{{serviceName}}Service', () => {
+  {{#if isClass}}
+  let service: {{serviceName}}Service;
+
+  beforeEach(() => {
+    service = new {{serviceName}}Service({{#each constructorMocks}}{{this}}{{#unless @last}}, {{/unless}}{{/each}});
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  {{/if}}
+
+  {{#each testCases}}
+  describe('{{this.method}}', () => {
+    it('{{this.description}}', {{#if this.isAsync}}async {{/if}}() => {
+      {{this.body}}
+    });
+  });
+  {{/each}}
+});
+*/
+
+// API Documentation Template
+/*
+## {{serviceName}} Service
+
+{{description}}
+
+### Methods
+
+{{#each methods}}
+#### {{this.name}}
+
+{{this.description}}
+
+**Parameters:**
+{{#each this.params}}
+- `{{this.name}}` ({{this.type}}){{#if this.optional}} - Optional{{/if}}: {{this.description}}
+{{/each}}
+
+**Returns:** {{#if this.returns}}{{this.returns.type}} - {{this.returns.description}}{{else}}void{{/if}}
+
+**Example:**
+```typescript
+{{this.example}}
+```
+
+---
+{{/each}}
+
+### Error Handling
+
+{{#each errorTypes}}
+- `{{this.name}}`: {{this.description}}
+{{/each}}
+
+### Events (if applicable)
+
+{{#each events}}
+- `{{this.name}}`: {{this.description}}
+{{/each}}
+*/
+
+// Integration Example
+/*
+// Using in a React component
+import { use{{serviceName}} } from '@/services/{{fileName}}';
+
+function MyComponent() {
+  const { data, loading, error } = use{{serviceName}}();
+
+  if (loading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage error={error} />;
+
+  return <div>{data}</div>;
+}
+
+// Using in an API route
+import { {{camelCase serviceName}}Service } from '@/services/{{fileName}}';
+
+export async function handler(req: Request, res: Response) {
+  try {
+    const result = await {{camelCase serviceName}}Service.{{sampleMethod}}(req.body);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Using in a Firebase Function
+import { {{camelCase serviceName}}Service } from '@/services/{{fileName}}';
+
+export const {{functionName}} = functions.https.onRequest(async (req, res) => {
+  const result = await {{camelCase serviceName}}Service.{{sampleMethod}}(req.body);
+  res.json(result);
+});
+*/

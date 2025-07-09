@@ -1,31 +1,43 @@
 /**
  * EATECH - Admin Layout Component
- * Version: 9.2.0
- * Description: Responsive Admin Dashboard Layout mit Lazy Loading & Real-time Features
+ * Version: 10.0.0
+ * Description: Responsive Admin Dashboard Layout mit Voice Commerce Integration
  * Author: EATECH Development Team
  * Modified: 2025-01-08
  * File Path: /apps/admin/src/components/Layout/AdminLayout.jsx
- * 
- * Features: Collapsible sidebar, real-time notifications, breadcrumbs, theme switcher
+ *
+ * Features: Collapsible sidebar, real-time notifications, breadcrumbs, theme switcher, VOICE COMMERCE
  */
 
-import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Menu, X, Search, Bell, Settings, User, LogOut, 
-  Home, Package, ShoppingCart, Users, BarChart3,
-  Calendar, MapPin, Star, Gift, MessageSquare,
-  CreditCard, Truck, Clock, TrendingUp, AlertCircle,
-  ChevronRight, ChevronLeft, Maximize2, Minimize2,
-  Moon, Sun, Palette, Globe, Shield, Zap, Wifi,
-  WifiOff, RefreshCw, Download, Upload, HelpCircle
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  BarChart3,
+  Bell,
+  Calendar,
+  Gift,
+  HelpCircle,
+  Home,
+  Menu,
+  Mic, MicOff,
+  Moon,
+  Package,
+  Search,
+  Settings,
+  ShoppingCart,
+  Star,
+  Sun,
+  User,
+  Users,
+  Volume2, VolumeX // VOICE ICONS ADDED
 } from 'lucide-react';
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 // Hooks & Contexts
 import { useAuth } from '../../hooks/useAuth';
 import { useTenant } from '../../hooks/useTenant';
 import { useTheme } from '../../hooks/useTheme';
+import { useVoice } from '../../hooks/useVoice'; // VOICE HOOK ADDED
 
 // Lazy loaded components
 const Sidebar = lazy(() => import('./Sidebar'));
@@ -40,6 +52,7 @@ const NetworkStatus = lazy(() => import('./NetworkStatus'));
 const SystemAlerts = lazy(() => import('./SystemAlerts'));
 const PerformanceMonitor = lazy(() => import('./PerformanceMonitor'));
 const KeyboardShortcuts = lazy(() => import('./KeyboardShortcuts'));
+const VoiceCommandsModal = lazy(() => import('./VoiceCommandsModal')); // VOICE MODAL ADDED
 
 // Lazy loaded services
 const realtimeService = () => import('../../services/realtimeService');
@@ -47,6 +60,7 @@ const notificationService = () => import('../../services/notificationService');
 const analyticsService = () => import('../../services/analyticsService');
 const performanceService = () => import('../../services/performanceService');
 const keyboardService = () => import('../../services/keyboardService');
+const voiceService = () => import('../../services/voice/voiceService'); // VOICE SERVICE ADDED
 
 // Loading component
 const LayoutSkeleton = () => (
@@ -70,7 +84,8 @@ const NAVIGATION_ITEMS = [
     path: '/admin',
     icon: Home,
     badge: null,
-    shortcut: '⌘ + D'
+    shortcut: '⌘ + D',
+    voiceCommand: ['dashboard', 'home', 'hauptseite'] // VOICE COMMANDS ADDED
   },
   {
     id: 'orders',
@@ -78,7 +93,8 @@ const NAVIGATION_ITEMS = [
     path: '/admin/orders',
     icon: ShoppingCart,
     badge: 'realtime',
-    shortcut: '⌘ + O'
+    shortcut: '⌘ + O',
+    voiceCommand: ['orders', 'bestellungen', 'bstellige'] // VOICE COMMANDS ADDED
   },
   {
     id: 'products',
@@ -86,6 +102,7 @@ const NAVIGATION_ITEMS = [
     path: '/admin/products',
     icon: Package,
     shortcut: '⌘ + P',
+    voiceCommand: ['products', 'produkte', 'menu'],
     children: [
       { id: 'products-list', label: 'All Products', path: '/admin/products' },
       { id: 'products-categories', label: 'Categories', path: '/admin/categories' },
@@ -97,54 +114,62 @@ const NAVIGATION_ITEMS = [
     label: 'Customers',
     path: '/admin/customers',
     icon: Users,
-    shortcut: '⌘ + U'
+    shortcut: '⌘ + U',
+    voiceCommand: ['customers', 'kunden', 'chunde']
   },
   {
     id: 'analytics',
     label: 'Analytics',
     path: '/admin/analytics',
     icon: BarChart3,
-    shortcut: '⌘ + A'
+    shortcut: '⌘ + A',
+    voiceCommand: ['analytics', 'statistiken', 'statistike']
   },
   {
     id: 'events',
     label: 'Events',
     path: '/admin/events',
     icon: Calendar,
-    shortcut: '⌘ + E'
+    shortcut: '⌘ + E',
+    voiceCommand: ['events', 'veranstaltungen', 'events']
   },
   {
     id: 'staff',
     label: 'Staff',
     path: '/admin/staff',
     icon: User,
-    shortcut: '⌘ + S'
+    shortcut: '⌘ + S',
+    voiceCommand: ['staff', 'personal', 'mitarbeiter']
   },
   {
     id: 'reviews',
     label: 'Reviews',
     path: '/admin/reviews',
     icon: Star,
-    badge: 'notification'
+    badge: 'notification',
+    voiceCommand: ['reviews', 'bewertungen', 'bewertige']
   },
   {
     id: 'promotions',
     label: 'Promotions',
     path: '/admin/promotions',
-    icon: Gift
+    icon: Gift,
+    voiceCommand: ['promotions', 'aktionen', 'aktion']
   },
   {
     id: 'notifications',
     label: 'Notifications',
     path: '/admin/notifications',
-    icon: Bell
+    icon: Bell,
+    voiceCommand: ['notifications', 'benachrichtigungen', 'nachricht']
   },
   {
     id: 'settings',
     label: 'Settings',
     path: '/admin/settings',
     icon: Settings,
-    shortcut: '⌘ + ,'
+    shortcut: '⌘ + ,',
+    voiceCommand: ['settings', 'einstellungen', 'istellige']
   }
 ];
 
@@ -159,11 +184,14 @@ const AdminLayout = ({ children }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showThemeCustomizer, setShowThemeCustomizer] = useState(false);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
+  const [showVoiceCommands, setShowVoiceCommands] = useState(false); // VOICE STATE ADDED
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [notifications, setNotifications] = useState([]);
   const [systemAlerts, setSystemAlerts] = useState([]);
   const [performanceData, setPerformanceData] = useState(null);
   const [realtimeBadges, setRealtimeBadges] = useState({});
+  const [voiceEnabled, setVoiceEnabled] = useState(false); // VOICE STATE ADDED
+  const [voiceOrders, setVoiceOrders] = useState([]); // VOICE ORDERS STATE ADDED
 
   // Hooks
   const location = useLocation();
@@ -172,12 +200,22 @@ const AdminLayout = ({ children }) => {
   const { tenant, updateTenant } = useTenant();
   const { theme, toggleTheme, updateTheme } = useTheme();
 
+  // VOICE HOOK INTEGRATION
+  const {
+    isListening,
+    transcript,
+    startListening,
+    stopListening,
+    isSupported: voiceSupported
+  } = useVoice();
+
   // Lazy loaded services refs
   const realtimeServiceRef = React.useRef(null);
   const notificationServiceRef = React.useRef(null);
   const analyticsServiceRef = React.useRef(null);
   const performanceServiceRef = React.useRef(null);
   const keyboardServiceRef = React.useRef(null);
+  const voiceServiceRef = React.useRef(null); // VOICE SERVICE REF ADDED
 
   // ============================================================================
   // LAZY LOADING SETUP
@@ -208,18 +246,40 @@ const AdminLayout = ({ children }) => {
         const KeyboardService = await keyboardService();
         keyboardServiceRef.current = new KeyboardService.default();
 
+        // INITIALIZE VOICE SERVICE
+        if (voiceSupported) {
+          const VoiceService = await voiceService();
+          voiceServiceRef.current = new VoiceService.default({
+            tenantId: tenant?.id,
+            userId: user?.uid,
+            language: tenant?.settings?.language || 'de-CH'
+          });
+
+          // Enable voice if user preference
+          const voicePref = localStorage.getItem('voice_enabled');
+          if (voicePref === 'true') {
+            setVoiceEnabled(true);
+          }
+        }
+
         // Setup realtime subscriptions
         setupRealtimeSubscriptions();
 
         // Setup keyboard shortcuts
         setupKeyboardShortcuts();
 
+        // Setup voice commands
+        if (voiceSupported) {
+          setupVoiceCommands();
+        }
+
         // Track layout initialization
         if (analyticsServiceRef.current) {
           analyticsServiceRef.current.trackEvent('admin_layout_initialized', {
             tenant_id: tenant?.id,
             user_role: user?.role,
-            theme: theme
+            theme: theme,
+            voice_enabled: voiceSupported && voiceEnabled
           });
         }
 
@@ -229,7 +289,54 @@ const AdminLayout = ({ children }) => {
     };
 
     initializeLazyServices();
-  }, [tenant?.id, user?.uid, user?.role, theme]);
+  }, [tenant?.id, user?.uid, user?.role, theme, voiceSupported, voiceEnabled]);
+
+  // ============================================================================
+  // VOICE COMMAND SETUP
+  // ============================================================================
+  const setupVoiceCommands = useCallback(() => {
+    if (!voiceServiceRef.current) return;
+
+    // Register navigation commands
+    NAVIGATION_ITEMS.forEach(item => {
+      if (item.voiceCommand) {
+        item.voiceCommand.forEach(command => {
+          voiceServiceRef.current.registerCommand(command, () => {
+            navigate(item.path);
+
+            // Voice feedback
+            if ('speechSynthesis' in window) {
+              const utterance = new SpeechSynthesisUtterance(
+                `Navigiere zu ${item.label}`
+              );
+              utterance.lang = 'de-CH';
+              window.speechSynthesis.speak(utterance);
+            }
+          });
+        });
+      }
+    });
+
+    // Register action commands
+    const actionCommands = {
+      'neue bestellung': () => navigate('/admin/orders/new'),
+      'nöi bstellig': () => navigate('/admin/orders/new'),
+      'neues produkt': () => navigate('/admin/products/new'),
+      'nöis produkt': () => navigate('/admin/products/new'),
+      'suche': () => setShowSearchModal(true),
+      'sueche': () => setShowSearchModal(true),
+      'hilfe': () => setShowVoiceCommands(true),
+      'hilf': () => setShowVoiceCommands(true),
+      'logout': () => handleLogout(),
+      'abmelden': () => handleLogout(),
+      'abmelde': () => handleLogout()
+    };
+
+    Object.entries(actionCommands).forEach(([command, action]) => {
+      voiceServiceRef.current.registerCommand(command, action);
+    });
+
+  }, [navigate, handleLogout]);
 
   // ============================================================================
   // REALTIME SUBSCRIPTIONS
@@ -244,14 +351,40 @@ const AdminLayout = ({ children }) => {
         orders: (prev.orders || 0) + 1
       }));
 
-      // Show notification for new orders
-      if (notificationServiceRef.current) {
-        notificationServiceRef.current.showRealtimeNotification({
-          type: 'order',
-          title: 'New Order Received',
-          message: `Order #${data.orderNumber} from ${data.customerName}`,
-          action: () => navigate(`/admin/orders/${data.id}`)
-        });
+      // VOICE ORDER HANDLING
+      if (data.channel === 'voice') {
+        setVoiceOrders(prev => [...prev, data]);
+
+        // Special notification for voice orders
+        if (notificationServiceRef.current) {
+          notificationServiceRef.current.showRealtimeNotification({
+            type: 'voice_order',
+            title: '🎤 Voice Order Received',
+            message: `Voice order #${data.orderNumber} from ${data.customerName}`,
+            action: () => navigate(`/admin/orders/${data.id}`),
+            priority: 'high',
+            sound: 'voice-order.mp3'
+          });
+        }
+
+        // Voice announcement
+        if (voiceEnabled && 'speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance(
+            `Neue Sprachbestellung von ${data.customerName}`
+          );
+          utterance.lang = 'de-CH';
+          window.speechSynthesis.speak(utterance);
+        }
+      } else {
+        // Regular order notification
+        if (notificationServiceRef.current) {
+          notificationServiceRef.current.showRealtimeNotification({
+            type: 'order',
+            title: 'New Order Received',
+            message: `Order #${data.orderNumber} from ${data.customerName}`,
+            action: () => navigate(`/admin/orders/${data.id}`)
+          });
+        }
       }
     });
 
@@ -287,7 +420,7 @@ const AdminLayout = ({ children }) => {
       setNotifications(prev => [data, ...prev].slice(0, 50));
     });
 
-  }, [navigate]);
+  }, [navigate, voiceEnabled]);
 
   const setupKeyboardShortcuts = useCallback(() => {
     if (!keyboardServiceRef.current) return;
@@ -305,20 +438,58 @@ const AdminLayout = ({ children }) => {
       'cmd+/': () => setShowKeyboardShortcuts(true),
       'cmd+shift+n': () => setShowNotifications(!showNotifications),
       'cmd+shift+t': () => toggleTheme(),
+      'cmd+shift+v': () => handleVoiceToggle(), // VOICE SHORTCUT ADDED
       'esc': () => {
         setShowSearchModal(false);
         setShowNotifications(false);
         setShowUserMenu(false);
         setShowKeyboardShortcuts(false);
+        setShowVoiceCommands(false);
+        if (isListening) stopListening();
       }
     };
 
     keyboardServiceRef.current.registerShortcuts(shortcuts);
-  }, [navigate, showNotifications, toggleTheme]);
+  }, [navigate, showNotifications, toggleTheme, isListening, stopListening]);
+
+  // ============================================================================
+  // VOICE HANDLERS
+  // ============================================================================
+  const handleVoiceToggle = useCallback(() => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  }, [isListening, startListening, stopListening]);
+
+  const toggleVoiceEnabled = useCallback(() => {
+    const newState = !voiceEnabled;
+    setVoiceEnabled(newState);
+    localStorage.setItem('voice_enabled', newState.toString());
+
+    if (!newState && isListening) {
+      stopListening();
+    }
+
+    // Track voice toggle
+    if (analyticsServiceRef.current) {
+      analyticsServiceRef.current.trackEvent('voice_toggled', {
+        enabled: newState
+      });
+    }
+  }, [voiceEnabled, isListening, stopListening]);
 
   // ============================================================================
   // EFFECTS
   // ============================================================================
+  useEffect(() => {
+    // Process voice transcript
+    if (transcript && voiceServiceRef.current) {
+      voiceServiceRef.current.processCommand(transcript);
+    }
+  }, [transcript]);
+
   useEffect(() => {
     // Network status monitoring
     const handleOnline = () => setIsOnline(true);
@@ -366,14 +537,15 @@ const AdminLayout = ({ children }) => {
     setShowNotifications(false);
     setShowUserMenu(false);
     setShowMobileSidebar(false);
+    setShowVoiceCommands(false);
   }, [location.pathname]);
 
   // ============================================================================
   // COMPUTED VALUES
   // ============================================================================
   const currentNavItem = useMemo(() => {
-    return NAVIGATION_ITEMS.find(item => 
-      location.pathname === item.path || 
+    return NAVIGATION_ITEMS.find(item =>
+      location.pathname === item.path ||
       location.pathname.startsWith(item.path + '/')
     );
   }, [location.pathname]);
@@ -385,7 +557,7 @@ const AdminLayout = ({ children }) => {
     paths.slice(1).forEach((path, index) => {
       const fullPath = '/' + paths.slice(0, index + 2).join('/');
       const navItem = NAVIGATION_ITEMS.find(item => item.path === fullPath);
-      
+
       breadcrumbs.push({
         label: navItem?.label || path.charAt(0).toUpperCase() + path.slice(1),
         path: fullPath
@@ -396,9 +568,10 @@ const AdminLayout = ({ children }) => {
   }, [location.pathname]);
 
   const totalNotificationCount = useMemo(() => {
-    return Object.values(realtimeBadges).reduce((sum, count) => sum + count, 0) + 
-           systemAlerts.filter(alert => !alert.dismissed).length;
-  }, [realtimeBadges, systemAlerts]);
+    return Object.values(realtimeBadges).reduce((sum, count) => sum + count, 0) +
+           systemAlerts.filter(alert => !alert.dismissed).length +
+           voiceOrders.length; // VOICE ORDERS ADDED TO COUNT
+  }, [realtimeBadges, systemAlerts, voiceOrders]);
 
   // ============================================================================
   // HANDLERS
@@ -413,7 +586,7 @@ const AdminLayout = ({ children }) => {
 
   const handleNavigate = useCallback((path) => {
     navigate(path);
-    
+
     // Clear badge for navigated item
     const navItem = NAVIGATION_ITEMS.find(item => item.path === path);
     if (navItem && realtimeBadges[navItem.id]) {
@@ -429,8 +602,14 @@ const AdminLayout = ({ children }) => {
       // Track logout event
       if (analyticsServiceRef.current) {
         analyticsServiceRef.current.trackEvent('admin_logout', {
-          session_duration: Date.now() - (user?.loginTime || Date.now())
+          session_duration: Date.now() - (user?.loginTime || Date.now()),
+          voice_enabled: voiceEnabled
         });
+      }
+
+      // Stop voice if active
+      if (isListening) {
+        stopListening();
       }
 
       await logout();
@@ -438,12 +617,12 @@ const AdminLayout = ({ children }) => {
     } catch (error) {
       console.error('Logout failed:', error);
     }
-  }, [logout, navigate, user?.loginTime]);
+  }, [logout, navigate, user?.loginTime, voiceEnabled, isListening, stopListening]);
 
   const dismissAlert = useCallback((alertId) => {
-    setSystemAlerts(prev => 
-      prev.map(alert => 
-        alert.id === alertId 
+    setSystemAlerts(prev =>
+      prev.map(alert =>
+        alert.id === alertId
           ? { ...alert, dismissed: true }
           : alert
       )
@@ -485,6 +664,77 @@ const AdminLayout = ({ children }) => {
 
       {/* Right Section */}
       <div className="flex items-center gap-2">
+        {/* Voice Status Indicator - NEW */}
+        {voiceSupported && (
+          <div className="flex items-center gap-2">
+            {/* Voice Enable Toggle */}
+            <button
+              onClick={toggleVoiceEnabled}
+              className={`p-2 rounded-lg transition-colors ${
+                voiceEnabled
+                  ? 'bg-purple-100 text-purple-600 hover:bg-purple-200'
+                  : 'hover:bg-gray-100'
+              }`}
+              title={voiceEnabled ? 'Voice Enabled' : 'Voice Disabled'}
+            >
+              {voiceEnabled ? (
+                <Volume2 className="w-5 h-5" />
+              ) : (
+                <VolumeX className="w-5 h-5" />
+              )}
+            </button>
+
+            {/* Voice Listening Indicator */}
+            {voiceEnabled && (
+              <button
+                onClick={handleVoiceToggle}
+                className={`relative p-2 rounded-lg transition-all ${
+                  isListening
+                    ? 'bg-red-500 text-white animate-pulse'
+                    : 'bg-purple-500 text-white hover:bg-purple-600'
+                }`}
+                title={isListening ? 'Listening...' : 'Start Voice Command'}
+              >
+                {isListening ? (
+                  <Mic className="w-5 h-5" />
+                ) : (
+                  <MicOff className="w-5 h-5" />
+                )}
+                {isListening && (
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-600 rounded-full animate-ping"></span>
+                )}
+              </button>
+            )}
+
+            {/* Voice Commands Help */}
+            {voiceEnabled && (
+              <button
+                onClick={() => setShowVoiceCommands(true)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Voice Commands Help"
+              >
+                <HelpCircle className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Voice Orders Badge */}
+        {voiceOrders.length > 0 && (
+          <div className="relative">
+            <button
+              onClick={() => navigate('/admin/orders?filter=voice')}
+              className="p-2 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors"
+              title={`${voiceOrders.length} Voice Orders`}
+            >
+              <ShoppingCart className="w-5 h-5" />
+              <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {voiceOrders.length}
+              </span>
+            </button>
+          </div>
+        )}
+
         {/* Network Status */}
         <div className="hidden sm:block">
           <Suspense fallback={null}>
@@ -545,6 +795,20 @@ const AdminLayout = ({ children }) => {
 
   const renderMainContent = () => (
     <main className="flex-1 p-4 lg:p-6 overflow-auto">
+      {/* Voice Transcript Display */}
+      {isListening && transcript && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 p-3 bg-purple-100 border border-purple-300 rounded-lg flex items-center gap-3"
+        >
+          <Mic className="w-5 h-5 text-purple-600 animate-pulse" />
+          <span className="text-sm text-purple-800">
+            {transcript || 'Listening...'}
+          </span>
+        </motion.div>
+      )}
+
       <AnimatePresence mode="wait">
         <motion.div
           key={location.pathname}
@@ -580,6 +844,7 @@ const AdminLayout = ({ children }) => {
             onNavigate={handleNavigate}
             onToggle={handleSidebarToggle}
             onCloseMobile={() => setShowMobileSidebar(false)}
+            voiceEnabled={voiceEnabled}
           />
         </Suspense>
 
@@ -620,6 +885,7 @@ const AdminLayout = ({ children }) => {
             isOpen={showSearchModal}
             onClose={() => setShowSearchModal(false)}
             onNavigate={handleNavigate}
+            voiceEnabled={voiceEnabled}
           />
         </Suspense>
       )}
@@ -630,6 +896,7 @@ const AdminLayout = ({ children }) => {
             isOpen={showNotifications}
             notifications={notifications}
             systemAlerts={systemAlerts}
+            voiceOrders={voiceOrders}
             onClose={() => setShowNotifications(false)}
             onDismissAlert={dismissAlert}
           />
@@ -646,6 +913,8 @@ const AdminLayout = ({ children }) => {
             onLogout={handleLogout}
             onSettings={() => navigate('/admin/settings')}
             onThemeCustomizer={() => setShowThemeCustomizer(true)}
+            voiceEnabled={voiceEnabled}
+            onToggleVoice={toggleVoiceEnabled}
           />
         </Suspense>
       )}
@@ -666,7 +935,22 @@ const AdminLayout = ({ children }) => {
           <KeyboardShortcuts
             isOpen={showKeyboardShortcuts}
             onClose={() => setShowKeyboardShortcuts(false)}
-            shortcuts={NAVIGATION_ITEMS.filter(item => item.shortcut)}
+            shortcuts={[
+              ...NAVIGATION_ITEMS.filter(item => item.shortcut),
+              { label: 'Toggle Voice', shortcut: '⌘ + ⇧ + V', action: handleVoiceToggle }
+            ]}
+          />
+        </Suspense>
+      )}
+
+      {/* Voice Commands Modal - NEW */}
+      {showVoiceCommands && (
+        <Suspense fallback={null}>
+          <VoiceCommandsModal
+            isOpen={showVoiceCommands}
+            onClose={() => setShowVoiceCommands(false)}
+            commands={NAVIGATION_ITEMS}
+            currentLanguage={tenant?.settings?.language || 'de-CH'}
           />
         </Suspense>
       )}
@@ -677,6 +961,8 @@ const AdminLayout = ({ children }) => {
           onNewOrder={() => navigate('/admin/orders/new')}
           onNewProduct={() => navigate('/admin/products/new')}
           onQuickStats={() => navigate('/admin/analytics')}
+          voiceEnabled={voiceEnabled}
+          onVoiceCommand={handleVoiceToggle}
         />
       </Suspense>
     </div>

@@ -1,17 +1,27 @@
-﻿{
+{
   "version": "3.0.0",
-  "npmClient": "npm",
-  "workspaces": ["apps/*", "packages/*"],
+  "npmClient": "npm", 
+  "useWorkspaces": true,
+  "packages": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
   "command": {
-    "publish": {
-      "conventionalCommits": true,
-      "message": "chore(release): publish",
-      "registry": "https://npm.pkg.github.com",
-      "allowBranch": ["main", "develop"]
+    "bootstrap": {
+      "hoist": true
     },
     "version": {
-      "allowBranch": ["main", "develop"],
-      "conventionalCommits": true
+      "conventionalCommits": true,
+      "message": "chore(release): publish %v",
+      "createRelease": "github"
+    },
+    "publish": {
+      "registry": "https://registry.npmjs.org/",
+      "verifyAccess": false
+    },
+    "run": {
+      "stream": true
     }
   }
 }

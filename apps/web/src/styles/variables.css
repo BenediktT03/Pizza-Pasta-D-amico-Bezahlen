@@ -1,0 +1,260 @@
+/* ===================================
+   EATECH V3.0 - CSS Variables
+   Theme customization and Swiss branding
+   =================================== */
+
+/* Brand colors - EATECH specific */
+:root {
+  /* Primary brand colors */
+  --brand-primary: #FF6B6B;
+  --brand-primary-50: #FFF5F5;
+  --brand-primary-100: #FFEBEB;
+  --brand-primary-200: #FFD6D6;
+  --brand-primary-300: #FFADAD;
+  --brand-primary-400: #FF8585;
+  --brand-primary-500: #FF6B6B;
+  --brand-primary-600: #FF4747;
+  --brand-primary-700: #E53535;
+  --brand-primary-800: #CC2E2E;
+  --brand-primary-900: #991F1F;
+  
+  /* Secondary brand colors */
+  --brand-secondary: #4ECDC4;
+  --brand-secondary-50: #F0FCFB;
+  --brand-secondary-100: #E1F9F7;
+  --brand-secondary-200: #C3F3EF;
+  --brand-secondary-300: #94E8DF;
+  --brand-secondary-400: #65DDCF;
+  --brand-secondary-500: #4ECDC4;
+  --brand-secondary-600: #38B5AC;
+  --brand-secondary-700: #2E9189;
+  --brand-secondary-800: #236D67;
+  --brand-secondary-900: #1A514C;
+  
+  /* Swiss flag colors */
+  --swiss-red: #FF0000;
+  --swiss-white: #FFFFFF;
+  
+  /* Food category colors */
+  --category-starters: #A8E6CF;
+  --category-mains: #FFD93D;
+  --category-burgers: #FF8B94;
+  --category-wraps: #C1E1C1;
+  --category-salads: #7FCD91;
+  --category-sides: #FDB147;
+  --category-desserts: #FAA2C1;
+  --category-drinks: #74C0FC;
+  --category-specials: #FFD43B;
+}
+
+/* Component-specific variables */
+:root {
+  /* Navigation */
+  --nav-height: 64px;
+  --nav-height-mobile: 56px;
+  --nav-background: var(--color-white);
+  --nav-shadow: var(--shadow-sm);
+  
+  /* Sidebar */
+  --sidebar-width: 280px;
+  --sidebar-width-collapsed: 64px;
+  --sidebar-background: var(--color-surface);
+  
+  /* Cards */
+  --card-padding: var(--spacing-lg);
+  --card-radius: var(--radius-lg);
+  --card-shadow: var(--shadow-md);
+  --card-border: 1px solid var(--color-border);
+  
+  /* Buttons */
+  --button-height-sm: 32px;
+  --button-height-md: 40px;
+  --button-height-lg: 48px;
+  --button-padding-x: var(--spacing-lg);
+  --button-radius: var(--radius-md);
+  --button-font-weight: var(--font-weight-medium);
+  
+  /* Forms */
+  --input-height: 40px;
+  --input-padding-x: var(--spacing-md);
+  --input-border: 1px solid var(--color-border);
+  --input-radius: var(--radius-md);
+  --input-focus-ring: 0 0 0 3px rgba(255, 107, 107, 0.1);
+  
+  /* Modals */
+  --modal-backdrop: rgba(0, 0, 0, 0.5);
+  --modal-max-width: 560px;
+  --modal-radius: var(--radius-xl);
+  --modal-padding: var(--spacing-xl);
+  
+  /* Toast notifications */
+  --toast-width: 360px;
+  --toast-padding: var(--spacing-md);
+  --toast-radius: var(--radius-lg);
+  
+  /* Menu items */
+  --menu-item-height: 120px;
+  --menu-item-image-size: 80px;
+  --menu-item-gap: var(--spacing-md);
+  
+  /* Order cards */
+  --order-card-height: 160px;
+  --order-status-badge-height: 24px;
+  
+  /* Cart */
+  --cart-item-height: 80px;
+  --cart-sidebar-width: 400px;
+}
+
+/* Animation timings */
+:root {
+  --animation-duration-fast: 150ms;
+  --animation-duration-base: 200ms;
+  --animation-duration-slow: 300ms;
+  --animation-duration-slower: 500ms;
+  
+  --animation-easing-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --animation-easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --animation-easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Breakpoints */
+:root {
+  --breakpoint-xs: 0;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* Swiss grid system */
+:root {
+  --grid-columns: 12;
+  --grid-gutter: var(--spacing-md);
+  --grid-margin: var(--spacing-lg);
+  
+  /* Swiss typographic scale */
+  --type-scale-ratio: 1.25;
+  --type-scale-base: 1rem;
+  --type-scale-sm: calc(var(--type-scale-base) / var(--type-scale-ratio));
+  --type-scale-lg: calc(var(--type-scale-base) * var(--type-scale-ratio));
+  --type-scale-xl: calc(var(--type-scale-lg) * var(--type-scale-ratio));
+  --type-scale-2xl: calc(var(--type-scale-xl) * var(--type-scale-ratio));
+  --type-scale-3xl: calc(var(--type-scale-2xl) * var(--type-scale-ratio));
+}
+
+/* PWA specific */
+:root {
+  --pwa-theme-color: var(--brand-primary);
+  --pwa-background-color: var(--color-white);
+  --pwa-display: standalone;
+  --pwa-orientation: portrait;
+  
+  /* iOS specific */
+  --ios-status-bar: default; /* or 'black-translucent' */
+  --ios-safe-area-inset-top: env(safe-area-inset-top);
+  --ios-safe-area-inset-right: env(safe-area-inset-right);
+  --ios-safe-area-inset-bottom: env(safe-area-inset-bottom);
+  --ios-safe-area-inset-left: env(safe-area-inset-left);
+}
+
+/* Voice UI */
+:root {
+  --voice-wave-color: var(--brand-secondary);
+  --voice-button-size: 64px;
+  --voice-button-pulse: var(--brand-secondary-300);
+}
+
+/* Performance */
+:root {
+  /* Optimize for 60fps animations */
+  --optimal-animation-duration: 16.67ms;
+  
+  /* Image loading */
+  --image-blur-placeholder: blur(20px);
+  --image-transition-duration: var(--animation-duration-slow);
+}
+
+/* Accessibility */
+:root {
+  /* Focus indicators */
+  --focus-ring-width: 2px;
+  --focus-ring-color: var(--brand-primary);
+  --focus-ring-offset: 2px;
+  
+  /* High contrast mode */
+  --high-contrast-border: 2px solid currentColor;
+  
+  /* Reduced motion */
+  --reduced-motion-duration: 0.01ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --animation-duration-fast: var(--reduced-motion-duration);
+    --animation-duration-base: var(--reduced-motion-duration);
+    --animation-duration-slow: var(--reduced-motion-duration);
+    --animation-duration-slower: var(--reduced-motion-duration);
+  }
+}
+
+/* Dark mode overrides */
+.dark {
+  --brand-primary: #FF8585;
+  --brand-secondary: #65DDCF;
+  
+  --nav-background: var(--color-surface);
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --modal-backdrop: rgba(0, 0, 0, 0.8);
+  
+  --pwa-background-color: var(--color-background);
+  --ios-status-bar: black;
+}
+
+/* Print mode */
+@media print {
+  :root {
+    --color-primary: #000000;
+    --color-text: #000000;
+    --color-background: #FFFFFF;
+    --shadow-none: none;
+  }
+}
+
+/* Seasonal themes (optional) */
+.theme-summer {
+  --brand-primary: #FF6B6B;
+  --brand-secondary: #4ECDC4;
+}
+
+.theme-autumn {
+  --brand-primary: #D35400;
+  --brand-secondary: #27AE60;
+}
+
+.theme-winter {
+  --brand-primary: #3498DB;
+  --brand-secondary: #9B59B6;
+}
+
+.theme-spring {
+  --brand-primary: #F39C12;
+  --brand-secondary: #16A085;
+}
+
+/* Event themes */
+.theme-swiss-national-day {
+  --brand-primary: var(--swiss-red);
+  --brand-secondary: var(--swiss-white);
+}
+
+.theme-christmas {
+  --brand-primary: #C0392B;
+  --brand-secondary: #27AE60;
+}
+
+.theme-easter {
+  --brand-primary: #F39C12;
+  --brand-secondary: #8E44AD;
+}

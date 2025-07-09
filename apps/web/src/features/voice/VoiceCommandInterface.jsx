@@ -4,9 +4,9 @@
  * Description: Fortgeschrittene Sprachkommando-Schnittstelle mit Lazy Loading & KI
  * Author: EATECH Development Team
  * Created: 2025-01-08
- * 
+ *
  * File Path: /apps/web/src/features/voice/VoiceCommandInterface.jsx
- * 
+ *
  * Features:
  * - Advanced voice recognition with Swiss German support
  * - Lazy loading for performance optimization
@@ -16,30 +16,36 @@
  * - Context-aware command interpretation
  */
 
-import React, { 
-  useState, 
-  useEffect, 
-  useCallback, 
-  useRef, 
-  useMemo,
-  lazy, 
+import {
+  AlertCircle,
+  Brain,
+  Check,
+  ChevronDown, ChevronUp,
+  HelpCircle,
+  MessageSquare,
+  Mic, MicOff,
+  RotateCcw,
+  Settings,
+  Target,
+  Volume2, VolumeX,
+  X
+} from 'lucide-react';
+import {
+  lazy,
   Suspense,
+  useCallback,
+  useEffect,
   useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
   useTransition
 } from 'react';
-import { 
-  Mic, MicOff, Volume2, VolumeX, Brain,
-  Zap, MessageSquare, Settings, HelpCircle,
-  Play, Pause, RotateCcw, Check, X,
-  AlertCircle, Info, ChevronDown, ChevronUp,
-  Globe, Headphones, Waves, Activity,
-  Target, Eye, Hand, Smartphone
-} from 'lucide-react';
-import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useCart } from '../../contexts/CartContext';
 import { useTenant } from '../../contexts/TenantContext';
-import { useVoicePreferences } from '../../hooks/useVoicePreferences';
 import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
+import { useVoicePreferences } from '../../hooks/useVoicePreferences';
 import styles from './VoiceCommandInterface.module.css';
 
 // ============================================================================
@@ -47,69 +53,69 @@ import styles from './VoiceCommandInterface.module.css';
 // ============================================================================
 
 // Core Voice Components
-const VoiceWaveform = lazy(() => 
+const VoiceWaveform = lazy(() =>
   import('./components/VoiceWaveform').then(module => ({
     default: module.VoiceWaveform
   }))
 );
 
-const CommandVisualizer = lazy(() => 
+const CommandVisualizer = lazy(() =>
   import('./components/CommandVisualizer').then(module => ({
     default: module.CommandVisualizer
   }))
 );
 
-const VoiceSettings = lazy(() => 
+const VoiceSettings = lazy(() =>
   import('./components/VoiceSettings').then(module => ({
     default: module.VoiceSettings
   }))
 );
 
-const LanguageSelector = lazy(() => 
+const LanguageSelector = lazy(() =>
   import('./components/LanguageSelector').then(module => ({
     default: module.LanguageSelector
   }))
 );
 
 // Advanced Components
-const ContextualHelp = lazy(() => 
+const ContextualHelp = lazy(() =>
   import('./components/ContextualHelp').then(module => ({
     default: module.ContextualHelp
   }))
 );
 
-const CommandHistory = lazy(() => 
+const CommandHistory = lazy(() =>
   import('./components/CommandHistory').then(module => ({
     default: module.CommandHistory
   }))
 );
 
-const VoiceTutorial = lazy(() => 
+const VoiceTutorial = lazy(() =>
   import('./components/VoiceTutorial').then(module => ({
     default: module.VoiceTutorial
   }))
 );
 
-const AccessibilityPanel = lazy(() => 
+const AccessibilityPanel = lazy(() =>
   import('./components/AccessibilityPanel').then(module => ({
     default: module.AccessibilityPanel
   }))
 );
 
 // AI & Analytics Components
-const NLPDebugger = lazy(() => 
+const NLPDebugger = lazy(() =>
   import('./components/NLPDebugger').then(module => ({
     default: module.NLPDebugger
   }))
 );
 
-const VoiceAnalytics = lazy(() => 
+const VoiceAnalytics = lazy(() =>
   import('./components/VoiceAnalytics').then(module => ({
     default: module.VoiceAnalytics
   }))
 );
 
-const IntentPreview = lazy(() => 
+const IntentPreview = lazy(() =>
   import('./components/IntentPreview').then(module => ({
     default: module.IntentPreview
   }))
@@ -119,37 +125,37 @@ const IntentPreview = lazy(() =>
 // LAZY LOADED SERVICES
 // ============================================================================
 
-const SpeechRecognitionService = lazy(() => 
+const SpeechRecognitionService = lazy(() =>
   import('../../services/voice/SpeechRecognitionService').then(module => ({
     default: module.SpeechRecognitionService
   }))
 );
 
-const TextToSpeechService = lazy(() => 
+const TextToSpeechService = lazy(() =>
   import('../../services/voice/TextToSpeechService').then(module => ({
     default: module.TextToSpeechService
   }))
 );
 
-const NaturalLanguageProcessor = lazy(() => 
+const NaturalLanguageProcessor = lazy(() =>
   import('../../services/ai/NaturalLanguageProcessor').then(module => ({
     default: module.NaturalLanguageProcessor
   }))
 );
 
-const VoiceCommandProcessor = lazy(() => 
+const VoiceCommandProcessor = lazy(() =>
   import('../../services/voice/VoiceCommandProcessor').then(module => ({
     default: module.VoiceCommandProcessor
   }))
 );
 
-const VoiceAnalyticsService = lazy(() => 
+const VoiceAnalyticsService = lazy(() =>
   import('../../services/analytics/VoiceAnalyticsService').then(module => ({
     default: module.VoiceAnalyticsService
   }))
 );
 
-const ContextAwareService = lazy(() => 
+const ContextAwareService = lazy(() =>
   import('../../services/ai/ContextAwareService').then(module => ({
     default: module.ContextAwareService
   }))
@@ -159,19 +165,19 @@ const ContextAwareService = lazy(() =>
 // LAZY LOADED UTILITIES
 // ============================================================================
 
-const SwissGermanProcessor = lazy(() => 
+const SwissGermanProcessor = lazy(() =>
   import('../../utils/voice/SwissGermanProcessor').then(module => ({
     default: module.SwissGermanProcessor
   }))
 );
 
-const CommandMatcher = lazy(() => 
+const CommandMatcher = lazy(() =>
   import('../../utils/voice/CommandMatcher').then(module => ({
     default: module.CommandMatcher
   }))
 );
 
-const VoiceErrorHandler = lazy(() => 
+const VoiceErrorHandler = lazy(() =>
   import('../../utils/voice/VoiceErrorHandler').then(module => ({
     default: module.VoiceErrorHandler
   }))
@@ -193,37 +199,37 @@ const VOICE_STATES = {
 };
 
 const SUPPORTED_LANGUAGES = {
-  'de-CH': { 
-    name: 'Schweizerdeutsch', 
-    code: 'de-CH', 
+  'de-CH': {
+    name: 'Schweizerdeutsch',
+    code: 'de-CH',
     flag: '🇨🇭',
     ttsVoice: 'de-CH-LeniNeural',
     confidence: 0.65 // Lower threshold for Swiss German
   },
-  'de-DE': { 
-    name: 'Deutsch', 
-    code: 'de-DE', 
+  'de-DE': {
+    name: 'Deutsch',
+    code: 'de-DE',
     flag: '🇩🇪',
     ttsVoice: 'de-DE-KatjaNeural',
     confidence: 0.75
   },
-  'fr-CH': { 
-    name: 'Français (Suisse)', 
-    code: 'fr-CH', 
+  'fr-CH': {
+    name: 'Français (Suisse)',
+    code: 'fr-CH',
     flag: '🇫🇷',
     ttsVoice: 'fr-CH-FabriceNeural',
     confidence: 0.75
   },
-  'it-CH': { 
-    name: 'Italiano (Svizzera)', 
-    code: 'it-CH', 
+  'it-CH': {
+    name: 'Italiano (Svizzera)',
+    code: 'it-CH',
     flag: '🇮🇹',
     ttsVoice: 'it-CH-PeppineNeural',
     confidence: 0.75
   },
-  'en-US': { 
-    name: 'English', 
-    code: 'en-US', 
+  'en-US': {
+    name: 'English',
+    code: 'en-US',
     flag: '🇺🇸',
     ttsVoice: 'en-US-AriaNeural',
     confidence: 0.8
@@ -276,8 +282,8 @@ const PERFORMANCE_THRESHOLDS = {
 
 const LoadingSpinner = ({ size = 24, message = 'Wird geladen...' }) => (
   <div className={styles.loadingContainer}>
-    <div 
-      className={styles.spinner} 
+    <div
+      className={styles.spinner}
       style={{ width: size, height: size }}
       aria-label={message}
     />
@@ -313,27 +319,27 @@ const VoiceCommandInterface = ({
   // ============================================================================
   // STATE MANAGEMENT
   // ============================================================================
-  
+
   // Core Voice State
   const [voiceState, setVoiceState] = useState(VOICE_STATES.IDLE);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isCalibrating, setIsCalibrating] = useState(false);
-  
+
   // Recognition State
   const [transcript, setTranscript] = useState('');
   const [finalTranscript, setFinalTranscript] = useState('');
   const [confidence, setConfidence] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
   const [recognitionError, setRecognitionError] = useState(null);
-  
+
   // Processing State
   const [currentIntent, setCurrentIntent] = useState(null);
   const [processingResult, setProcessingResult] = useState(null);
   const [commandHistory, setCommandHistory] = useState([]);
   const [lastSuccessfulCommand, setLastSuccessfulCommand] = useState(null);
-  
+
   // UI State
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -342,19 +348,19 @@ const VoiceCommandInterface = ({
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(theme === 'dark');
-  
+
   // Performance State
   const [loadingStates, setLoadingStates] = useState({});
   const [errorStates, setErrorStates] = useState({});
   const [performanceMetrics, setPerformanceMetrics] = useState({});
-  
+
   // Transition for smooth UI updates
   const [isPending, startTransition] = useTransition();
-  
+
   // ============================================================================
   // REFS & HOOKS
   // ============================================================================
-  
+
   const recognitionRef = useRef(null);
   const synthesisRef = useRef(null);
   const audioContextRef = useRef(null);
@@ -363,60 +369,60 @@ const VoiceCommandInterface = ({
   const timeoutRef = useRef(null);
   const calibrationRef = useRef(null);
   const performanceRef = useRef({});
-  
+
   // Custom Hooks
   const { user } = useAuth();
   const { cart, addItem, removeItem, clear } = useCart();
   const { tenant } = useTenant();
-  const { 
-    language, 
-    voiceEnabled, 
-    volume, 
-    rate, 
-    updatePreferences 
+  const {
+    language,
+    voiceEnabled,
+    volume,
+    rate,
+    updatePreferences
   } = useVoicePreferences();
-  const { 
-    startMeasurement, 
-    endMeasurement, 
-    getMetrics 
+  const {
+    startMeasurement,
+    endMeasurement,
+    getMetrics
   } = usePerformanceMonitor();
-  
+
   // ============================================================================
   // MEMOIZED VALUES
   // ============================================================================
-  
-  const currentLanguageConfig = useMemo(() => 
+
+  const currentLanguageConfig = useMemo(() =>
     SUPPORTED_LANGUAGES[language] || SUPPORTED_LANGUAGES['de-CH'],
     [language]
   );
-  
+
   const availableCommands = useMemo(() => [
     ...Object.values(COMMAND_CATEGORIES),
     ...customCommands
   ], [customCommands]);
-  
-  const isVoiceSupported = useMemo(() => 
-    'webkitSpeechRecognition' in window || 
+
+  const isVoiceSupported = useMemo(() =>
+    'webkitSpeechRecognition' in window ||
     'SpeechRecognition' in window,
     []
   );
-  
-  const shouldAutoStart = useMemo(() => 
+
+  const shouldAutoStart = useMemo(() =>
     autoStart && isVoiceSupported && voiceEnabled,
     [autoStart, isVoiceSupported, voiceEnabled]
   );
-  
+
   // ============================================================================
   // SERVICE INITIALIZATION
   // ============================================================================
-  
+
   const initializeServices = useCallback(async () => {
     const initStart = performance.now();
     setVoiceState(VOICE_STATES.INITIALIZING);
-    
+
     try {
       setLoadingStates(prev => ({ ...prev, services: true }));
-      
+
       // Initialize core services with lazy loading
       const services = await Promise.allSettled([
         SpeechRecognitionService(),
@@ -426,29 +432,29 @@ const VoiceCommandInterface = ({
         VoiceAnalyticsService(),
         ContextAwareService()
       ]);
-      
+
       // Check for failed services
       const failedServices = services
         .map((result, index) => ({ result, index }))
         .filter(({ result }) => result.status === 'rejected');
-      
+
       if (failedServices.length > 0) {
         console.warn('Some services failed to initialize:', failedServices);
       }
-      
+
       // Initialize utilities
       await Promise.allSettled([
         SwissGermanProcessor(),
         CommandMatcher(),
         VoiceErrorHandler()
       ]);
-      
+
       // Setup speech recognition
       await setupSpeechRecognition();
-      
+
       // Setup audio analysis
       await setupAudioAnalysis();
-      
+
       // Initialize analytics
       const { default: AnalyticsService } = await VoiceAnalyticsService();
       await AnalyticsService.initialize({
@@ -456,21 +462,21 @@ const VoiceCommandInterface = ({
         tenantId: tenant?.id,
         language: language
       });
-      
+
       const initTime = performance.now() - initStart;
-      setPerformanceMetrics(prev => ({ 
-        ...prev, 
-        initializationTime: initTime 
+      setPerformanceMetrics(prev => ({
+        ...prev,
+        initializationTime: initTime
       }));
-      
+
       setIsInitialized(true);
       setVoiceState(VOICE_STATES.IDLE);
-      
+
       // Auto-start if configured
       if (shouldAutoStart) {
         setTimeout(() => startListening(), 1000);
       }
-      
+
     } catch (error) {
       console.error('Service initialization failed:', error);
       setRecognitionError('Initialisierung fehlgeschlagen');
@@ -480,34 +486,34 @@ const VoiceCommandInterface = ({
       setLoadingStates(prev => ({ ...prev, services: false }));
     }
   }, [language, user, tenant, shouldAutoStart, onError]);
-  
+
   const setupSpeechRecognition = useCallback(async () => {
     if (!isVoiceSupported) {
       throw new Error('Speech recognition not supported');
     }
-    
+
     try {
       const { default: SpeechService } = await SpeechRecognitionService();
-      
+
       recognitionRef.current = new SpeechService({
         language: currentLanguageConfig.code,
         continuous: true,
         interimResults: true,
         maxAlternatives: 3
       });
-      
+
       // Event handlers
       recognitionRef.current.onstart = handleRecognitionStart;
       recognitionRef.current.onresult = handleRecognitionResult;
       recognitionRef.current.onerror = handleRecognitionError;
       recognitionRef.current.onend = handleRecognitionEnd;
-      
+
     } catch (error) {
       console.error('Speech recognition setup failed:', error);
       throw error;
     }
   }, [currentLanguageConfig.code, isVoiceSupported]);
-  
+
   const setupAudioAnalysis = useCallback(async () => {
     try {
       audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
@@ -518,47 +524,47 @@ const VoiceCommandInterface = ({
       // Non-critical, continue without audio visualization
     }
   }, []);
-  
+
   // ============================================================================
   // SPEECH RECOGNITION HANDLERS
   // ============================================================================
-  
+
   const handleRecognitionStart = useCallback(() => {
     setIsListening(true);
     setVoiceState(VOICE_STATES.LISTENING);
     setRecognitionError(null);
     startMeasurement('recognition_session');
   }, [startMeasurement]);
-  
+
   const handleRecognitionResult = useCallback(async (event) => {
     const measurementId = startMeasurement('recognition_processing');
-    
+
     try {
       let interimTranscript = '';
       let finalTranscriptText = '';
       let highestConfidence = 0;
-      
+
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
         const transcriptText = result[0].transcript;
         const confidenceScore = result[0].confidence || 0;
-        
+
         if (result.isFinal) {
           finalTranscriptText += transcriptText;
           setFinalTranscript(prev => prev + transcriptText);
-          
+
           // Process final result
           await processVoiceCommand(transcriptText, confidenceScore);
         } else {
           interimTranscript += transcriptText;
         }
-        
+
         highestConfidence = Math.max(highestConfidence, confidenceScore);
       }
-      
+
       setTranscript(interimTranscript || finalTranscriptText);
       setConfidence(highestConfidence);
-      
+
     } catch (error) {
       console.error('Recognition result processing failed:', error);
       setRecognitionError('Sprachverarbeitung fehlgeschlagen');
@@ -566,17 +572,17 @@ const VoiceCommandInterface = ({
       endMeasurement(measurementId);
     }
   }, [startMeasurement, endMeasurement]);
-  
+
   const handleRecognitionError = useCallback(async (event) => {
     console.error('Speech recognition error:', event.error);
-    
+
     const { default: ErrorHandler } = await VoiceErrorHandler();
     const errorMessage = ErrorHandler.getLocalizedMessage(event.error, language);
-    
+
     setRecognitionError(errorMessage);
     setVoiceState(VOICE_STATES.ERROR);
     setIsListening(false);
-    
+
     // Analytics
     try {
       const { default: AnalyticsService } = await VoiceAnalyticsService();
@@ -588,10 +594,10 @@ const VoiceCommandInterface = ({
     } catch (analyticsError) {
       console.warn('Analytics tracking failed:', analyticsError);
     }
-    
+
     onError?.(event.error);
   }, [language, user, onError]);
-  
+
   const handleRecognitionEnd = useCallback(() => {
     setIsListening(false);
     if (voiceState !== VOICE_STATES.ERROR) {
@@ -599,15 +605,15 @@ const VoiceCommandInterface = ({
     }
     endMeasurement('recognition_session');
   }, [voiceState, endMeasurement]);
-  
+
   // ============================================================================
   // COMMAND PROCESSING
   // ============================================================================
-  
+
   const processVoiceCommand = useCallback(async (transcriptText, confidenceScore) => {
     const processingStart = performance.now();
     setVoiceState(VOICE_STATES.PROCESSING);
-    
+
     try {
       // Confidence check
       const minConfidence = currentLanguageConfig.confidence;
@@ -615,14 +621,14 @@ const VoiceCommandInterface = ({
         await speakResponse('Entschuldigung, ich habe Sie nicht verstanden. Können Sie das wiederholen?');
         return;
       }
-      
+
       // Swiss German preprocessing
       let processedTranscript = transcriptText;
       if (language === 'de-CH') {
         const { default: SwissProcessor } = await SwissGermanProcessor();
         processedTranscript = SwissProcessor.normalizeText(transcriptText);
       }
-      
+
       // NLP processing
       const { default: NLPService } = await NaturalLanguageProcessor();
       const intent = await NLPService.processCommand(processedTranscript, {
@@ -635,9 +641,9 @@ const VoiceCommandInterface = ({
         },
         confidence: confidenceScore
       });
-      
+
       setCurrentIntent(intent);
-      
+
       // Command processing
       const { default: CommandProcessor } = await VoiceCommandProcessor();
       const result = await CommandProcessor.executeCommand(intent, {
@@ -652,9 +658,9 @@ const VoiceCommandInterface = ({
           onOrderComplete
         }
       });
-      
+
       setProcessingResult(result);
-      
+
       // Update command history
       const commandEntry = {
         id: Date.now(),
@@ -666,9 +672,9 @@ const VoiceCommandInterface = ({
         confidence: confidenceScore,
         processingTime: performance.now() - processingStart
       };
-      
+
       setCommandHistory(prev => [commandEntry, ...prev.slice(0, 19)]); // Keep last 20
-      
+
       if (result.success) {
         setLastSuccessfulCommand(commandEntry);
         await speakResponse(result.message);
@@ -676,7 +682,7 @@ const VoiceCommandInterface = ({
       } else {
         await speakResponse(result.error || 'Der Befehl konnte nicht ausgeführt werden.');
       }
-      
+
       // Analytics
       const { default: AnalyticsService } = await VoiceAnalyticsService();
       AnalyticsService.trackCommand({
@@ -689,7 +695,7 @@ const VoiceCommandInterface = ({
         userId: user?.id,
         tenantId: tenant?.id
       });
-      
+
     } catch (error) {
       console.error('Command processing failed:', error);
       await speakResponse('Es gab einen Fehler bei der Verarbeitung Ihres Befehls.');
@@ -710,27 +716,27 @@ const VoiceCommandInterface = ({
     onOrderComplete,
     onCommandExecuted
   ]);
-  
+
   // ============================================================================
   // TEXT-TO-SPEECH
   // ============================================================================
-  
+
   const speakResponse = useCallback(async (text) => {
     if (!text || isSpeaking) return;
-    
+
     try {
       setIsSpeaking(true);
       setVoiceState(VOICE_STATES.SPEAKING);
-      
+
       const { default: TTSService } = await TextToSpeechService();
-      
+
       await TTSService.speak(text, {
         voice: currentLanguageConfig.ttsVoice,
         rate: rate,
         volume: volume,
         pitch: 1.0
       });
-      
+
     } catch (error) {
       console.error('Text-to-speech failed:', error);
     } finally {
@@ -738,29 +744,29 @@ const VoiceCommandInterface = ({
       setVoiceState(VOICE_STATES.IDLE);
     }
   }, [isSpeaking, currentLanguageConfig.ttsVoice, rate, volume]);
-  
+
   // ============================================================================
   // CONTROL FUNCTIONS
   // ============================================================================
-  
+
   const startListening = useCallback(async () => {
     if (!isInitialized || !voiceEnabled || isListening) return;
-    
+
     try {
       setRecognitionError(null);
       setTranscript('');
       setFinalTranscript('');
       setConfidence(0);
-      
+
       // Request microphone permission
       try {
         streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
-        
+
         // Setup audio analysis
         if (audioContextRef.current && analyserRef.current && streamRef.current) {
           const source = audioContextRef.current.createMediaStreamSource(streamRef.current);
           source.connect(analyserRef.current);
-          
+
           // Start audio level monitoring
           monitorAudioLevel();
         }
@@ -769,9 +775,9 @@ const VoiceCommandInterface = ({
         setRecognitionError('Mikrofon-Zugriff wurde verweigert');
         return;
       }
-      
+
       await recognitionRef.current.start();
-      
+
       // Set timeout for automatic stop
       timeoutRef.current = setTimeout(() => {
         if (isListening) {
@@ -779,90 +785,90 @@ const VoiceCommandInterface = ({
           speakResponse('Zeitüberschreitung erreicht.');
         }
       }, 30000); // 30 seconds
-      
+
     } catch (error) {
       console.error('Failed to start listening:', error);
       setRecognitionError('Spracherkennung konnte nicht gestartet werden');
     }
   }, [isInitialized, voiceEnabled, isListening]);
-  
+
   const stopListening = useCallback(() => {
     if (recognitionRef.current && isListening) {
       recognitionRef.current.stop();
     }
-    
+
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
-    
+
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
-    
+
     setIsListening(false);
     setAudioLevel(0);
   }, [isListening]);
-  
+
   const monitorAudioLevel = useCallback(() => {
     if (!analyserRef.current) return;
-    
+
     const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
-    
+
     const updateLevel = () => {
       if (!isListening) return;
-      
+
       analyserRef.current.getByteFrequencyData(dataArray);
       const average = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
       const normalizedLevel = average / 255;
-      
+
       setAudioLevel(normalizedLevel);
-      
+
       requestAnimationFrame(updateLevel);
     };
-    
+
     updateLevel();
   }, [isListening]);
-  
+
   // ============================================================================
   // CALIBRATION
   // ============================================================================
-  
+
   const startCalibration = useCallback(async () => {
     setIsCalibrating(true);
     setVoiceState(VOICE_STATES.CALIBRATING);
-    
+
     try {
       await speakResponse('Bitte sagen Sie: "Hallo EATECH" um die Spracherkennung zu kalibrieren.');
-      
+
       // Start listening for calibration phrase
       calibrationRef.current = setTimeout(() => {
         setIsCalibrating(false);
         setVoiceState(VOICE_STATES.IDLE);
         speakResponse('Kalibrierung abgeschlossen.');
       }, 10000);
-      
+
     } catch (error) {
       console.error('Calibration failed:', error);
       setIsCalibrating(false);
       setVoiceState(VOICE_STATES.ERROR);
     }
   }, []);
-  
+
   // ============================================================================
   // EVENT HANDLERS
   // ============================================================================
-  
+
   const handleLanguageChange = useCallback(async (newLanguage) => {
     updatePreferences({ language: newLanguage });
-    
+
     // Reinitialize speech recognition with new language
     if (recognitionRef.current) {
       stopListening();
       await setupSpeechRecognition();
     }
-    
+
     // Speak confirmation in new language
     const messages = {
       'de-CH': 'Sprache wurde zu Schweizerdeutsch geändert',
@@ -871,19 +877,19 @@ const VoiceCommandInterface = ({
       'it-CH': 'Lingua cambiata in italiano',
       'en-US': 'Language changed to English'
     };
-    
+
     await speakResponse(messages[newLanguage] || messages['de-CH']);
   }, [updatePreferences, stopListening, setupSpeechRecognition]);
-  
+
   const handleVoiceToggle = useCallback(() => {
     const newEnabled = !voiceEnabled;
     updatePreferences({ voiceEnabled: newEnabled });
-    
+
     if (!newEnabled && isListening) {
       stopListening();
     }
   }, [voiceEnabled, updatePreferences, isListening, stopListening]);
-  
+
   const handleRepeatLastCommand = useCallback(async () => {
     if (lastSuccessfulCommand) {
       await processVoiceCommand(
@@ -894,55 +900,55 @@ const VoiceCommandInterface = ({
       await speakResponse('Kein vorheriger Befehl zum Wiederholen gefunden.');
     }
   }, [lastSuccessfulCommand, processVoiceCommand]);
-  
+
   // ============================================================================
   // LIFECYCLE EFFECTS
   // ============================================================================
-  
+
   useEffect(() => {
     initializeServices();
-    
+
     return () => {
       // Cleanup
       stopListening();
-      
+
       if (synthesisRef.current) {
         synthesisRef.current.cancel();
       }
-      
+
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
-      
+
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-      
+
       if (calibrationRef.current) {
         clearTimeout(calibrationRef.current);
       }
     };
   }, [initializeServices, stopListening]);
-  
+
   // Theme detection
   useLayoutEffect(() => {
     if (theme === 'auto') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       setIsDarkMode(mediaQuery.matches);
-      
+
       const handleChange = (e) => setIsDarkMode(e.matches);
       mediaQuery.addEventListener('change', handleChange);
-      
+
       return () => mediaQuery.removeEventListener('change', handleChange);
     } else {
       setIsDarkMode(theme === 'dark');
     }
   }, [theme]);
-  
+
   // ============================================================================
   // RENDER FUNCTIONS
   // ============================================================================
-  
+
   const renderMainInterface = () => (
     <div className={styles.mainInterface}>
       <button
@@ -954,18 +960,18 @@ const VoiceCommandInterface = ({
         <div className={styles.buttonIcon}>
           {isListening ? <MicOff size={32} /> : <Mic size={32} />}
         </div>
-        
+
         {/* Audio Waveform Visualization */}
         {isListening && (
           <Suspense fallback={<SkeletonLoader type="Waveform" />}>
-            <VoiceWaveform 
+            <VoiceWaveform
               isActive={isListening}
               audioLevel={audioLevel}
               frequency={confidence}
             />
           </Suspense>
         )}
-        
+
         <div className={styles.buttonText}>
           {voiceState === VOICE_STATES.INITIALIZING && 'Initialisiere...'}
           {voiceState === VOICE_STATES.LISTENING && 'Ich höre...'}
@@ -976,11 +982,11 @@ const VoiceCommandInterface = ({
           {voiceState === VOICE_STATES.ERROR && 'Fehler'}
           {voiceState === VOICE_STATES.TIMEOUT && 'Zeitüberschreitung'}
         </div>
-        
+
         {/* Confidence Indicator */}
         {confidence > 0 && (
           <div className={styles.confidenceIndicator}>
-            <div 
+            <div
               className={styles.confidenceBar}
               style={{ width: `${confidence * 100}%` }}
             />
@@ -992,7 +998,7 @@ const VoiceCommandInterface = ({
       </button>
     </div>
   );
-  
+
   const renderTranscript = () => (
     <div className={styles.transcriptContainer}>
       {(transcript || finalTranscript) && (
@@ -1012,17 +1018,17 @@ const VoiceCommandInterface = ({
           </div>
         </div>
       )}
-      
+
       {/* Current Intent Display */}
       {currentIntent && (
         <Suspense fallback={<SkeletonLoader type="Intent" />}>
-          <IntentPreview 
+          <IntentPreview
             intent={currentIntent}
             language={language}
           />
         </Suspense>
       )}
-      
+
       {/* Processing Result */}
       {processingResult && (
         <div className={`${styles.result} ${processingResult.success ? styles.success : styles.error}`}>
@@ -1030,7 +1036,7 @@ const VoiceCommandInterface = ({
           <span>{processingResult.message}</span>
         </div>
       )}
-      
+
       {/* Error Display */}
       {recognitionError && (
         <div className={styles.error}>
@@ -1043,7 +1049,7 @@ const VoiceCommandInterface = ({
       )}
     </div>
   );
-  
+
   const renderControls = () => (
     <div className={styles.controls}>
       {/* Language Selector */}
@@ -1055,7 +1061,7 @@ const VoiceCommandInterface = ({
           disabled={isListening}
         />
       </Suspense>
-      
+
       {/* Voice Toggle */}
       <button
         className={`${styles.controlButton} ${voiceEnabled ? styles.active : ''}`}
@@ -1064,7 +1070,7 @@ const VoiceCommandInterface = ({
       >
         {voiceEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
       </button>
-      
+
       {/* Calibration */}
       <button
         className={styles.controlButton}
@@ -1074,7 +1080,7 @@ const VoiceCommandInterface = ({
       >
         <Target size={16} />
       </button>
-      
+
       {/* Repeat Last Command */}
       <button
         className={styles.controlButton}
@@ -1084,7 +1090,7 @@ const VoiceCommandInterface = ({
       >
         <RotateCcw size={16} />
       </button>
-      
+
       {/* Settings */}
       <button
         className={styles.controlButton}
@@ -1093,7 +1099,7 @@ const VoiceCommandInterface = ({
       >
         <Settings size={16} />
       </button>
-      
+
       {/* Help */}
       <button
         className={styles.controlButton}
@@ -1102,7 +1108,7 @@ const VoiceCommandInterface = ({
       >
         <HelpCircle size={16} />
       </button>
-      
+
       {/* Minimize/Expand */}
       <button
         className={styles.controlButton}
@@ -1113,7 +1119,7 @@ const VoiceCommandInterface = ({
       </button>
     </div>
   );
-  
+
   const renderCommandHistory = () => (
     <div className={styles.historySection}>
       {commandHistory.length > 0 && (
@@ -1130,11 +1136,11 @@ const VoiceCommandInterface = ({
       )}
     </div>
   );
-  
+
   // ============================================================================
   // MAIN RENDER
   // ============================================================================
-  
+
   if (!isVoiceSupported) {
     return (
       <div className={`${styles.voiceCommandInterface} ${styles.unsupported} ${className}`}>
@@ -1146,7 +1152,7 @@ const VoiceCommandInterface = ({
       </div>
     );
   }
-  
+
   if (!isInitialized) {
     return (
       <div className={`${styles.voiceCommandInterface} ${styles.initializing} ${className}`}>
@@ -1162,11 +1168,11 @@ const VoiceCommandInterface = ({
       </div>
     );
   }
-  
+
   return (
-    <div 
+    <div
       className={`
-        ${styles.voiceCommandInterface} 
+        ${styles.voiceCommandInterface}
         ${className}
         ${isDarkMode ? styles.dark : styles.light}
         ${isMinimized ? styles.minimized : ''}
@@ -1177,16 +1183,16 @@ const VoiceCommandInterface = ({
     >
       {/* Main Interface */}
       {renderMainInterface()}
-      
+
       {/* Transcript and Results */}
       {!isMinimized && renderTranscript()}
-      
+
       {/* Controls */}
       {renderControls()}
-      
+
       {/* Command History */}
       {!isMinimized && renderCommandHistory()}
-      
+
       {/* Command Visualizer */}
       {!isMinimized && isListening && (
         <Suspense fallback={<SkeletonLoader type="Visualizer" />}>
@@ -1198,7 +1204,7 @@ const VoiceCommandInterface = ({
           />
         </Suspense>
       )}
-      
+
       {/* Modals */}
       {showSettings && (
         <Suspense fallback={<LoadingSpinner message="Lade Einstellungen..." />}>
@@ -1216,7 +1222,7 @@ const VoiceCommandInterface = ({
           />
         </Suspense>
       )}
-      
+
       {showHelp && (
         <Suspense fallback={<LoadingSpinner message="Lade Hilfe..." />}>
           <ContextualHelp
@@ -1231,7 +1237,7 @@ const VoiceCommandInterface = ({
           />
         </Suspense>
       )}
-      
+
       {showTutorial && (
         <Suspense fallback={<LoadingSpinner message="Lade Tutorial..." />}>
           <VoiceTutorial
@@ -1242,7 +1248,7 @@ const VoiceCommandInterface = ({
           />
         </Suspense>
       )}
-      
+
       {/* Debug Panel */}
       {showDebugger && debugMode && (
         <Suspense fallback={<LoadingSpinner message="Lade Debugger..." />}>
@@ -1255,7 +1261,7 @@ const VoiceCommandInterface = ({
           />
         </Suspense>
       )}
-      
+
       {/* Analytics Panel */}
       {showAnalytics && (
         <Suspense fallback={<LoadingSpinner message="Lade Analytics..." />}>
@@ -1266,7 +1272,7 @@ const VoiceCommandInterface = ({
           />
         </Suspense>
       )}
-      
+
       {/* Accessibility Panel */}
       <Suspense fallback={null}>
         <AccessibilityPanel

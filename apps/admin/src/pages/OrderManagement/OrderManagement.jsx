@@ -1,30 +1,38 @@
 /**
  * EATECH - Order Management Component
- * Version: 8.4.0
- * Description: Real-time Order Management Dashboard mit Lazy Loading & Advanced Features
+ * Version: 8.5.0
+ * Description: Real-time Order Management Dashboard mit Voice Integration
  * Author: EATECH Development Team
  * Modified: 2025-01-08
  * File Path: /apps/admin/src/pages/OrderManagement/OrderManagement.jsx
- * 
- * Features: Real-time orders, kitchen display, delivery tracking, analytics
+ *
+ * Features: Real-time orders, kitchen display, delivery tracking, analytics, VOICE COMMANDS
  */
 
-import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ShoppingCart, Clock, CheckCircle, XCircle, AlertCircle,
-  Truck, User, MapPin, Phone, Mail, MessageSquare,
-  Filter, Search, MoreVertical, RefreshCw, Download,
-  Calendar, DollarSign, Package, Utensils, Timer,
-  Play, Pause, Check, X, Edit, Printer, Eye,
-  ChefHat, Navigation, Star, Flag, Zap, Activity,
-  BarChart3, TrendingUp, TrendingDown, Wifi, WifiOff
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  AlertCircle,
+  BarChart3,
+  Download,
+  Filter,
+  Mic,
+  RefreshCw,
+  ShoppingCart,
+  Volume2 // Voice icons added
+  ,
+
+  WifiOff
 } from 'lucide-react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // Hooks & Contexts
 import { useAuth } from '../../hooks/useAuth';
-import { useTenant } from '../../hooks/useTenant';
 import { useRealtimeOrders } from '../../hooks/useRealtimeOrders';
+import { useTenant } from '../../hooks/useTenant';
+import { useVoice } from '../../hooks/useVoice'; // Voice hook added
+
+// Voice Components
+import { VoiceOrderBadge } from '../../components/Orders/VoiceOrderIndicator';
 
 // Lazy loaded components
 const OrderCard = lazy(() => import('./components/OrderCard'));
@@ -41,6 +49,7 @@ const PaymentDetails = lazy(() => import('./components/PaymentDetails'));
 const OrderNotes = lazy(() => import('./components/OrderNotes'));
 const EstimationTool = lazy(() => import('./components/EstimationTool'));
 const OrderAnalytics = lazy(() => import('./components/OrderAnalytics'));
+const VoiceButton = lazy(() => import('../../features/voice/VoiceButton')); // Voice button added
 
 // Lazy loaded services
 const orderService = () => import('../../services/orderService');
@@ -73,6 +82,15 @@ export const ORDER_TYPES = {
   PICKUP: 'pickup',
   DELIVERY: 'delivery',
   DINE_IN: 'dine_in'
+};
+
+// Order channels - VOICE added
+export const ORDER_CHANNELS = {
+  WEB: 'web',
+  APP: 'app',
+  PHONE: 'phone',
+  VOICE: 'voice', // Voice channel added
+  POS: 'pos'
 };
 
 // Priority levels
@@ -110,6 +128,7 @@ const OrderManagement = () => {
   const [filters, setFilters] = useState({
     status: 'all',
     type: 'all',
+    channel: 'all', // Channel filter added for voice orders
     priority: 'all',
     timeRange: 'today',
     searchTerm: '',
@@ -129,16 +148,30 @@ const OrderManagement = () => {
   const [refreshInterval] = useState(30000); // 30 seconds
   const [stats, setStats] = useState({});
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [showVoiceCommands, setShowVoiceCommands] = useState(false); // Voice commands panel
 
   // Hooks
   const { user } = useAuth();
   const { tenant } = useTenant();
-  const { 
-    orders: realtimeOrders, 
+  const {
+    orders: realtimeOrders,
     isConnected: realtimeConnected,
     subscribe,
-    unsubscribe 
+    unsubscribe
   } = useRealtimeOrders();
+
+  // Voice Hook Integration
+  const {
+    isListening,
+    isProcessing: isVoiceProcessing,
+    voiceEnabled,
+    transcript,
+    lastCommand,
+    startListening,
+    stopListening,
+    toggleVoice,
+    error: voiceError
+  } = useVoice();
 
   // Refs
   const refreshIntervalRef = useRef(null);
@@ -157,7 +190,108 @@ const OrderManagement = () => {
   const calculationUtilsRef = useRef(null);
 
   // ============================================================================
-  // LAZY LOADING SETUP
+  // VOICE COMMAND HANDLERS
+  // ============================================================================
+  useEffect(() => {
+    if (!lastCommand) return;
+
+    const handleVoiceAction = async () => {
+      const { action, type, ...params } = lastCommand;
+
+      switch (type) {
+        case 'navigate':
+          if (params.target === '/orders/new' && params.params?.table) {
+            // Create new order for table
+            await createNewOrderForTable(params.params.table);
+          }
+          break;
+
+        case 'order_ready':
+          if (params.orderId) {
+            await handleOrderStatusChange(params.orderId, ORDER_STATUSES.READY);
+          }
+          break;
+
+        case 'cancel_order':
+          if (params.orderId) {
+            await handleOrderCancel(params.orderId, 'Voice command cancellation');
+          }
+          break;
+
+        case 'table_status':
+          // Handle table status updates
+          console.log('Table status update:', params);
+          break;
+
+        case 'product_availability':
+          // Handle product availability updates
+          console.log('Product availability update:', params);
+          break;
+
+        case 'emergency':
+          // Handle emergency situations
+          handleEmergencyProtocol(params.level);
+          break;
+
+        default:
+          console.log('Unhandled voice action:', lastCommand);
+      }
+    };
+
+    handleVoiceAction();
+  }, [lastCommand]);
+
+  const createNewOrderForTable = async (tableNumber) => {
+    if (!orderServiceRef.current) return;
+
+    try {
+      const newOrder = await orderServiceRef.current.createOrder({
+        type: ORDER_TYPES.DINE_IN,
+        channel: ORDER_CHANNELS.VOICE,
+        table: tableNumber,
+        items: [],
+        voiceMetadata: {
+          transcript,
+          language: 'de-CH',
+          confidence: 0.95
+        }
+      });
+
+      if (notificationServiceRef.current) {
+        notificationServiceRef.current.showSuccess(
+          `Neue Bestellung für Tisch ${tableNumber} erstellt`
+        );
+      }
+
+      // Navigate to order details
+      setSelectedOrder(newOrder);
+    } catch (error) {
+      console.error('Failed to create voice order:', error);
+    }
+  };
+
+  const handleEmergencyProtocol = (level) => {
+    if (level === 'high') {
+      // Stop all operations
+      setAutoRefresh(false);
+
+      // Alert all staff
+      if (notificationServiceRef.current) {
+        notificationServiceRef.current.showError(
+          'NOTFALL AKTIVIERT - Alle Operationen gestoppt',
+          { duration: null } // Don't auto-hide
+        );
+      }
+
+      // Play emergency sound
+      if (soundsRef.current.emergency) {
+        soundsRef.current.emergency.play();
+      }
+    }
+  };
+
+  // ============================================================================
+  // LAZY LOADING SETUP (existing code)
   // ============================================================================
   useEffect(() => {
     const initializeLazyServices = async () => {
@@ -205,7 +339,7 @@ const OrderManagement = () => {
   }, []);
 
   // ============================================================================
-  // DATA LOADING
+  // DATA LOADING (Updated with voice channel)
   // ============================================================================
   const loadOrders = useCallback(async () => {
     if (!orderServiceRef.current) return;
@@ -217,15 +351,16 @@ const OrderManagement = () => {
         sort: { [sortBy]: sortDirection },
         limit: 100
       });
-      
+
       setOrders(orderData);
-      
+
       // Track analytics
       if (analyticsServiceRef.current) {
         analyticsServiceRef.current.trackEvent('orders_loaded', {
           count: orderData.length,
           filters: filters,
-          view_mode: viewMode
+          view_mode: viewMode,
+          voice_orders: orderData.filter(o => o.channel === ORDER_CHANNELS.VOICE).length
         });
       }
 
@@ -244,11 +379,24 @@ const OrderManagement = () => {
       const statsData = await orderServiceRef.current.getOrderStats({
         timeRange: filters.timeRange
       });
+
+      // Add voice order stats
+      const voiceOrders = orders.filter(o => o.channel === ORDER_CHANNELS.VOICE);
+      statsData.voiceStats = {
+        total: orders.length,
+        voice: voiceOrders.length,
+        languages: voiceOrders.reduce((acc, order) => {
+          const lang = order.voiceMetadata?.language || 'unknown';
+          acc[lang] = (acc[lang] || 0) + 1;
+          return acc;
+        }, {})
+      };
+
       setStats(statsData);
     } catch (error) {
       console.error('Failed to load stats:', error);
     }
-  }, [filters.timeRange]);
+  }, [filters.timeRange, orders]);
 
   const setupRealtimeSubscriptions = useCallback(() => {
     if (!realtimeServiceRef.current) return;
@@ -257,28 +405,34 @@ const OrderManagement = () => {
     subscribe('new_order', (order) => {
       setOrders(prev => [order, ...prev]);
       showNewOrderNotification(order);
-      playNewOrderSound();
+
+      // Special handling for voice orders
+      if (order.channel === ORDER_CHANNELS.VOICE) {
+        playVoiceOrderSound();
+      } else {
+        playNewOrderSound();
+      }
     });
 
     // Subscribe to order status updates
     subscribe('order_status_changed', (update) => {
-      setOrders(prev => prev.map(order => 
-        order.id === update.orderId 
+      setOrders(prev => prev.map(order =>
+        order.id === update.orderId
           ? { ...order, status: update.status, updatedAt: new Date().toISOString() }
           : order
       ));
-      
+
       showStatusUpdateNotification(update);
     });
 
     // Subscribe to order cancellations
     subscribe('order_cancelled', (update) => {
-      setOrders(prev => prev.map(order => 
-        order.id === update.orderId 
+      setOrders(prev => prev.map(order =>
+        order.id === update.orderId
           ? { ...order, status: ORDER_STATUSES.CANCELLED, cancelReason: update.reason }
           : order
       ));
-      
+
       showCancellationNotification(update);
     });
 
@@ -290,8 +444,10 @@ const OrderManagement = () => {
     try {
       soundsRef.current = {
         newOrder: await soundServiceRef.current.loadSound('/sounds/new-order.mp3'),
+        voiceOrder: await soundServiceRef.current.loadSound('/sounds/voice-order.mp3'), // Voice order sound
         orderReady: await soundServiceRef.current.loadSound('/sounds/order-ready.mp3'),
-        orderCancelled: await soundServiceRef.current.loadSound('/sounds/order-cancelled.mp3')
+        orderCancelled: await soundServiceRef.current.loadSound('/sounds/order-cancelled.mp3'),
+        emergency: await soundServiceRef.current.loadSound('/sounds/emergency.mp3') // Emergency sound
       };
     } catch (error) {
       console.error('Failed to load sounds:', error);
@@ -299,7 +455,7 @@ const OrderManagement = () => {
   }, []);
 
   // ============================================================================
-  // FILTERING & SORTING
+  // FILTERING & SORTING (Updated with channel filter)
   // ============================================================================
   useEffect(() => {
     const filtered = filterAndSortOrders(orders);
@@ -318,6 +474,11 @@ const OrderManagement = () => {
       filtered = filtered.filter(order => order.type === filters.type);
     }
 
+    // Channel filter for voice orders
+    if (filters.channel !== 'all') {
+      filtered = filtered.filter(order => order.channel === filters.channel);
+    }
+
     if (filters.priority !== 'all') {
       filtered = filtered.filter(order => order.priority === filters.priority);
     }
@@ -328,18 +489,19 @@ const OrderManagement = () => {
 
     if (filters.searchTerm) {
       const searchTerm = filters.searchTerm.toLowerCase();
-      filtered = filtered.filter(order => 
+      filtered = filtered.filter(order =>
         order.orderNumber.toLowerCase().includes(searchTerm) ||
         order.customer.name.toLowerCase().includes(searchTerm) ||
         order.customer.email.toLowerCase().includes(searchTerm) ||
-        order.items.some(item => item.name.toLowerCase().includes(searchTerm))
+        order.items.some(item => item.name.toLowerCase().includes(searchTerm)) ||
+        (order.voiceMetadata?.transcript && order.voiceMetadata.transcript.toLowerCase().includes(searchTerm))
       );
     }
 
     // Apply time range filter
     if (filters.timeRange !== 'all' && dateUtilsRef.current) {
       const timeFilter = dateUtilsRef.current.getTimeRangeFilter(filters.timeRange);
-      filtered = filtered.filter(order => 
+      filtered = filtered.filter(order =>
         new Date(order.createdAt) >= timeFilter.start &&
         new Date(order.createdAt) <= timeFilter.end
       );
@@ -389,7 +551,7 @@ const OrderManagement = () => {
   }, [sortBy]);
 
   // ============================================================================
-  // ORDER ACTIONS
+  // ORDER ACTIONS (existing code)
   // ============================================================================
   const handleOrderStatusChange = useCallback(async (orderId, newStatus, options = {}) => {
     if (!orderServiceRef.current) return;
@@ -402,8 +564,8 @@ const OrderManagement = () => {
       });
 
       // Update local state
-      setOrders(prev => prev.map(order => 
-        order.id === orderId 
+      setOrders(prev => prev.map(order =>
+        order.id === orderId
           ? { ...order, status: newStatus, updatedAt: new Date().toISOString() }
           : order
       ));
@@ -426,7 +588,8 @@ const OrderManagement = () => {
           order_id: orderId,
           old_status: orders.find(o => o.id === orderId)?.status,
           new_status: newStatus,
-          user_id: user?.uid
+          user_id: user?.uid,
+          method: options.voiceCommand ? 'voice' : 'manual'
         });
       }
 
@@ -444,8 +607,8 @@ const OrderManagement = () => {
     try {
       await orderServiceRef.current.assignOrder(orderId, assignedTo);
 
-      setOrders(prev => prev.map(order => 
-        order.id === orderId 
+      setOrders(prev => prev.map(order =>
+        order.id === orderId
           ? { ...order, assignedTo, updatedAt: new Date().toISOString() }
           : order
       ));
@@ -465,13 +628,13 @@ const OrderManagement = () => {
     try {
       await orderServiceRef.current.cancelOrder(orderId, reason);
 
-      setOrders(prev => prev.map(order => 
-        order.id === orderId 
-          ? { 
-              ...order, 
-              status: ORDER_STATUSES.CANCELLED, 
+      setOrders(prev => prev.map(order =>
+        order.id === orderId
+          ? {
+              ...order,
+              status: ORDER_STATUSES.CANCELLED,
               cancelReason: reason,
-              updatedAt: new Date().toISOString() 
+              updatedAt: new Date().toISOString()
             }
           : order
       ));
@@ -505,7 +668,7 @@ const OrderManagement = () => {
   }, [orders]);
 
   // ============================================================================
-  // BULK ACTIONS
+  // BULK ACTIONS (existing code)
   // ============================================================================
   const handleBulkStatusUpdate = useCallback(async (orderIds, newStatus) => {
     const updates = orderIds.map(id => handleOrderStatusChange(id, newStatus));
@@ -526,15 +689,19 @@ const OrderManagement = () => {
   }, [handlePrintOrder]);
 
   // ============================================================================
-  // NOTIFICATIONS & SOUNDS
+  // NOTIFICATIONS & SOUNDS (Updated with voice)
   // ============================================================================
   const showNewOrderNotification = useCallback((order) => {
     if (!notificationServiceRef.current) return;
 
+    const isVoiceOrder = order.channel === ORDER_CHANNELS.VOICE;
+
     notificationServiceRef.current.showInfo(
-      `New order #${order.orderNumber}`,
+      `${isVoiceOrder ? '🎤 ' : ''}New order #${order.orderNumber}`,
       {
-        description: `${order.customer.name} - ${formattersRef.current?.formatPrice(order.total)}`,
+        description: `${order.customer.name} - ${formattersRef.current?.formatPrice(order.total)}${
+          isVoiceOrder ? ' (Voice Order)' : ''
+        }`,
         action: 'View',
         onClick: () => setSelectedOrder(order)
       }
@@ -565,8 +732,14 @@ const OrderManagement = () => {
     }
   }, [tenant?.settings?.enableSounds]);
 
+  const playVoiceOrderSound = useCallback(() => {
+    if (soundsRef.current.voiceOrder && tenant?.settings?.enableSounds) {
+      soundsRef.current.voiceOrder.play();
+    }
+  }, [tenant?.settings?.enableSounds]);
+
   // ============================================================================
-  // AUTO REFRESH
+  // AUTO REFRESH (existing code)
   // ============================================================================
   useEffect(() => {
     if (autoRefresh) {
@@ -590,7 +763,7 @@ const OrderManagement = () => {
   }, [autoRefresh, refreshInterval, realtimeConnected, loadOrders, loadStats]);
 
   // ============================================================================
-  // COMPUTED VALUES
+  // COMPUTED VALUES (Updated with voice stats)
   // ============================================================================
   const ordersByStatus = useMemo(() => {
     return filteredOrders.reduce((acc, order) => {
@@ -608,14 +781,18 @@ const OrderManagement = () => {
   }, [selectedOrders.size]);
 
   const urgentOrders = useMemo(() => {
-    return filteredOrders.filter(order => 
+    return filteredOrders.filter(order =>
       order.priority === PRIORITY_LEVELS.URGENT ||
       (order.estimatedReadyTime && new Date(order.estimatedReadyTime) < new Date())
     );
   }, [filteredOrders]);
 
+  const voiceOrderCount = useMemo(() => {
+    return filteredOrders.filter(order => order.channel === ORDER_CHANNELS.VOICE).length;
+  }, [filteredOrders]);
+
   // ============================================================================
-  // RENDER HELPERS
+  // RENDER HELPERS (Updated with voice features)
   // ============================================================================
   const renderHeader = () => (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -623,6 +800,11 @@ const OrderManagement = () => {
         <h1 className="text-3xl font-bold text-gray-900">Order Management</h1>
         <p className="text-gray-600">
           {filteredOrders.length} orders • {Object.keys(ordersByStatus).length} statuses
+          {voiceOrderCount > 0 && (
+            <span className="ml-2">
+              • <Mic className="inline w-4 h-4 text-purple-600" /> {voiceOrderCount} voice
+            </span>
+          )}
           {!realtimeConnected && (
             <span className="ml-2 text-red-500 flex items-center gap-1">
               <WifiOff className="w-4 h-4" />
@@ -633,6 +815,23 @@ const OrderManagement = () => {
       </div>
 
       <div className="flex items-center gap-2">
+        {/* Voice Button */}
+        <Suspense fallback={
+          <button className="p-2 bg-purple-100 border border-purple-300 rounded-lg animate-pulse">
+            <Mic className="w-5 h-5 text-purple-600" />
+          </button>
+        }>
+          <VoiceButton
+            isListening={isListening}
+            isProcessing={isVoiceProcessing}
+            voiceEnabled={voiceEnabled}
+            onToggle={toggleVoice}
+            onStart={startListening}
+            onStop={stopListening}
+            className="mr-2"
+          />
+        </Suspense>
+
         {/* View Mode Toggle */}
         <div className="flex items-center bg-gray-100 rounded-lg p-1">
           {Object.values(VIEW_MODES).map(mode => (
@@ -662,8 +861,8 @@ const OrderManagement = () => {
         <button
           onClick={() => setAutoRefresh(!autoRefresh)}
           className={`p-2 border rounded-lg transition-colors ${
-            autoRefresh 
-              ? 'bg-green-100 border-green-300 text-green-700' 
+            autoRefresh
+              ? 'bg-green-100 border-green-300 text-green-700'
               : 'bg-white border-gray-300 hover:bg-gray-50'
           }`}
           title="Auto Refresh"
@@ -686,6 +885,15 @@ const OrderManagement = () => {
         >
           <Download className="w-5 h-5" />
         </button>
+
+        {/* Voice Commands Help */}
+        <button
+          onClick={() => setShowVoiceCommands(!showVoiceCommands)}
+          className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          title="Voice Commands"
+        >
+          <Volume2 className="w-5 h-5" />
+        </button>
       </div>
     </div>
   );
@@ -697,8 +905,61 @@ const OrderManagement = () => {
         ordersByStatus={ordersByStatus}
         urgentCount={urgentOrders.length}
         isOnline={realtimeConnected}
+        voiceStats={stats.voiceStats} // Pass voice stats
       />
     </Suspense>
+  );
+
+  const renderVoiceCommandsPanel = () => (
+    <AnimatePresence>
+      {showVoiceCommands && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="mb-6 bg-purple-50 border border-purple-200 rounded-lg p-4"
+        >
+          <h3 className="font-semibold text-purple-900 mb-2 flex items-center gap-2">
+            <Mic className="w-5 h-5" />
+            Sprachbefehle
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+            <div>
+              <p className="font-medium text-purple-800">Bestellungen:</p>
+              <ul className="text-purple-700 space-y-1">
+                <li>• "Neue Bestellung für Tisch 5"</li>
+                <li>• "Bestellung ABC123 ist fertig"</li>
+                <li>• "Bestellung stornieren XYZ456"</li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-medium text-purple-800">Navigation:</p>
+              <ul className="text-purple-700 space-y-1">
+                <li>• "Zeige offene Bestellungen"</li>
+                <li>• "Gehe zu Küchen-Display"</li>
+                <li>• "Dashboard anzeigen"</li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-medium text-purple-800">Verwaltung:</p>
+              <ul className="text-purple-700 space-y-1">
+                <li>• "Tisch 3 ist besetzt"</li>
+                <li>• "Pizza ausverkauft"</li>
+                <li>• "Notfall" (für Notfall-Protokoll)</li>
+              </ul>
+            </div>
+          </div>
+          {isListening && (
+            <div className="mt-4 p-3 bg-purple-100 rounded-lg">
+              <p className="text-purple-800 flex items-center gap-2">
+                <Mic className="w-4 h-4 animate-pulse" />
+                Höre zu... {transcript && `"${transcript}"`}
+              </p>
+            </div>
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 
   const renderFilters = () => (
@@ -717,11 +978,13 @@ const OrderManagement = () => {
               onClear={() => setFilters({
                 status: 'all',
                 type: 'all',
+                channel: 'all', // Include channel in clear
                 priority: 'all',
                 timeRange: 'today',
                 searchTerm: '',
                 assignedTo: 'all'
               })}
+              includeChannelFilter={true} // Enable channel filter
             />
           </Suspense>
         </motion.div>
@@ -756,24 +1019,36 @@ const OrderManagement = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {filteredOrders.map(order => (
         <Suspense key={order.id} fallback={<div className="h-64 bg-gray-100 rounded-lg animate-pulse"></div>}>
-          <OrderCard
-            order={order}
-            selected={selectedOrders.has(order.id)}
-            onSelect={() => {
-              const newSelected = new Set(selectedOrders);
-              if (newSelected.has(order.id)) {
-                newSelected.delete(order.id);
-              } else {
-                newSelected.add(order.id);
-              }
-              setSelectedOrders(newSelected);
-            }}
-            onClick={() => setSelectedOrder(order)}
-            onStatusChange={handleOrderStatusChange}
-            onAssign={handleOrderAssignment}
-            onPrint={handlePrintOrder}
-            onCancel={handleOrderCancel}
-          />
+          <div className="relative">
+            {/* Voice Order Indicator */}
+            {order.channel === ORDER_CHANNELS.VOICE && (
+              <div className="absolute top-2 right-2 z-10">
+                <VoiceOrderBadge onClick={() => {
+                  // Show voice order details
+                  console.log('Voice order details:', order.voiceMetadata);
+                }} />
+              </div>
+            )}
+
+            <OrderCard
+              order={order}
+              selected={selectedOrders.has(order.id)}
+              onSelect={() => {
+                const newSelected = new Set(selectedOrders);
+                if (newSelected.has(order.id)) {
+                  newSelected.delete(order.id);
+                } else {
+                  newSelected.add(order.id);
+                }
+                setSelectedOrders(newSelected);
+              }}
+              onClick={() => setSelectedOrder(order)}
+              onStatusChange={handleOrderStatusChange}
+              onAssign={handleOrderAssignment}
+              onPrint={handlePrintOrder}
+              onCancel={handleOrderCancel}
+            />
+          </div>
         </Suspense>
       ))}
     </div>
@@ -782,17 +1057,18 @@ const OrderManagement = () => {
   const renderKitchenDisplay = () => (
     <Suspense fallback={<LoadingSpinner />}>
       <KitchenDisplay
-        orders={filteredOrders.filter(order => 
+        orders={filteredOrders.filter(order =>
           [ORDER_STATUSES.CONFIRMED, ORDER_STATUSES.PREPARING].includes(order.status)
         )}
         onStatusChange={handleOrderStatusChange}
         onEstimateTime={(orderId, time) => {
-          setOrders(prev => prev.map(order => 
-            order.id === orderId 
+          setOrders(prev => prev.map(order =>
+            order.id === orderId
               ? { ...order, estimatedReadyTime: time }
               : order
           ));
         }}
+        voiceOrderIndicators={true} // Enable voice indicators in kitchen
       />
     </Suspense>
   );
@@ -800,13 +1076,13 @@ const OrderManagement = () => {
   const renderDeliveryTracker = () => (
     <Suspense fallback={<LoadingSpinner />}>
       <DeliveryTracker
-        orders={filteredOrders.filter(order => 
+        orders={filteredOrders.filter(order =>
           [ORDER_STATUSES.READY, ORDER_STATUSES.OUT_FOR_DELIVERY].includes(order.status)
         )}
         onStatusChange={handleOrderStatusChange}
         onLocationUpdate={(orderId, location) => {
-          setOrders(prev => prev.map(order => 
-            order.id === orderId 
+          setOrders(prev => prev.map(order =>
+            order.id === orderId
               ? { ...order, deliveryLocation: location }
               : order
           ));
@@ -842,11 +1118,16 @@ const OrderManagement = () => {
           <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">No Orders Found</h3>
           <p className="text-gray-600">
-            {filters.searchTerm || filters.status !== 'all' 
+            {filters.searchTerm || filters.status !== 'all'
               ? 'Try adjusting your filters to see more orders.'
               : 'Orders will appear here when customers place them.'
             }
           </p>
+          {voiceEnabled && (
+            <p className="text-sm text-purple-600 mt-2">
+              💡 Tipp: Sagen Sie "Neue Bestellung für Tisch 5" um eine Bestellung zu erstellen
+            </p>
+          )}
         </div>
       );
     }
@@ -872,6 +1153,9 @@ const OrderManagement = () => {
       {/* Header */}
       {renderHeader()}
 
+      {/* Voice Commands Panel */}
+      {renderVoiceCommandsPanel()}
+
       {/* Stats */}
       {renderStats()}
 
@@ -895,6 +1179,7 @@ const OrderManagement = () => {
             onAssign={handleOrderAssignment}
             onPrint={handlePrintOrder}
             onCancel={handleOrderCancel}
+            showVoiceDetails={selectedOrder.channel === ORDER_CHANNELS.VOICE} // Show voice details
           />
         </Suspense>
       )}
@@ -906,6 +1191,7 @@ const OrderManagement = () => {
             orders={orders}
             stats={stats}
             onClose={() => setShowAnalytics(false)}
+            includeVoiceAnalytics={true} // Include voice analytics
           />
         </Suspense>
       )}
@@ -917,6 +1203,7 @@ const OrderManagement = () => {
             orders={filteredOrders}
             filters={filters}
             onClose={() => setShowExporter(false)}
+            includeVoiceMetadata={true} // Include voice metadata in export
           />
         </Suspense>
       )}

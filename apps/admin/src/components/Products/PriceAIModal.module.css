@@ -1,0 +1,892 @@
+/**
+ * EATECH - Price AI Modal Styles
+ * Version: 1.0.0
+ * Description: Styles for AI-powered price optimization modal
+ * Author: EATECH Development Team
+ * Created: 2025-01-08
+ * File Path: /apps/admin/src/components/Products/PriceAIModal.module.css
+ */
+
+/* ============================================================================
+   MODAL STRUCTURE
+   ============================================================================ */
+
+   .modal {
+    max-width: 900px !important;
+  }
+
+  .modalHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .headerIcon {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #8b5cf6;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(0.95);
+    }
+  }
+
+  .modalContent {
+    padding: 1.5rem;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  .modalContent::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .modalContent::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 4px;
+  }
+
+  .modalContent::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+  }
+
+  .modalContent::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+
+  .modalFooter {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
+  }
+
+  /* ============================================================================
+     LOADING STATE
+     ============================================================================ */
+
+  .loadingContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    padding: 3rem;
+  }
+
+  .loadingContent {
+    text-align: center;
+    max-width: 400px;
+  }
+
+  .loadingIcon {
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto 1.5rem;
+    color: #8b5cf6;
+    animation: rotate 3s linear infinite;
+  }
+
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .loadingTitle {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+
+  .loadingMessage {
+    color: #6b7280;
+    margin-bottom: 2rem;
+  }
+
+  .progressSteps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    position: relative;
+  }
+
+  .progressSteps::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #e5e7eb;
+    transform: translateY(-50%);
+    z-index: -1;
+  }
+
+  .progressStep {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .stepDot {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: #e5e7eb;
+    transition: all 0.3s;
+  }
+
+  .progressStep.active .stepDot {
+    width: 1.25rem;
+    height: 1.25rem;
+    background: #8b5cf6;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+  }
+
+  .stepLabel {
+    font-size: 0.75rem;
+    color: #6b7280;
+    white-space: nowrap;
+  }
+
+  .progressStep.active .stepLabel {
+    color: #8b5cf6;
+    font-weight: 500;
+  }
+
+  /* ============================================================================
+     STRATEGY SELECTOR
+     ============================================================================ */
+
+  .strategySection {
+    margin-bottom: 2rem;
+  }
+
+  .sectionTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 1rem;
+  }
+
+  .sectionIcon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #6b7280;
+  }
+
+  .strategyGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .strategyCard {
+    padding: 1.25rem;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .strategyCard:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .strategyCard.selected {
+    border-color: #8b5cf6;
+    background: linear-gradient(to bottom, #faf5ff, #f3e8ff);
+  }
+
+  .strategyIcon {
+    width: 2rem;
+    height: 2rem;
+    margin: 0 auto 0.75rem;
+    color: #6b7280;
+  }
+
+  .strategyCard.selected .strategyIcon {
+    color: #8b5cf6;
+  }
+
+  .strategyCard h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.25rem;
+  }
+
+  .strategyCard p {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin: 0;
+  }
+
+  /* ============================================================================
+     OPTIMIZATION RESULT
+     ============================================================================ */
+
+  .resultSection {
+    background: linear-gradient(to bottom, #faf5ff, #ffffff);
+    border: 1px solid #e9d5ff;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .mainResult {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .currentPrice,
+  .recommendedPrice {
+    text-align: center;
+  }
+
+  .priceLabel {
+    display: block;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+  }
+
+  .priceValue {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  .recommendedPrice .priceValue {
+    color: #8b5cf6;
+  }
+
+  .priceChange {
+    display: inline-block;
+    margin-top: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+  }
+
+  .priceChange.increase {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .priceChange.decrease {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    background: #f3f4f6;
+    border-radius: 50%;
+  }
+
+  .arrowUp {
+    color: #10b981;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .arrowDown {
+    color: #ef4444;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  /* ============================================================================
+     CONFIDENCE INDICATOR
+     ============================================================================ */
+
+  .confidence {
+    margin-bottom: 1.5rem;
+  }
+
+  .confidenceHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .confidenceBar {
+    position: relative;
+    height: 0.5rem;
+    background: #e5e7eb;
+    border-radius: 0.25rem;
+    overflow: hidden;
+  }
+
+  .confidenceFill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    border-radius: 0.25rem;
+    transition: width 0.6s ease-out;
+  }
+
+  .confidenceValue {
+    display: block;
+    text-align: right;
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+  }
+
+  /* ============================================================================
+     INSIGHTS
+     ============================================================================ */
+
+  .insights {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+  }
+
+  .insightsTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.75rem;
+  }
+
+  .insightsIcon {
+    width: 1rem;
+    height: 1rem;
+    color: #3b82f6;
+  }
+
+  .insightsList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    space-y: 0.5rem;
+  }
+
+  .insightsList li {
+    position: relative;
+    padding-left: 1.5rem;
+    font-size: 0.875rem;
+    color: #4b5563;
+    line-height: 1.5;
+  }
+
+  .insightsList li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #8b5cf6;
+    font-weight: 600;
+  }
+
+  /* ============================================================================
+     IMPACT SIMULATION
+     ============================================================================ */
+
+  .simulationSection {
+    margin-bottom: 2rem;
+  }
+
+  .metricsComparison {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .metricColumn {
+    flex: 1;
+    padding: 1rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+  }
+
+  .metricColumn h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .metric:last-child {
+    border-bottom: none;
+  }
+
+  .metricLabel {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .metricValue {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .metricChange {
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .metricChange.positive {
+    color: #10b981;
+  }
+
+  .metricChange.negative {
+    color: #ef4444;
+  }
+
+  .metricArrow {
+    font-size: 1.5rem;
+    color: #9ca3af;
+  }
+
+  .monthlyImpact {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .impactCard {
+    padding: 1rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    text-align: center;
+  }
+
+  .impactLabel {
+    display: block;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+  }
+
+  .impactValue {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  .impactValue.positive {
+    color: #10b981;
+  }
+
+  .impactValue.negative {
+    color: #ef4444;
+  }
+
+  /* ============================================================================
+     COMPETITOR ANALYSIS
+     ============================================================================ */
+
+  .competitorSection {
+    margin-bottom: 2rem;
+  }
+
+  .competitorList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .competitorCard {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+  }
+
+  .competitorName {
+    flex: 1;
+    font-size: 0.875rem;
+    color: #111827;
+  }
+
+  .competitorPrice {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4b5563;
+    margin-right: 1rem;
+  }
+
+  .competitorDiff {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+  }
+
+  .competitorDiff.higher {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .competitorDiff.lower {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .marketPosition {
+    text-align: center;
+    padding: 0.75rem;
+    background: #ede9fe;
+    border: 1px solid #ddd6fe;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    color: #5b21b6;
+  }
+
+  /* ============================================================================
+     ADVANCED SETTINGS
+     ============================================================================ */
+
+  .advancedToggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem;
+    margin: 1rem 0;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .advancedToggle:hover {
+    background: #f3f4f6;
+    color: #111827;
+  }
+
+  .advancedSection {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+  }
+
+  .settingsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .settingItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .settingItem label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .settingItem input[type="range"] {
+    width: 100%;
+    height: 0.5rem;
+    background: #e5e7eb;
+    border-radius: 0.25rem;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .settingItem input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 1rem;
+    height: 1rem;
+    background: #8b5cf6;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .settingItem select {
+    padding: 0.5rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    color: #111827;
+    cursor: pointer;
+  }
+
+  .settingItem span {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #8b5cf6;
+  }
+
+  /* ============================================================================
+     ERROR STATE
+     ============================================================================ */
+
+  .errorContainer {
+    text-align: center;
+    padding: 3rem;
+  }
+
+  .errorIcon {
+    width: 3rem;
+    height: 3rem;
+    color: #ef4444;
+    margin: 0 auto 1rem;
+  }
+
+  .errorContainer h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+
+  .errorContainer p {
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+  }
+
+  .retryButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #8b5cf6;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .retryButton:hover {
+    background: #7c3aed;
+  }
+
+  /* ============================================================================
+     BUTTONS
+     ============================================================================ */
+
+  .buttonIcon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .cancelButton {
+    padding: 0.5rem 1rem;
+    background: white;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .cancelButton:hover {
+    background: #f9fafb;
+    color: #111827;
+  }
+
+  .refreshButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #f3f4f6;
+    color: #4b5563;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .refreshButton:hover {
+    background: #e5e7eb;
+    color: #111827;
+  }
+
+  .applyButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.5rem;
+    background: #8b5cf6;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .applyButton:hover {
+    background: #7c3aed;
+  }
+
+  .applyButton:disabled {
+    background: #d1d5db;
+    color: #9ca3af;
+    cursor: not-allowed;
+  }
+
+  /* ============================================================================
+     RESPONSIVE DESIGN
+     ============================================================================ */
+
+  @media (max-width: 768px) {
+    .strategyGrid {
+      grid-template-columns: 1fr;
+    }
+
+    .mainResult {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .metricsComparison {
+      flex-direction: column;
+    }
+
+    .metricArrow {
+      transform: rotate(90deg);
+    }
+
+    .monthlyImpact {
+      grid-template-columns: 1fr;
+    }
+
+    .modalFooter {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .modalFooter button {
+      width: 100%;
+    }
+  }
+
+  /* ============================================================================
+     DARK MODE
+     ============================================================================ */
+
+  @media (prefers-color-scheme: dark) {
+    .modalContent {
+      background: #1f2937;
+      color: #f3f4f6;
+    }
+
+    .sectionTitle,
+    .loadingTitle {
+      color: #f3f4f6;
+    }
+
+    .strategyCard {
+      background: #374151;
+      border-color: #4b5563;
+    }
+
+    .strategyCard:hover {
+      border-color: #6b7280;
+    }
+
+    .strategyCard.selected {
+      background: linear-gradient(to bottom, #312e81, #1e1b4b);
+    }
+
+    .resultSection {
+      background: linear-gradient(to bottom, #312e81, #1f2937);
+      border-color: #4c1d95;
+    }
+
+    .insights,
+    .metricColumn,
+    .competitorCard,
+    .impactCard,
+    .advancedSection {
+      background: #374151;
+      border-color: #4b5563;
+    }
+
+    .confidenceBar,
+    .progressSteps::before {
+      background: #4b5563;
+    }
+
+    .modalFooter {
+      background: #111827;
+      border-top-color: #374151;
+    }
+  }

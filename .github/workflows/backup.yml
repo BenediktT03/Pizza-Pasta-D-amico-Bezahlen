@@ -1,0 +1,144 @@
+# Database Backup Workflow
+name: Database Backup
+
+on:
+  schedule:
+    # Run daily at 2:00 UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      backup_type:
+        description: 'Backup type'
+        required: true
+        default: 'incremental'
+        type: choice
+        options:
+          - incremental
+          - full
+
+env:
+  FIREBASE_PROJECT: eatech-foodtruck
+
+jobs:
+  backup-firestore:
+    name: Backup Firestore
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ env.FIREBASE_PROJECT }}
+
+      - name: Create backup timestamp
+        id: timestamp
+        run: echo "timestamp=$(date +%Y%m%d_%H%M%S)" >> $GITHUB_OUTPUT
+
+      - name: Run Firestore backup
+        run: |
+          BACKUP_NAME="eatech-backup-${{ steps.timestamp.outputs.timestamp }}"
+          
+          gcloud firestore export gs://${{ env.FIREBASE_PROJECT }}-backups/$BACKUP_NAME \
+            --async \
+            --collection-ids='foodtrucks,managers,orders,users,feature_flags,analytics,system_monitoring'
+
+      - name: Verify backup
+        run: |
+          sleep 30
+          gcloud firestore operations list --limit=1
+
+      - name: Create backup metadata
+        run: |
+          cat > backup-metadata.json << EOF
+          {
+            "timestamp": "${{ steps.timestamp.outputs.timestamp }}",
+            "type": "${{ github.event.inputs.backup_type || 'incremental' }}",
+            "collections": [
+              "foodtrucks",
+              "managers", 
+              "orders",
+              "users",
+              "feature_flags",
+              "analytics",
+              "system_monitoring"
+            ],
+            "status": "completed",
+            "initiated_by": "${{ github.actor }}",
+            "workflow_run": "${{ github.run_id }}"
+          }
+          EOF
+
+      - name: Upload metadata to GCS
+        run: |
+          gsutil cp backup-metadata.json \
+            gs://${{ env.FIREBASE_PROJECT }}-backups/eatech-backup-${{ steps.timestamp.outputs.timestamp }}/metadata.json
+
+      - name: Clean old backups (keep last 30 days)
+        run: |
+          # List backups older than 30 days
+          CUTOFF_DATE=$(date -d "30 days ago" +%Y%m%d)
+          
+          gsutil ls gs://${{ env.FIREBASE_PROJECT }}-backups/ | while read -r backup; do
+            BACKUP_DATE=$(echo $backup | grep -oP '\d{8}' | head -1)
+            if [[ $BACKUP_DATE < $CUTOFF_DATE ]]; then
+              echo "Deleting old backup: $backup"
+              gsutil -m rm -r $backup
+            fi
+          done
+
+      - name: Notify backup completion
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              "text": "Database Backup Completed",
+              "attachments": [{
+                "color": "good",
+                "fields": [
+                  {
+                    "title": "Backup Type",
+                    "value": "${{ github.event.inputs.backup_type || 'incremental' }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Timestamp",
+                    "value": "${{ steps.timestamp.outputs.timestamp }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Status",
+                    "value": "✅ Success",
+                    "short": true
+                  }
+                ]
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Notify backup failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              "text": "⚠️ Database Backup Failed",
+              "attachments": [{
+                "color": "danger",
+                "fields": [
+                  {
+                    "title": "Error",
+                    "value": "Backup process failed. Please check logs.",
+                    "short": false
+                  }
+                ]
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

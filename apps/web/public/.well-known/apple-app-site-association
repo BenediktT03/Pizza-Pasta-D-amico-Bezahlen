@@ -1,0 +1,78 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "ABCDE12345.ch.eatech.foodtruck",
+        "paths": [
+          "*",
+          "/",
+          "/truck/*",
+          "/order/*",
+          "/payment/*",
+          "/menu/*",
+          "/qr/*",
+          "/event/*",
+          "/location/*",
+          "/profile/*",
+          "/favorites/*",
+          "/history/*",
+          "/support/*",
+          "/settings/*",
+          "/notifications/*",
+          "/voice/*",
+          "/cart/*",
+          "/checkout/*",
+          "/confirmation/*",
+          "/track/*",
+          "/feedback/*",
+          "/share/*",
+          "/invite/*",
+          "/promo/*",
+          "/discount/*",
+          "/voucher/*",
+          "/gift/*",
+          "/loyalty/*",
+          "/referral/*",
+          "/review/*",
+          "/rate/*",
+          "/help/*",
+          "/faq/*",
+          "/terms/*",
+          "/privacy/*",
+          "/about/*",
+          "/contact/*",
+          "/partner/*",
+          "/login/*",
+          "/register/*",
+          "/forgot-password/*",
+          "/reset-password/*",
+          "/verify/*",
+          "/onboarding/*",
+          "/welcome/*",
+          "/tutorial/*"
+        ]
+      },
+      {
+        "appID": "ABCDE12345.ch.eatech.foodtruck.debug",
+        "paths": ["*"]
+      },
+      {
+        "appID": "ABCDE12345.ch.eatech.foodtruck.staging",
+        "paths": ["*"]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "ABCDE12345.ch.eatech.foodtruck",
+      "ABCDE12345.ch.eatech.foodtruck.debug",
+      "ABCDE12345.ch.eatech.foodtruck.staging"
+    ]
+  },
+  "appclips": {
+    "apps": [
+      "ABCDE12345.ch.eatech.foodtruck.Clip"
+    ]
+  }
+}

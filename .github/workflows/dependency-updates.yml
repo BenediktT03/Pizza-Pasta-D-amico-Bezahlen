@@ -1,0 +1,65 @@
+# Automated Dependency Updates
+name: Dependency Updates
+
+on:
+  schedule:
+    # Run every Monday at 8:00 UTC
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    name: Update Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: '8'
+
+      - name: Update dependencies
+        run: |
+          pnpm update --interactive false
+          pnpm audit fix || true
+
+      - name: Run tests after update
+        run: |
+          pnpm install
+          pnpm run test:unit
+          pnpm run build --filter=@eatech/web
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore(deps): update dependencies'
+          title: '🔄 Update Dependencies'
+          body: |
+            ## Automated Dependency Updates
+            
+            This PR contains the following updates:
+            - Updated npm dependencies to their latest versions
+            - Fixed any security vulnerabilities found by `pnpm audit`
+            
+            ### Checklist
+            - [ ] All tests pass
+            - [ ] Build succeeds
+            - [ ] No breaking changes identified
+            
+            ---
+            *This PR was automatically created by the dependency update workflow.*
+          branch: deps/update-dependencies
+          delete-branch: true
+          labels: |
+            dependencies
+            automated

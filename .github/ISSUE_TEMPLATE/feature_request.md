@@ -128,13 +128,11 @@ Provide rough estimates if possible:
 - [ ] **Admin Dashboard** - Foodtruck management interface
 - [ ] **Master Control** - Platform administration
 - [ ] **Mobile Apps** - Future native mobile apps
-- [ ] **Kiosk Mode** - Self-service terminals
 
 ### Device Compatibility
 - [ ] **Mobile Phones** - iOS and Android
 - [ ] **Tablets** - iPad and Android tablets
 - [ ] **Desktop** - Windows, macOS, Linux
-- [ ] **Kiosks** - Touch screen terminals
 - [ ] **Smart Displays** - Kitchen displays
 
 ## 🔧 Technical Considerations

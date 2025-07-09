@@ -1,40 +1,46 @@
-﻿{
-  "name": "eatech",
+{
+  "name": "eatech-foodtruck",
   "version": "3.0.0",
+  "description": "All-in-One Food Truck Management System für die Schweiz",
   "private": true,
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "services/*"
   ],
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
-    "clean": "turbo run clean && rimraf node_modules",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
-    "prepare": "husky install",
-    "postinstall": "turbo run build --filter=@eatech/core --filter=@eatech/ui"
+    "clean": "turbo run clean",
+    "deploy": "turbo run deploy",
+    "dev:web": "turbo run dev --filter=@eatech/web",
+    "dev:admin": "turbo run dev --filter=@eatech/admin",
+    "dev:kitchen": "turbo run dev --filter=@eatech/kitchen",
+    "dev:master": "turbo run dev --filter=@eatech/master",
+    "test:e2e": "playwright test",
+    "test:unit": "jest",
+    "db:seed": "ts-node scripts/seed-database.ts",
+    "db:backup": "ts-node scripts/backup-database.ts",
+    "generate:component": "node tools/scripts/generate-component.js",
+    "analyze": "node tools/scripts/analyze-bundle.js"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
-    "@types/react": "^18.2.45",
-    "@types/react-dom": "^18.2.18",
-    "@typescript-eslint/eslint-plugin": "^6.14.0",
-    "@typescript-eslint/parser": "^6.14.0",
-    "eslint": "^8.55.0",
+    "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
     "husky": "^8.0.3",
-    "lerna": "^8.0.0",
-    "prettier": "^3.1.1",
-    "rimraf": "^5.0.5",
-    "turbo": "^1.11.2",
-    "typescript": "^5.3.3"
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.2.0",
+    "turbo": "^1.11.0",
+    "typescript": "^5.3.0"
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
-  }
+  },
+  "packageManager": "npm@9.8.1"
 }

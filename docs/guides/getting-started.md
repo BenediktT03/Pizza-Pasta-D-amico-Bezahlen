@@ -1,811 +1,454 @@
-# EATECH V3.0 Getting Started Guide
+# 🚀 Getting Started with EATECH
 
-**Willkommen bei EATECH V3.0** - Dem revolutionären Multi-Tenant Foodtruck Bestellsystem für die Schweiz!
+Welcome to EATECH! This guide will help you get up and running with the platform in under 30 minutes.
 
-**Version:** 3.0.0  
-**Launch:** 1. August 2025  
-**Support:** [benedikt@thomma.ch](mailto:benedikt@thomma.ch)
+## Prerequisites
 
----
+Before you begin, ensure you have the following installed:
 
-## 🎯 Was ist EATECH?
+- **Node.js** v20.x LTS or higher
+- **npm** v10.x or higher
+- **Git** for version control
+- **VS Code** (recommended) or your preferred IDE
+- **Firebase CLI** (`npm install -g firebase-tools`)
 
-EATECH revolutioniert die Schweizer Foodtruck-Branche durch eine All-in-One PWA-Lösung. Keine Apps, keine Downloads - nur pure Effizienz für Foodtruck-Betreiber und ihre Kunden.
+## Quick Start
 
-### 🌟 Key Benefits
-- **100% PWA** - Funktioniert auf allen Geräten ohne App Store
-- **Offline-First** - Arbeitet auch ohne Internet
-- **Multi-Language** - DE/FR/IT/EN + Schweizerdeutsch Support
-- **KI-Powered** - Intelligente Automatisierung und Optimierung
-- **Swiss Made** - DSGVO/DSG konform, lokale Server
-
----
-
-## 📋 Inhaltsverzeichnis
-
-1. [Quick Start - 5 Minuten Setup](#quick-start---5-minuten-setup)
-2. [Account Setup](#account-setup)
-3. [First Steps](#first-steps)
-4. [Menu Configuration](#menu-configuration)
-5. [Payment Setup](#payment-setup)
-6. [Staff Training](#staff-training)
-7. [Go Live Checklist](#go-live-checklist)
-8. [Support & Help](#support--help)
-
----
-
-## ⚡ Quick Start - 5 Minuten Setup
-
-### Schritt 1: Account erstellen (2 Min)
-```bash
-# Registrierung über
-https://app.eatech.ch/register
-
-# Oder direkt kontaktieren
-E-Mail: benedikt@thomma.ch
-Telefon: [Wird noch bekannt gegeben]
-```
-
-### Schritt 2: Basis-Konfiguration (2 Min)
-1. **Foodtruck-Name** eingeben
-2. **Standort** definieren (Schweiz)
-3. **Öffnungszeiten** festlegen
-4. **Sprache** wählen (DE/FR/IT/EN)
-
-### Schritt 3: Erstes Produkt anlegen (1 Min)
-```json
-{
-  "name": "Classic Burger",
-  "price": 16.90,
-  "category": "Hauptgericht",
-  "description": "Saftiger Rindfleisch-Burger"
-}
-```
-
-**🎉 Fertig! Ihr Foodtruck ist online und bereit für Bestellungen.**
-
----
-
-## 🏗️ Account Setup
-
-### 1. Registrierung
-
-Besuchen Sie [app.eatech.ch/register](https://app.eatech.ch/register) und wählen Sie Ihren Plan:
-
-| Plan | Preis | Features |
-|------|-------|----------|
-| **Free** | CHF 0/Monat | Bis 50 Bestellungen/Monat |
-| **Basic** | CHF 29/Monat | Bis 200 Bestellungen/Monat |
-| **Premium** | CHF 49/Monat | Unbegrenzt + KI-Features |
-| **Enterprise** | Custom | White Label + API |
-
-### 2. Verifizierung
+### 1. Clone the Repository
 
 ```bash
-# E-Mail Verifizierung
-✅ Klicken Sie auf den Link in Ihrer E-Mail
+# Clone the repository
+git clone https://github.com/eatech/eatech-v3.git
 
-# Telefon Verifizierung (Schweizer Nummer erforderlich)
-📱 Format: +41 XX XXX XX XX
-💬 SMS mit 6-stelligem Code
+# Navigate to the project directory
+cd eatech-v3
+
+# Check Node version
+node --version  # Should be v20.x or higher
 ```
 
-### 3. Business Registration
+### 2. Install Dependencies
 
-```json
-{
-  "businessName": "Burger Paradise",
-  "registrationNumber": "CHE-123.456.789",
-  "vatNumber": "CHE-123.456.789 MWST",
-  "address": {
-    "street": "Bahnhofstrasse 1",
-    "city": "Zürich",
-    "zip": "8001",
-    "canton": "ZH"
-  },
-  "contact": {
-    "email": "info@burgerparadise.ch",
-    "phone": "+41791234567"
-  }
+```bash
+# Install all dependencies
+npm install
+
+# This will automatically:
+# - Install root dependencies
+# - Bootstrap all packages
+# - Set up git hooks
+```
+
+### 3. Firebase Setup
+
+#### Create a Firebase Project
+
+1. Go to [Firebase Console](https://console.firebase.google.com)
+2. Click "Create a project"
+3. Name it (e.g., "eatech-dev")
+4. Enable Google Analytics (optional)
+5. Wait for project creation
+
+#### Enable Required Services
+
+In your Firebase project, enable:
+
+1. **Authentication**
+   - Email/Password
+   - Google Sign-In
+   - Phone Authentication
+
+2. **Firestore Database**
+   - Start in test mode (for development)
+   - Choose location: europe-west6 (Zurich)
+
+3. **Storage**
+   - Start in test mode
+   - Same location as Firestore
+
+4. **Functions**
+   - Upgrade to Blaze plan (required for functions)
+
+#### Get Configuration
+
+1. Go to Project Settings → General
+2. Scroll to "Your apps" → Add app → Web
+3. Register app with nickname "EATECH Web"
+4. Copy the configuration
+
+### 4. Environment Configuration
+
+Create `.env.local` files:
+
+```bash
+# Copy example files
+cp .env.local.example .env.local
+cp apps/web/.env.example apps/web/.env.local
+cp apps/admin/.env.example apps/admin/.env.local
+```
+
+Update `.env.local` with your Firebase config:
+
+```env
+# Firebase Configuration
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
+
+# Development Settings
+VITE_USE_EMULATORS=true
+VITE_API_URL=http://localhost:5001
+```
+
+### 5. Start Development
+
+```bash
+# Start Firebase emulators
+npm run emulators
+
+# In a new terminal, start the development servers
+npm run dev
+
+# This starts:
+# - Customer Web App: http://localhost:5173
+# - Admin Dashboard: http://localhost:5174
+# - Kitchen Display: http://localhost:5176
+# - Firebase Emulators UI: http://localhost:4000
+```
+
+## Project Structure Overview
+
+```
+eatech/
+├── apps/                    # Applications
+│   ├── web/                # Customer-facing app
+│   ├── admin/              # Restaurant admin dashboard
+│   ├── kitchen/            # Kitchen display system
+│   └── master/             # Platform administration
+├── packages/               # Shared packages
+│   ├── core/              # Business logic & services
+│   ├── ui/                # Reusable UI components
+│   ├── types/             # TypeScript definitions
+│   └── utils/             # Utility functions
+└── services/              # Backend services
+    ├── functions/         # Firebase Cloud Functions
+    └── workers/           # Cloudflare Workers
+```
+
+## Your First Changes
+
+### 1. Create a Simple Component
+
+Create a new component in the UI package:
+
+```typescript
+// packages/ui/src/components/Welcome/Welcome.tsx
+import React from 'react';
+import styles from './Welcome.module.css';
+
+interface WelcomeProps {
+  name: string;
 }
-```
 
----
-
-## 🚀 First Steps
-
-### Dashboard Overview
-
-Nach dem Login sehen Sie Ihr **Dashboard** mit:
-
-```
-📊 Live Metrics
-├── Heute: 0 Bestellungen, CHF 0 Umsatz
-├── Diese Woche: 0 Bestellungen
-├── Wartezeit: 0 Min
-└── Status: 🔴 Offline
-
-📱 Quick Actions
-├── ➕ Neues Produkt
-├── 📱 QR-Code generieren
-├── 📊 Statistiken
-└── ⚙️ Einstellungen
-```
-
-### 1. Grundeinstellungen konfigurieren
-
-#### Tenant-Einstellungen
-```javascript
-// Öffnungszeiten definieren
-const operatingHours = {
-  monday: { open: "11:00", close: "21:00" },
-  tuesday: { open: "11:00", close: "21:00" },
-  wednesday: { open: "11:00", close: "21:00" },
-  thursday: { open: "11:00", close: "21:00" },
-  friday: { open: "11:00", close: "22:00" },
-  saturday: { open: "11:00", close: "22:00" },
-  sunday: { closed: true }
-};
-
-// Sprach-Einstellungen
-const languages = {
-  primary: "de",
-  supported: ["de", "fr", "it", "en"],
-  schweizerdeutsch: true
-};
-
-// Währung & Steuern
-const financial = {
-  currency: "CHF",
-  taxRate: 7.7,
-  taxIncluded: true,
-  roundingRule: "0.05" // Schweizer Rappen-Rundung
+export const Welcome: React.FC<WelcomeProps> = ({ name }) => {
+  return (
+    <div className={styles.container}>
+      <h1>Welcome to EATECH, {name}! 🍕</h1>
+      <p>Start building amazing restaurant experiences.</p>
+    </div>
+  );
 };
 ```
 
-#### Branding anpassen
+Create the styles:
+
 ```css
-/* Ihr Foodtruck-Design */
-:root {
-  --primary-color: #FF6B35;    /* Ihr Hauptfarbe */
-  --secondary-color: #004E89;  /* Sekundärfarbe */
-  --accent-color: #F7931E;     /* Akzentfarbe */
+/* packages/ui/src/components/Welcome/Welcome.module.css */
+.container {
+  text-align: center;
+  padding: 2rem;
+  background-color: var(--color-primary-light);
+  border-radius: 8px;
+  margin: 2rem 0;
 }
 ```
 
-### 2. Logo & Assets hochladen
+Export the component:
+
+```typescript
+// packages/ui/src/index.ts
+export { Welcome } from './components/Welcome/Welcome';
+```
+
+### 2. Use the Component
+
+Use your new component in the web app:
+
+```typescript
+// apps/web/src/pages/Home.tsx
+import { Welcome } from '@eatech/ui';
+
+export const Home = () => {
+  return (
+    <div>
+      <Welcome name="Developer" />
+      {/* Rest of your page */}
+    </div>
+  );
+};
+```
+
+### 3. Test Your Changes
+
+Run the test suite:
 
 ```bash
-# Unterstützte Formate
-Logo: PNG, JPG, SVG (max. 2MB)
-Grösse: 512x512px (quadratisch empfohlen)
-Hintergrund: Transparent
+# Run all tests
+npm test
 
-# Upload via Dashboard
-Gehe zu: Einstellungen > Branding > Logo hochladen
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests for specific package
+npm run test:ui
 ```
 
----
+## Common Development Tasks
 
-## 🍔 Menu Configuration
+### Adding a New Route
 
-### Produktkategorien erstellen
+```typescript
+// apps/web/src/router.tsx
+import { NewPage } from './pages/NewPage';
 
-```json
-{
-  "categories": [
-    {
-      "id": "hauptgerichte",
-      "name": {
-        "de": "Hauptgerichte",
-        "fr": "Plats principaux",
-        "it": "Piatti principali",
-        "en": "Main Dishes"
-      },
-      "sortOrder": 1
-    },
-    {
-      "id": "beilagen", 
-      "name": {
-        "de": "Beilagen",
-        "fr": "Accompagnements",
-        "it": "Contorni", 
-        "en": "Sides"
-      },
-      "sortOrder": 2
-    },
-    {
-      "id": "getraenke",
-      "name": {
-        "de": "Getränke",
-        "fr": "Boissons",
-        "it": "Bevande",
-        "en": "Drinks"
-      },
-      "sortOrder": 3
-    }
-  ]
-}
-```
-
-### Erstes Produkt anlegen
-
-#### Basis-Produkt
-```json
-{
-  "name": {
-    "de": "Classic Burger",
-    "fr": "Burger Classique",
-    "it": "Burger Classico",
-    "en": "Classic Burger"
+const routes = [
+  // ... existing routes
+  {
+    path: '/new-page',
+    element: <NewPage />,
   },
-  "description": {
-    "de": "200g Rindfleisch, Salat, Tomate, Zwiebel, Käse",
-    "fr": "200g de bœuf, salade, tomate, oignon, fromage",
-    "it": "200g di manzo, lattuga, pomodoro, cipolla, formaggio",
-    "en": "200g beef, lettuce, tomato, onion, cheese"
-  },
-  "category": "hauptgerichte",
-  "pricing": {
-    "basePrice": 16.90,
-    "currency": "CHF",
-    "taxRate": 7.7,
-    "cost": 5.50
+];
+```
+
+### Creating an API Endpoint
+
+```typescript
+// services/functions/src/http/api.ts
+app.get('/api/hello', authenticate, async (req, res) => {
+  const { tenantId } = req.user;
+  
+  res.json({
+    message: 'Hello from EATECH API',
+    tenantId,
+  });
+});
+```
+
+### Adding a Firestore Collection
+
+```typescript
+// packages/types/src/models/example.ts
+export interface Example {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// packages/core/src/services/example/example.service.ts
+export class ExampleService {
+  async create(data: Omit<Example, 'id'>): Promise<Example> {
+    const doc = await db.collection('examples').add({
+      ...data,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    
+    return { id: doc.id, ...data };
   }
 }
 ```
 
-#### Varianten hinzufügen
-```json
-{
-  "variants": [
-    {
-      "name": { "de": "Klein (150g)", "en": "Small (150g)" },
-      "price": 14.90,
-      "isDefault": false
-    },
-    {
-      "name": { "de": "Normal (200g)", "en": "Regular (200g)" },
-      "price": 16.90,
-      "isDefault": true
-    },
-    {
-      "name": { "de": "Gross (300g)", "en": "Large (300g)" },
-      "price": 19.90,
-      "isDefault": false
-    }
-  ]
-}
+## Debugging Tips
+
+### Enable Debug Mode
+
+Add to your `.env.local`:
+
+```env
+VITE_DEBUG=true
 ```
 
-#### Modifier-Gruppen
-```json
-{
-  "modifierGroups": [
-    {
-      "name": { "de": "Fleisch wählen", "en": "Choose Meat" },
-      "required": true,
-      "min": 1,
-      "max": 1,
-      "options": [
-        {
-          "name": { "de": "Rindfleisch", "en": "Beef" },
-          "price": 0,
-          "isDefault": true
-        },
-        {
-          "name": { "de": "Poulet", "en": "Chicken" },
-          "price": 0
-        },
-        {
-          "name": { "de": "Veggie (Beyond Meat)", "en": "Veggie" },
-          "price": 2.00
-        }
-      ]
-    },
-    {
-      "name": { "de": "Extras", "en": "Extras" },
-      "required": false,
-      "min": 0,
-      "max": 5,
-      "options": [
-        {
-          "name": { "de": "Bacon", "en": "Bacon" },
-          "price": 3.50
-        },
-        {
-          "name": { "de": "Extra Käse", "en": "Extra Cheese" },
-          "price": 2.00
-        },
-        {
-          "name": { "de": "Avocado", "en": "Avocado" },
-          "price": 3.00
-        }
-      ]
-    }
-  ]
+This enables verbose logging throughout the application.
+
+### Using Browser DevTools
+
+1. **React DevTools**: Install the browser extension
+2. **Network Tab**: Monitor API calls
+3. **Console**: Check for errors and debug logs
+
+### Firebase Emulator UI
+
+Access the emulator UI at http://localhost:4000 to:
+- View and edit Firestore data
+- Check Authentication users
+- Monitor Cloud Functions logs
+
+## Best Practices
+
+### 1. Type Safety
+
+Always define types for your data:
+
+```typescript
+// Good
+interface Product {
+  id: string;
+  name: string;
+  price: number;
 }
-```
 
-### Inventory Management
-
-```javascript
-// Lagerbestand verwalten
-const inventory = {
-  trackInventory: true,
-  quantity: 50,
-  lowStockThreshold: 10,
-  autoDisable: true, // Bei 0 automatisch deaktivieren
-  notifications: {
-    lowStock: true,
-    outOfStock: true
-  }
+const product: Product = {
+  id: '123',
+  name: 'Pizza',
+  price: 15.99,
 };
 
-// Supplier Information
-const supplier = {
-  name: "Metro AG",
-  contact: "Hans Müller",
-  phone: "+41441234567",
-  email: "bestellung@metro.ch",
-  leadTime: 2 // Tage
-};
+// Avoid
+const product = {
+  id: '123',
+  name: 'Pizza',
+  price: 15.99,
+}; // Type is inferred but not explicit
 ```
 
----
+### 2. Component Organization
 
-## 💳 Payment Setup
+Keep components small and focused:
 
-### 1. Stripe Integration (Empfohlen)
+```typescript
+// Good: Single responsibility
+export const PriceDisplay: React.FC<{ price: number }> = ({ price }) => (
+  <span className={styles.price}>CHF {price.toFixed(2)}</span>
+);
 
-```bash
-# Stripe Account erstellen
-1. Besuchen Sie: https://dashboard.stripe.com/register
-2. Verifizieren Sie Ihr Schweizer Business
-3. Kopieren Sie die API Keys
-
-# In EATECH einfügen
-Gehe zu: Einstellungen > Zahlungen > Stripe
-Publishable Key: pk_live_...
-Secret Key: sk_live_...
-```
-
-### 2. Twint Integration
-
-```json
-{
-  "twint": {
-    "merchantId": "M123456",
-    "apiKey": "[Erhalten von Twint]",
-    "environment": "production",
-    "enabled": true,
-    "supportedTransactions": [
-      "payment",
-      "refund"
-    ]
-  }
-}
-```
-
-### 3. Cash Management
-
-```javascript
-// Bargeld-Handling
-const cashSettings = {
-  enabled: true,
-  changeMoney: 200.00, // CHF Wechselgeld im Register
-  denominations: [
-    { value: 0.05, quantity: 100 },
-    { value: 0.10, quantity: 50 },
-    { value: 0.20, quantity: 50 },
-    { value: 0.50, quantity: 40 },
-    { value: 1.00, quantity: 30 },
-    { value: 2.00, quantity: 20 },
-    { value: 5.00, quantity: 20 },
-    { value: 10.00, quantity: 10 },
-    { value: 20.00, quantity: 10 },
-    { value: 50.00, quantity: 5 },
-    { value: 100.00, quantity: 2 }
-  ],
-  roundingRules: {
-    cash: "0.05", // Auf 5 Rappen runden
-    card: "0.01"  // Exakt
-  }
+// Avoid: Doing too much
+export const ProductCard = ({ product, user, cart, ... }) => {
+  // Hundreds of lines of code...
 };
 ```
 
-### 4. Payment Methods Configuration
+### 3. Use Shared Packages
 
-```json
-{
-  "paymentMethods": {
-    "cash": {
-      "enabled": true,
-      "minAmount": 0,
-      "maxAmount": 500
-    },
-    "card": {
-      "enabled": true,
-      "processor": "stripe",
-      "minAmount": 2.00,
-      "maxAmount": 1000,
-      "contactless": true
-    },
-    "twint": {
-      "enabled": true,
-      "minAmount": 1.00,
-      "maxAmount": 500
-    }
-  }
-}
+Leverage the monorepo structure:
+
+```typescript
+// Good: Use shared utilities
+import { formatCurrency } from '@eatech/utils';
+import { Button } from '@eatech/ui';
+import { Product } from '@eatech/types';
+
+// Avoid: Duplicating code
+const formatCurrency = (amount) => `CHF ${amount.toFixed(2)}`;
 ```
+
+## Deployment Preview
+
+To preview your changes in a production-like environment:
+
+```bash
+# Build all packages
+npm run build
+
+# Preview the build
+npm run preview
+
+# Run production build locally
+npm run serve:prod
+```
+
+## Getting Help
+
+### Resources
+
+- **Documentation**: Check the `/docs` folder
+- **Type Definitions**: Hover over any imported item in VS Code
+- **Examples**: Look at existing implementations in the codebase
+
+### Commands Reference
+
+```bash
+# Development
+npm run dev              # Start all dev servers
+npm run dev:web          # Start only web app
+npm run emulators        # Start Firebase emulators
+
+# Testing
+npm test                 # Run all tests
+npm run test:watch       # Run tests in watch mode
+npm run test:coverage    # Generate coverage report
+
+# Building
+npm run build            # Build all packages
+npm run build:web        # Build specific app
+
+# Linting & Formatting
+npm run lint             # Check for linting errors
+npm run lint:fix         # Fix linting errors
+npm run format           # Format code with Prettier
+
+# Type Checking
+npm run type-check       # Check TypeScript types
+```
+
+## Next Steps
+
+Now that you have EATECH running locally:
+
+1. **Explore the Apps**: Try out the different applications
+2. **Read the Architecture**: Understand how everything fits together
+3. **Join the Community**: Connect with other developers
+4. **Build Something**: Start with a small feature or improvement
+
+### Suggested First Projects
+
+1. **Add a new product category**: Extend the menu system
+2. **Create a dashboard widget**: Add analytics to the admin panel
+3. **Improve accessibility**: Add ARIA labels and keyboard navigation
+4. **Write tests**: Increase code coverage for existing features
+
+## Troubleshooting
+
+### Common Issues
+
+**Port already in use**
+```bash
+# Kill process on port
+lsof -ti:5173 | xargs kill
+```
+
+**Module not found errors**
+```bash
+# Clean install
+rm -rf node_modules package-lock.json
+npm install
+```
+
+**Firebase emulator issues**
+```bash
+# Reset emulator data
+rm -rf .firebase/
+npm run emulators
+```
+
+For more issues, check the [Troubleshooting Guide](../TROUBLESHOOTING.md).
 
 ---
 
-## 👥 Staff Training
+Welcome to the EATECH community! We're excited to see what you'll build. 🚀
 
-### 1. Rollen definieren
-
-```json
-{
-  "roles": [
-    {
-      "name": "Besitzer",
-      "permissions": ["all"]
-    },
-    {
-      "name": "Manager", 
-      "permissions": [
-        "orders:manage",
-        "products:manage",
-        "staff:manage",
-        "analytics:view"
-      ]
-    },
-    {
-      "name": "Küche",
-      "permissions": [
-        "orders:view",
-        "orders:update_status",
-        "kitchen:manage"
-      ]
-    },
-    {
-      "name": "Verkauf",
-      "permissions": [
-        "orders:create",
-        "orders:view",
-        "payments:process"
-      ]
-    }
-  ]
-}
-```
-
-### 2. Staff Accounts erstellen
-
-```javascript
-// Neuen Mitarbeiter hinzufügen
-const newStaff = {
-  name: "Anna Müller",
-  email: "anna@burgerparadise.ch",
-  phone: "+41791234568",
-  role: "Küche",
-  pin: "1234", // 4-stellige PIN für POS
-  schedule: {
-    monday: { start: "11:00", end: "19:00" },
-    tuesday: { start: "11:00", end: "19:00" },
-    wednesday: { off: true },
-    // ...
-  }
-};
-```
-
-### 3. Training Materialien
-
-#### Kitchen Display System (KDS)
-```
-📱 Tablet in der Küche zeigt:
-├── 🔥 Neue Bestellungen (rot)
-├── ⏱️ In Bearbeitung (gelb)  
-├── ✅ Fertig (grün)
-└── 📊 Wartezeiten
-
-🎮 Bedienung:
-- Antippen = Status ändern
-- Wischen = Details anzeigen
-- Doppelt tippen = Notizen hinzufügen
-```
-
-#### Order Management
-```
-📋 Bestellablauf:
-1️⃣ Bestellung eingeht → 🔔 Benachrichtigung
-2️⃣ Bestätigen → ⏱️ Timer startet
-3️⃣ Zubereitung → 👨‍🍳 Status "Preparing"
-4️⃣ Fertig → 📢 Kunde benachrichtigen
-5️⃣ Übergabe → ✅ Abschließen
-
-⚡ Shortcuts:
-- [F1] = Neue Bestellung
-- [F2] = Status ändern
-- [F3] = Notizen
-- [F4] = Storno
-```
-
-### 4. Mobile App Training
-
-```bash
-# PWA Installation (für Staff)
-📱 iPhone:
-1. Safari öffnen
-2. app.eatech.ch/admin öffnen  
-3. "Zum Home-Bildschirm" hinzufügen
-
-📱 Android:
-1. Chrome öffnen
-2. app.eatech.ch/admin öffnen
-3. "App installieren" Banner
-
-✨ Funktioniert offline!
-```
-
----
-
-## ☑️ Go Live Checklist
-
-### Pre-Launch (1 Woche vorher)
-
-```bash
-# Business Setup
-☐ Business-Registrierung verifiziert
-☐ Steuer-Nummern korrekt
-☐ Bank-Verbindung getestet
-☐ Versicherung abgeklärt
-
-# Technical Setup  
-☐ Alle Produkte angelegt
-☐ Preise geprüft
-☐ Fotos hochgeladen (min. 1 pro Produkt)
-☐ Öffnungszeiten konfiguriert
-☐ Payment Methods getestet
-☐ Staff Accounts erstellt
-☐ Tablet/POS eingerichtet
-
-# Legal Compliance
-☐ Datenschutzerklärung
-☐ AGB definiert
-☐ Impressum vollständig
-☐ HACCP Zertifikat
-☐ Lebensmittel-Bewilligung
-```
-
-### Launch Day
-
-```bash
-# Morning Checklist (Vor Öffnung)
-☐ System Status prüfen: status.eatech.ch
-☐ Internet-Verbindung testen
-☐ Tablets geladen und funktional
-☐ Payment Terminal bereit
-☐ Wechselgeld gezählt
-☐ Lager aufgefüllt
-☐ Staff eingeloggt
-
-# Erste Bestellung testen
-☐ Test-Bestellung über QR-Code
-☐ Payment Flow durchgehen
-☐ Kitchen Display prüfen
-☐ Kunde-Benachrichtigung testen
-
-# Go Live! 
-☐ Status auf "Online" setzen
-☐ Social Media Post
-☐ QR-Codes aufstellen
-☐ Team über Launch informieren
-```
-
-### Post-Launch (Erste Woche)
-
-```bash
-# Daily Monitoring
-☐ Bestellungen überprüfen
-☐ Kundenfeedback sammeln
-☐ System-Performance checken
-☐ Staff Feedback einholen
-
-# Weekly Review
-☐ Analytics auswerten
-☐ Beliebte Produkte identifizieren
-☐ Preise optimieren (KI-Empfehlungen)
-☐ Process Improvements
-
-# Support
-☐ Bei Problemen: benedikt@thomma.ch
-☐ Feature Requests dokumentieren  
-☐ Training Needs identifizieren
-```
-
----
-
-## 🎯 Success Metrics (Erste 30 Tage)
-
-### Week 1 Ziele
-```
-📊 Minimale Ziele:
-├── 5+ Bestellungen/Tag
-├── 95%+ Uptime
-├── <2 Min Bestellzeit
-└── 0 kritische Fehler
-
-🎯 Optimale Ziele:
-├── 15+ Bestellungen/Tag  
-├── 99.9% Uptime
-├── <1 Min Bestellzeit
-└── 4.5+ Kundenbewertung
-```
-
-### Month 1 Ziele
-```
-📈 Growth Targets:
-├── 200+ Total Orders
-├── CHF 3000+ Revenue  
-├── 50+ Unique Customers
-├── 30%+ Repeat Rate
-
-💡 Optimierungen:
-├── A/B Test Preise
-├── Menu Optimierung (KI)
-├── Staff Effizienz +20%
-└── Customer Satisfaction 4.5+
-```
-
----
-
-## 🆘 Support & Help
-
-### 1. Immediate Help
-
-```bash
-# Notfall-Hotline (24/7)
-📞 Telefon: [Wird noch bekannt gegeben]
-📧 E-Mail: support@eatech.ch
-💬 Live Chat: app.eatech.ch/support
-
-# System Status
-🔗 status.eatech.ch
-- Echtzeit System-Status
-- Wartungsfenster
-- Incident Reports
-```
-
-### 2. Knowledge Base
-
-```bash
-# Documentation Hub
-📚 docs.eatech.ch
-├── 🚀 Getting Started
-├── 📖 User Guides
-├── 🔧 API Documentation
-├── 💡 Best Practices
-├── ❓ FAQ
-└── 🎥 Video Tutorials
-
-# Community
-💬 Discord: [Coming Soon]
-📱 WhatsApp Gruppe: [Invite Only]
-🐦 Twitter: @eatech_ch
-```
-
-### 3. Training Resources
-
-```bash
-# Video Academy
-🎥 academy.eatech.ch
-├── Setup Walkthrough (15 Min)
-├── Daily Operations (10 Min)
-├── Advanced Features (20 Min)
-├── Troubleshooting (5 Min)
-└── Success Stories (Various)
-
-# Live Training Sessions
-📅 Jeden Dienstag 14:00-15:00
-🔗 Zoom Link in App
-📋 Q&A Session
-🎯 Hands-on Practice
-```
-
-### 4. Success Manager
-
-```bash
-# Persönlicher Success Manager (Premium+)
-👤 Dedicated Account Manager
-📞 Monatliche Check-ins
-📊 Performance Reviews  
-💡 Custom Optimizations
-🎯 Growth Planning
-
-# Kontakt für Premium Kunden
-📧 success@eatech.ch
-📱 WhatsApp: [Premium Support Number]
-```
-
----
-
-## 🚀 Was kommt als nächstes?
-
-### Q2 2025 - Neue Features
-```
-🗣️ Voice Commerce
-├── "Hey EATECH" Wake Word
-├── Natürliche Sprachbestellungen
-├── Mehrsprachige Unterstützung
-└── Schweizerdeutsch Support
-
-🤖 Advanced AI  
-├── Automatische Preisoptimierung
-├── Demand Forecasting
-├── Customer Segmentation
-└── Predictive Analytics
-
-🎪 Event Management
-├── Festival Integration
-├── Multi-Location Events
-├── Revenue Sharing
-└── Live Analytics
-```
-
-### Q3 2025 - Platform Expansion
-```
-🌍 Geographic Expansion
-├── Österreich Support
-├── Deutschland Support
-├── EU Compliance
-└── Multi-Currency
-
-🏢 Enterprise Features
-├── Chain Management
-├── Franchise Tools
-├── White Label Solutions
-└── Advanced Reporting
-```
-
----
-
-## 📞 Kontakt & Support
-
-### Gründer & CEO
-```
-👤 Benedikt Thomma
-📧 benedikt@thomma.ch
-🏢 EATECH Switzerland
-📍 Schweiz
-```
-
-### Technischer Support
-```
-📧 support@eatech.ch
-📞 [Wird noch bekannt gegeben]
-🕐 Montag-Freitag: 08:00-18:00
-🕐 Wochenende: 10:00-16:00
-```
-
-### Sales & Partnerships
-```
-📧 sales@eatech.ch
-💼 Partnerships: partners@eatech.ch
-🎯 Enterprise: enterprise@eatech.ch
-```
-
----
-
-## 🎉 Willkommen bei EATECH!
-
-Sie sind jetzt Teil der EATECH-Familie und der Revolution im Schweizer Foodtruck-Business. Mit dieser Anleitung sind Sie bestens gerüstet für Ihren erfolgreichen Start.
-
-**Bei Fragen stehen wir Ihnen jederzeit zur Verfügung!**
-
----
-
-*Last Updated: Januar 2025 - EATECH V3.0*  
-*© 2025 EATECH Switzerland. Made with ❤️ in Switzerland.*
+If you have questions, reach out on our [Slack channel](https://eatech.slack.com) or open a [GitHub issue](https://github.com/eatech/eatech-v3/issues).

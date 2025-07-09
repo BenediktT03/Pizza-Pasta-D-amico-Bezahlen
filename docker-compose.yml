@@ -1,225 +1,191 @@
-# EATECH V3.0 - Development Docker Compose
-# Multi-Tenant Foodtruck Bestellsystem
-# Development Environment with Hot Reload
-
-version: '3.8'
+version: '3.9'
 
 services:
-  # Next.js Web App (Customer PWA)
+  # === WEB APP (Customer PWA) ===
   web:
     build:
       context: .
-      dockerfile: Dockerfile.web
-      target: development
-    container_name: eatech-web-dev
+      dockerfile: ./infrastructure/docker/Dockerfile.web
+      args:
+        - NODE_ENV=development
+    container_name: eatech-web
     ports:
       - "3000:3000"
     volumes:
-      - ./apps/web:/app
-      - /app/node_modules
-      - /app/.next
+      - ./apps/web:/app/apps/web
+      - ./packages:/app/packages
+      - web_node_modules:/app/apps/web/node_modules
     environment:
       - NODE_ENV=development
       - NEXT_PUBLIC_APP_URL=http://localhost:3000
-      - NEXT_PUBLIC_API_URL=http://localhost:3001
-      - FIREBASE_PROJECT_ID=eatech-dev
-      - STRIPE_PUBLISHABLE_KEY=pk_test_51234567890
-    env_file:
-      - .env.local
-    depends_on:
-      - redis
-      - functions
     networks:
       - eatech-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    depends_on:
+      - firebase-emulator
 
-  # Admin Dashboard
+  # === ADMIN DASHBOARD ===
   admin:
     build:
       context: .
-      dockerfile: Dockerfile.admin
-      target: development
-    container_name: eatech-admin-dev
+      dockerfile: ./infrastructure/docker/Dockerfile.admin
+      args:
+        - NODE_ENV=development
+    container_name: eatech-admin
     ports:
-      - "3001:3000"
+      - "3001:3001"
     volumes:
-      - ./apps/admin:/app
-      - /app/node_modules
+      - ./apps/admin:/app/apps/admin
+      - ./packages:/app/packages
+      - admin_node_modules:/app/apps/admin/node_modules
     environment:
       - NODE_ENV=development
-      - REACT_APP_API_URL=http://localhost:3001
-      - REACT_APP_WS_URL=ws://localhost:3001
-    env_file:
-      - .env.local
-    depends_on:
-      - functions
-      - redis
+      - VITE_APP_URL=http://localhost:3001
     networks:
       - eatech-network
-    restart: unless-stopped
+    depends_on:
+      - firebase-emulator
 
-  # Master Control System
+  # === MASTER CONTROL ===
   master:
     build:
       context: .
-      dockerfile: Dockerfile.master
-      target: development
-    container_name: eatech-master-dev
+      dockerfile: ./infrastructure/docker/Dockerfile.master
+      args:
+        - NODE_ENV=development
+    container_name: eatech-master
     ports:
-      - "3002:3000"
+      - "3002:3002"
     volumes:
-      - ./apps/master:/app
-      - /app/node_modules
+      - ./apps/master:/app/apps/master
+      - ./packages:/app/packages
+      - master_node_modules:/app/apps/master/node_modules
     environment:
       - NODE_ENV=development
-      - REACT_APP_API_URL=http://localhost:3001
-      - REACT_APP_MASTER_KEY=dev_master_key_123
-    env_file:
-      - .env.local
-    depends_on:
-      - functions
-      - redis
+      - VITE_APP_URL=http://localhost:3002
     networks:
       - eatech-network
-    restart: unless-stopped
+    depends_on:
+      - firebase-emulator
 
-  # Firebase Functions (API Backend)
-  functions:
+  # === KITCHEN DISPLAY ===
+  kitchen:
     build:
       context: .
-      dockerfile: Dockerfile.functions
-      target: development
-    container_name: eatech-functions-dev
+      dockerfile: ./infrastructure/docker/Dockerfile.kitchen
+      args:
+        - NODE_ENV=development
+    container_name: eatech-kitchen
     ports:
-      - "5001:5001"  # Firebase Functions port
-      - "8080:8080"  # Admin API port
+      - "3003:3003"
     volumes:
-      - ./functions:/app
-      - /app/node_modules
+      - ./apps/kitchen:/app/apps/kitchen
+      - ./packages:/app/packages
+      - kitchen_node_modules:/app/apps/kitchen/node_modules
     environment:
       - NODE_ENV=development
-      - FIREBASE_PROJECT_ID=eatech-dev
-      - GCLOUD_PROJECT=eatech-dev
-      - FUNCTIONS_EMULATOR=true
-    env_file:
-      - .env.local
-    depends_on:
-      - redis
-      - postgres
+      - VITE_APP_URL=http://localhost:3003
     networks:
       - eatech-network
-    restart: unless-stopped
-    command: npm run serve
+    depends_on:
+      - firebase-emulator
 
-  # Redis Cache & Session Store
+  # === FIREBASE EMULATOR ===
+  firebase-emulator:
+    build:
+      context: .
+      dockerfile: ./infrastructure/docker/Dockerfile.firebase-emulator
+    container_name: eatech-firebase-emulator
+    ports:
+      - "4000:4000" # Emulator UI
+      - "5001:5001" # Functions
+      - "8080:8080" # Firestore
+      - "9099:9099" # Auth
+      - "9199:9199" # Storage
+    volumes:
+      - ./firebase.json:/app/firebase.json
+      - ./firestore.rules:/app/firestore.rules
+      - ./storage.rules:/app/storage.rules
+      - firebase_data:/app/.firebase
+    environment:
+      - FIREBASE_PROJECT=demo-eatech
+    networks:
+      - eatech-network
+    command: firebase emulators:start --only auth,firestore,storage,functions --project demo-eatech
+
+  # === REDIS CACHE ===
   redis:
     image: redis:7-alpine
-    container_name: eatech-redis-dev
+    container_name: eatech-redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
-      - ./infrastructure/redis/redis.conf:/usr/local/etc/redis/redis.conf
-    command: redis-server /usr/local/etc/redis/redis.conf
     networks:
       - eatech-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
+    command: redis-server --appendonly yes
 
-  # PostgreSQL (Analytics & Reporting)
-  postgres:
-    image: postgres:15-alpine
-    container_name: eatech-postgres-dev
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
-    environment:
-      - POSTGRES_DB=eatech_analytics
-      - POSTGRES_USER=eatech
-      - POSTGRES_PASSWORD=dev_password_123
-    networks:
-      - eatech-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U eatech"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Nginx Proxy & Load Balancer
+  # === NGINX REVERSE PROXY ===
   nginx:
     image: nginx:alpine
-    container_name: eatech-nginx-dev
+    container_name: eatech-nginx
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./infrastructure/nginx/nginx.dev.conf:/etc/nginx/nginx.conf
-      - ./infrastructure/nginx/ssl:/etc/nginx/ssl
+      - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./infrastructure/nginx/sites:/etc/nginx/sites-available
+      - nginx_ssl:/etc/nginx/ssl
+    networks:
+      - eatech-network
     depends_on:
       - web
       - admin
       - master
-      - functions
-    networks:
-      - eatech-network
-    restart: unless-stopped
+      - kitchen
 
-  # Monitoring & Logging
+  # === MONITORING (Optional) ===
   prometheus:
     image: prom/prometheus:latest
-    container_name: eatech-prometheus-dev
+    container_name: eatech-prometheus
     ports:
       - "9090:9090"
     volumes:
-      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-      - '--web.enable-lifecycle'
     networks:
       - eatech-network
-    restart: unless-stopped
+    profiles:
+      - monitoring
 
   grafana:
     image: grafana/grafana:latest
-    container_name: eatech-grafana-dev
+    container_name: eatech-grafana
     ports:
-      - "3001:3000"
+      - "3004:3000"
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning
+      - ./infrastructure/monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
     networks:
       - eatech-network
-    restart: unless-stopped
+    profiles:
+      - monitoring
 
+# === VOLUMES ===
 volumes:
+  web_node_modules:
+  admin_node_modules:
+  master_node_modules:
+  kitchen_node_modules:
+  firebase_data:
   redis_data:
-    driver: local
-  postgres_data:
-    driver: local
+  nginx_ssl:
   prometheus_data:
-    driver: local
   grafana_data:
-    driver: local
 
+# === NETWORKS ===
 networks:
   eatech-network:
     driver: bridge

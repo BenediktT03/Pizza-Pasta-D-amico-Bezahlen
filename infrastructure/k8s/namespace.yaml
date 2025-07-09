@@ -1,0 +1,207 @@
+# EATECH V3.0 - Kubernetes Namespace Configuration
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eatech-prod
+  labels:
+    name: eatech-prod
+    environment: production
+    app.kubernetes.io/name: eatech
+    app.kubernetes.io/instance: production
+    app.kubernetes.io/component: namespace
+    app.kubernetes.io/part-of: eatech-platform
+    app.kubernetes.io/managed-by: kubectl
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eatech-staging
+  labels:
+    name: eatech-staging
+    environment: staging
+    app.kubernetes.io/name: eatech
+    app.kubernetes.io/instance: staging
+    app.kubernetes.io/component: namespace
+    app.kubernetes.io/part-of: eatech-platform
+    app.kubernetes.io/managed-by: kubectl
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eatech-dev
+  labels:
+    name: eatech-dev
+    environment: development
+    app.kubernetes.io/name: eatech
+    app.kubernetes.io/instance: development
+    app.kubernetes.io/component: namespace
+    app.kubernetes.io/part-of: eatech-platform
+    app.kubernetes.io/managed-by: kubectl
+---
+# Resource Quotas for Production
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: eatech-prod-quota
+  namespace: eatech-prod
+spec:
+  hard:
+    requests.cpu: "20"
+    requests.memory: 40Gi
+    limits.cpu: "40"
+    limits.memory: 80Gi
+    persistentvolumeclaims: "10"
+    services.loadbalancers: "2"
+    services.nodeports: "0"
+---
+# Resource Quotas for Staging
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: eatech-staging-quota
+  namespace: eatech-staging
+spec:
+  hard:
+    requests.cpu: "10"
+    requests.memory: 20Gi
+    limits.cpu: "20"
+    limits.memory: 40Gi
+    persistentvolumeclaims: "5"
+    services.loadbalancers: "1"
+    services.nodeports: "0"
+---
+# Resource Quotas for Development
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: eatech-dev-quota
+  namespace: eatech-dev
+spec:
+  hard:
+    requests.cpu: "5"
+    requests.memory: 10Gi
+    limits.cpu: "10"
+    limits.memory: 20Gi
+    persistentvolumeclaims: "3"
+    services.loadbalancers: "1"
+    services.nodeports: "5"
+---
+# Network Policies for Production
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: eatech-prod-network-policy
+  namespace: eatech-prod
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: eatech-prod
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    - namespaceSelector:
+        matchLabels:
+          name: cert-manager
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: eatech-prod
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+---
+# LimitRange for Production
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: eatech-prod-limit-range
+  namespace: eatech-prod
+spec:
+  limits:
+  - max:
+      cpu: "4"
+      memory: 8Gi
+    min:
+      cpu: 50m
+      memory: 64Mi
+    default:
+      cpu: 500m
+      memory: 512Mi
+    defaultRequest:
+      cpu: 100m
+      memory: 128Mi
+    type: Container
+  - max:
+      storage: 100Gi
+    min:
+      storage: 1Gi
+    type: PersistentVolumeClaim
+---
+# LimitRange for Staging
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: eatech-staging-limit-range
+  namespace: eatech-staging
+spec:
+  limits:
+  - max:
+      cpu: "2"
+      memory: 4Gi
+    min:
+      cpu: 50m
+      memory: 64Mi
+    default:
+      cpu: 250m
+      memory: 256Mi
+    defaultRequest:
+      cpu: 100m
+      memory: 128Mi
+    type: Container
+  - max:
+      storage: 50Gi
+    min:
+      storage: 1Gi
+    type: PersistentVolumeClaim
+---
+# LimitRange for Development
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: eatech-dev-limit-range
+  namespace: eatech-dev
+spec:
+  limits:
+  - max:
+      cpu: "1"
+      memory: 2Gi
+    min:
+      cpu: 50m
+      memory: 64Mi
+    default:
+      cpu: 200m
+      memory: 256Mi
+    defaultRequest:
+      cpu: 50m
+      memory: 64Mi
+    type: Container
+  - max:
+      storage: 20Gi
+    min:
+      storage: 1Gi
+    type: PersistentVolumeClaim

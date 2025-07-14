@@ -46,7 +46,7 @@
     "@storybook/addon-interactions": "^7.6.10",
     "@storybook/addon-links": "^7.6.10",
     "@storybook/blocks": "^7.6.10",
-    "@storybook/react": "^7.6.10",
+    "@storybook/react": "^9.0.16",
     "@storybook/react-vite": "^7.6.10",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
